@@ -1,0 +1,47 @@
+/* Wistudi multilingual website additions */
+.ws-lang-toggle{min-width:76px;gap:7px;white-space:nowrap}
+.ws-lang-flag{width:21px;height:14px;display:block;flex:0 0 auto;border-radius:2px;object-fit:cover;box-shadow:0 0 0 1px rgba(31,25,43,.10)}
+.ws-lang-menu{width:248px!important;padding:7px!important;max-height:min(390px,calc(100vh - 92px));overflow-y:auto;overscroll-behavior:contain}
+.ws-lang-option{cursor:pointer!important;min-height:44px;padding:9px 11px!important}
+.ws-lang-option:hover{background:#faf8fd;color:#3f3748}
+.ws-lang-option.current{background:#f6f1ff!important;color:#5b21b6!important}
+.ws-lang-option-label{display:flex;align-items:center;gap:10px;min-width:0;text-align:left}
+.ws-lang-option-label>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ws-lang-code{font-size:.66rem;font-weight:800;letter-spacing:.05em;color:#958b9f}
+.ws-lang-option.current .ws-lang-code{color:#7c3aed}
+
+html.ws-font-thai body,
+html.ws-font-thai body h1,
+html.ws-font-thai body h2,
+html.ws-font-thai body h3,
+html.ws-font-thai body h4,
+html.ws-font-thai .ws-btn,
+html.ws-font-thai .ws-lang-toggle,
+html.ws-font-thai .ws-lang-option{font-family:'Noto Sans Thai',Inter,Arial,sans-serif!important}
+html.ws-font-thai body h1,
+html.ws-font-thai body h2,
+html.ws-font-thai body h3{letter-spacing:-.018em!important}
+
+html.ws-font-chinese body,
+html.ws-font-chinese body h1,
+html.ws-font-chinese body h2,
+html.ws-font-chinese body h3,
+html.ws-font-chinese body h4,
+html.ws-font-chinese .ws-btn,
+html.ws-font-chinese .ws-lang-toggle,
+html.ws-font-chinese .ws-lang-option{font-family:'Noto Sans SC',Inter,Arial,sans-serif!important}
+html.ws-font-chinese body h1,
+html.ws-font-chinese body h2,
+html.ws-font-chinese body h3{letter-spacing:-.018em!important}
+
+/* Give localized labels a little more room without changing the design language. */
+html[data-ws-locale="vi"] .ws-nav-links,
+html[data-ws-locale="id"] .ws-nav-links,
+html[data-ws-locale="ms"] .ws-nav-links,
+html[data-ws-locale="th"] .ws-nav-links{gap:20px}
+html[data-ws-locale="zh"] .ws-nav-links{gap:24px}
+
+@media(max-width:760px){
+  .ws-lang-menu{right:-42px!important;width:min(248px,calc(100vw - 24px))!important}
+  .ws-lang-toggle{min-width:70px}
+}
