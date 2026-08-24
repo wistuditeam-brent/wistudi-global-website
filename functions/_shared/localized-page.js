@@ -92,7 +92,7 @@ export async function renderLocalizedPage(context, explicitSegments) {
   html = setMeta(html, locale, page);
   html = html.replace(/<html\b[^>]*>/i, `<html lang="${localeConfig.htmlLang}" data-ws-locale="${locale}">`);
   html = html.replace(/<link\s+rel=["']canonical["'][^>]*>/i, '');
-  html = html.replace(/<head>/i, `<head>\n<base href="${config.asset}">\n<link rel="canonical" href="${canonical}">\n${alternates}\n<script>window.__WS_LOCALE__=${jsonForHtml(locale)};window.__WS_PAGE__=${jsonForHtml(page)};window.__WS_LOCALES__=${jsonForHtml(LOCALES)};window.__WS_I18N__=${jsonForHtml(translations)};<\/script>`);
+  html = html.replace(/<head>/i, `<head>\n<base href="${config.asset}">\n<link rel="canonical" href="${canonical}">\n${alternates}\n<link rel="stylesheet" href="/assets/css/locale.css">\n<script>window.__WS_LOCALE__=${jsonForHtml(locale)};window.__WS_PAGE__=${jsonForHtml(page)};window.__WS_LOCALES__=${jsonForHtml(LOCALES)};window.__WS_I18N__=${jsonForHtml(translations)};<\/script>`);
 
   const response = new Response(html, asset);
   response.headers.set('Content-Type', 'text/html; charset=UTF-8');
