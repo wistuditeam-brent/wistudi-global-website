@@ -13,13 +13,46 @@
     document.addEventListener('click',()=>document.querySelectorAll('.ws-lang.open').forEach(x=>{x.classList.remove('open');const t=x.querySelector('.ws-lang-toggle');if(t)t.setAttribute('aria-expanded','false');}));
     document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.ws-lang.open').forEach(x=>x.classList.remove('open'));if(mobile)mobile.classList.remove('open');if(menuBtn)menuBtn.setAttribute('aria-expanded','false');}});
 
+    // All publishing CTAs go directly to the Wistudi sign-up page.
+    document.querySelectorAll('a').forEach(a=>{
+      if(a.textContent.trim().toLowerCase()==='start publishing') a.href='https://wistudi.com/sign-up';
+    });
+
+    // Media loading optimisation without changing source quality.
+    // Keep the same original image/video files; only control when they are decoded/loaded/played.
+    document.querySelectorAll('img').forEach((img,index)=>{
+      if(!img.hasAttribute('decoding')) img.decoding='async';
+      const r=img.getBoundingClientRect();
+      const aboveFold=r.top < window.innerHeight*1.15;
+      if(!aboveFold && !img.hasAttribute('loading')) img.loading='lazy';
+      if(index===0 && aboveFold && 'fetchPriority' in img) img.fetchPriority='high';
+    });
+
+    const siteVideos=[...document.querySelectorAll('video:not(.carousel-card video)')];
+    siteVideos.forEach(video=>{
+      const r=video.getBoundingClientRect();
+      const aboveFold=r.top < window.innerHeight*1.15;
+      if(!aboveFold && video.preload==='auto') video.preload='metadata';
+    });
+    if('IntersectionObserver' in window){
+      const mediaObserver=new IntersectionObserver(entries=>{
+        entries.forEach(entry=>{
+          const video=entry.target;
+          if(entry.isIntersecting){
+            if(video.autoplay) video.play().catch(()=>{});
+          }else if(video.autoplay){
+            video.pause();
+          }
+        });
+      },{threshold:.08,rootMargin:'180px 0px'});
+      siteVideos.forEach(video=>mediaObserver.observe(video));
+    }
+
     // Contact CTAs can preselect the enquiry type via /contact/?type=...
     if(document.body.classList.contains('page-contact')){
       const params=new URLSearchParams(location.search);const type=params.get('type');const select=document.getElementById('enquiry');
       if(type&&select&&[...select.options].some(o=>o.value===type)){select.value=type;select.dispatchEvent(new Event('change',{bubbles:true}));}
     }
-
-
 
     // Shared sticky section navigation / scroll spy for Platform, Blocks & Activities, and Organisations.
     document.querySelectorAll('.subnav-wrap.ws-section-subnav').forEach(wrap=>{
@@ -34,7 +67,6 @@
         const offset=headH+(wrap.offsetHeight||60)+24;
         let chosen=pairs[0];
         for(const pair of pairs){if(pair.target.getBoundingClientRect().top<=offset) chosen=pair; else break;}
-        // Near the bottom, make sure the final reachable section can become active.
         if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-4) chosen=pairs[pairs.length-1];
         pairs.forEach(p=>p.a.classList.toggle('active',p===chosen));
         const active=chosen.a;
@@ -50,8 +82,6 @@
       window.addEventListener('resize',schedule,{passive:true});
       update();
     });
-
-
 
     // Unified fast section fade for the three long-form website pages.
     if(document.body.matches('.page-platform,.page-blocks,.page-organisations')){
@@ -81,20 +111,60 @@
     }
 
     if(document.body.classList.contains('page-blocks')){
-      // Requirement: the block-stack demo plays 30% faster.
       const stack=document.querySelector('.blocks-demo-video,.media-card.stack-video video');
       if(stack){stack.defaultPlaybackRate=1.3;stack.playbackRate=1.3;stack.addEventListener('loadedmetadata',()=>{stack.defaultPlaybackRate=1.3;stack.playbackRate=1.3;},{once:true});}
 
-      // Requirement: only the centred/active carousel block may play, on desktop and mobile.
+      // The actual card nearest the carousel viewport centre owns the active state and playback.
+      // This remains true after autoplay, arrow navigation, click activation, resize and on mobile.
       const track=document.getElementById('carouselTrack');
-      const enforce=()=>{
-        if(!track)return;
-        track.querySelectorAll('.carousel-card').forEach(card=>{
-          const v=card.querySelector('video');if(!v)return;
-          if(!card.classList.contains('active')){v.pause();try{v.currentTime=0}catch(_){}}
+      const shell=document.querySelector('.carousel-shell');
+      let centreRaf=0;
+      let settleTimer=0;
+      const syncCentredCard=()=>{
+        centreRaf=0;
+        if(!track||!shell)return;
+        const cards=[...track.querySelectorAll('.carousel-card')];
+        if(!cards.length)return;
+        const shellRect=shell.getBoundingClientRect();
+        const centre=shellRect.left+shellRect.width/2;
+        let centred=cards[0];
+        let best=Infinity;
+        cards.forEach(card=>{
+          const r=card.getBoundingClientRect();
+          const d=Math.abs((r.left+r.width/2)-centre);
+          if(d<best){best=d;centred=card;}
+        });
+        cards.forEach(card=>{
+          const active=card===centred;
+          card.classList.toggle('active',active);
+          card.setAttribute('aria-current',active?'true':'false');
+          const v=card.querySelector('video');
+          if(v){
+            if(active){v.play().catch(()=>{});}
+            else{v.pause();try{v.currentTime=0}catch(_){}}
+          }
+          const top=card.querySelector('.carousel-top');
+          if(top){
+            let category=top.querySelector('.chip:not(.playchip)')?.textContent||'';
+            top.innerHTML=`<span class="chip">${category}</span>${active?'<span class="chip playchip">Live preview</span>':''}`;
+          }
         });
       };
-      if(track){new MutationObserver(enforce).observe(track,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});track.addEventListener('play',e=>{const v=e.target;if(v&&v.tagName==='VIDEO'&&!v.closest('.carousel-card')?.classList.contains('active')){v.pause();try{v.currentTime=0}catch(_){}}},true);setInterval(enforce,900);setTimeout(enforce,250);}
+      const scheduleCentreSync=(settle=false)=>{
+        if(centreRaf)cancelAnimationFrame(centreRaf);
+        centreRaf=requestAnimationFrame(syncCentredCard);
+        if(settle){clearTimeout(settleTimer);settleTimer=setTimeout(syncCentredCard,470);}
+      };
+      if(track&&shell){
+        new MutationObserver(()=>scheduleCentreSync(true)).observe(track,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
+        track.addEventListener('transitionrun',()=>scheduleCentreSync(false));
+        track.addEventListener('transitionend',()=>scheduleCentreSync(false));
+        shell.addEventListener('scroll',()=>scheduleCentreSync(false),{passive:true});
+        window.addEventListener('resize',()=>scheduleCentreSync(true),{passive:true});
+        window.addEventListener('orientationchange',()=>scheduleCentreSync(true),{passive:true});
+        setTimeout(()=>scheduleCentreSync(true),120);
+        setTimeout(()=>scheduleCentreSync(false),900);
+      }
     }
   });
 })();
@@ -103,15 +173,13 @@
 (() => {
   const header = document.querySelector('.ws-site-header');
   const subnav = document.querySelector('.ws-section-subnav');
-  if (!header || !subnav) return; // Contact intentionally has no section submenu.
-
+  if (!header || !subnav) return;
   const syncStickyOffsets = () => {
     const headerHeight = Math.ceil(header.getBoundingClientRect().height || 0);
     const subnavHeight = Math.ceil(subnav.getBoundingClientRect().height || 0);
     if (headerHeight) document.documentElement.style.setProperty('--ws-header-height', `${headerHeight}px`);
     if (subnavHeight) document.documentElement.style.setProperty('--ws-subnav-height', `${subnavHeight}px`);
   };
-
   syncStickyOffsets();
   window.addEventListener('resize', syncStickyOffsets, {passive:true});
   window.addEventListener('orientationchange', syncStickyOffsets, {passive:true});
@@ -122,23 +190,17 @@
   }
 })();
 
-
 // ACTUAL VIEWPORT-STICKY SUBNAV FIX
-// The submenu begins below the hero in normal document flow.
-// Once it reaches the main header, it remains fixed directly beneath it.
 (() => {
   const init = () => {
     const header = document.querySelector('.ws-site-header');
     const subnav = document.querySelector('.ws-section-subnav');
-    if (!header || !subnav) return; // Contact page intentionally has no submenu.
-
+    if (!header || !subnav) return;
     const placeholder = document.createElement('div');
     placeholder.className = 'ws-subnav-placeholder';
     subnav.parentNode.insertBefore(placeholder, subnav);
-
     let triggerY = 0;
     let ticking = false;
-
     const setVars = () => {
       const headerH = Math.ceil(header.getBoundingClientRect().height || 0);
       const subnavH = Math.ceil(subnav.getBoundingClientRect().height || 0);
@@ -146,12 +208,10 @@
       if (subnavH) document.documentElement.style.setProperty('--ws-subnav-height', `${subnavH}px`);
       return {headerH, subnavH};
     };
-
     const update = () => {
       ticking = false;
-      const {headerH, subnavH} = setVars();
+      const {subnavH} = setVars();
       const shouldFix = window.scrollY >= triggerY;
-
       if (shouldFix) {
         placeholder.style.height = `${subnavH}px`;
         placeholder.classList.add('active');
@@ -162,39 +222,29 @@
         placeholder.style.height = '0px';
       }
     };
-
     const measure = () => {
-      // Measure from the submenu's real position in normal flow.
       subnav.classList.remove('ws-subnav-fixed');
       placeholder.classList.remove('active');
       placeholder.style.height = '0px';
-
       const {headerH} = setVars();
       triggerY = subnav.getBoundingClientRect().top + window.scrollY - headerH;
       update();
     };
-
     const schedule = () => {
       if (!ticking) {
         ticking = true;
         requestAnimationFrame(update);
       }
     };
-
     requestAnimationFrame(measure);
     window.addEventListener('scroll', schedule, {passive:true});
     window.addEventListener('resize', measure, {passive:true});
     window.addEventListener('orientationchange', measure, {passive:true});
-
     if ('ResizeObserver' in window) {
       const ro = new ResizeObserver(measure);
       ro.observe(header);
     }
   };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init, {once:true});
-  } else {
-    init();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once:true});
+  else init();
 })();
