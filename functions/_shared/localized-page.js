@@ -1,10 +1,17 @@
-import { LOCALES, getTranslations } from './i18n/index.js';
+const LOCALES = {
+  en: { code: 'EN', htmlLang: 'en', label: 'English', flag: '🇬🇧', font: 'default' },
+  vi: { code: 'VI', htmlLang: 'vi', label: 'Tiếng Việt', flag: '🇻🇳', font: 'default' },
+  th: { code: 'TH', htmlLang: 'th', label: 'ไทย', flag: '🇹🇭', font: 'thai' },
+  id: { code: 'ID', htmlLang: 'id', label: 'Bahasa Indonesia', flag: '🇮🇩', font: 'default' },
+  ms: { code: 'MS', htmlLang: 'ms', label: 'Bahasa Melayu', flag: '🇲🇾', font: 'default' },
+  zh: { code: 'ZH', htmlLang: 'zh-CN', label: '简体中文', flag: '🇨🇳', font: 'chinese' }
+};
 
 const PAGE_CONFIG = {
-  platform: { asset: '/', suffix: '/', bodyClass: 'page-platform' },
-  blocks: { asset: '/blocks-activities/', suffix: '/blocks-activities/', bodyClass: 'page-blocks' },
-  organisations: { asset: '/organisations/', suffix: '/organisations/', bodyClass: 'page-organisations' },
-  contact: { asset: '/contact/', suffix: '/contact/', bodyClass: 'page-contact' }
+  platform: { asset: '/', suffix: '/', module: 'platform', exportName: 'PLATFORM' },
+  blocks: { asset: '/blocks-activities/', suffix: '/blocks-activities/', module: 'blocks', exportName: 'BLOCKS' },
+  organisations: { asset: '/organisations/', suffix: '/organisations/', module: 'organisations', exportName: 'ORGANISATIONS' },
+  contact: { asset: '/contact/', suffix: '/contact/', module: 'contact', exportName: 'CONTACT' }
 };
 
 const SEO = {
@@ -65,6 +72,15 @@ function setMeta(html, locale, page) {
   return html;
 }
 
+function localeBootstrap(locale, page, config) {
+  const localeJson = jsonForHtml(locale);
+  const pageJson = jsonForHtml(page);
+  const localesJson = jsonForHtml(LOCALES);
+  const moduleJson = jsonForHtml(config.module);
+  const exportJson = jsonForHtml(config.exportName);
+  return `<script type="module">\nwindow.__WS_LOCALE__=${localeJson};window.__WS_PAGE__=${pageJson};window.__WS_LOCALES__=${localesJson};window.__WS_I18N__={};\ntry{if(${localeJson}!==\"en\"){const [commonMod,pageMod]=await Promise.all([import('/assets/i18n/common.js'),import('/assets/i18n/'+${moduleJson}+'.js')]);window.__WS_I18N__={...(commonMod.COMMON?.[${localeJson}]||{}),...(pageMod[${exportJson}]?.[${localeJson}]||{})};}}catch(err){console.error('Wistudi locale load failed',err);}\nconst wsShell=document.createElement('script');wsShell.src='/assets/js/site-shell.js';wsShell.defer=true;document.head.appendChild(wsShell);\n<\/script>`;
+}
+
 export async function renderLocalizedPage(context, explicitSegments) {
   const locale = String(context.params.locale || '').toLowerCase();
   if (!LOCALES[locale]) return context.next();
@@ -83,7 +99,6 @@ export async function renderLocalizedPage(context, explicitSegments) {
 
   let html = await asset.text();
   const localeConfig = LOCALES[locale];
-  const translations = getTranslations(locale, page);
   const canonical = `https://global.wistudi.com/${locale}${config.suffix === '/' ? '/' : config.suffix}`;
   const alternates = Object.entries(LOCALES).map(([key, item]) =>
     `<link rel="alternate" hreflang="${item.htmlLang}" href="https://global.wistudi.com/${key}${config.suffix === '/' ? '/' : config.suffix}">`
@@ -91,8 +106,9 @@ export async function renderLocalizedPage(context, explicitSegments) {
 
   html = setMeta(html, locale, page);
   html = html.replace(/<html\b[^>]*>/i, `<html lang="${localeConfig.htmlLang}" data-ws-locale="${locale}">`);
-  html = html.replace(/<link\s+rel=["']canonical["'][^>]*>/i, '');
-  html = html.replace(/<head>/i, `<head>\n<base href="${config.asset}">\n<link rel="canonical" href="${canonical}">\n${alternates}\n<link rel="stylesheet" href="/assets/css/locale.css">\n<script>window.__WS_LOCALE__=${jsonForHtml(locale)};window.__WS_PAGE__=${jsonForHtml(page)};window.__WS_LOCALES__=${jsonForHtml(LOCALES)};window.__WS_I18N__=${jsonForHtml(translations)};<\/script>`);
+  html = html.replace(/<link\s+rel=["']canonical["'][^>]*>/ig, '');
+  html = html.replace(/<script\b[^>]*src=["'][^"']*assets\/js\/site-shell\.js[^"']*["'][^>]*><\/script>/ig, '');
+  html = html.replace(/<head>/i, `<head>\n<base href="${config.asset}">\n<link rel="canonical" href="${canonical}">\n${alternates}\n<link rel="stylesheet" href="/assets/css/locale.css">\n${localeBootstrap(locale,page,config)}`);
 
   const response = new Response(html, asset);
   response.headers.set('Content-Type', 'text/html; charset=UTF-8');
