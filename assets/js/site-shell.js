@@ -114,56 +114,61 @@
       const stack=document.querySelector('.blocks-demo-video,.media-card.stack-video video');
       if(stack){stack.defaultPlaybackRate=1.3;stack.playbackRate=1.3;stack.addEventListener('loadedmetadata',()=>{stack.defaultPlaybackRate=1.3;stack.playbackRate=1.3;},{once:true});}
 
-      // The actual card nearest the carousel viewport centre owns the active state and playback.
-      // This remains true after autoplay, arrow navigation, click activation, resize and on mobile.
+      // Correct the carousel against the REAL viewport centre. The page's own carousel
+      // measures a transformed card width, which can increasingly offset the active card.
+      // We correct the final translateX using the active card's rendered centre instead.
       const track=document.getElementById('carouselTrack');
       const shell=document.querySelector('.carousel-shell');
-      let centreRaf=0;
+      let recenterRaf=0;
       let settleTimer=0;
-      const syncCentredCard=()=>{
-        centreRaf=0;
-        if(!track||!shell)return;
-        const cards=[...track.querySelectorAll('.carousel-card')];
-        if(!cards.length)return;
-        const shellRect=shell.getBoundingClientRect();
-        const centre=shellRect.left+shellRect.width/2;
-        let centred=cards[0];
-        let best=Infinity;
-        cards.forEach(card=>{
-          const r=card.getBoundingClientRect();
-          const d=Math.abs((r.left+r.width/2)-centre);
-          if(d<best){best=d;centred=card;}
-        });
-        cards.forEach(card=>{
-          const active=card===centred;
-          card.classList.toggle('active',active);
-          card.setAttribute('aria-current',active?'true':'false');
-          const v=card.querySelector('video');
-          if(v){
-            if(active){v.play().catch(()=>{});}
-            else{v.pause();try{v.currentTime=0}catch(_){}}
-          }
-          const top=card.querySelector('.carousel-top');
-          if(top){
-            let category=top.querySelector('.chip:not(.playchip)')?.textContent||'';
-            top.innerHTML=`<span class="chip">${category}</span>${active?'<span class="chip playchip">Live preview</span>':''}`;
-          }
+      const enforcePlayback=()=>{
+        if(!track)return;
+        track.querySelectorAll('.carousel-card').forEach(card=>{
+          const video=card.querySelector('video');
+          if(!video)return;
+          if(card.classList.contains('active')) video.play().catch(()=>{});
+          else{video.pause();try{video.currentTime=0}catch(_){}}
         });
       };
-      const scheduleCentreSync=(settle=false)=>{
-        if(centreRaf)cancelAnimationFrame(centreRaf);
-        centreRaf=requestAnimationFrame(syncCentredCard);
-        if(settle){clearTimeout(settleTimer);settleTimer=setTimeout(syncCentredCard,470);}
+      const recenterActive=()=>{
+        recenterRaf=0;
+        if(!track||!shell)return;
+        const active=track.querySelector('.carousel-card.active');
+        if(!active)return;
+        const shellRect=shell.getBoundingClientRect();
+        const cardRect=active.getBoundingClientRect();
+        const delta=(shellRect.left+shellRect.width/2)-(cardRect.left+cardRect.width/2);
+        if(Math.abs(delta)>.5){
+          let currentX=0;
+          const transform=getComputedStyle(track).transform;
+          if(transform&&transform!=='none'){
+            try{currentX=new DOMMatrixReadOnly(transform).m41;}catch(_){
+              const match=transform.match(/matrix\([^,]+,[^,]+,[^,]+,[^,]+,\s*([^,]+)/);
+              if(match)currentX=parseFloat(match[1])||0;
+            }
+          }
+          track.style.transform=`translateX(${currentX+delta}px)`;
+        }
+        enforcePlayback();
+      };
+      const scheduleRecenter=(settle=false)=>{
+        if(recenterRaf)cancelAnimationFrame(recenterRaf);
+        recenterRaf=requestAnimationFrame(recenterActive);
+        if(settle){clearTimeout(settleTimer);settleTimer=setTimeout(recenterActive,500);}
       };
       if(track&&shell){
-        new MutationObserver(()=>scheduleCentreSync(true)).observe(track,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
-        track.addEventListener('transitionrun',()=>scheduleCentreSync(false));
-        track.addEventListener('transitionend',()=>scheduleCentreSync(false));
-        shell.addEventListener('scroll',()=>scheduleCentreSync(false),{passive:true});
-        window.addEventListener('resize',()=>scheduleCentreSync(true),{passive:true});
-        window.addEventListener('orientationchange',()=>scheduleCentreSync(true),{passive:true});
-        setTimeout(()=>scheduleCentreSync(true),120);
-        setTimeout(()=>scheduleCentreSync(false),900);
+        new MutationObserver(()=>scheduleRecenter(true)).observe(track,{attributes:true,attributeFilter:['style'],childList:true});
+        track.addEventListener('transitionend',()=>scheduleRecenter(false));
+        track.addEventListener('play',e=>{
+          const video=e.target;
+          if(video?.tagName==='VIDEO'&&!video.closest('.carousel-card')?.classList.contains('active')){
+            video.pause();try{video.currentTime=0}catch(_){ }
+          }
+        },true);
+        window.addEventListener('resize',()=>scheduleRecenter(true),{passive:true});
+        window.addEventListener('orientationchange',()=>scheduleRecenter(true),{passive:true});
+        setTimeout(()=>scheduleRecenter(true),150);
+        setTimeout(()=>scheduleRecenter(false),1000);
       }
     }
   });
