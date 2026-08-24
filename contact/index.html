@@ -221,7 +221,6 @@ form.addEventListener('submit',async e=>{
   e.preventDefault();statusBox.className='status';
   if(!form.checkValidity()){form.reportValidity();return;}
   const fd=new FormData(form);
-  if(fd.get('company_fax')) return;
   if(location.protocol==='file:'){
     showStatus('success','Preview mode: the form is working visually, but no message was sent. Connect /api/contact when this page is deployed.');
     return;
