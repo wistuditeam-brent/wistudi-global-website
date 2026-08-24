@@ -1,0 +1,239 @@
+/* Wistudi shared website shell — generated from the Blocks & Activities header standard */
+:root{--ws-ink:#181523;--ws-muted:#6d6878;--ws-line:#e9e6ef;--ws-purple:#7c3aed;--ws-orange:#f97316;--ws-shadow:0 18px 42px rgba(34,24,64,.11)}
+html{scroll-behavior:smooth;overflow-x:clip}body{overflow-x:clip;font-family:Inter,Arial,sans-serif}
+body h1,body h2,body h3{font-family:'Be Vietnam Pro',Inter,sans-serif}
+.ws-site-header{position:sticky;top:0;z-index:240;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(233,230,239,.94)}
+.ws-container{width:min(calc(100% - 40px),1180px);margin-inline:auto}
+.ws-nav{height:72px;display:flex;align-items:center;justify-content:space-between;gap:22px}
+.ws-brand{display:inline-flex;align-items:center;flex:0 0 auto}.ws-brand img{display:block;width:132px;height:auto;max-width:100%}
+.ws-nav-links{display:flex;gap:27px;align-items:center;font-size:.82rem;font-weight:650;color:#6f6879}.ws-nav-links a{position:relative;padding:25px 0;text-decoration:none;color:inherit;white-space:nowrap}.ws-nav-links a:hover,.ws-nav-links a.active{color:var(--ws-ink)}.ws-nav-links a.active:after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:999px;background:linear-gradient(90deg,var(--ws-orange),var(--ws-purple))}
+.ws-nav-actions{display:flex;gap:9px;align-items:center;flex:0 0 auto}.ws-btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 15px;border-radius:14px;border:1px solid transparent;font:700 .78rem/1 Inter,Arial,sans-serif;text-decoration:none;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;background:#fff;color:var(--ws-ink)}.ws-btn:hover{transform:translateY(-2px)}.ws-btn.primary{background:linear-gradient(135deg,var(--ws-purple),#8b5cf6);color:#fff;box-shadow:0 12px 26px rgba(124,58,237,.23)}.ws-btn.secondary{border-color:#e2dceb}.ws-btn.secondary:hover{border-color:#cfc6df;box-shadow:0 10px 24px rgba(34,24,64,.07)}
+.ws-lang{position:relative}.ws-lang-toggle{height:42px;min-width:69px;padding:0 11px;border:1px solid #e2dceb;border-radius:13px;background:#fff;color:#50495b;font:700 .76rem/1 Inter,Arial,sans-serif;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}.ws-lang-toggle svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;transition:transform .2s ease}.ws-lang.open .ws-lang-toggle svg{transform:rotate(180deg)}.ws-lang-menu{position:absolute;right:0;top:calc(100% + 9px);width:188px;padding:7px;border-radius:15px;background:#fff;border:1px solid var(--ws-line);box-shadow:var(--ws-shadow);opacity:0;visibility:hidden;transform:translateY(-5px);transition:.18s ease}.ws-lang.open .ws-lang-menu{opacity:1;visibility:visible;transform:none}.ws-lang-option{width:100%;border:0;border-radius:10px;background:transparent;text-align:left;padding:10px 11px;font:650 .78rem/1.25 Inter,Arial,sans-serif;color:#554e60;display:flex;align-items:center;justify-content:space-between;gap:9px}.ws-lang-option.current{background:#f6f1ff;color:#5b21b6}.ws-lang-option[disabled]{color:#a39baa;cursor:not-allowed}.ws-lang-soon{font-size:.61rem;font-weight:750;padding:4px 6px;border-radius:999px;background:#f3f0f6;color:#918998}
+.ws-menu-toggle{display:none;width:42px;height:42px;border:1px solid #e7e1ed;border-radius:12px;background:#f7f4fa;color:var(--ws-ink);padding:0;cursor:pointer}.ws-menu-toggle span{display:block;width:18px;height:2px;border-radius:99px;background:currentColor;margin:4px auto;transition:.2s ease}
+.ws-mobile-menu{display:none;border-top:1px solid var(--ws-line);background:#fff}.ws-mobile-inner{padding:14px 0 18px;display:grid;gap:6px}.ws-mobile-inner>a{padding:11px 3px;color:#625b6d;font-weight:650;font-size:.88rem;text-decoration:none}.ws-mobile-inner>a.active{color:var(--ws-purple)}.ws-mobile-actions{display:flex;gap:9px;flex-wrap:wrap;padding-top:8px}.ws-mobile-actions .ws-btn{flex:1 1 150px}
+.ws-site-footer{padding:42px 0 32px;border-top:1px solid var(--ws-line);background:#fff}.ws-footer-row{display:grid;grid-template-columns:170px 1fr 1.4fr auto;gap:28px;align-items:start;font-size:.72rem;color:#7c7584}.ws-footer-wordmark{width:120px;height:auto}.ws-footer-links,.ws-footer-contact{display:grid;gap:7px}.ws-footer-row a{color:inherit;text-decoration:none}.ws-footer-row a:hover{color:var(--ws-purple)}.ws-footer-copy{white-space:nowrap}
+/* The Blocks & Activities cards are intentionally block-like rather than tall cards. */
+body.page-blocks .carousel-shell{height:430px}
+body.page-blocks .carousel-card{width:360px!important;height:auto!important;aspect-ratio:1/1!important;display:flex!important;flex-direction:column!important;border-radius:22px!important}
+body.page-blocks .carousel-card .vidwrap{aspect-ratio:auto!important;flex:0 0 55%;min-height:0}
+body.page-blocks .carousel-card .card-body{flex:1 1 auto;min-height:0;overflow:hidden;padding:15px 17px 16px!important}
+body.page-blocks .carousel-card p{font-size:.82rem!important;line-height:1.45!important;margin-top:7px!important;display:-webkit-box!important;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+body.page-blocks .carousel-card h3{font-size:1.08rem!important}
+/* Keep active block clearly dominant; side blocks are static previews. */
+body.page-blocks .carousel-card:not(.active) video{opacity:.76;filter:saturate(.84)}
+body.page-blocks .carousel-card.active video{opacity:1;filter:none}
+/* Avoid sticky elements colliding with the unified header. */
+body.page-organisations .control-card{top:96px}
+@media(max-width:1060px){.ws-nav-links{gap:18px}.ws-nav-actions>.ws-btn.secondary{display:none}}
+@media(max-width:900px){.ws-container{width:min(calc(100% - 28px),1180px)}.ws-nav{height:64px}.ws-nav-links{display:none}.ws-nav-actions>.ws-btn{display:none}.ws-menu-toggle{display:block}.ws-mobile-menu.open{display:block}.ws-brand img{width:118px}.ws-site-footer{padding-top:34px}.ws-footer-row{grid-template-columns:1fr 1fr}.ws-footer-row .ws-brand{grid-column:1/-1}.ws-footer-copy{white-space:normal}.subnav-wrap{top:64px!important}}
+@media(max-width:760px){body.page-blocks .carousel-shell{height:360px!important;margin-inline:-14px}body.page-blocks .carousel-card{width:min(82vw,310px)!important;height:auto!important;aspect-ratio:1/1!important}body.page-blocks .carousel-card .vidwrap{flex-basis:53%}body.page-blocks .carousel-card p{-webkit-line-clamp:2}.ws-footer-row{grid-template-columns:1fr}.ws-lang-toggle{min-width:62px}.ws-lang-menu{right:-48px}}
+@media(max-width:420px){.ws-container{width:min(calc(100% - 24px),1180px)}body.page-blocks .carousel-shell{height:330px!important}body.page-blocks .carousel-card .card-body{padding:12px 13px!important}body.page-blocks .carousel-card h3{font-size:.98rem!important}body.page-blocks .carousel-card p{font-size:.76rem!important}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.ws-btn,.ws-lang-menu,.ws-lang-toggle svg,.ws-menu-toggle span{transition:none!important}}
+
+
+/* Shared sticky section navigation — matches the Blocks & Activities sub-menu. */
+.subnav-wrap.ws-section-subnav{position:sticky;top:72px;z-index:220;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(222,216,232,.96);box-shadow:0 9px 26px rgba(34,24,64,.07)}
+.subnav-wrap.ws-section-subnav .subnav{width:min(calc(100% - 40px),1180px);margin-inline:auto;display:flex;align-items:center;justify-content:center;gap:10px;min-height:66px;padding:8px 0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;scroll-snap-type:x proximity;overscroll-behavior-inline:contain}
+.subnav-wrap.ws-section-subnav .subnav::-webkit-scrollbar{display:none}
+.subnav-wrap.ws-section-subnav .subnav a{flex:0 0 auto;white-space:nowrap;color:#655e70;font-size:.8rem;font-weight:750;padding:10px 14px;border-radius:999px;text-decoration:none;transition:background .22s ease,color .22s ease,transform .22s ease,box-shadow .22s ease;scroll-snap-align:center}
+.subnav-wrap.ws-section-subnav .subnav a:hover{background:#f4efff;color:var(--ws-purple);transform:translateY(-1px)}
+.subnav-wrap.ws-section-subnav .subnav a.active{background:linear-gradient(135deg,#f3eaff,#fff1e7);color:#5f2bbd;box-shadow:inset 0 0 0 1px rgba(124,58,237,.13),0 6px 16px rgba(54,35,89,.08)}
+body.page-platform main section[id],body.page-organisations main section[id]{scroll-margin-top:158px}
+/* The organisation control panel remains below both sticky navigation bars. */
+body.page-organisations .control-card{top:166px}
+@media(max-width:900px){.subnav-wrap.ws-section-subnav{top:64px}.subnav-wrap.ws-section-subnav .subnav{width:min(calc(100% - 28px),1180px);justify-content:flex-start;min-height:60px;gap:6px;padding:7px 0}.subnav-wrap.ws-section-subnav .subnav a{font-size:.76rem;padding:9px 12px}body.page-platform main section[id],body.page-organisations main section[id]{scroll-margin-top:142px}body.page-organisations .control-card{top:auto}}
+@media(max-width:420px){.subnav-wrap.ws-section-subnav .subnav{width:min(calc(100% - 24px),1180px)}}
+@media(prefers-reduced-motion:reduce){.subnav-wrap.ws-section-subnav .subnav a{transition:none!important}}
+
+
+/* ===== 2026-08-24 unified post-hero sticky subnavigation + faster reveal ===== */
+/* All section submenus begin after the hero in document flow, then pin directly below the main header. */
+.subnav-wrap.ws-section-subnav{
+  position:sticky;
+  top:72px;
+  z-index:220;
+  background:rgba(255,255,255,.96);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-top:1px solid rgba(233,230,239,.78);
+  border-bottom:1px solid rgba(222,216,232,.96);
+  box-shadow:0 9px 26px rgba(34,24,64,.07);
+}
+.subnav-wrap.ws-section-subnav .subnav{
+  width:min(calc(100% - 40px),1180px);
+  margin-inline:auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  min-height:66px;
+  padding:8px 0;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-width:none;
+  scroll-snap-type:x proximity;
+  overscroll-behavior-inline:contain;
+}
+.subnav-wrap.ws-section-subnav .subnav::-webkit-scrollbar{display:none}
+.subnav-wrap.ws-section-subnav .subnav a{
+  flex:0 0 auto;
+  white-space:nowrap;
+  color:#655e70;
+  font-size:.8rem;
+  font-weight:750;
+  padding:10px 14px;
+  border-radius:999px;
+  text-decoration:none;
+  transition:background .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease;
+  scroll-snap-align:center;
+}
+.subnav-wrap.ws-section-subnav .subnav a:hover{background:#f4efff;color:var(--ws-purple);transform:translateY(-1px)}
+.subnav-wrap.ws-section-subnav .subnav a.active{background:linear-gradient(135deg,#f3eaff,#fff1e7);color:#5f2bbd;box-shadow:inset 0 0 0 1px rgba(124,58,237,.13),0 6px 16px rgba(54,35,89,.08)}
+
+/* Anchor targets clear both sticky bars on all three long-form pages. */
+body.page-platform main section[id],
+body.page-organisations main section[id],
+body.page-blocks main section[id]{scroll-margin-top:158px}
+
+/* One shared, quicker section-loading fade across Platform, Blocks & Activities, and Organisations. */
+body.page-platform .ws-scroll-section,
+body.page-blocks .ws-scroll-section,
+body.page-organisations .ws-scroll-section{
+  opacity:0;
+  transform:translate3d(0,16px,0);
+  filter:blur(1.5px);
+  transition:opacity .30s ease,transform .36s cubic-bezier(.2,.76,.2,1),filter .28s ease;
+  will-change:opacity,transform,filter;
+}
+body.page-platform .ws-scroll-section.ws-section-visible,
+body.page-blocks .ws-scroll-section.ws-section-visible,
+body.page-organisations .ws-scroll-section.ws-section-visible{
+  opacity:1;
+  transform:none;
+  filter:blur(0);
+  will-change:auto;
+}
+
+/* Existing inner reveal systems remain, but resolve faster so they match the new shared section fade. */
+body.page-blocks .reveal{
+  transition-duration:.30s!important;
+  transition-timing-function:cubic-bezier(.2,.76,.2,1)!important;
+}
+body.page-organisations .reveal{
+  transition-duration:.30s,.34s,.28s!important;
+}
+body.page-organisations .section-shell-reveal{
+  transition-duration:.30s,.36s,.28s!important;
+}
+body.page-platform .scroll-reveal{
+  transition-duration:.30s,.36s,.28s!important;
+}
+body.page-platform .reveal-section{
+  transition-duration:.32s,.36s!important;
+}
+body.page-platform #printable.reveal-visible .printable-icon-card{
+  animation-duration:.38s!important;
+}
+
+/* Keep the organisation's internal sticky control panel below both nav bars on desktop. */
+body.page-organisations .control-card{top:166px}
+
+@media(max-width:900px){
+  .subnav-wrap.ws-section-subnav{top:64px}
+  .subnav-wrap.ws-section-subnav .subnav{width:min(calc(100% - 28px),1180px);justify-content:flex-start;min-height:60px;gap:6px;padding:7px 0}
+  .subnav-wrap.ws-section-subnav .subnav a{font-size:.76rem;padding:9px 12px}
+  body.page-platform main section[id],body.page-organisations main section[id],body.page-blocks main section[id]{scroll-margin-top:142px}
+  body.page-organisations .control-card{top:auto}
+}
+@media(max-width:420px){.subnav-wrap.ws-section-subnav .subnav{width:min(calc(100% - 24px),1180px)}}
+@media(prefers-reduced-motion:reduce){
+  body.page-platform .ws-scroll-section,
+  body.page-blocks .ws-scroll-section,
+  body.page-organisations .ws-scroll-section{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}
+}
+
+/* ===== 2026-08-24 robust sticky section navigation =====
+   Applies to Platform, Blocks & Activities and Organisations only because
+   Contact does not render .ws-section-subnav. Header height is measured by JS. */
+:root{--ws-header-height:72px;--ws-subnav-height:66px}
+.subnav-wrap.ws-section-subnav{
+  position:-webkit-sticky!important;
+  position:sticky!important;
+  top:var(--ws-header-height)!important;
+  z-index:230!important;
+  width:100%;
+  align-self:start;
+  background:rgba(255,255,255,.97)!important;
+  backdrop-filter:blur(14px)!important;
+  -webkit-backdrop-filter:blur(14px)!important;
+  border-top:1px solid rgba(233,230,239,.82)!important;
+  border-bottom:1px solid rgba(222,216,232,.98)!important;
+  box-shadow:0 8px 22px rgba(34,24,64,.065)!important;
+  transform:translateZ(0);
+}
+body.page-platform main,
+body.page-blocks main,
+body.page-organisations main{overflow:visible!important}
+body.page-platform main section[id],
+body.page-blocks main section[id],
+body.page-organisations main section[id]{
+  scroll-margin-top:calc(var(--ws-header-height) + var(--ws-subnav-height) + 18px)!important;
+}
+@media(max-width:900px){
+  :root{--ws-header-height:64px;--ws-subnav-height:60px}
+  .subnav-wrap.ws-section-subnav{top:var(--ws-header-height)!important}
+}
+
+
+/* ===== ACTUAL VIEWPORT-STICKY SUBNAV FIX ===== */
+/*
+  Chrome can break position:sticky when an ancestor/document establishes an
+  overflow scrolling box. The document now uses overflow-x:clip and this
+  fixed state is applied by JS once the post-hero submenu reaches the header.
+*/
+:root{
+  --ws-header-height:72px;
+  --ws-subnav-height:66px;
+}
+
+.subnav-wrap.ws-section-subnav{
+  position:-webkit-sticky !important;
+  position:sticky !important;
+  top:var(--ws-header-height) !important;
+  z-index:300 !important;
+  width:100% !important;
+}
+
+.ws-subnav-placeholder{
+  display:none;
+  width:100%;
+  height:0;
+  pointer-events:none;
+}
+
+.ws-subnav-placeholder.active{
+  display:block;
+}
+
+.subnav-wrap.ws-section-subnav.ws-subnav-fixed{
+  position:fixed !important;
+  top:var(--ws-header-height) !important;
+  left:0 !important;
+  right:0 !important;
+  width:100% !important;
+  z-index:300 !important;
+  margin:0 !important;
+}
+
+body.page-platform main section[id],
+body.page-blocks main section[id],
+body.page-organisations main section[id]{
+  scroll-margin-top:calc(var(--ws-header-height) + var(--ws-subnav-height) + 18px) !important;
+}
+
+@media(max-width:900px){
+  :root{
+    --ws-header-height:64px;
+    --ws-subnav-height:60px;
+  }
+}

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<!-- Updated: high-resolution contact artwork and icons. -->
+
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Contact Wistudi</title>
+<meta content="Talk to Wistudi about organisations, partnerships, publishing, platform use, integrations or general enquiries." name="description"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#ffffff;--bg-soft:#fbfaff;--ink:#181523;--muted:#6d6878;--line:#e9e6ef;
+  --purple:#7c3aed;--purple-deep:#5b21b6;--purple-soft:#f1ebff;
+  --orange:#f97316;--orange-soft:#fff0e5;--blue:#3157f5;--teal:#14b8a6;
+  --dark:#1a1330;--radius:28px;--shadow-sm:0 12px 32px rgba(34,24,64,.08);
+  --shadow-md:0 24px 64px rgba(34,24,64,.12);--shadow-lg:0 34px 90px rgba(17,11,34,.16);--max:1180px;
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,Arial,sans-serif;color:var(--ink);background:#fff;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}button{cursor:pointer}img{display:block;max-width:100%}
+h1,h2,h3{margin:0;font-family:'Be Vietnam Pro',Inter,sans-serif;letter-spacing:-.035em;color:var(--ink)}h1{font-size:clamp(3rem,6vw,5.15rem);line-height:1.01;font-weight:800}h2{font-size:clamp(2rem,4vw,3.35rem);line-height:1.08;font-weight:800}h3{font-size:1.08rem;line-height:1.25;font-weight:700}p{margin:0;color:var(--muted)}
+.container{width:min(calc(100% - 40px),var(--max));margin-inline:auto}.section{padding:100px 0}.eyebrow{display:inline-flex;align-items:center;gap:9px;color:var(--purple);font-size:.74rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase;margin-bottom:16px}.eyebrow:before{content:'';width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,#ffaf5a,var(--purple))}.lead{font-size:clamp(1rem,1.7vw,1.18rem);line-height:1.75;max-width:740px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:50px;padding:0 20px;border-radius:14px;font-size:.92rem;font-weight:700;transition:.2s ease;border:1px solid transparent}.btn.primary{background:linear-gradient(135deg,var(--purple),#8b5cf6);color:#fff;box-shadow:0 14px 30px rgba(124,58,237,.24)}.btn.primary:hover{transform:translateY(-2px);box-shadow:0 18px 36px rgba(124,58,237,.3)}.btn.secondary{background:#fff;color:var(--ink);border-color:#e2dceb}.btn.secondary:hover{transform:translateY(-2px);border-color:#cfc6df}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(233,230,239,.9)}.nav{height:72px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand img{width:132px;height:auto}.nav-links{display:flex;gap:28px;align-items:center;font-size:.82rem;font-weight:600;color:#6f6879}.nav-links a{position:relative;padding:25px 0}.nav-links a:hover,.nav-links a.active{color:var(--ink)}.nav-links a.active:after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--purple))}.nav-actions{display:flex;gap:10px;align-items:center}.nav-actions .btn{min-height:42px;padding:0 15px;font-size:.78rem}
+.scroll-progress{position:fixed;left:0;right:0;top:0;height:3px;z-index:220;pointer-events:none}.scroll-progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--orange),var(--purple),#26bdf2);box-shadow:0 0 16px rgba(124,58,237,.38)}
+.hero{position:relative;overflow:hidden;padding:108px 0 102px;background:linear-gradient(135deg,#f2f0f4 0%,#f5f3f6 54%,#f7f4f3 100%)}.hero:before{content:'';position:absolute;width:590px;height:590px;border-radius:50%;right:-230px;top:-280px;background:radial-gradient(circle,rgba(124,58,237,.12),rgba(124,58,237,0) 68%)}.hero:after{content:'';position:absolute;width:470px;height:470px;border-radius:50%;left:-250px;bottom:-320px;background:radial-gradient(circle,rgba(249,115,22,.10),rgba(249,115,22,0) 68%)}.hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:.92fr 1.08fr;gap:66px;align-items:center}.hero-copy .lead{margin-top:22px}.hero-copy h1 span{background:linear-gradient(100deg,var(--purple-deep),var(--purple) 48%,var(--orange));-webkit-background-clip:text;background-clip:text;color:transparent}.hero-note{display:flex;align-items:center;gap:10px;margin-top:23px;font-size:.8rem;color:#746c80}.hero-note i{width:8px;height:8px;border-radius:50%;background:#31b46f;box-shadow:0 0 0 5px rgba(49,180,111,.10)}
+.contact-orbit{position:relative;display:flex;align-items:center;justify-content:center}.contact-diagram{display:block;width:min(100%,780px);height:auto;object-fit:contain;background:transparent;filter:drop-shadow(0 22px 40px rgba(50,35,90,.10));animation:heroFloat 6.5s ease-in-out infinite;transform-origin:center center}@keyframes heroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}50%{transform:translateY(-8px)}}
+.route{background:#fff}.section-head{max-width:780px;margin:0 auto 40px;text-align:center}.section-head .lead{margin:14px auto 0}.route-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.route-card{position:relative;padding:24px;border:1px solid var(--line);border-radius:24px;background:#fff;text-align:left;transition:.24s ease;box-shadow:0 10px 24px rgba(34,24,64,.04)}.route-card:hover,.route-card.selected{transform:translateY(-5px);border-color:rgba(124,58,237,.32);box-shadow:var(--shadow-sm)}.route-card.selected{background:linear-gradient(145deg,#fff,#faf7ff)}.route-asset{width:124px;height:124px;object-fit:contain;display:block;margin:0 0 18px;image-rendering:auto;filter:drop-shadow(0 14px 22px rgba(56,42,110,.13));transition:transform .28s cubic-bezier(.2,.7,.2,1),filter .28s ease}.route-card:hover .route-asset,.route-card.selected .route-asset{transform:translateY(-4px) scale(1.025);filter:drop-shadow(0 18px 28px rgba(56,42,110,.18))}.route-card p{font-size:.84rem;line-height:1.55;margin-top:8px}.route-arrow{position:absolute;right:18px;top:18px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#faf8fd;color:#837a90;transition:.2s ease}.route-card:hover .route-arrow,.route-card.selected .route-arrow{background:var(--purple);color:#fff}.route-arrow svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
+.contact-section{position:relative;background:linear-gradient(180deg,#faf9ff 0%,#fff 100%)}.contact-wrap{display:grid;grid-template-columns:.78fr 1.22fr;gap:48px;align-items:start}.contact-copy{position:sticky;top:118px;padding:18px 0}.contact-copy h2{font-size:clamp(2.15rem,4vw,3.45rem)}.contact-copy .lead{font-size:1rem;margin-top:16px;max-width:500px}.trust-list{display:grid;gap:14px;margin-top:30px}.trust-item{display:flex;gap:13px;align-items:flex-start}.trust-check{flex:0 0 26px;width:26px;height:26px;border-radius:9px;background:#fff;border:1px solid #e3dcec;display:grid;place-items:center;color:var(--purple);box-shadow:0 7px 16px rgba(34,24,64,.06)}.trust-check svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.3}.trust-item strong{display:block;font-size:.88rem}.trust-item span{display:block;color:#81798c;font-size:.78rem;margin-top:2px}.direct-contact{margin-top:34px;padding:22px;border-radius:20px;background:#fff;border:1px solid var(--line);box-shadow:0 10px 28px rgba(34,24,64,.05)}.direct-contact .small{font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#968da1}.contact-links{display:grid;gap:8px;margin-top:12px}.contact-links a{font-size:.85rem;font-weight:600;color:#5c5368;display:flex;align-items:center;gap:9px}.contact-links a:hover{color:var(--purple)}.contact-links svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.form-card{position:relative;padding:36px;border-radius:30px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow-md)}.form-card:before{content:'';position:absolute;left:36px;right:36px;top:0;height:3px;border-radius:0 0 8px 8px;background:linear-gradient(90deg,var(--orange),var(--purple),var(--blue))}.form-intro{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:28px}.form-intro h3{font-size:1.42rem}.form-intro p{font-size:.84rem;margin-top:6px;max-width:560px}.form-step{white-space:nowrap;padding:7px 10px;border-radius:999px;background:#f5f1fb;font-size:.66rem;font-weight:800;color:#766b83}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.field{display:grid;gap:8px}.field.full{grid-column:1/-1}.field label{font-size:.76rem;font-weight:700;color:#4f4859}.field label .req{color:var(--purple)}.field label .optional{font-weight:500;color:#a097aa;margin-left:4px}.control{position:relative}.control svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:17px;height:17px;stroke:#9a91a6;fill:none;stroke-width:1.8;pointer-events:none}.field input,.field select,.field textarea{width:100%;border:1px solid #ded9e7;background:#fff;color:var(--ink);border-radius:14px;outline:none;transition:.2s ease}.field input,.field select{height:50px;padding:0 14px 0 44px}.field textarea{min-height:165px;resize:vertical;padding:14px 15px;line-height:1.55}.field select{appearance:none;padding-right:42px}.select-chevron{position:absolute!important;left:auto!important;right:15px!important;pointer-events:none}.field input::placeholder,.field textarea::placeholder{color:#b0a8b8}.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(124,58,237,.58);box-shadow:0 0 0 4px rgba(124,58,237,.09)}.field input:user-invalid,.field textarea:user-invalid,.field select:user-invalid{border-color:#df7f7f}.form-helper{display:flex;gap:10px;align-items:flex-start;margin-top:13px;padding:12px 14px;border-radius:13px;background:#faf8fd;color:#776f82;font-size:.75rem}.form-helper svg{flex:0 0 16px;width:16px;height:16px;stroke:var(--purple);fill:none;stroke-width:2;margin-top:1px}.form-bottom{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-top:24px}.privacy-note{max-width:420px;font-size:.68rem;line-height:1.55;color:#9a91a4}.submit-btn{border:0;min-width:178px}.submit-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2}.status{display:none;margin-top:18px;padding:14px 16px;border-radius:14px;font-size:.8rem;font-weight:600}.status.show{display:block}.status.success{background:#ecf9f1;color:#237848;border:1px solid #ccebd8}.status.error{background:#fff2f1;color:#a14742;border:1px solid #f0d3d0}.honeypot{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+.topics{background:#fff}.topic-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-top:38px}.topic{padding:21px 14px;border:1px solid var(--line);border-radius:18px;text-align:center;background:#fff;transition:.22s ease}.topic:hover{transform:translateY(-4px);box-shadow:var(--shadow-sm);border-color:#ddd4e8}.topic-asset{width:112px;height:112px;object-fit:contain;display:block;margin:0 auto 16px;image-rendering:auto;filter:drop-shadow(0 13px 21px rgba(56,42,110,.12));transition:transform .28s cubic-bezier(.2,.7,.2,1),filter .28s ease}.topic:hover .topic-asset{transform:translateY(-5px) scale(1.035);filter:drop-shadow(0 18px 28px rgba(56,42,110,.17))}.topic strong{font-size:14px;line-height:1.35;color:var(--text);display:block;max-width:120px;margin:0 auto;}
+.closing{padding:20px 0 90px}.closing-box{position:relative;overflow:hidden;padding:58px 42px;border-radius:32px;background:linear-gradient(118deg,#24143f,#5b21b6 52%,#3157f5);color:#fff;box-shadow:var(--shadow-md);display:grid;grid-template-columns:1fr auto;gap:36px;align-items:center}.closing-box:after{content:'';position:absolute;width:320px;height:320px;border-radius:50%;right:-100px;top:-190px;background:radial-gradient(circle,rgba(255,255,255,.18),transparent 68%)}.closing-box h2,.closing-box p{color:#fff}.closing-box h2{font-size:clamp(2rem,3.8vw,3.1rem)}.closing-box p{margin-top:10px;max-width:690px;color:rgba(255,255,255,.74)}.closing-box .btn{position:relative;z-index:2;background:#fff;color:var(--purple-deep);min-width:190px}
+footer{padding:42px 0 32px;border-top:1px solid var(--line);background:#fff}.footer-row{display:grid;grid-template-columns:170px 1fr 1.4fr auto;gap:28px;align-items:start;font-size:.72rem;color:#7c7584}.footer-wordmark{width:120px}.footer-links{display:grid;gap:7px}.footer-contact{display:grid;gap:5px}.footer-links a:hover,.footer-contact a:hover{color:var(--purple)}
+.reveal{opacity:0;transform:translateY(26px);filter:blur(5px);transition:opacity .65s cubic-bezier(.2,.7,.2,1),transform .65s cubic-bezier(.2,.7,.2,1),filter .65s ease}.reveal.in{opacity:1;transform:none;filter:blur(0)}
+@media(max-width:1040px){.hero-grid,.contact-wrap{grid-template-columns:1fr}.contact-copy{position:static}.contact-orbit{max-width:680px;width:100%;margin:0 auto}.route-grid{grid-template-columns:1fr 1fr}.topic-grid{grid-template-columns:repeat(3,1fr)}.footer-row{grid-template-columns:1fr 1fr}.closing-box{grid-template-columns:1fr}.closing-box .btn{justify-self:start}.contact-wrap{gap:30px}}
+@media(max-width:760px){.route-asset{width:112px;height:112px}.topic-asset{width:100px;height:100px}.container{width:min(calc(100% - 28px),var(--max))}.section{padding:76px 0}.nav{height:64px}.nav-links{display:none}.nav-actions .secondary{display:none}.hero{padding:78px 0}.hero-grid{gap:34px}.contact-orbit{min-height:auto;transform:none;margin-block:0}.contact-diagram{width:min(100%,620px)}.route-grid{grid-template-columns:1fr}.form-card{padding:26px 20px;border-radius:24px}.form-card:before{left:20px;right:20px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.form-intro{display:block}.form-step{display:inline-flex;margin-top:12px}.form-bottom{align-items:flex-start;flex-direction:column}.submit-btn{width:100%}.topic-grid{grid-template-columns:1fr 1fr}.closing{padding-bottom:70px}.closing-box{padding:42px 25px}.footer-row{grid-template-columns:1fr}}
+@media(max-width:520px){h1{font-size:clamp(2.7rem,14vw,3.8rem)}.contact-orbit{min-height:495px;transform:none}.orbit-ring{width:290px;height:290px}.orbit-ring.two{width:205px;height:205px}.center-node{width:145px;height:145px}.center-node .mini-logo{width:88px}.orbit-card{width:145px}.orbit-card.one{left:0;top:40px}.orbit-card.two{right:0;top:40px}.orbit-card.three{left:0;bottom:44px}.orbit-card.four{right:0;bottom:44px}.orbit-card span{display:none}.orbit-icon{width:34px;height:34px;flex-basis:34px}.route-asset{width:112px;height:112px}.topic-asset{width:98px;height:98px}.topic-grid{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.orbit-ring{animation:none}.reveal{opacity:1;transform:none;filter:none;transition:none}}
+</style>
+
+<link rel="icon" type="image/png" sizes="64x64" href="../assets/images/favicon-64.png">
+<link rel="apple-touch-icon" href="../assets/images/apple-touch-icon.png">
+<link rel="canonical" href="https://wistudi.com/contact/">
+<link rel="stylesheet" href="../assets/css/site-shell.css">
+</head>
+<body class="page-contact">
+<div aria-hidden="true" class="scroll-progress"><span id="scrollProgressBar"></span></div>
+<header class="ws-site-header">
+  <div class="ws-container ws-nav">
+    <a class="ws-brand" href="../index.html" aria-label="Wistudi — Platform home"><img src="../assets/images/wistudi-logo.png" alt="Wistudi"></a>
+    <nav class="ws-nav-links" aria-label="Primary navigation">
+      <a class="" href="../index.html">Platform</a>
+      <a class="" href="../blocks-activities/index.html">Blocks &amp; Activities</a>
+      <a class="" href="../organisations/index.html">Organisations</a>
+      <a class="active" href="../contact/index.html">Contact</a>
+    </nav>
+    <div class="ws-nav-actions">
+      <div class="ws-lang">
+        <button class="ws-lang-toggle" type="button" aria-haspopup="true" aria-expanded="false">EN <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg></button>
+        <div class="ws-lang-menu" role="menu" aria-label="Language">
+          <button class="ws-lang-option current" type="button" role="menuitem" aria-current="true"><span>English</span><span>EN</span></button>
+          <button class="ws-lang-option" type="button" role="menuitem" disabled><span>Tiếng Việt</span><span class="ws-lang-soon">Coming soon</span></button>
+        </div>
+      </div>
+      <a class="ws-btn secondary" href="../index.html">Explore Platform</a>
+      <a class="ws-btn primary" href="https://wistudi.com">Start Publishing</a>
+      <button class="ws-menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <div class="ws-mobile-menu">
+    <div class="ws-container ws-mobile-inner">
+      <a class="" href="../index.html">Platform</a>
+      <a class="" href="../blocks-activities/index.html">Blocks &amp; Activities</a>
+      <a class="" href="../organisations/index.html">Organisations</a>
+      <a class="active" href="../contact/index.html">Contact</a>
+      <div class="ws-mobile-actions"><a class="ws-btn secondary" href="../index.html">Explore Platform</a><a class="ws-btn primary" href="https://wistudi.com">Start Publishing</a></div>
+    </div>
+  </div>
+</header>
+<main>
+<section class="hero">
+<div class="container hero-grid">
+<div class="hero-copy reveal">
+<div class="eyebrow">Contact Wistudi</div>
+<h1>Let’s talk about what you want to <span>build.</span></h1>
+<p class="lead">Whether you're exploring Wistudi for an organisation, looking at a partnership, publishing learning content, or simply have a question, tell us what you're working on.</p>
+<div class="actions">
+<a class="btn primary" href="#contact-form">Start a conversation</a>
+<a class="btn secondary" href="../index.html">Explore Wistudi first</a>
+</div>
+<div class="hero-note"><i></i><span>Tell us the context. We’ll route your enquiry to the right person.</span></div>
+</div>
+<div aria-label="Ways to contact Wistudi" class="contact-orbit reveal">
+<img alt="Wistudi contact routes for organisations, schools and universities, partnerships, publishing and general enquiries" class="contact-diagram" decoding="async" fetchpriority="high" loading="eager" src="../assets/media/ae73f37eb5f3c615a587.png"/>
+</div>
+</div>
+</section>
+<section class="section route" id="enquiry-types">
+<div class="container">
+<div class="section-head reveal"><div class="eyebrow">Choose a direction</div><h2>What would you like to talk about?</h2><p class="lead">Choose the closest fit. It will pre-select the right enquiry type in the form below.</p></div>
+<div class="route-grid">
+<button class="route-card selected reveal" data-enquiry="organisation" type="button">
+<span class="route-arrow"><svg viewbox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+<img alt="Organisation plans and rollout" class="route-asset" decoding="async" loading="lazy" src="../assets/media/179b8be10e4c5a5bfe61.png"/><h3>Organisation plans and rollout</h3><p>Private workspaces, team access, implementation and custom setups.</p>
+</button>
+<button class="route-card reveal" data-enquiry="partnership" type="button">
+<span class="route-arrow"><svg viewbox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+<img alt="Partnership opportunities" class="route-asset" decoding="async" loading="lazy" src="../assets/media/2ad46a3829909c8cb26e.png"/><h3>Partnership opportunities</h3><p>Co-branded content, integrations, reseller relationships, and strategic collaborations.</p>
+</button>
+<button class="route-card reveal" data-enquiry="publishing" type="button">
+<span class="route-arrow"><svg viewbox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+<img alt="Publishing and content" class="route-asset" decoding="async" loading="lazy" src="../assets/media/4b75cfd5f7d833da3bcb.png"/><h3>Publishing and content</h3><p>Publishing workflows, content projects, worksheet and flow creation, and platform use cases.</p>
+</button>
+<button class="route-card reveal" data-enquiry="general" type="button">
+<span class="route-arrow"><svg viewbox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+<img alt="General enquiry" class="route-asset" decoding="async" loading="lazy" src="../assets/media/d4b4d46e589a4408f6ee.png"/><h3>General enquiry</h3><p>Questions, support, media enquiries, or anything that doesn’t fit the other routes.</p>
+</button>
+</div>
+</div>
+</section>
+<section class="section contact-section" id="contact-form">
+<div class="container contact-wrap">
+<aside class="contact-copy reveal">
+<div class="eyebrow">Tell us a little more</div>
+<h2>Start the conversation.</h2>
+<p class="lead">You don’t need to have everything figured out. Give us enough context to understand what you’re trying to achieve and we’ll take it from there.</p>
+<div class="trust-list">
+<div class="trust-item"><div class="trust-check"><svg viewbox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg></div><div><strong>One form, correctly routed</strong><span>Your enquiry type helps us send it to the right person.</span></div></div>
+<div class="trust-item"><div class="trust-check"><svg viewbox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg></div><div><strong>Organisation enquiries welcome</strong><span>Schools, universities, teams, training providers and larger deployments.</span></div></div>
+<div class="trust-item"><div class="trust-check"><svg viewbox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg></div><div><strong>Partnerships can start early</strong><span>Bring the opportunity, integration idea or collaboration context.</span></div></div>
+</div>
+<div class="direct-contact">
+<div class="small">Prefer email?</div>
+<div class="contact-links">
+<a href="mailto:support@wistudi.com"><svg viewbox="0 0 24 24"><path d="M4 4h16v16H4zM4 7l8 6 8-6"></path></svg>support@wistudi.com</a>
+<a href="mailto:partnerships@wistudi.com"><svg viewbox="0 0 24 24"><path d="M4 4h16v16H4zM4 7l8 6 8-6"></path></svg>partnerships@wistudi.com</a>
+</div>
+</div>
+</aside>
+<div class="form-card reveal">
+<div class="form-intro"><div><h3>Contact Wistudi</h3><p>Required fields are marked with an asterisk. Optional organisation details help us understand the context faster.</p></div><span class="form-step">Contact form</span></div>
+<!-- Form endpoint: connect /api/contact to a Cloudflare Pages Function / Worker before production. -->
+<form action="../api/contact" id="wistudiContactForm" method="post" novalidate="">
+<div aria-hidden="true" class="honeypot"><label>Leave this field empty <input autocomplete="off" name="company_fax" tabindex="-1" type="text"/></label></div>
+<div class="form-grid">
+<div class="field"><label for="name">Name <span class="req">*</span></label><div class="control"><svg viewbox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10z"></path></svg><input autocomplete="name" id="name" name="name" placeholder="Your name" required="" type="text"/></div></div>
+<div class="field"><label for="email">Email address <span class="req">*</span></label><div class="control"><svg viewbox="0 0 24 24"><path d="M4 4h16v16H4zM4 7l8 6 8-6"></path></svg><input autocomplete="email" id="email" name="email" placeholder="you@example.com" required="" type="email"/></div></div>
+<div class="field"><label for="phone">Phone number <span class="optional">optional</span></label><div class="control"><svg viewbox="0 0 24 24"><path d="M6.6 10.8a15.5 15.5 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24c1.1.36 2.3.54 3.6.54a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.6 21 3 13.4 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.3.18 2.5.54 3.6a1 1 0 0 1-.24 1z"></path></svg><input autocomplete="tel" id="phone" name="phone" placeholder="+84 ..." type="tel"/></div></div>
+<div class="field"><label for="organisation">Company / organisation <span class="optional">optional</span></label><div class="control"><svg viewbox="0 0 24 24"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 12h2v2H9zm4 0h2v2h-2z"></path></svg><input autocomplete="organization" id="organisation" name="organisation" placeholder="Organisation name" type="text"/></div></div>
+<div class="field"><label for="org-email">Organisation email <span class="optional">optional</span></label><div class="control"><svg viewbox="0 0 24 24"><path d="M4 4h16v16H4zM4 7l8 6 8-6"></path></svg><input id="org-email" name="organisation_email" placeholder="contact@organisation.com" type="email"/></div></div>
+<div class="field"><label for="website">Website <span class="optional">optional</span></label><div class="control"><svg viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"></path></svg><input id="website" inputmode="url" name="website" placeholder="https://" type="url"/></div></div>
+<div class="field full"><label for="enquiry">What are you contacting us about? <span class="req">*</span></label><div class="control"><svg viewbox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5"></path></svg><select id="enquiry" name="enquiry_type" required=""><option disabled="" selected="" value="">Select an enquiry type</option><option value="organisation">Organisation / team enquiry</option><option value="school-university">School / university enquiry</option><option value="partnership">Partnership / integration</option><option value="publishing">Publishing / content</option><option value="sales">Plans / commercial enquiry</option><option value="support">Platform support</option><option value="media">Media / events</option><option value="general">General enquiry</option></select><svg class="select-chevron" viewbox="0 0 24 24"><path d="m7 10 5 5 5-5"></path></svg></div><div class="form-helper" id="enquiryHelper"><svg viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg><span>Choose the closest fit. You can explain the details in your message.</span></div></div>
+<div class="field full"><label for="message">Message <span class="req">*</span></label><textarea id="message" minlength="10" name="message" placeholder="Tell us what you're working on, what you need, or what you would like to explore with Wistudi..." required=""></textarea></div>
+</div>
+<div class="form-bottom"><p class="privacy-note">By submitting this form, you’re asking Wistudi to contact you about your enquiry. Your details should only be used to respond to this request and related follow-up.</p><button class="btn primary submit-btn" type="submit"><span>Send enquiry</span><svg viewbox="0 0 24 24"><path d="m5 12 14-7-4 14-3-6zM12 13l7-8"></path></svg></button></div>
+<div aria-live="polite" class="status" id="formStatus" role="status"></div>
+</form>
+</div>
+</div>
+</section>
+<section class="section topics">
+<div class="container">
+<div class="section-head reveal"><div class="eyebrow">You can talk to us about</div><h2>From one lesson to a wider rollout.</h2><p class="lead">Wistudi conversations can begin with a single use case or a broader organisation, publishing or integration opportunity.</p></div>
+<div class="topic-grid">
+<div class="topic reveal"><img alt="Interactive learning" class="topic-asset" decoding="async" loading="lazy" src="../assets/media/f07300f8c92655692d86.png"/><strong>Interactive learning</strong></div>
+<div class="topic reveal"><img alt="XP Video" class="topic-asset" decoding="async" loading="lazy" src="../assets/media/1d7a0003a52630a3a3d6.png"/><strong>XP Video</strong></div>
+<div class="topic reveal"><img alt="Flows and curriculum" class="topic-asset" decoding="async" loading="lazy" src="../assets/media/08659838ed473fc6d18e.png"/><strong>Flows and curriculum</strong></div>
+<div class="topic reveal"><img alt="Training and onboarding" class="topic-asset" decoding="async" loading="lazy" src="../assets/media/07a2ed12ba1579327835.png"/><strong>Training and onboarding</strong></div>
+<div class="topic reveal"><img alt="Publishing and content" class="topic-asset" decoding="async" loading="lazy" src="../assets/media/f3620448f37ab508fdfb.png"/><strong>Publishing and content</strong></div>
+<div class="topic reveal"><img alt="Platform integrations" class="topic-asset" decoding="async" loading="lazy" src="../assets/media/2d1191d7dac35be2594e.png"/><strong>Platform integrations</strong></div>
+</div>
+</div>
+</section>
+<section class="closing">
+<div class="container">
+<div class="closing-box reveal"><div><h2>Not sure where your idea fits?</h2><p>That’s fine. Tell us what you’re trying to achieve and we’ll point you in the right direction.</p></div><a class="btn" href="#contact-form">Start a conversation</a></div>
+</div>
+</section>
+</main>
+<footer class="ws-site-footer">
+  <div class="ws-container ws-footer-row">
+    <a class="ws-brand" href="../index.html" aria-label="Wistudi — Platform home"><img class="ws-footer-wordmark" src="../assets/images/wistudi-logo.png" alt="Wistudi"></a>
+    <div class="ws-footer-links"><a href="../index.html">Platform</a><a href="../blocks-activities/index.html">Blocks &amp; Activities</a><a href="../organisations/index.html">Organisations</a><a href="../contact/index.html">Contact</a></div>
+    <div class="ws-footer-contact"><a href="mailto:support@wistudi.com">support@wistudi.com</a><a href="mailto:partnerships@wistudi.com">partnerships@wistudi.com</a><a href="tel:+84879876624">+84 879 876 624</a><span>Operating out of Vietnam</span><span>85 Great Portland Street, First Floor, London, England</span></div>
+    <div class="ws-footer-copy">© 2026 Wistudi</div>
+  </div>
+</footer>
+<script>
+const progressBar=document.getElementById('scrollProgressBar');
+const updateProgress=()=>{const h=document.documentElement;const max=h.scrollHeight-h.clientHeight;progressBar.style.width=(max?((h.scrollTop/max)*100):0)+'%'};
+addEventListener('scroll',updateProgress,{passive:true});updateProgress();
+
+const revealObserver=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('in');revealObserver.unobserve(entry.target)}})},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>revealObserver.observe(el));
+
+const enquirySelect=document.getElementById('enquiry');
+const helper=document.querySelector('#enquiryHelper span');
+const routeCards=[...document.querySelectorAll('.route-card')];
+const helperCopy={
+  organisation:'Tell us about the organisation, team size, learners and the way you are considering using Wistudi.',
+  'school-university':'Tell us about your school or university, intended users and the learning experience you want to support.',
+  partnership:'Tell us about the partnership, integration, distribution or collaboration opportunity you have in mind.',
+  publishing:'Tell us what you publish or want to create — lessons, curricula, resources, interactive experiences or printable materials.',
+  sales:'Tell us about the planned rollout, user numbers or commercial context you would like to discuss.',
+  support:'Describe what you were trying to do, what happened, and any relevant device or browser details.',
+  media:'Tell us about the event, interview, media opportunity or request.',
+  general:'Choose the closest fit. You can explain the details in your message.'
+};
+function updateHelper(value){helper.textContent=helperCopy[value]||'Choose the closest fit. You can explain the details in your message.';routeCards.forEach(c=>c.classList.toggle('selected',c.dataset.enquiry===value));}
+enquirySelect.addEventListener('change',()=>updateHelper(enquirySelect.value));
+routeCards.forEach(card=>card.addEventListener('click',()=>{enquirySelect.value=card.dataset.enquiry;updateHelper(card.dataset.enquiry);document.getElementById('contact-form').scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>enquirySelect.focus({preventScroll:true}),520)}));
+
+const form=document.getElementById('wistudiContactForm');
+const statusBox=document.getElementById('formStatus');
+const submitBtn=form.querySelector('.submit-btn');
+const submitText=submitBtn.querySelector('span');
+function showStatus(type,message){statusBox.className='status show '+type;statusBox.textContent=message;}
+form.addEventListener('submit',async e=>{
+  e.preventDefault();statusBox.className='status';
+  if(!form.checkValidity()){form.reportValidity();return;}
+  const fd=new FormData(form);
+  if(fd.get('company_fax')) return;
+  if(location.protocol==='file:'){
+    showStatus('success','Preview mode: the form is working visually, but no message was sent. Connect /api/contact when this page is deployed.');
+    return;
+  }
+  submitBtn.disabled=true;submitText.textContent='Sending…';
+  try{
+    const payload=Object.fromEntries(fd.entries());
+    const response=await fetch(form.action,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(payload)});
+    if(!response.ok) throw new Error('Request failed');
+    showStatus('success','Thanks — your enquiry has been sent to Wistudi.');
+    form.reset();routeCards.forEach(c=>c.classList.remove('selected'));updateHelper('general');
+  }catch(err){
+    showStatus('error','We couldn’t send the enquiry yet. Please email support@wistudi.com, or connect the /api/contact endpoint for this page.');
+  }finally{submitBtn.disabled=false;submitText.textContent='Send enquiry';}
+});
+</script>
+<script src="../assets/js/site-shell.js"></script>
+</body>
+</html>

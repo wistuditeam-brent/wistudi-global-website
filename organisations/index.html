@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="Wistudi for Organisations — a modular learning publishing platform that can stand alone, connect with existing systems, and scale across schools, universities, training teams, publishers and technology ecosystems." name="description"/>
+<title>Wistudi for Organisations</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=B+Vietnam+Pro:wght@500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{--ink:#171522;--muted:#6f6a79;--line:#e8e3ee;--paper:#fff;--soft:#f8f7fb;--purple:#7336f5;--purple2:#4d48ff;--orange:#ff7a16;--blue:#176df5;--cyan:#18bcd5;--navy:#14152b;--radius:26px;--shadow:0 24px 70px rgba(43,28,77,.12);--shadow2:0 14px 40px rgba(65,42,115,.11)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:#fff;line-height:1.6;-webkit-font-smoothing:antialiased}img{display:block;max-width:100%}a{color:inherit;text-decoration:none}button{font:inherit}.container{width:min(1180px,calc(100% - 44px));margin:auto}.eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:"B Vietnam Pro",sans-serif;text-transform:uppercase;letter-spacing:.13em;font-weight:800;font-size:.76rem;color:var(--purple)}.eyebrow:before{content:"";width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ffbe65)}h1,h2,h3{font-family:"B Vietnam Pro",Inter,sans-serif;line-height:1.08;margin:0;letter-spacing:-.035em}h1{font-size:clamp(3.25rem,6.2vw,6rem);max-width:800px}h2{font-size:clamp(2rem,4.2vw,3.75rem)}h3{font-size:1.12rem}p{margin:0}.lead{font-size:clamp(1.06rem,1.5vw,1.3rem);line-height:1.72;color:var(--muted);max-width:780px}.section{padding:105px 0;position:relative;overflow:hidden}.soft{background:linear-gradient(180deg,#faf9fd 0%,#f7f8fc 100%)}.section-head{display:grid;gap:18px;margin-bottom:52px}.section-head.center{text-align:center;justify-items:center}.section-head.center .lead{max-width:800px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;padding:13px 20px;font-weight:800;border:1px solid transparent;transition:.2s ease;cursor:pointer}.btn.primary{background:linear-gradient(135deg,var(--orange),#ff9d33);color:white;box-shadow:0 10px 24px rgba(255,122,22,.24)}.btn.primary:hover{transform:translateY(-2px);box-shadow:0 15px 30px rgba(255,122,22,.3)}.btn.secondary{background:#fff;border-color:#ddd7e7;color:var(--ink)}.btn.secondary:hover{transform:translateY(-2px);border-color:#bdb2d3;box-shadow:var(--shadow2)}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.text-link{font-weight:800;color:var(--purple)}.text-link:hover{text-decoration:underline;text-underline-offset:4px}
+/* header */
+.site-header{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.88);backdrop-filter:blur(16px);border-bottom:1px solid rgba(228,223,236,.85)}.nav{height:74px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand img{width:135px;height:auto}.nav-links{display:flex;align-items:center;gap:25px;font-size:.88rem;font-weight:700;color:#6e6878}.nav-links a{position:relative;padding:9px 0}.nav-links a:after{content:"";position:absolute;left:0;right:100%;bottom:2px;height:2px;background:linear-gradient(90deg,var(--orange),var(--purple));transition:.22s}.nav-links a:hover:after,.nav-links a.active:after{right:0}.nav-links a.active{color:var(--ink)}.nav-actions{display:flex;align-items:center;gap:10px}.nav-actions .btn{padding:10px 14px;font-size:.82rem}.menu-btn{display:none;border:0;background:#f4f1f8;border-radius:12px;width:43px;height:43px;font-size:1.2rem;color:var(--ink)}
+/* hero */
+.hero{position:relative;overflow:hidden;padding:88px 0 72px;background:radial-gradient(circle at 83% 16%,rgba(30,185,232,.2),transparent 28%),radial-gradient(circle at 52% 10%,rgba(120,55,245,.18),transparent 34%),linear-gradient(125deg,#fff9f4 0%,#fbf8ff 48%,#eef9ff 100%);border-bottom:1px solid var(--line)}.hero:before{content:"";position:absolute;width:520px;height:520px;border-radius:50%;left:-260px;top:-240px;background:linear-gradient(135deg,rgba(255,122,22,.16),rgba(124,58,237,.05));filter:blur(4px)}.hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:52px;align-items:center;position:relative;z-index:1}.hero-copy .lead{margin-top:24px;max-width:700px;color:#5f5968}.hero-tags{display:flex;flex-wrap:wrap;gap:9px;margin-top:28px}.hero-tags span{background:rgba(255,255,255,.72);border:1px solid rgba(120,91,156,.15);box-shadow:0 8px 22px rgba(82,58,117,.07);padding:8px 12px;border-radius:999px;font-size:.8rem;font-weight:750;color:#5f586a}.hero-visual{position:relative;display:grid;place-items:center;min-height:570px}.hero-diagram{width:min(100%,670px);filter:drop-shadow(0 28px 35px rgba(79,51,149,.16));animation:heroFloat 7s ease-in-out infinite;transform-origin:center}.hero-orb{position:absolute;border-radius:999px;filter:blur(0);opacity:.7;pointer-events:none}.hero-orb.one{width:34px;height:34px;background:#ff9c31;right:8%;top:15%;animation:orbitBob 5.5s ease-in-out infinite}.hero-orb.two{width:24px;height:24px;background:#6b38f4;left:9%;bottom:22%;animation:orbitBob 6s ease-in-out infinite reverse}@keyframes heroFloat{50%{transform:translateY(-10px)}}@keyframes orbitBob{50%{transform:translate(5px,-9px)}}
+/* capability cards */
+.capability-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.cap-card{position:relative;background:#fff;border:1px solid var(--line);border-radius:24px;padding:24px 22px 23px;min-height:275px;box-shadow:0 11px 34px rgba(43,28,77,.06);transition:transform .23s ease,box-shadow .23s ease,border-color .23s ease;overflow:hidden}.cap-card:before{content:"";position:absolute;inset:auto -70px -95px auto;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(115,54,245,.10),transparent 68%)}.cap-card:hover{transform:translateY(-6px);border-color:#d3c4f3;box-shadow:0 22px 50px rgba(61,38,101,.12)}.cap-icon-wrap{height:105px;display:flex;align-items:center;margin-bottom:12px}.cap-icon{width:105px;height:105px;object-fit:contain;transition:transform .24s ease}.cap-card:hover .cap-icon{transform:scale(1.05) rotate(-1deg)}.cap-card h3{font-size:1.1rem;margin-bottom:8px}.cap-card p{font-size:.92rem;color:var(--muted);line-height:1.62}.cap-tag{margin-top:14px;display:inline-flex;padding:6px 9px;border-radius:999px;background:#f5f1fb;color:#6f627b;font-size:.72rem;font-weight:750}
+/* split image sections */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}.support-visual{position:relative;display:grid;place-items:center;min-height:450px}.support-visual img{width:min(100%,640px);filter:drop-shadow(0 24px 34px rgba(68,43,123,.14));transition:transform .3s ease}.support-visual:hover img{transform:translateY(-6px) scale(1.012)}.sector-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:30px}.sector-card{border:1px solid var(--line);border-radius:18px;padding:18px;background:#fff;transition:.2s ease}.sector-card:hover{border-color:#d8c9f5;box-shadow:var(--shadow2);transform:translateY(-3px)}.sector-card h3{font-size:1rem;margin-bottom:5px}.sector-card p{color:var(--muted);font-size:.86rem;line-height:1.55}.sector-card .mini{width:28px;height:4px;border-radius:999px;background:linear-gradient(90deg,var(--purple),var(--orange));margin-bottom:13px}
+/* deployment */
+.deployment-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.deploy-card{position:relative;border:1px solid var(--line);border-radius:25px;background:#fff;padding:28px;overflow:hidden;transition:.25s ease;min-height:250px}.deploy-card:nth-child(2){background:linear-gradient(160deg,#fbf7ff,#f3f8ff)}.deploy-card:nth-child(3){background:linear-gradient(160deg,#fff9f3,#fff)}.deploy-card:hover{transform:translateY(-6px);box-shadow:var(--shadow);border-color:#d9cdf1}.deploy-number{font-family:"B Vietnam Pro";font-weight:800;font-size:.78rem;color:var(--purple);margin-bottom:48px;display:flex;justify-content:space-between}.deploy-number span:last-child{width:42px;height:42px;border-radius:14px;background:#f2edff;display:grid;place-items:center;font-size:1rem}.deploy-card h3{font-size:1.35rem;margin-bottom:10px}.deploy-card p{color:var(--muted)}
+/* architecture */
+.architecture{background:linear-gradient(130deg,#121428 0%,#191539 46%,#123f56 100%);color:white}.architecture .eyebrow{color:#bfadff}.architecture .lead{color:#c5c2d0}.arch-shell{display:grid;grid-template-columns:.9fr 1.1fr;gap:60px;align-items:center}.arch-visual img{width:100%;max-width:610px;margin:auto;filter:drop-shadow(0 30px 46px rgba(0,0,0,.24));transition:.3s ease}.arch-visual:hover img{transform:scale(1.016) rotate(.4deg)}.arch-points{display:grid;gap:12px;margin-top:28px}.arch-point{display:grid;grid-template-columns:38px 1fr;gap:13px;align-items:start;padding:15px 16px;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.045);transition:.2s}.arch-point:hover{background:rgba(255,255,255,.08);transform:translateX(5px)}.arch-point i{font-style:normal;width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#7540ff,#2c7fff);font-weight:800}.arch-point strong{display:block;margin-bottom:2px}.arch-point p{color:#aaa7bb;font-size:.9rem}
+/* tech */
+.logo-bands{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:42px}.logo-panel{border:1px solid var(--line);border-radius:24px;background:#fff;padding:25px}.logo-panel h3{font-size:1.15rem;margin-bottom:7px}.logo-panel>p{font-size:.9rem;color:var(--muted);margin-bottom:22px}.logo-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.logo-box{height:105px;border-radius:17px;border:1px solid #eee8f2;background:#fff;display:flex;align-items:center;justify-content:center;padding:16px;transition:.22s ease}.logo-box:hover{transform:translateY(-4px);box-shadow:var(--shadow2);border-color:#d8cced}.logo-box img{max-height:64px;max-width:100%;object-fit:contain}.logo-note{margin-top:14px;font-size:.78rem;color:#847d8e}
+/* org environment */
+.env-layout{display:grid;grid-template-columns:.9fr 1.1fr;gap:38px;align-items:start}.env-list{display:grid;grid-template-columns:1fr 1fr;gap:14px}.env-item{border:1px solid var(--line);background:#fff;border-radius:17px;padding:17px;transition:.2s}.env-item:hover{border-color:#cfbff2;transform:translateY(-3px);box-shadow:var(--shadow2)}.env-item strong{font-family:"B Vietnam Pro";display:block;margin-bottom:4px}.env-item p{color:var(--muted);font-size:.86rem;line-height:1.5}.control-card{border-radius:26px;padding:26px;background:linear-gradient(145deg,#21194c,#4035a8 60%,#175f8d);color:white;box-shadow:var(--shadow);position:sticky;top:100px}.control-card h3{font-size:1.45rem;margin-bottom:8px}.control-card p{color:#dad7e7}.control-rows{display:grid;gap:10px;margin-top:22px}.control-row{display:flex;justify-content:space-between;align-items:center;gap:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:13px 14px;font-size:.9rem}.control-row span:last-child{font-size:.73rem;font-weight:750;border-radius:999px;padding:5px 8px;background:rgba(255,255,255,.13)}
+/* formats */
+.format-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:28px}.format-box{border-radius:16px;padding:16px;border:1px solid var(--line);background:#fff}.format-box strong{display:block;font-family:"B Vietnam Pro";margin-bottom:4px}.format-box p{color:var(--muted);font-size:.84rem}
+/* reporting */
+.report-grid{display:grid;grid-template-columns:.82fr 1.18fr;gap:32px;align-items:stretch}.report-levels{display:grid;gap:13px}.report-level{border:1px solid var(--line);border-radius:18px;background:#fff;padding:18px;transition:.2s}.report-level:hover{transform:translateX(5px);border-color:#d4c6ef}.report-level b{font-family:"B Vietnam Pro";display:block;margin-bottom:5px}.report-level p{color:var(--muted);font-size:.88rem}.analytics-mock{border-radius:24px;background:#17172b;padding:24px;color:#fff;min-height:390px;box-shadow:var(--shadow)}.analytics-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}.analytics-top small{color:#aaa8bb}.bars{height:190px;display:flex;align-items:flex-end;gap:13px;padding:0 10px;border-bottom:1px solid rgba(255,255,255,.14)}.bar{flex:1;border-radius:10px 10px 0 0;background:linear-gradient(180deg,#8b55ff,#3c6cff);position:relative;transform-origin:bottom;animation:barRise .8s cubic-bezier(.2,.8,.2,1) both}.bar:nth-child(2){height:72%}.bar:nth-child(3){height:92%;background:linear-gradient(180deg,#ff9b32,#ff6a1a)}.bar:nth-child(4){height:64%}.bar:nth-child(5){height:86%}.bar:nth-child(1){height:48%}@keyframes barRise{from{transform:scaleY(.12);opacity:.3}to{transform:scaleY(1);opacity:1}}.analytics-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}.analytics-chips div{background:rgba(255,255,255,.07);border-radius:14px;padding:12px}.analytics-chips strong{display:block;font-size:1.15rem}.analytics-chips span{font-size:.72rem;color:#aaa8bb}
+/* gallery */
+.community{background:linear-gradient(180deg,#fff 0%,#fbf8ff 100%)}.gallery-wrap{margin-top:48px}.gallery-stage{position:relative;aspect-ratio:16/9;border-radius:28px;overflow:hidden;background:#171526;box-shadow:0 26px 70px rgba(39,27,70,.18);border:1px solid rgba(110,84,156,.16);isolation:isolate}.gallery-stage:before{content:"";position:absolute;inset:-35px;background-image:var(--gallery-bg);background-size:cover;background-position:center;filter:blur(30px) saturate(.85);opacity:.42;transform:scale(1.08);z-index:-2;transition:background-image .25s ease}.gallery-stage:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,8,25,.04),rgba(10,8,25,.34));z-index:-1}.gallery-main{width:100%;height:100%;object-fit:contain;transition:opacity .22s ease,transform .5s ease}.gallery-stage:hover .gallery-main{transform:scale(1.006)}.gallery-caption{position:absolute;left:24px;right:24px;bottom:22px;display:flex;justify-content:space-between;align-items:end;gap:16px;color:#fff;pointer-events:none}.gallery-caption>div{max-width:650px;background:rgba(21,15,43,.58);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:12px 15px}.gallery-caption strong{font-family:"B Vietnam Pro";font-size:1.05rem;display:block}.gallery-caption span{font-size:.84rem;color:#eee9f6}.gallery-open{position:absolute;right:22px;top:22px;width:46px;height:46px;border-radius:15px;border:1px solid rgba(255,255,255,.24);background:rgba(24,19,45,.58);backdrop-filter:blur(10px);color:#fff;display:grid;place-items:center;cursor:pointer;transition:.2s;z-index:2}.gallery-open:hover{transform:scale(1.06);background:rgba(24,19,45,.78)}.gallery-nav{position:absolute;inset:50% 16px auto;transform:translateY(-50%);display:flex;justify-content:space-between;pointer-events:none;z-index:2}.gallery-nav button{pointer-events:auto;width:44px;height:44px;border-radius:15px;border:1px solid rgba(255,255,255,.22);background:rgba(24,19,45,.55);color:white;cursor:pointer;font-size:1.35rem;transition:.2s}.gallery-nav button:hover{background:rgba(24,19,45,.8);transform:scale(1.05)}.thumbs{display:flex;gap:10px;overflow-x:auto;padding:15px 2px 6px;scrollbar-width:thin;scroll-snap-type:x proximity}.thumb{flex:0 0 132px;aspect-ratio:16/9;border-radius:13px;padding:0;border:2px solid transparent;background:#eee;overflow:hidden;cursor:pointer;opacity:.66;transition:.2s;scroll-snap-align:start}.thumb img{width:100%;height:100%;object-fit:cover}.thumb:hover{opacity:1;transform:translateY(-2px)}.thumb.active{opacity:1;border-color:var(--orange);box-shadow:0 7px 18px rgba(255,122,22,.18)}
+/* Prevent browser scroll anchoring from reacting to carousel media updates. */
+.gallery-wrap,.gallery-stage,.thumbs{overflow-anchor:none}
+/* adoption & partners */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.step{border-radius:20px;border:1px solid var(--line);padding:22px;background:#fff;position:relative;overflow:hidden;transition:.2s}.step:hover{transform:translateY(-4px);box-shadow:var(--shadow2)}.step b{font-family:"B Vietnam Pro";display:block;font-size:1.05rem;margin:26px 0 6px}.step p{color:var(--muted);font-size:.86rem}.step-num{font-size:.73rem;font-weight:800;color:var(--purple)}.partner-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.partner-card{border:1px solid var(--line);border-radius:24px;padding:26px;background:#fff}.partner-card h3{font-size:1.2rem;margin-bottom:6px}.partner-card>p{color:var(--muted);font-size:.9rem;margin-bottom:22px}.partner-types{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.partner-type{border-radius:14px;background:#f8f6fb;padding:12px;font-size:.83rem}.partner-type b{display:block;font-family:"B Vietnam Pro"}
+/* compare */
+.compare{display:grid;grid-template-columns:1fr 1.08fr;gap:18px;margin-top:38px;align-items:stretch}.compare-col{border:1px solid var(--line);border-radius:24px;overflow:hidden;background:#fff}.compare-col.wistudi{border:0;background:linear-gradient(155deg,#6f32f5 0%,#434ff7 54%,#137fc7 100%);color:#fff;box-shadow:0 28px 70px rgba(64,48,171,.23);transform:translateY(-8px)}.compare-head{padding:21px 24px;font-family:"B Vietnam Pro";font-size:1.18rem;font-weight:800;border-bottom:1px solid var(--line)}.compare-col.wistudi .compare-head{border-color:rgba(255,255,255,.15)}.compare-row{display:flex;align-items:center;gap:11px;padding:16px 24px;border-bottom:1px solid var(--line);font-size:.92rem}.compare-row:last-child{border-bottom:0}.compare-col.wistudi .compare-row{border-color:rgba(255,255,255,.13)}.compare-row i{font-style:normal;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#f0edf4;color:#7f7889;font-size:.72rem;font-weight:800;flex:none}.compare-col.wistudi .compare-row i{background:rgba(255,255,255,.16);color:#fff}.compare-badge{display:inline-flex;margin:20px 24px 5px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.75rem;font-weight:800}
+/* CTA/footer */
+.cta-wrap{padding:50px 0 100px}.cta{position:relative;overflow:hidden;border-radius:28px;padding:62px 48px;background:linear-gradient(125deg,#1b142d 0%,#24205d 54%,#0d4d65 100%);color:white;text-align:center;box-shadow:0 28px 75px rgba(31,25,73,.24)}.cta:before{content:"";position:absolute;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(131,70,255,.4),transparent 67%);left:-130px;top:-190px}.cta:after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,131,31,.2),transparent 67%);right:-80px;bottom:-130px}.cta>*{position:relative;z-index:1}.cta h2{font-size:clamp(2rem,4vw,3.35rem);max-width:800px;margin:auto}.cta p{color:#d6d2df;max-width:760px;margin:16px auto 0}.cta .actions{justify-content:center}footer{border-top:1px solid var(--line);padding:38px 0 50px;background:#fff}.footer-grid{display:grid;grid-template-columns:1.25fr repeat(3,1fr);gap:30px}.footer-brand img{width:120px;margin-bottom:14px}.footer-brand p,.footer-col a,.footer-col span{color:#7b7582;font-size:.82rem}.footer-col{display:grid;align-content:start;gap:7px}.footer-col strong{font-family:"B Vietnam Pro";font-size:.85rem;margin-bottom:4px}.footer-bottom{margin-top:28px;padding-top:20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;color:#958f9b;font-size:.76rem;gap:20px;flex-wrap:wrap}
+/* reveal */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .42s ease,transform .42s cubic-bezier(.2,.78,.2,1)}.reveal.in{opacity:1;transform:none}.reveal[data-delay="1"]{transition-delay:.05s}.reveal[data-delay="2"]{transition-delay:.10s}.reveal[data-delay="3"]{transition-delay:.15s}.reveal[data-delay="4"]{transition-delay:.20s}
+/* lightbox */
+.lightbox{position:fixed;inset:0;z-index:100;background:rgba(11,8,22,.88);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:28px}.lightbox.open{display:flex}.lightbox-inner{position:relative;width:min(1200px,96vw);height:min(82vh,820px);display:grid;place-items:center}.lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:18px;box-shadow:0 30px 100px rgba(0,0,0,.42)}.lightbox-close{position:absolute;right:0;top:-8px;transform:translateY(-100%);width:44px;height:44px;border-radius:14px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.12);color:white;font-size:1.35rem;cursor:pointer}
+@media(max-width:1020px){.nav-links{display:none}.menu-btn{display:block}.nav.open .nav-links{display:flex;position:absolute;top:74px;left:0;right:0;background:white;border-bottom:1px solid var(--line);padding:18px 22px;flex-direction:column;align-items:flex-start;box-shadow:0 20px 40px rgba(40,25,67,.09)}.hero-grid,.split,.arch-shell,.env-layout,.report-grid{grid-template-columns:1fr}.hero-visual{min-height:auto}.hero-diagram{max-width:620px}.capability-grid{grid-template-columns:repeat(2,1fr)}.logo-bands,.partner-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr}.support-visual{min-height:380px}.control-card{position:relative;top:auto}}
+@media(max-width:760px){.container{width:min(100% - 28px,1180px)}.section{padding:76px 0}.hero{padding:64px 0 54px}h1{font-size:clamp(2.7rem,14vw,4.4rem)}h2{font-size:clamp(2rem,9vw,3rem)}.hero-grid{gap:30px}.hero-visual{order:2}.hero-diagram{width:100%}.capability-grid,.sector-grid,.deployment-grid,.format-strip,.steps{grid-template-columns:1fr}.cap-card{min-height:0;display:grid;grid-template-columns:88px 1fr;column-gap:14px;align-items:center}.cap-icon-wrap{height:86px;margin:0;grid-row:1/4}.cap-icon{width:86px;height:86px}.cap-card .cap-tag{grid-column:2}.logo-row{grid-template-columns:1fr 1fr}.env-list{grid-template-columns:1fr}.partner-types{grid-template-columns:1fr}.compare{grid-template-columns:1fr}.compare-col.wistudi{transform:none}.gallery-caption{left:12px;right:12px;bottom:12px}.gallery-caption>div{padding:10px 12px}.gallery-caption span{display:none}.gallery-nav{inset:50% 8px auto}.gallery-open{right:12px;top:12px}.thumb{flex-basis:102px}.cta{padding:48px 22px}.footer-grid{grid-template-columns:1fr}.nav-actions .btn.secondary{display:none}}
+@media(max-width:480px){.brand img{width:112px}.nav-actions .btn.primary{display:none}.nav{height:66px}.nav.open .nav-links{top:66px}.cap-card{grid-template-columns:74px 1fr;padding:18px 16px}.cap-icon-wrap,.cap-icon{width:72px;height:72px}.gallery-stage{border-radius:20px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}.reveal{opacity:1!important;transform:none!important}}
+</style>
+<style id="wistudi-organisation-enhancements">
+/* ===== Organisation page refinement pass ===== */
+.section{scroll-margin-top:88px}
+
+/* Faster, more dimensional reveal motion. Kept deliberately subtle for an organisation-facing page. */
+.reveal{opacity:0;filter:saturate(.92);transition:opacity .34s ease,transform .40s cubic-bezier(.2,.82,.2,1),filter .34s ease;will-change:opacity,transform}
+.reveal-up{transform:translate3d(0,20px,0) scale(.995)}
+.reveal-left{transform:translate3d(-26px,8px,0) scale(.995)}
+.reveal-right{transform:translate3d(26px,8px,0) scale(.995)}
+.reveal-pop{transform:translate3d(0,14px,0) scale(.975)}
+.reveal.in{opacity:1;transform:translate3d(0,0,0) scale(1);filter:none;will-change:auto}
+.reveal[data-delay="1"]{transition-delay:.035s}
+.reveal[data-delay="2"]{transition-delay:.07s}
+.reveal[data-delay="3"]{transition-delay:.105s}
+.reveal[data-delay="4"]{transition-delay:.14s}
+.section-head.in .eyebrow:before{animation:orgDotPulse .72s ease-out both}
+@keyframes orgDotPulse{0%{box-shadow:0 0 0 0 rgba(255,122,22,.35)}65%{box-shadow:0 0 0 9px rgba(255,122,22,0)}100%{box-shadow:none}}
+
+/* New multi-format visual: use the supplied image as a strong editorial graphic rather than another circular diagram. */
+#formats .split{gap:58px}
+#formats .format-ecosystem-visual{min-height:0;align-self:center;border-radius:28px;background:#050505;overflow:hidden;box-shadow:0 26px 68px rgba(39,28,71,.18);border:1px solid rgba(112,86,158,.16);isolation:isolate}
+#formats .format-ecosystem-visual:before{content:"";position:absolute;inset:-18%;background:radial-gradient(circle at 26% 25%,rgba(120,54,245,.17),transparent 34%),radial-gradient(circle at 78% 72%,rgba(255,122,22,.14),transparent 30%);z-index:0;pointer-events:none}
+#formats .format-ecosystem-image{position:relative;z-index:1;width:100%;max-width:none;margin:0;display:block;border-radius:27px;filter:none;transform:translateZ(0);transition:transform .34s ease,filter .34s ease}
+#formats .format-ecosystem-visual:hover .format-ecosystem-image{transform:scale(1.012);filter:brightness(1.035)}
+#formats .format-box{transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease,background .22s ease}
+#formats .format-box:hover{transform:translateY(-4px);border-color:#d9c9f7;box-shadow:0 14px 34px rgba(65,42,115,.10);background:#fff}
+
+/* Give repeated card groups a little more life without turning the page into a motion demo. */
+.cap-card,.deploy-card,.sector-card,.env-item,.step,.partner-card,.logo-panel,.compare-col{backface-visibility:hidden}
+.cap-card:hover,.deploy-card:hover,.sector-card:hover,.env-item:hover,.step:hover,.partner-card:hover,.logo-panel:hover{transform:translateY(-5px)}
+.arch-visual img,.hero-diagram{backface-visibility:hidden}
+
+/* Gallery: desktop keeps the elegant overlay; mobile moves the copy under the image. */
+.gallery-mobile-caption{display:none}
+@media(max-width:1020px){
+  #formats .split{gap:38px}
+  #formats .format-ecosystem-visual{width:min(100%,760px);margin-inline:auto}
+}
+@media(max-width:760px){
+  .section{padding:70px 0}
+  .section-head{gap:14px;margin-bottom:34px}
+  .lead{font-size:1rem;line-height:1.68}
+  .split{gap:34px}
+  #formats .format-strip{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  #formats .format-box{padding:14px;min-width:0}
+  #formats .format-box strong{font-size:.92rem}
+  #formats .format-box p{font-size:.78rem;line-height:1.45}
+  #formats .format-ecosystem-visual{border-radius:22px;box-shadow:0 20px 44px rgba(39,28,71,.16)}
+  #formats .format-ecosystem-image{border-radius:21px}
+
+  .gallery-stage{aspect-ratio:4/3;border-radius:22px}
+  .gallery-caption{display:none!important}
+  .gallery-mobile-caption{display:grid;gap:4px;margin-top:12px;padding:14px 15px;border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:0 10px 25px rgba(43,28,77,.06);color:var(--ink)}
+  .gallery-mobile-caption strong{font-family:"B Vietnam Pro",Inter,sans-serif;font-size:.94rem;line-height:1.3}
+  .gallery-mobile-caption span{font-size:.8rem;line-height:1.5;color:var(--muted)}
+  .gallery-nav{inset:50% 7px auto}
+  .gallery-nav button{width:39px;height:39px;border-radius:13px;font-size:1.2rem}
+  .gallery-open{width:40px;height:40px;border-radius:13px;right:10px;top:10px}
+  .thumbs{gap:8px;padding-top:11px}
+  .thumb{flex-basis:94px;border-radius:11px}
+
+  /* Mobile motion is shorter and mostly vertical to avoid sideways visual jumpiness. */
+  .reveal-left,.reveal-right,.reveal-up{transform:translate3d(0,15px,0) scale(.995)}
+  .reveal-pop{transform:translate3d(0,10px,0) scale(.985)}
+  .reveal{transition-duration:.30s,.34s,.30s}
+}
+@media(max-width:520px){
+  .container{width:min(100% - 24px,1180px)}
+  .hero{padding-top:54px}
+  h1{font-size:clamp(2.5rem,13vw,3.55rem)}
+  h2{font-size:clamp(1.9rem,8.6vw,2.65rem)}
+  #formats .format-strip{grid-template-columns:1fr 1fr}
+  .gallery-stage{aspect-ratio:1/1}
+  .thumb{flex-basis:82px}
+}
+@media(prefers-reduced-motion:reduce){
+  .reveal,.reveal-up,.reveal-left,.reveal-right,.reveal-pop{opacity:1!important;transform:none!important;filter:none!important}
+  .section-head.in .eyebrow:before{animation:none!important}
+}
+</style>
+<style id="wistudi-organisation-final-refinements">
+/* ===== Final organisation page refinements ===== */
+
+/* The repeated organisation ecosystem illustration has been removed. */
+#who-for .who-for-layout{width:min(1180px,calc(100% - 44px));margin:auto}
+#who-for .who-for-layout>.reveal{max-width:none}
+#who-for .sector-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:34px}
+
+/* Multi-format illustration sits directly on the page — no card, dark panel or separate background. */
+#formats .format-ecosystem-visual{
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+  isolation:auto!important;
+  padding:0!important;
+}
+#formats .format-ecosystem-visual:before{display:none!important;content:none!important}
+#formats .format-ecosystem-image{
+  border-radius:0!important;
+  background:transparent!important;
+  filter:drop-shadow(0 16px 24px rgba(67,45,112,.10))!important;
+  transform:translateZ(0);
+}
+#formats .format-ecosystem-visual:hover .format-ecosystem-image{
+  transform:translateY(-3px) scale(1.008);
+  filter:drop-shadow(0 20px 30px rgba(67,45,112,.13))!important;
+}
+
+/* Make the existing inner reveals calmer and more visible while scrolling. */
+.reveal{
+  transition:opacity .58s ease,transform .66s cubic-bezier(.22,.78,.2,1),filter .56s ease!important;
+}
+.reveal-up{transform:translate3d(0,14px,0) scale(.997)}
+.reveal-left{transform:translate3d(-18px,8px,0) scale(.997)}
+.reveal-right{transform:translate3d(18px,8px,0) scale(.997)}
+.reveal-pop{transform:translate3d(0,11px,0) scale(.986)}
+.reveal[data-delay="1"]{transition-delay:.06s!important}
+.reveal[data-delay="2"]{transition-delay:.12s!important}
+.reveal[data-delay="3"]{transition-delay:.18s!important}
+.reveal[data-delay="4"]{transition-delay:.24s!important}
+
+/* Whole-section content reveal. Backgrounds remain fixed, so the effect feels smooth rather than jumpy. */
+.section-shell-reveal{
+  opacity:0;
+  transform:translate3d(0,30px,0);
+  filter:blur(2px);
+  transition:opacity .72s ease,transform .82s cubic-bezier(.2,.78,.2,1),filter .68s ease;
+  will-change:opacity,transform,filter;
+}
+.section-shell-reveal.section-shell-visible{
+  opacity:1;
+  transform:translate3d(0,0,0);
+  filter:blur(0);
+  will-change:auto;
+}
+
+@media(max-width:1020px){
+  #who-for .sector-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  #who-for .who-for-layout{width:min(100% - 28px,1180px)}
+  #who-for .sector-grid{grid-template-columns:1fr;gap:12px}
+  #formats .format-ecosystem-image{filter:drop-shadow(0 12px 20px rgba(67,45,112,.09))!important}
+  .section-shell-reveal{transform:translate3d(0,22px,0);filter:blur(1px);transition-duration:.62s,.72s,.58s}
+  .reveal-left,.reveal-right,.reveal-up{transform:translate3d(0,11px,0) scale(.998)}
+  .reveal-pop{transform:translate3d(0,8px,0) scale(.99)}
+}
+@media(max-width:520px){
+  #who-for .who-for-layout{width:min(100% - 24px,1180px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .section-shell-reveal,.section-shell-reveal.section-shell-visible{
+    opacity:1!important;transform:none!important;filter:none!important;transition:none!important
+  }
+}
+</style>
+
+<link rel="icon" type="image/png" sizes="64x64" href="../assets/images/favicon-64.png">
+<link rel="apple-touch-icon" href="../assets/images/apple-touch-icon.png">
+<link rel="canonical" href="https://wistudi.com/organisations/">
+<link rel="stylesheet" href="../assets/css/site-shell.css">
+</head>
+<body class="page-organisations">
+<header class="ws-site-header">
+  <div class="ws-container ws-nav">
+    <a class="ws-brand" href="../index.html" aria-label="Wistudi — Platform home"><img src="../assets/images/wistudi-logo.png" alt="Wistudi"></a>
+    <nav class="ws-nav-links" aria-label="Primary navigation">
+      <a class="" href="../index.html">Platform</a>
+      <a class="" href="../blocks-activities/index.html">Blocks &amp; Activities</a>
+      <a class="active" href="../organisations/index.html">Organisations</a>
+      <a class="" href="../contact/index.html">Contact</a>
+    </nav>
+    <div class="ws-nav-actions">
+      <div class="ws-lang">
+        <button class="ws-lang-toggle" type="button" aria-haspopup="true" aria-expanded="false">EN <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg></button>
+        <div class="ws-lang-menu" role="menu" aria-label="Language">
+          <button class="ws-lang-option current" type="button" role="menuitem" aria-current="true"><span>English</span><span>EN</span></button>
+          <button class="ws-lang-option" type="button" role="menuitem" disabled><span>Tiếng Việt</span><span class="ws-lang-soon">Coming soon</span></button>
+        </div>
+      </div>
+      <a class="ws-btn secondary" href="../index.html">Explore Platform</a>
+      <a class="ws-btn primary" href="https://wistudi.com">Start Publishing</a>
+      <button class="ws-menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <div class="ws-mobile-menu">
+    <div class="ws-container ws-mobile-inner">
+      <a class="" href="../index.html">Platform</a>
+      <a class="" href="../blocks-activities/index.html">Blocks &amp; Activities</a>
+      <a class="active" href="../organisations/index.html">Organisations</a>
+      <a class="" href="../contact/index.html">Contact</a>
+      <div class="ws-mobile-actions"><a class="ws-btn secondary" href="../index.html">Explore Platform</a><a class="ws-btn primary" href="https://wistudi.com">Start Publishing</a></div>
+    </div>
+  </div>
+</header>
+<main>
+<section class="hero">
+<div class="container hero-grid">
+<div class="hero-copy reveal in reveal-up">
+<span class="eyebrow">Wistudi for Organisations</span>
+<h1>Make Wistudi work around your organisation.</h1>
+<p class="lead">Use Wistudi as your learning and publishing platform, connect it with systems you already rely on, or expand it with specialist technology — without fragmenting the learner experience.</p>
+<div class="actions"><a class="btn primary" href="../contact/index.html?type=organisation">Talk to Wistudi</a><a class="btn secondary" href="../index.html">Explore the Platform</a></div>
+<div class="hero-tags"><span>Use independently</span><span>Connect when needed</span><span>Scale across teams</span><span>Built for modular expansion</span></div>
+</div>
+<div class="hero-visual reveal in reveal-up" id="heroVisual"><span class="hero-orb one"></span><span class="hero-orb two"></span><img alt="Diagram showing Wistudi at the centre of an organisation learning ecosystem, connected to existing systems, publishing, teams and scalable deployment" class="hero-diagram" src="../assets/media/60a1eac1b7bdbb5e1d33.webp"/></div>
+</div>
+</section>
+<div class="subnav-wrap ws-section-subnav" aria-label="Page sections"><nav class="subnav"><a href="#capabilities">Capabilities</a><a href="#who-for">Who it’s for</a><a href="#deployment">Deployment</a><a href="#integrations">Integrations</a><a href="#technology">Technology</a><a href="#management">Management</a><a href="#formats">Formats</a><a href="#community">Community</a><a href="#adoption">Adoption</a><a href="#partners">Partners</a><a href="#comparison">Compare</a></nav></div>
+
+<section class="section" id="capabilities">
+<div class="container">
+<div class="section-head reveal reveal-up"><span class="eyebrow">Your organisation, your environment</span><h2>Take the power of Wistudi and shape it around the way you work.</h2><p class="lead">The core platform remains connected, while your people, brand, content, permissions, reporting and integrations can be organised around your own model.</p></div>
+<div class="capability-grid">
+<article class="cap-card reveal reveal-pop"><div class="cap-icon-wrap"><img alt="Learning environment icon" class="cap-icon" src="../assets/media/527c94fa995cadebd72e.webp"/></div><div><h3>Your learning environment</h3><p>Bring publishing, learner access, assignments, assessment, social learning and reporting into one organisation-ready space.</p><span class="cap-tag">Connected workspace</span></div></article>
+<article class="cap-card reveal reveal-pop" data-delay="1"><div class="cap-icon-wrap"><img alt="Brand identity icon" class="cap-icon" src="../assets/media/f6715177b5cf404789ea.webp"/></div><div><h3>Your brand</h3><p>Create a recognisable learning experience around your organisation, programmes and audiences.</p><span class="cap-tag">Organisation identity</span></div></article>
+<article class="cap-card reveal reveal-pop" data-delay="2"><div class="cap-icon-wrap"><img alt="Team management icon" class="cap-icon" src="../assets/media/6d72d0b8287d185a054d.webp"/></div><div><h3>Your people</h3><p>Manage administrators, publishers, educators, trainers, learners, groups and cohorts.</p><span class="cap-tag">People &amp; groups</span></div></article>
+<article class="cap-card reveal reveal-pop" data-delay="3"><div class="cap-icon-wrap"><img alt="Content library icon" class="cap-icon" src="../assets/media/614ff380f2a285be1e76.webp"/></div><div><h3>Your content</h3><p>Build private lessons, courses, curricula, training and reusable content libraries.</p><span class="cap-tag">Private libraries</span></div></article>
+<article class="cap-card reveal reveal-pop"><div class="cap-icon-wrap"><img alt="Reporting and analytics icon" class="cap-icon" src="../assets/media/b5dcfd1e6e03a29bc0e1.webp"/></div><div><h3>Your reporting</h3><p>See progress, participation, assessment and outcomes at learner, group and organisation level.</p><span class="cap-tag">Results &amp; visibility</span></div></article>
+<article class="cap-card reveal reveal-pop" data-delay="1"><div class="cap-icon-wrap"><img alt="Permissions and management icon" class="cap-icon" src="../assets/media/a79566a161805d6c82cf.webp"/></div><div><h3>Your permissions</h3><p>Control who can create, publish, access and manage learning across your environment.</p><span class="cap-tag">Roles &amp; control</span></div></article>
+<article class="cap-card reveal reveal-pop" data-delay="2"><div class="cap-icon-wrap"><img alt="Integration hub icon" class="cap-icon" src="../assets/media/b93000fa6d813645dbe6.webp"/></div><div><h3>Your integrations</h3><p>Connect Wistudi to the wider LMS, identity, portal or technology ecosystem around you.</p><span class="cap-tag">Modular connections</span></div></article>
+<article class="cap-card reveal reveal-pop" data-delay="3"><div class="cap-icon-wrap"><img alt="Organisation scale and analytics icon" class="cap-icon" src="../assets/media/1f11aeea368c21e02917.webp"/></div><div><h3>Your scale</h3><p>Expand across teams, clients, campuses, departments, communities or networks.</p><span class="cap-tag">Grow when ready</span></div></article>
+</div>
+</div>
+</section>
+<section class="section soft" id="who-for">
+<div class="container who-for-layout">
+<div class="reveal reveal-up"><span class="eyebrow">Different organisations. One flexible platform.</span><h2 style="margin-top:12px">Built for education, training, publishing and technology.</h2><p class="lead" style="margin-top:18px">The operating model can change without forcing the learning experience to become a different product.</p>
+<div class="sector-grid">
+<div class="sector-card"><div class="mini"></div><h3>Schools &amp; K–12</h3><p>Interactive lessons, classroom delivery, worksheets and learner groups.</p></div>
+<div class="sector-card"><div class="mini"></div><h3>Universities &amp; Colleges</h3><p>Course content, learning experiences, cohorts and interoperability pathways.</p></div>
+<div class="sector-card"><div class="mini"></div><h3>Training Companies</h3><p>Client programmes, workshops, blended learning and reusable training libraries.</p></div>
+<div class="sector-card"><div class="mini"></div><h3>Corporate L&amp;D</h3><p>Internal learning, onboarding, development programmes and results visibility.</p></div>
+<div class="sector-card"><div class="mini"></div><h3>Publishers &amp; Curriculum Providers</h3><p>Package and distribute structured interactive and printable learning resources.</p></div>
+<div class="sector-card"><div class="mini"></div><h3>EdTech &amp; Technology Companies</h3><p>Connect specialist capabilities into modular Wistudi learning experiences.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section class="section" id="deployment">
+<div class="container">
+<div class="section-head center reveal reveal-up"><span class="eyebrow">Flexible deployment</span><h2>Use Wistudi in the way that makes sense for your organisation.</h2><p class="lead">Start with the platform, add connections around it, or make Wistudi one part of a wider ecosystem.</p></div>
+<div class="deployment-grid">
+<article class="deploy-card reveal reveal-pop"><div class="deploy-number">01 <span>●</span></div><h3>Wistudi as your platform</h3><p>Run publishing, learning, management, assessment, reporting and social learning directly inside Wistudi.</p></article>
+<article class="deploy-card reveal reveal-pop" data-delay="1"><div class="deploy-number">02 <span>↔</span></div><h3>Wistudi alongside your systems</h3><p>Connect Wistudi into existing LMS, identity, portal and learning workflows without replacing everything.</p></article>
+<article class="deploy-card reveal reveal-pop" data-delay="2"><div class="deploy-number">03 <span>＋</span></div><h3>Wistudi inside a wider ecosystem</h3><p>Use Wistudi as one part of a broader education or technology environment, with external capabilities joining the experience.</p></article>
+</div>
+</div>
+</section>
+<section class="section architecture" id="integrations">
+<div class="container arch-shell">
+<div class="reveal reveal-up"><span class="eyebrow">Modular architecture</span><h2 style="margin-top:12px">Built to connect, not lock you in.</h2><p class="lead" style="margin-top:18px">Wistudi is designed around modular learning experiences, so its own capabilities and external technologies can work together more naturally.</p>
+<div class="arch-points">
+<div class="arch-point"><i>1</i><div><strong>Wistudi stays powerful on its own</strong><p>Publishing, learning, assessment, reporting, community and printable workflows remain native.</p></div></div>
+<div class="arch-point"><i>2</i><div><strong>Connect the systems you already use</strong><p>LMS, identity, portals and organisation workflows can sit around the core experience.</p></div></div>
+<div class="arch-point"><i>3</i><div><strong>Add specialist technology when it adds value</strong><p>Partner blocks and external tools can expand the learning stack without fragmenting the learner journey.</p></div></div>
+</div>
+</div>
+<div class="arch-visual reveal reveal-up" data-delay="1"><img alt="Modular integration ecosystem diagram" src="../assets/media/ee54cad19a53e0c52df4.webp"/></div>
+</div>
+</section>
+<section class="section" id="technology">
+<div class="container">
+<div class="section-head reveal reveal-up"><span class="eyebrow">Learning technology ecosystem</span><h2>Designed to work with the technology around you.</h2><p class="lead">Wistudi is being designed to connect with established learning environments and interoperability standards. Integration ecosystem logos are shown separately from organisations and communities we work with.</p></div>
+<div class="logo-bands">
+<div class="logo-panel reveal reveal-pop"><h3>Integration ecosystems &amp; standards</h3><p>Examples of systems and standards Wistudi is designed to connect with or support through interoperability pathways.</p><div class="logo-row"><div class="logo-box"><img alt="Moodle" src="../assets/media/8eb2a0153a721ad1568d.webp"/></div><div class="logo-box"><img alt="Canvas" src="../assets/media/51e8fec0885c099fae21.webp"/></div><div class="logo-box"><img alt="Learning Tools Interoperability" src="../assets/media/1b5e45b5a0ab5eec4e70.webp"/></div></div><div class="logo-note">Logos indicate intended compatibility / interoperability context, not commercial partnership.</div></div>
+<div class="logo-panel reveal reveal-pop" data-delay="1"><h3>Education &amp; community relationships</h3><p>Organisations and communities Wistudi works with can be shown separately from technical integration ecosystems.</p><div class="logo-row"><div class="logo-box"><img alt="EA EdTech Agency" src="../assets/media/d683b3ff121f8c875639.webp"/></div><div class="logo-box"><img alt="Happy Teachers Academy" src="../assets/media/315a1404e27c9be52f55.webp"/></div><div class="logo-box"><img alt="Vietnam STEM" src="../assets/media/fa3dc0ef53bd113764ff.webp"/></div></div><div class="logo-note">Partnership and relationship presentation can evolve as programmes and collaborations develop.</div></div>
+</div>
+</div>
+</section>
+<section class="section soft" id="management">
+<div class="container">
+<div class="section-head reveal reveal-up"><span class="eyebrow">Make Wistudi your own</span><h2>Your people, content, permissions and learning structure.</h2><p class="lead">Organisation control is not just a layer around learning. It is what makes the learning environment usable across real teams, cohorts and programmes.</p></div>
+<div class="env-layout">
+<div class="env-list reveal reveal-up">
+<div class="env-item"><strong>Branding</strong><p>Shape the organisation experience around your identity.</p></div><div class="env-item"><strong>Teams</strong><p>Admins, publishers, educators, trainers and learners.</p></div><div class="env-item"><strong>Permissions</strong><p>Control who can create, publish, access and manage.</p></div><div class="env-item"><strong>Private content</strong><p>Keep organisation learning private where required.</p></div><div class="env-item"><strong>Content libraries</strong><p>Build reusable resources, curricula and training libraries.</p></div><div class="env-item"><strong>Learner groups</strong><p>Organise classes, departments, cohorts or clients.</p></div>
+</div>
+<div class="control-card reveal reveal-up" data-delay="1"><h3>One organisation layer. Multiple learning experiences.</h3><p>Keep the operational structure consistent even as teams use different formats and programmes.</p><div class="control-rows"><div class="control-row"><span>People &amp; groups</span><span>Manage</span></div><div class="control-row"><span>Content &amp; libraries</span><span>Organise</span></div><div class="control-row"><span>Publishing &amp; permissions</span><span>Control</span></div><div class="control-row"><span>Learning &amp; results</span><span>Track</span></div><div class="control-row"><span>Integrations &amp; access</span><span>Connect</span></div></div></div>
+</div>
+</div>
+</section>
+<section class="section" id="formats">
+<div class="container split">
+<div class="reveal reveal-left"><span class="eyebrow">One organisation. Multiple learning formats.</span><h2 style="margin-top:12px">Support different learning needs without building separate systems.</h2><p class="lead" style="margin-top:18px">Interactive, video, printable, live, self-paced and blended learning can sit within the same publishing and management environment.</p>
+<div class="format-strip"><div class="format-box"><strong>Interactive</strong><p>Flows, activities and assessment.</p></div><div class="format-box"><strong>XP Video</strong><p>Video becomes active learning.</p></div><div class="format-box"><strong>Printable</strong><p>Worksheets, handouts and resource packs.</p></div><div class="format-box"><strong>Structured</strong><p>Courses, curricula and training programmes.</p></div></div>
+</div>
+<div class="support-visual reveal format-ecosystem-visual reveal-right" data-delay="1"><img alt="Wistudi one-platform diagram connecting Interactive, XP Video, Printable and Structured learning formats" class="format-ecosystem-image" src="../assets/media/eaee1886ad91ea24b5e1.png"/></div>
+</div>
+</section>
+
+<section class="section community" id="community">
+<div class="container">
+<div class="section-head center reveal reveal-up"><span class="eyebrow">Wistudi in the community</span><h2>Built with real learning conversations around it.</h2><p class="lead">Events, demos and conversations with educators, organisations and collaborators help keep Wistudi grounded in how learning is actually delivered.</p></div>
+<div class="gallery-wrap reveal reveal-up">
+<div class="gallery-stage" id="galleryStage" style="--gallery-bg:url('../assets/media/1aa7793386e46dff9f8b.webp')">
+<img alt="Wistudi event gallery image" class="gallery-main" id="galleryMain" src="../assets/media/1aa7793386e46dff9f8b.webp"/>
+<button aria-label="Open image larger" class="gallery-open" id="galleryOpen">⌕</button>
+<div class="gallery-nav"><button aria-label="Previous image" id="galleryPrev">‹</button><button aria-label="Next image" id="galleryNext">›</button></div>
+<div class="gallery-caption"><div><strong id="galleryTitle">At the Wistudi booth</strong><span id="galleryDesc">Sharing the platform with educators and learning professionals.</span></div></div>
+</div><div class="gallery-mobile-caption" id="galleryMobileCaption"><strong id="galleryMobileTitle">At the Wistudi booth</strong><span id="galleryMobileDesc">Sharing the platform with educators and learning professionals.</span></div>
+<div class="thumbs" id="galleryThumbs"></div>
+</div>
+</div>
+</section>
+<section class="section soft" id="adoption">
+<div class="container">
+<div class="section-head center reveal reveal-up"><span class="eyebrow">Start where it makes sense</span><h2>Adopt Wistudi without rebuilding everything at once.</h2><p class="lead">A phased route lets organisations prove the use case first, then expand control, content and integrations as the need becomes clearer.</p></div>
+<div class="steps"><div class="step reveal reveal-pop"><span class="step-num">01</span><b>Pilot</b><p>Start with a team, course, department or focused use case.</p></div><div class="step reveal reveal-pop" data-delay="1"><span class="step-num">02</span><b>Expand</b><p>Add publishers, learners, content libraries and programmes.</p></div><div class="step reveal reveal-pop" data-delay="2"><span class="step-num">03</span><b>Connect</b><p>Integrate Wistudi into wider learning infrastructure where needed.</p></div><div class="step reveal reveal-pop" data-delay="3"><span class="step-num">04</span><b>Scale</b><p>Deploy across larger organisations, campuses, clients or networks.</p></div></div>
+</div>
+</section>
+<section class="section" id="partners">
+<div class="container">
+<div class="section-head reveal reveal-up"><span class="eyebrow">Partners &amp; ecosystem</span><h2>Work with Wistudi in more than one way.</h2><p class="lead">Using Wistudi as an organisation is different from integrating technology or collaborating as a partner. The page keeps those routes distinct.</p></div>
+<div class="partner-grid"><div class="partner-card reveal reveal-pop"><h3>Organisations, educators &amp; communities</h3><p>Use Wistudi directly for teaching, training, publishing, programmes or community learning.</p><div class="partner-types"><div class="partner-type"><b>Education organisations</b>Schools, universities and learning communities.</div><div class="partner-type"><b>Training &amp; L&amp;D</b>Internal or client-facing programmes.</div><div class="partner-type"><b>Publishers</b>Curricula, resources and structured learning content.</div><div class="partner-type"><b>Community partners</b>Events, workshops and collaborative programmes.</div></div></div><div class="partner-card reveal reveal-pop" data-delay="1"><h3>Technology &amp; distribution partners</h3><p>Connect specialist capabilities, distribution reach or technical infrastructure around Wistudi’s modular architecture.</p><div class="partner-types"><div class="partner-type"><b>Technology partners</b>Specialist tools and partner blocks.</div><div class="partner-type"><b>Integration partners</b>LMS, identity and connected workflows.</div><div class="partner-type"><b>Content partners</b>Publish or distribute learning through Wistudi.</div><div class="partner-type"><b>Distribution partners</b>Bring Wistudi into new institutions, sectors or markets.</div></div></div></div>
+</div>
+</section>
+<section class="section soft" id="comparison">
+<div class="container">
+<div class="section-head center reveal reveal-up"><span class="eyebrow">Why Wistudi for organisations</span><h2>One connected environment instead of a stitched-together workflow.</h2><p class="lead">The point is not that every organisation should replace every system. It is that learning, publishing and management should not become fragmented just because several tools are involved.</p></div>
+<div class="compare reveal reveal-up"><div class="compare-col"><div class="compare-head">Common multi-tool setup</div><div class="compare-row"><i>–</i>Separate authoring and publishing tools</div><div class="compare-row"><i>–</i>Learning management handled elsewhere</div><div class="compare-row"><i>–</i>Printable workflows rebuilt separately</div><div class="compare-row"><i>–</i>Video learning sits in another workflow</div><div class="compare-row"><i>–</i>Community and discovery are disconnected</div><div class="compare-row"><i>–</i>Reporting is spread across systems</div></div><div class="compare-col wistudi"><span class="compare-badge">Wistudi connected approach</span><div class="compare-head">Publishing + learning + management around one core</div><div class="compare-row"><i>✓</i>Create and publish in one environment</div><div class="compare-row"><i>✓</i>Learning management built around the content</div><div class="compare-row"><i>✓</i>Interactive + printable remain connected</div><div class="compare-row"><i>✓</i>XP Video and Flows belong to the same ecosystem</div><div class="compare-row"><i>✓</i>Social learning and discovery can live alongside formal learning</div><div class="compare-row"><i>✓</i>Use independently or integrate when needed</div></div></div>
+</div>
+</section>
+<section class="cta-wrap"><div class="container"><div class="cta reveal reveal-up"><span class="eyebrow" style="color:#cfc1ff">Wistudi for your organisation</span><h2>Let’s build the right Wistudi environment for your organisation.</h2><p>Use Wistudi independently, shape it around your people and content, connect it to existing systems, or expand it through specialist partner technology.</p><div class="actions"><a class="btn primary" href="../contact/index.html?type=organisation">Talk to Wistudi</a><a class="btn secondary" href="../index.html">Explore the Platform</a></div><div style="margin-top:18px"><a class="text-link" href="../contact/index.html?type=partnership" style="color:#cfc1ff">Technology or distribution partner? Discuss a partnership →</a></div></div></div></section>
+</main>
+<footer class="ws-site-footer">
+  <div class="ws-container ws-footer-row">
+    <a class="ws-brand" href="../index.html" aria-label="Wistudi — Platform home"><img class="ws-footer-wordmark" src="../assets/images/wistudi-logo.png" alt="Wistudi"></a>
+    <div class="ws-footer-links"><a href="../index.html">Platform</a><a href="../blocks-activities/index.html">Blocks &amp; Activities</a><a href="../organisations/index.html">Organisations</a><a href="../contact/index.html">Contact</a></div>
+    <div class="ws-footer-contact"><a href="mailto:support@wistudi.com">support@wistudi.com</a><a href="mailto:partnerships@wistudi.com">partnerships@wistudi.com</a><a href="tel:+84879876624">+84 879 876 624</a><span>Operating out of Vietnam</span><span>85 Great Portland Street, First Floor, London, England</span></div>
+    <div class="ws-footer-copy">© 2026 Wistudi</div>
+  </div>
+</footer>
+<div aria-hidden="true" class="lightbox" id="lightbox"><div class="lightbox-inner"><button aria-label="Close image" class="lightbox-close" id="lightboxClose">×</button><img alt="Expanded Wistudi event image" id="lightboxImg"/></div></div>
+<script>
+// Unified Wistudi header navigation is handled by assets/js/site-shell.js; legacy header handlers removed.
+const reveals=document.querySelectorAll('.reveal:not(.in)');if('IntersectionObserver'in window){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.07,rootMargin:'0px 0px -6% 0px'});reveals.forEach(el=>io.observe(el))}else reveals.forEach(el=>el.classList.add('in'));
+
+// smooth section-by-section reveal on desktop and mobile
+const sectionShells=[...document.querySelectorAll('main > section.section > .container, main > section.cta-wrap > .container')];
+const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(!reduceMotion && 'IntersectionObserver' in window){
+  const sectionIO=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('section-shell-visible');
+        sectionIO.unobserve(entry.target);
+      }
+    });
+  },{threshold:.08,rootMargin:'0px 0px -7% 0px'});
+  sectionShells.forEach(shell=>{
+    const r=shell.getBoundingClientRect();
+    shell.classList.add('section-shell-reveal');
+    if(r.top < window.innerHeight*.9 && r.bottom > 0){
+      requestAnimationFrame(()=>shell.classList.add('section-shell-visible'));
+    }else{
+      sectionIO.observe(shell);
+    }
+  });
+}else{
+  sectionShells.forEach(shell=>shell.classList.add('section-shell-reveal','section-shell-visible'));
+}
+
+// subtle hero parallax on pointer-capable devices
+const heroVisual=document.getElementById('heroVisual');if(matchMedia('(pointer:fine)').matches&&heroVisual){heroVisual.addEventListener('pointermove',e=>{const r=heroVisual.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;heroVisual.style.transform=`translate(${x*5}px,${y*5}px)`});heroVisual.addEventListener('pointerleave',()=>heroVisual.style.transform='')}
+// gallery
+const gallery=[{src:'../assets/media/1aa7793386e46dff9f8b.webp',title:'At the Wistudi booth',desc:'Sharing the platform with educators and learning professionals.'},{src:'../assets/media/9f43a1fd76d7f341862b.webp',title:'Conversations that shape the platform',desc:'Listening to questions, use cases and ideas from the learning community.'},{src:'../assets/media/9c44bc4af0576a845564.webp',title:'Hands-on product demos',desc:'Showing how interactive learning experiences work in practice.'},{src:'../assets/media/d7fb4231567b50cc3e6d.webp',title:'Exploring Wistudi together',desc:'Practical demonstrations with educators and potential collaborators.'},{src:'../assets/media/611c80569a6eed48887a.webp',title:'Learning in the real world',desc:'Turning product conversations into feedback, relationships and new use cases.'},{src:'../assets/media/89ed37c1ef7324b486a5.webp',title:'The Wistudi team',desc:'Building, demonstrating and discussing the platform with the wider community.'},{src:'../assets/media/e527c244012a7d3c1f98.webp',title:'Community connections',desc:'Meeting educators, publishers, trainers and organisations around learning innovation.'},{src:'../assets/media/25d9ea22da2a882a74a6.webp',title:'Live event engagement',desc:'Bringing Wistudi into direct conversations with the people it is built for.'},{src:'../assets/media/28a2a2b0bd04ca0ad272.webp',title:'Product conversations in context',desc:'Discussing teaching, training and publishing workflows face to face.'},{src:'../assets/media/18a31811b1861f8f89f3.webp',title:'From questions to practical use cases',desc:'Walking through how Wistudi can fit real teaching and learning environments.'}];let gi=0,gTimer=null,userTimer=null;const stage=document.getElementById('galleryStage'),main=document.getElementById('galleryMain'),title=document.getElementById('galleryTitle'),desc=document.getElementById('galleryDesc'),thumbs=document.getElementById('galleryThumbs');
+function drawThumbs(){
+  if(thumbs.children.length) return;
+  gallery.forEach((g,i)=>{
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='thumb';
+    b.setAttribute('aria-label','Show gallery image '+(i+1));
+    b.setAttribute('aria-selected','false');
+    b.innerHTML=`<img src="${g.src}" alt="">`;
+    b.addEventListener('click',()=>setGallery(i,true));
+    thumbs.appendChild(b);
+  });
+}
+function updateThumbs(manual=false){
+  Array.from(thumbs.children).forEach((thumb,i)=>{
+    const active=i===gi;
+    thumb.classList.toggle('active',active);
+    thumb.setAttribute('aria-selected',active?'true':'false');
+  });
+  const active=thumbs.children[gi];
+  if(!active) return;
+
+  // Keep the filmstrip centred horizontally WITHOUT using scrollIntoView.
+  // scrollIntoView can move the entire document vertically, which was causing
+  // the page to jump back to the gallery every time autoplay changed image.
+  const targetLeft=active.offsetLeft-(thumbs.clientWidth-active.offsetWidth)/2;
+  const maxLeft=Math.max(0,thumbs.scrollWidth-thumbs.clientWidth);
+  const left=Math.max(0,Math.min(targetLeft,maxLeft));
+  thumbs.scrollTo({
+    left,
+    behavior: manual && !window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'smooth' : 'auto'
+  });
+}
+function setGallery(i,manual=false){
+  gi=(i+gallery.length)%gallery.length;
+  main.style.opacity='.2';
+  setTimeout(()=>{
+    const g=gallery[gi];
+    main.src=g.src;
+    title.textContent=g.title;
+    desc.textContent=g.desc;
+    stage.style.setProperty('--gallery-bg',`url("${g.src}")`);
+    main.style.opacity='1';
+    updateThumbs(manual);
+  },110);
+  if(manual)takeControl();
+}
+function next(auto=false){setGallery(gi+1,!auto)}function prev(){setGallery(gi-1,true)}function startAuto(){clearInterval(gTimer);gTimer=setInterval(()=>next(true),5200)}function stopAuto(){clearInterval(gTimer);gTimer=null}function takeControl(){stopAuto();clearTimeout(userTimer);userTimer=setTimeout(startAuto,9000)}
+document.getElementById('galleryNext').addEventListener('click',()=>next(false));document.getElementById('galleryPrev').addEventListener('click',prev);stage.addEventListener('mouseenter',stopAuto);stage.addEventListener('mouseleave',()=>{clearTimeout(userTimer);startAuto()});stage.addEventListener('focusin',stopAuto);stage.addEventListener('focusout',startAuto);drawThumbs();updateThumbs(false);startAuto();
+const lb=document.getElementById('lightbox'),lbImg=document.getElementById('lightboxImg');function openLb(){lbImg.src=gallery[gi].src;lb.classList.add('open');lb.setAttribute('aria-hidden','false');stopAuto();document.body.style.overflow='hidden'}function closeLb(){lb.classList.remove('open');lb.setAttribute('aria-hidden','true');document.body.style.overflow='';startAuto()}document.getElementById('galleryOpen').addEventListener('click',openLb);main.addEventListener('click',openLb);main.style.cursor='zoom-in';document.getElementById('lightboxClose').addEventListener('click',closeLb);lb.addEventListener('click',e=>{if(e.target===lb)closeLb()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&lb.classList.contains('open'))closeLb();if(e.key==='ArrowRight'&&lb.classList.contains('open')){gi=(gi+1)%gallery.length;lbImg.src=gallery[gi].src}if(e.key==='ArrowLeft'&&lb.classList.contains('open')){gi=(gi-1+gallery.length)%gallery.length;lbImg.src=gallery[gi].src}});
+</script>
+<script id="wistudi-mobile-gallery-caption-sync">
+(function(){
+  const dTitle=document.getElementById('galleryTitle');
+  const dDesc=document.getElementById('galleryDesc');
+  const mTitle=document.getElementById('galleryMobileTitle');
+  const mDesc=document.getElementById('galleryMobileDesc');
+  if(!dTitle||!dDesc||!mTitle||!mDesc) return;
+  const syncCaption=()=>{mTitle.textContent=dTitle.textContent;mDesc.textContent=dDesc.textContent;};
+  syncCaption();
+  const captionObserver=new MutationObserver(syncCaption);
+  captionObserver.observe(dTitle,{childList:true,characterData:true,subtree:true});
+  captionObserver.observe(dDesc,{childList:true,characterData:true,subtree:true});
+})();
+</script><script src="../assets/js/site-shell.js"></script>
+</body></html>

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wistudi Blocks & Activities</title>
+<meta name="description" content="Explore Wistudi's modular blocks and activities for Flows, XP Video, live teaching and printable-connected learning.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--bg-soft:#faf9ff;--bg-purple:#f5f1ff;--ink:#181523;--muted:#6d6878;--line:#e9e6ef;--purple:#7c3aed;--purple-deep:#5b21b6;--purple-soft:#efe8ff;--orange:#f97316;--orange-soft:#ffedd5;--blue:#3157f5;--dark:#1a1330;--radius:28px;--shadow-sm:0 10px 30px rgba(34,24,64,.08);--shadow-md:0 20px 60px rgba(34,24,64,.12);--shadow-lg:0 32px 90px rgba(17,11,34,.18);--max:1180px}
+*{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:Inter,Arial,sans-serif;color:var(--ink);background:#fff;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden} img,video{display:block;max-width:100%} a{color:inherit;text-decoration:none} h1,h2,h3{margin:0;color:var(--ink);font-family:'Be Vietnam Pro',Inter,sans-serif;letter-spacing:-.035em} h1{font-size:clamp(3rem,6vw,5rem);line-height:1.02;font-weight:800} h2{font-size:clamp(2rem,4vw,3.35rem);line-height:1.08;font-weight:800} h3{font-size:1.08rem;line-height:1.24;font-weight:700} p{margin:0;color:var(--muted)}
+.container{width:min(calc(100% - 40px),var(--max));margin-inline:auto} .section{padding:104px 0} .lead{font-size:clamp(1rem,1.7vw,1.18rem);line-height:1.75;max-width:760px} .eyebrow{display:inline-flex;align-items:center;gap:9px;color:var(--purple);font-size:.74rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase;margin-bottom:16px} .eyebrow:before{content:'';width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,#ffaf5a,var(--purple))} .center{text-align:center} .center .lead{margin-inline:auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 20px;border-radius:14px;font-size:.92rem;font-weight:700;transition:.2s ease;border:1px solid transparent} .btn.primary{background:linear-gradient(135deg,var(--purple),#8b5cf6);color:#fff;box-shadow:0 14px 30px rgba(124,58,237,.25)} .btn.primary:hover{transform:translateY(-2px)} .btn.secondary{background:#fff;color:var(--ink);border-color:#e2dceb} .btn.secondary:hover{transform:translateY(-2px)} .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(233,230,239,.9)} .nav{height:72px;display:flex;align-items:center;justify-content:space-between;gap:24px} .brand img{width:132px;height:auto} .nav-links{display:flex;gap:28px;align-items:center;font-size:.82rem;font-weight:600;color:#6f6879} .nav-links a{position:relative;padding:25px 0} .nav-links a:hover,.nav-links a.active{color:var(--ink)} .nav-links a.active:after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--purple))} .nav-actions{display:flex;gap:10px;align-items:center} .nav-actions .btn{min-height:42px;padding:0 15px;font-size:.78rem}
+.subnav-wrap{position:sticky;top:72px;z-index:80;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)} .subnav{display:flex;align-items:center;justify-content:center;gap:28px;min-height:52px;overflow:auto;scrollbar-width:none} .subnav::-webkit-scrollbar{display:none} .subnav a{white-space:nowrap;color:#756e80;font-size:.72rem;font-weight:700} .subnav a:hover{color:var(--purple)}
+.hero{position:relative;overflow:hidden;color:#fff;background-image:url('../assets/media/10dd7a92b026aa52af3d.webp');background-size:cover;background-position:center;padding:86px 0} .hero:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,12,45,.14) 0%,rgba(20,12,45,.04) 40%,rgba(20,12,45,0) 70%);z-index:0} .hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:.9fr 1.1fr;gap:54px;align-items:center} .hero h1,.hero p{color:#fff} .hero .lead{max-width:620px;color:rgba(255,255,255,.86)} .hero .eyebrow{color:#fff} .hero .eyebrow:before{background:#ffbd69} .hero .btn.secondary{background:rgba(255,255,255,.94);border-color:rgba(255,255,255,.8)} .hero-proof{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px} .hero-proof span{font-size:.72rem;font-weight:700;color:rgba(255,255,255,.85);padding:7px 10px;border:1px solid rgba(255,255,255,.28);border-radius:999px;background:rgba(255,255,255,.08);backdrop-filter:blur(8px)} .hero-media-wrap{display:flex;justify-content:center} .hero-video-shell{width:min(100%,720px);padding:14px;border-radius:34px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);box-shadow:0 28px 80px rgba(21,13,47,.28);backdrop-filter:blur(12px)} .hero-video{width:100%;aspect-ratio:16/10;border-radius:26px;overflow:hidden;background:#fff;box-shadow:0 24px 70px rgba(17,10,39,.25)} .hero-video video{width:100%;height:100%;object-fit:cover}
+.arch{background:linear-gradient(180deg,#fff,#fbf9ff)} .arch-head{max-width:820px;margin:0 auto 44px;text-align:center} .arch-grid{display:grid;grid-template-columns:.95fr 1.05fr;gap:60px;align-items:center} .media-card{position:relative;border-radius:30px;overflow:hidden;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow-md)} .media-card video{width:100%;height:100%;object-fit:cover} .media-card.stack-video{aspect-ratio:1.05/1} .media-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:76px;height:76px;border:none;border-radius:50%;background:rgba(17,11,34,.56);box-shadow:0 12px 34px rgba(0,0,0,.18);display:grid;place-items:center;pointer-events:none} .media-play:before{content:'';margin-left:5px;border-top:14px solid transparent;border-bottom:14px solid transparent;border-left:22px solid #fff} .steps{display:grid;gap:18px;margin-top:28px} .step{display:grid;grid-template-columns:38px 1fr;gap:14px;align-items:start} .step b{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--purple-soft);color:var(--purple);font-size:.72rem} .step strong{display:block;font-family:'Be Vietnam Pro';font-size:1rem;line-height:1.25} .step p{font-size:.88rem;margin-top:4px}
+.library{position:relative;overflow:hidden;color:#fff;background:linear-gradient(135deg,#1a1231 0%,#24134a 45%,#152962 100%)} .library:after{content:'';position:absolute;width:520px;height:520px;right:-260px;top:-200px;border-radius:50%;background:radial-gradient(circle,rgba(49,87,245,.26),transparent 66%)} .library *{position:relative;z-index:1} .library .eyebrow,.library h2,.library p{color:#fff} .library .lead{color:rgba(255,255,255,.74)} .library-head{display:grid;grid-template-columns:1.35fr .65fr;gap:44px;align-items:end;margin-bottom:18px} .library-note{font-size:.82rem;line-height:1.7;color:rgba(255,255,255,.58)!important}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 24px} .filter-btn{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:rgba(255,255,255,.82);border-radius:999px;padding:8px 12px;font-size:.71rem;font-weight:700;cursor:pointer} .filter-btn.active,.filter-btn:hover{background:#fff;color:#281c44}
+.carousel-shell{position:relative;height:520px;overflow:hidden} .carousel-track{position:absolute;left:0;top:0;display:flex;gap:24px;align-items:stretch;will-change:transform;transition:transform .45s cubic-bezier(.22,.61,.36,1)} .carousel-card{width:340px;height:450px;border-radius:24px;overflow:hidden;background:#fff;color:var(--ink);border:2px solid rgba(255,255,255,.08);box-shadow:0 18px 40px rgba(0,0,0,.16);transition:transform .35s ease,opacity .35s ease,border-color .35s ease,box-shadow .35s ease;cursor:pointer;opacity:.86;transform:scale(.94)} .carousel-card.active{border-color:var(--orange);box-shadow:0 24px 56px rgba(0,0,0,.2);opacity:1;transform:scale(1)} .carousel-card .vidwrap{aspect-ratio:16/9;background:#ece7f5;overflow:hidden} .carousel-card video{width:100%;height:100%;object-fit:cover;background:#ece7f5} .carousel-card .card-body{padding:16px 16px 14px} .carousel-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px} .chip{font-size:.6rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:6px 8px;border-radius:999px;background:#f4f1fa;color:#6f6479} .playchip{background:#55497a;color:#fff} .carousel-card h3{font-size:1.15rem} .carousel-card p{font-size:.84rem;line-height:1.56;margin-top:8px} .carousel-controls{display:flex;justify-content:space-between;align-items:center;margin-top:8px} .carousel-status{font-size:.72rem;color:rgba(255,255,255,.64)} .arrow-group{display:flex;gap:8px} .car-btn{width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:1rem} .car-btn:hover{background:rgba(255,255,255,.16)}
+.demo-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:60px;align-items:center} .demo.alt{background:var(--bg-purple)} .demo.reverse .demo-copy{order:2} .demo.reverse .demo-media{order:1} .video-frame{position:relative;aspect-ratio:16/9;border-radius:28px;overflow:hidden;background:#f4f0f8;border:1px solid #e6dfec;box-shadow:var(--shadow-md)} .video-frame video{width:100%;height:100%;object-fit:cover} .video-badge{position:absolute;right:14px;bottom:14px;padding:10px 13px;border-radius:12px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow-sm);font-size:.72rem;font-weight:700;color:#615a6c} .check-list{display:grid;gap:12px;margin-top:28px} .check-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid var(--line);font-size:.98rem;font-weight:600;color:#5e5769} .checkmark{flex:0 0 22px;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#ffb46e,var(--orange));display:grid;place-items:center;box-shadow:0 6px 16px rgba(249,115,22,.22)} .checkmark:before{content:'✓';color:#fff;font-size:.82rem;font-weight:800}
+.screen{background:linear-gradient(135deg,#f6fbff 0%,#f8f5ff 100%)} .screen-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:44px;align-items:center} .path-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:24px} .pill{padding:8px 11px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:.7rem;font-weight:700} .path-arrow{font-weight:800;color:var(--purple)} .callout{margin-top:18px;padding:18px 18px;border-left:4px solid var(--orange);background:rgba(255,255,255,.72);border-radius:0 16px 16px 0} .callout strong{font-family:'Be Vietnam Pro';font-size:.96rem} .callout p{font-size:.84rem;margin-top:4px} .sheet-visual{display:flex;justify-content:center;align-items:center;min-height:520px} .sheet-visual img{width:min(100%,620px);filter:drop-shadow(0 28px 46px rgba(31,22,49,.18));transform:rotate(1deg)}
+.examples{background:#fff} .example-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:42px} .example-card{padding:24px;border:1px solid var(--line);border-radius:24px;background:#fff;box-shadow:0 12px 28px rgba(34,24,64,.05);transition:.25s ease} .example-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-sm)} .example-card h3{font-size:1.06rem;margin-bottom:8px} .example-card p{font-size:.9rem;line-height:1.65;min-height:56px} .example-icons{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px} .example-icons img{width:58px;height:58px;object-fit:contain;filter:drop-shadow(0 8px 18px rgba(19,13,36,.08))} .worksheet-word{font-size:.84rem;font-weight:800;color:var(--purple);margin-left:2px}
+.whiteboard{position:relative;overflow:hidden;color:#fff;background:linear-gradient(125deg,#122945 0%,#163764 48%,#311878 100%)} .whiteboard:after{content:'';position:absolute;width:520px;height:520px;right:-260px;bottom:-260px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.35),transparent 64%)} .whiteboard *{position:relative;z-index:1} .whiteboard .eyebrow,.whiteboard h2,.whiteboard p{color:#fff} .whiteboard .lead{color:rgba(255,255,255,.74)} .whiteboard-head{display:grid;grid-template-columns:1fr 1fr;gap:54px;align-items:end;margin-bottom:30px} .mode-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:24px} .mode{min-height:84px;padding:12px 10px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);text-align:center} .mode strong{display:block;color:#fff;font-family:'Be Vietnam Pro';font-size:.73rem} .mode span{display:block;color:rgba(255,255,255,.58);font-size:.62rem;margin-top:4px} .rollout{display:inline-flex;margin-top:16px;padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);font-size:.68rem;font-weight:700;color:#d8e6ff}
+.integrations{background:linear-gradient(180deg,#fff,#faf9ff)} .int-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:stretch;margin-top:40px} .int-card{padding:28px;border:1px solid var(--line);border-radius:24px;background:#fff;box-shadow:var(--shadow-sm)} .int-card.native{border-top:4px solid var(--purple)} .int-card.expand{border-top:4px solid var(--orange)} .int-card h3{font-size:1.14rem} .int-card p{font-size:.86rem;margin-top:8px} .int-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px} .int-tags span{font-size:.65rem;padding:6px 8px;border-radius:999px;background:#f5f2f8;color:#706679;font-weight:700} .int-plus{display:grid;place-items:center;width:48px;height:48px;align-self:center;border-radius:50%;background:var(--purple-soft);color:var(--purple);font-size:1.3rem;font-weight:800}
+.cta{padding:90px 0} .cta-box{padding:58px 34px;border-radius:32px;text-align:center;color:#fff;background:linear-gradient(115deg,#5b21b6,#7c3aed 48%,#3157f5);box-shadow:var(--shadow-md)} .cta-box h2,.cta-box p{color:#fff} .cta-box p{max-width:690px;margin:14px auto 0;color:rgba(255,255,255,.76)} .cta-box .actions{justify-content:center} .cta-box .btn.primary{background:#fff;color:var(--purple)} .cta-box .btn.secondary{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.28);color:#fff}
+footer{padding:42px 0 32px;border-top:1px solid var(--line);background:#fff} .footer-row{display:grid;grid-template-columns:170px 1fr 1.4fr auto;gap:28px;align-items:start;font-size:.72rem;color:#7c7584} .footer-wordmark{width:120px} .footer-links{display:grid;gap:7px} .footer-contact{display:grid;gap:5px}
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .55s ease,transform .55s ease} .reveal.in{opacity:1;transform:none}
+@media (max-width:1020px){.hero-grid,.arch-grid,.demo-grid,.screen-grid,.whiteboard-head{grid-template-columns:1fr}.library-head{grid-template-columns:1fr}.example-grid{grid-template-columns:repeat(2,1fr)}.mode-grid{grid-template-columns:repeat(3,1fr)}.footer-row{grid-template-columns:1fr 1fr}.demo.reverse .demo-copy,.demo.reverse .demo-media{order:initial}.carousel-card{width:300px;height:430px}}
+@media (max-width:760px){.container{width:min(calc(100% - 28px),var(--max))}.section{padding:78px 0} header .nav{height:64px}.subnav-wrap{top:64px}.nav-links{display:none}.nav-actions .secondary{display:none}.hero{padding:74px 0}.hero-video-shell{padding:10px;border-radius:26px}.hero-video{border-radius:20px}.carousel-shell{height:500px}.carousel-card{width:260px;height:410px}.example-grid{grid-template-columns:1fr}.mode-grid{grid-template-columns:repeat(2,1fr)}.int-grid{grid-template-columns:1fr}.int-plus{justify-self:center}.footer-row{grid-template-columns:1fr}.subnav{justify-content:flex-start}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal{opacity:1;transform:none;transition:none}.carousel-track{transition:none}}
+
+/* ===== Refinement pass v5 ===== */
+.scroll-progress{position:fixed;left:0;right:0;top:0;height:3px;z-index:220;pointer-events:none;background:transparent}.scroll-progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--orange),var(--purple),#26bdf2);box-shadow:0 0 16px rgba(124,58,237,.38);transition:width .08s linear}
+
+/* stronger internal navigation */
+.subnav-wrap{box-shadow:0 9px 26px rgba(34,24,64,.07);border-bottom:1px solid rgba(222,216,232,.96)}
+.subnav{min-height:66px;gap:10px;padding:8px 0;scroll-snap-type:x proximity}
+.subnav a{font-size:.8rem;font-weight:750;padding:10px 14px;border-radius:999px;color:#655e70;transition:background .22s ease,color .22s ease,transform .22s ease;scroll-snap-align:center}
+.subnav a:hover{background:#f4efff;color:var(--purple);transform:translateY(-1px)}
+.subnav a.active{background:linear-gradient(135deg,#f3eaff,#fff1e7);color:#5f2bbd;box-shadow:inset 0 0 0 1px rgba(124,58,237,.13),0 6px 16px rgba(54,35,89,.08)}
+
+/* block demo: use the actual portrait aspect ratio and never crop it */
+.media-card.stack-video{aspect-ratio:872/1020;max-width:540px;margin-inline:auto;background:#fff;box-shadow:0 26px 70px rgba(34,24,64,.13)}
+.media-card.stack-video video,.blocks-demo-video{width:100%;height:100%;object-fit:contain!important;background:#fff}
+.media-play{display:none!important}
+
+/* carousel readability + enlarge action */
+.carousel-card{position:relative;height:468px}
+.carousel-card .card-body{padding:17px 18px 18px}
+.carousel-card h3{font-size:1.18rem}
+.library .carousel-card p,.carousel-card p{display:block!important;color:#6d6878!important;font-size:.86rem!important;line-height:1.55!important;margin-top:10px!important;max-width:29ch}
+.zoom-preview-btn{position:absolute;z-index:8;top:11px;right:11px;width:38px;height:38px;border:1px solid rgba(255,255,255,.7);border-radius:12px;background:rgba(24,19,48,.70);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 22px rgba(11,7,28,.22);backdrop-filter:blur(9px);transition:transform .2s ease,background .2s ease,box-shadow .2s ease}
+.zoom-preview-btn:hover{transform:scale(1.07);background:var(--orange);box-shadow:0 10px 26px rgba(249,115,22,.28)}
+.zoom-preview-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
+
+/* larger XP Video showcase */
+.xp-demo .container{width:min(calc(100% - 40px),1280px)}
+.xp-demo .demo-grid{grid-template-columns:1.2fr .8fr;gap:54px}
+.xp-demo .video-frame{box-shadow:0 26px 74px rgba(72,47,126,.16)}
+.xp-demo .demo-copy{padding-left:10px}
+
+/* HD whiteboard prominence */
+.whiteboard-hd-frame{aspect-ratio:16/9;border-radius:32px!important;border:1px solid rgba(255,255,255,.24)!important;box-shadow:0 36px 100px rgba(0,8,28,.38)!important;overflow:hidden}
+.whiteboard-hd-video{width:100%;height:100%;object-fit:cover}
+.mode-grid{gap:14px;margin-top:30px}
+.mode{min-height:118px;padding:20px 14px;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .24s ease,background .24s ease,border-color .24s ease,box-shadow .24s ease}
+.mode strong{font-size:.9rem;letter-spacing:-.01em}.mode span{font-size:.72rem;line-height:1.45;margin-top:7px;color:rgba(255,255,255,.67)}
+.mode:hover{transform:translateY(-5px);background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.25);box-shadow:0 16px 38px rgba(0,0,0,.13)}
+
+/* larger integration cards */
+.integrations .container{width:min(calc(100% - 40px),1280px)}
+.int-grid{gap:26px;margin-top:48px;align-items:center}
+.int-card{padding:40px 42px;min-height:235px;border-radius:30px;box-shadow:0 22px 52px rgba(34,24,64,.10);display:flex;flex-direction:column;justify-content:center;transition:transform .26s ease,box-shadow .26s ease}
+.int-card:hover{transform:translateY(-6px);box-shadow:0 30px 70px rgba(34,24,64,.15)}
+.int-card h3{font-size:1.36rem}.int-card p{font-size:.98rem;line-height:1.68;margin-top:10px;max-width:54ch}.int-tags{gap:9px;margin-top:22px}.int-tags span{font-size:.72rem;padding:8px 10px}.int-plus{width:62px;height:62px;font-size:1.55rem;box-shadow:0 14px 30px rgba(124,58,237,.15)}
+
+/* less static: depth, motion and scroll reveal */
+.reveal{opacity:0;transform:translateY(34px) scale(.985);filter:blur(7px);transition:opacity .72s cubic-bezier(.2,.7,.2,1),transform .72s cubic-bezier(.2,.7,.2,1),filter .72s ease}
+.reveal.in{opacity:1;transform:none;filter:blur(0)}
+.video-frame,.media-card,.example-card,.int-card,.mode,.check-item,.step{will-change:transform}
+@keyframes softFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes haloPulse{0%,100%{box-shadow:0 36px 100px rgba(0,8,28,.34)}50%{box-shadow:0 40px 115px rgba(75,45,187,.34)}}
+@media (prefers-reduced-motion:no-preference){.hero-video-shell{animation:softFloat 6.8s ease-in-out infinite}.whiteboard-hd-frame{animation:haloPulse 6s ease-in-out infinite}.check-item:hover,.step:hover{transform:translateX(5px)}}
+
+/* enlarged preview modal */
+body.modal-open{overflow:hidden}
+.block-preview-modal{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:30px;opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease}
+.block-preview-modal.open{opacity:1;visibility:visible}
+.block-preview-backdrop{position:absolute;inset:0;background:rgba(12,8,27,.78);backdrop-filter:blur(12px)}
+.block-preview-dialog{position:relative;z-index:1;width:min(1040px,92vw);max-height:90vh;overflow:auto;border-radius:28px;background:#fff;box-shadow:0 40px 120px rgba(0,0,0,.38);transform:translateY(18px) scale(.97);transition:transform .28s cubic-bezier(.2,.7,.2,1)}
+.block-preview-modal.open .block-preview-dialog{transform:none}
+.block-modal-close{position:absolute;right:16px;top:16px;z-index:3;width:42px;height:42px;border:0;border-radius:50%;background:#211842;color:#fff;font-size:25px;line-height:1;cursor:pointer}
+.block-modal-head{padding:26px 76px 18px 28px}.block-modal-chip{display:inline-flex;padding:7px 10px;border-radius:999px;background:#f1ebff;color:var(--purple);font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.block-modal-head h3{font-size:1.6rem;margin-top:10px}.block-modal-head p{font-size:.94rem;margin-top:7px;color:var(--muted)}
+.block-modal-video-wrap{margin:0 22px 22px;border-radius:22px;overflow:hidden;background:#f0edf5;box-shadow:inset 0 0 0 1px var(--line)}.block-modal-video-wrap video{width:100%;max-height:68vh;aspect-ratio:16/9;object-fit:contain;background:#f0edf5}
+
+/* mobile and tablet refinement */
+@media (max-width:1020px){
+  .xp-demo .demo-grid{grid-template-columns:1fr;gap:34px}.xp-demo .demo-copy{padding-left:0}.xp-demo .demo-media{order:1}.xp-demo .demo-copy{order:2}
+  .media-card.stack-video{max-width:500px}
+  .int-card{min-height:0;padding:34px}.mode-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width:760px){
+  h1{font-size:clamp(2.65rem,12vw,4rem)}h2{font-size:clamp(1.9rem,8.8vw,2.65rem)}
+  .subnav-wrap{top:64px}.subnav{justify-content:flex-start;min-height:60px;gap:6px;padding-inline:2px}.subnav a{font-size:.76rem;padding:9px 12px}
+  .hero-grid{gap:34px}.hero-video-shell{width:100%}
+  .arch-grid{gap:38px}.media-card.stack-video{width:min(100%,430px)}
+  .carousel-shell{height:472px;margin-inline:-14px}.carousel-card{width:min(82vw,310px)!important;height:430px}.carousel-card .card-body{padding:15px}.zoom-preview-btn{width:36px;height:36px;top:9px;right:9px}
+  .xp-demo .container,.integrations .container{width:min(calc(100% - 28px),1280px)}
+  .xp-demo .video-frame{border-radius:22px}.video-badge{font-size:.66rem;right:9px;bottom:9px}
+  .whiteboard-head{gap:24px}.whiteboard-hd-frame{border-radius:22px!important}.mode-grid{grid-template-columns:repeat(2,1fr);gap:10px}.mode{min-height:112px;padding:17px 10px}.mode strong{font-size:.85rem}.mode span{font-size:.68rem}
+  .int-grid{gap:16px}.int-card{padding:28px 24px;border-radius:24px}.int-card h3{font-size:1.22rem}.int-card p{font-size:.91rem}.int-plus{width:52px;height:52px;justify-self:center}
+  .block-preview-modal{padding:10px}.block-preview-dialog{width:100%;max-height:94vh;border-radius:20px}.block-modal-head{padding:20px 58px 14px 18px}.block-modal-head h3{font-size:1.3rem}.block-modal-head p{font-size:.85rem}.block-modal-video-wrap{margin:0 12px 12px;border-radius:14px}.block-modal-video-wrap video{max-height:66vh}.block-modal-close{right:10px;top:10px;width:38px;height:38px}
+}
+@media (max-width:480px){
+  .section{padding:68px 0}.mode-grid{grid-template-columns:1fr 1fr}.mode{min-height:104px}.carousel-status{max-width:68%;line-height:1.4}.car-btn{width:39px;height:39px}
+  .int-card{padding:25px 20px}.int-tags span{font-size:.68rem;padding:7px 9px}
+}
+@media (prefers-reduced-motion:reduce){.scroll-progress span{transition:none}.reveal{filter:none}.hero-video-shell,.whiteboard-hd-frame{animation:none!important}}
+
+
+/* ===== Interaction & icon refinement v6 ===== */
+.reveal{opacity:0;transform:translateY(18px) scale(.993);filter:blur(2px);transition:opacity .42s cubic-bezier(.2,.72,.2,1),transform .42s cubic-bezier(.2,.72,.2,1),filter .36s ease}
+.reveal.in{opacity:1;transform:none;filter:blur(0)}
+
+/* screen to desk — make the format bridge impossible to miss */
+.screen-grid{grid-template-columns:1fr 1fr;gap:58px}
+.screen-copy{position:relative;z-index:2}
+.journey-path{display:grid;grid-template-columns:minmax(112px,1fr) 28px minmax(126px,1.12fr) 28px minmax(112px,1fr) 32px minmax(126px,1.12fr);gap:8px;align-items:center;margin-top:30px}
+.journey-step{position:relative;min-height:152px;padding:15px 10px 14px;border:1px solid rgba(219,212,233,.95);border-radius:22px;background:rgba(255,255,255,.9);box-shadow:0 14px 34px rgba(41,27,73,.08);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease,background .22s ease;overflow:hidden}
+.journey-step:after{content:'';position:absolute;inset:auto 12% -30% 12%;height:55%;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.14),transparent 68%);opacity:0;transition:opacity .22s ease;pointer-events:none}
+.journey-step:hover{transform:translateY(-6px);box-shadow:0 22px 46px rgba(41,27,73,.14);border-color:rgba(124,58,237,.28);background:#fff}.journey-step:hover:after{opacity:1}
+.journey-icon{height:78px;width:84px;display:grid;place-items:center;margin-bottom:7px;position:relative;z-index:1}.journey-icon img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 14px rgba(68,42,119,.12));transition:transform .24s ease}.journey-step:hover .journey-icon img{transform:scale(1.07) rotate(-2deg)}
+.journey-step strong{font-family:'Be Vietnam Pro',Inter,sans-serif;font-size:.78rem;line-height:1.25;position:relative;z-index:1}.journey-step small{font-size:.62rem;line-height:1.35;color:#837b8d;margin-top:4px;position:relative;z-index:1}
+.worksheet-step{border-color:rgba(249,115,22,.26);box-shadow:0 15px 36px rgba(249,115,22,.08)}
+.journey-arrow,.journey-plus{font-family:'Be Vietnam Pro',Inter,sans-serif;text-align:center;font-size:1.35rem;font-weight:800;color:var(--purple);animation:pathPulse 2.8s ease-in-out infinite}.journey-plus{color:var(--orange)}
+.screen-callout{position:relative;margin-top:22px;padding:23px 24px 23px 25px;border-left:5px solid var(--orange);background:linear-gradient(115deg,rgba(255,255,255,.97),rgba(251,247,255,.94));border-radius:0 20px 20px 0;box-shadow:0 15px 34px rgba(41,27,73,.07);overflow:hidden}.screen-callout:after{content:'';position:absolute;width:150px;height:150px;right:-60px;top:-85px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.14),transparent 68%)}
+.callout-kicker{display:block;color:var(--purple);font-size:.68rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px}.screen-callout strong{display:block;font-size:1.12rem;letter-spacing:-.02em}.screen-callout p{font-size:.91rem;line-height:1.6;margin-top:6px;max-width:48ch}
+.sheet-visual{min-height:500px}.sheet-visual img{width:min(100%,565px);transform:rotate(.5deg);filter:drop-shadow(0 30px 50px rgba(31,22,49,.19));transition:transform .5s cubic-bezier(.2,.7,.2,1),filter .5s ease}.sheet-visual.in img{transform:rotate(.5deg) translateY(0)}
+
+/* integration section — bigger visual hierarchy and clearer contrast */
+.int-grid{grid-template-columns:1fr 74px 1fr;gap:26px;align-items:center}
+.int-card{position:relative;min-height:330px;padding:32px 34px;border-radius:32px;display:grid;grid-template-columns:155px 1fr;gap:24px;align-items:center;overflow:hidden;background:linear-gradient(145deg,#fff 0%,#fdfcff 100%)}
+.int-card:before{content:'';position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .28s ease;background:linear-gradient(120deg,transparent 15%,rgba(124,58,237,.055) 47%,transparent 72%)}.int-card:hover:before{opacity:1}
+.int-card.native{border-top:5px solid var(--purple);box-shadow:0 24px 60px rgba(91,33,182,.12)}.int-card.expand{border-top:5px solid var(--orange);box-shadow:0 24px 60px rgba(249,115,22,.11)}
+.int-visual{position:relative;height:160px;display:grid;place-items:center}.int-visual img{width:150px;height:150px;object-fit:contain;filter:drop-shadow(0 12px 24px rgba(63,42,105,.13));transition:transform .35s cubic-bezier(.2,.75,.2,1)}.int-card:hover .int-visual img{transform:translateY(-5px) scale(1.04) rotate(-1.5deg)}
+.int-copy{position:relative;z-index:1}.int-kicker{display:block;font-size:.68rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--purple);margin-bottom:7px}.int-card.expand .int-kicker{color:#d95a08}.int-card h3{font-size:1.52rem;line-height:1.17}.int-card p{font-size:1rem;line-height:1.68;margin-top:10px;max-width:48ch}.int-tags{gap:8px;margin-top:20px}.int-tags span{font-size:.72rem;padding:8px 10px;background:#f5f1fa}
+.int-plus{width:68px;height:68px;font-size:1.65rem;background:linear-gradient(145deg,#f4ecff,#fff5ea);box-shadow:0 16px 34px rgba(91,33,182,.14);border:1px solid rgba(124,58,237,.12);animation:plusGlow 3s ease-in-out infinite}
+
+/* carousel feels continuous; the JS teleports only between identical clones */
+.carousel-track{transition:transform .42s cubic-bezier(.22,.72,.24,1)}.carousel-track.no-transition{transition:none!important}
+.carousel-shell{cursor:grab}.carousel-shell:active{cursor:grabbing}.carousel-card{transition:transform .28s ease,opacity .28s ease,border-color .28s ease,box-shadow .28s ease}.carousel-card.active{box-shadow:0 26px 65px rgba(0,0,0,.24),0 0 0 1px rgba(249,115,22,.18)}
+.carousel-status{display:flex;align-items:center;gap:8px}.carousel-status:before{content:'';width:7px;height:7px;border-radius:50%;background:#6ee7b7;box-shadow:0 0 0 5px rgba(110,231,183,.1);animation:statusPulse 2s ease-in-out infinite}
+
+/* subtle motion only on emphasis elements, not everything */
+@keyframes pathPulse{0%,100%{transform:translateX(0);opacity:.75}50%{transform:translateX(3px);opacity:1}}
+@keyframes plusGlow{0%,100%{transform:scale(1);box-shadow:0 16px 34px rgba(91,33,182,.14)}50%{transform:scale(1.06);box-shadow:0 18px 42px rgba(249,115,22,.17)}}
+@keyframes statusPulse{0%,100%{opacity:.65}50%{opacity:1}}
+@media (prefers-reduced-motion:no-preference){.screen .eyebrow:before,.integrations .eyebrow:before{animation:statusPulse 2.2s ease-in-out infinite}.journey-step:nth-of-type(2){animation-delay:.08s}.journey-step:nth-of-type(3){animation-delay:.16s}}
+
+@media (max-width:1120px){.screen-grid{grid-template-columns:1fr;gap:32px}.journey-path{grid-template-columns:minmax(118px,1fr) 28px minmax(130px,1fr) 28px minmax(118px,1fr) 30px minmax(130px,1fr);max-width:820px}.sheet-visual{min-height:420px}.sheet-visual img{width:min(100%,540px)}.int-card{grid-template-columns:130px 1fr;gap:18px}.int-visual{height:135px}.int-visual img{width:130px;height:130px}}
+@media (max-width:860px){.journey-path{grid-template-columns:1fr 30px 1fr;gap:10px}.journey-step{min-height:148px}.journey-arrow:nth-of-type(2){display:none}.journey-plus{display:none}.int-grid{grid-template-columns:1fr;gap:18px}.int-plus{justify-self:center}.int-card{min-height:0;grid-template-columns:145px 1fr;padding:30px}.int-visual{height:145px}.int-visual img{width:140px;height:140px}}
+@media (max-width:600px){.journey-path{grid-template-columns:1fr 24px 1fr;gap:8px}.journey-step{min-height:136px;padding:12px 8px}.journey-icon{width:68px;height:68px}.journey-step strong{font-size:.72rem}.journey-step small{font-size:.58rem}.journey-arrow,.journey-plus{font-size:1.1rem}.screen-callout{padding:20px}.screen-callout strong{font-size:1.02rem}.sheet-visual{min-height:340px}.sheet-visual img{width:min(95%,470px)}.int-card{grid-template-columns:1fr;text-align:center;padding:27px 22px}.int-visual{height:132px}.int-visual img{width:128px;height:128px;margin-inline:auto}.int-kicker{margin-top:2px}.int-card p{margin-inline:auto}.int-tags{justify-content:center}}
+@media (prefers-reduced-motion:reduce){.journey-arrow,.journey-plus,.int-plus,.carousel-status:before{animation:none!important}}
+
+</style>
+
+<link rel="icon" type="image/png" sizes="64x64" href="../assets/images/favicon-64.png">
+<link rel="apple-touch-icon" href="../assets/images/apple-touch-icon.png">
+<link rel="canonical" href="https://wistudi.com/blocks-activities/">
+<link rel="stylesheet" href="../assets/css/site-shell.css">
+</head>
+<body class="page-blocks"><div class="scroll-progress" aria-hidden="true"><span id="scrollProgressBar"></span></div>
+<header class="ws-site-header">
+  <div class="ws-container ws-nav">
+    <a class="ws-brand" href="../index.html" aria-label="Wistudi — Platform home"><img src="../assets/images/wistudi-logo.png" alt="Wistudi"></a>
+    <nav class="ws-nav-links" aria-label="Primary navigation">
+      <a class="" href="../index.html">Platform</a>
+      <a class="active" href="../blocks-activities/index.html">Blocks &amp; Activities</a>
+      <a class="" href="../organisations/index.html">Organisations</a>
+      <a class="" href="../contact/index.html">Contact</a>
+    </nav>
+    <div class="ws-nav-actions">
+      <div class="ws-lang">
+        <button class="ws-lang-toggle" type="button" aria-haspopup="true" aria-expanded="false">EN <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg></button>
+        <div class="ws-lang-menu" role="menu" aria-label="Language">
+          <button class="ws-lang-option current" type="button" role="menuitem" aria-current="true"><span>English</span><span>EN</span></button>
+          <button class="ws-lang-option" type="button" role="menuitem" disabled><span>Tiếng Việt</span><span class="ws-lang-soon">Coming soon</span></button>
+        </div>
+      </div>
+      <a class="ws-btn secondary" href="../index.html">Explore Platform</a>
+      <a class="ws-btn primary" href="https://wistudi.com">Start Publishing</a>
+      <button class="ws-menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <div class="ws-mobile-menu">
+    <div class="ws-container ws-mobile-inner">
+      <a class="" href="../index.html">Platform</a>
+      <a class="active" href="../blocks-activities/index.html">Blocks &amp; Activities</a>
+      <a class="" href="../organisations/index.html">Organisations</a>
+      <a class="" href="../contact/index.html">Contact</a>
+      <div class="ws-mobile-actions"><a class="ws-btn secondary" href="../index.html">Explore Platform</a><a class="ws-btn primary" href="https://wistudi.com">Start Publishing</a></div>
+    </div>
+  </div>
+</header>
+<main>
+<section class="hero"><div class="container hero-grid"><div class="reveal in"><span class="eyebrow">Wistudi Blocks &amp; Activities</span><h1>Build learning one block at a time.</h1><p class="lead">Wistudi’s native blocks power interactive activities, Flows, XP Video checkpoints, printable worksheets, reflection, collaboration and live teaching — all inside one connected learning system.</p><div class="actions"><a class="btn primary" href="#library">Explore the Blocks</a><a class="btn secondary" href="#architecture">See how they connect</a></div><div class="hero-proof"><span>Growing native library</span><span>Flows + XP Video</span><span>Screen → desk</span><span>Live teaching</span></div></div><div class="hero-media-wrap reveal in"><div class="hero-video-shell"><div class="hero-video"><video autoplay muted loop playsinline preload="auto" poster="../assets/media/8aaa21490c0978bd8c54.webp" src="../assets/media/9610212a26978af7d8b9.mp4"></video></div></div></div></div></section>
+<div class="subnav-wrap ws-section-subnav" aria-label="Page sections"><div class="container subnav"><a href="#architecture">How blocks work</a><a href="#library">Block previews</a><a href="#flows">Flows</a><a href="#xp-video">XP Video</a><a href="#screen-desk">Screen to desk</a><a href="#whiteboard">Whiteboard</a><a href="#integrations">Expand</a></div></div>
+<section class="section arch" id="architecture"><div class="container"><div class="arch-head reveal"><span class="eyebrow">More than individual activities</span><h2>The blocks are the building pieces of Wistudi.</h2><p class="lead">One block can create a single interaction. Stack blocks together and they become complete learning journeys across Flows, XP Videos, live teaching and printable formats.</p></div><div class="arch-grid"><div class="reveal"><div class="media-card stack-video"><video class="blocks-demo-video" autoplay muted loop playsinline preload="auto" poster="../assets/media/205d974b542e8de1d5b7.webp" src="../assets/media/db2445dd721f629e5424.mp4"></video></div></div><div class="reveal"><span class="eyebrow">Modular by design</span><h2>Build the exact learning sequence you need.</h2><div class="steps"><div class="step"><b>01</b><div><strong>Choose a block</strong><p>Start with practice, assessment, visual discovery, reflection, collaboration or teaching.</p></div></div><div class="step"><b>02</b><div><strong>Stack blocks together</strong><p>Move naturally from content to interaction, practice, feedback and reflection.</p></div></div><div class="step"><b>03</b><div><strong>Use them across Wistudi</strong><p>Place blocks in Flows or at checkpoints inside XP Videos.</p></div></div><div class="step"><b>04</b><div><strong>Build something bigger</strong><p>Turn the stack into lessons, training, courses, curricula and blended learning experiences.</p></div></div></div></div></div></div></section>
+<section class="section library" id="library"><div class="container"><div class="library-head reveal"><div><span class="eyebrow">A growing native block library</span><h2>A lot of ways to learn. This is only a preview.</h2><p class="lead">Browse a selection of Wistudi’s native blocks. Each preview is already open in the carousel. When a block reaches the centre, that intro plays.</p></div><p class="library-note">The blocks shown here are only part of the wider library used across interactive lessons, XP Videos, assessment, collaboration, teaching and printable-connected learning.</p></div><div class="filter-row reveal" id="filterRow"></div><div class="carousel-shell reveal"><div class="carousel-track" id="carouselTrack"></div></div><div class="carousel-controls"><div class="carousel-status">Auto-browsing is on. The centre card plays; hover to pause or use the arrows to take control.</div><div class="arrow-group"><button class="car-btn" id="prevBtn" aria-label="Previous block">←</button><button class="car-btn" id="nextBtn" aria-label="Next block">→</button></div></div></div></section>
+<section class="section demo" id="flows"><div class="container demo-grid"><div class="demo-copy reveal"><span class="eyebrow">Blocks inside Flows</span><h2>Stack blocks into complete learning experiences.</h2><p class="lead">A Flow moves learners through a structured sequence of content, interaction, practice, reflection and assessment. The blocks are what build that journey.</p><div class="check-list"><div class="check-item"><span class="checkmark"></span>Introduction &amp; content</div><div class="check-item"><span class="checkmark"></span>Interactive activity</div><div class="check-item"><span class="checkmark"></span>Practice or assessment</div><div class="check-item"><span class="checkmark"></span>Reflection or assignment</div></div></div><div class="demo-media reveal"><div class="video-frame"><video autoplay muted loop playsinline preload="auto" poster="../assets/media/a8947b48444c9794d2aa.webp" src="../assets/media/96bfe69baf2abbc6423e.mp4"></video><div class="video-badge">Flow demo · blocks working together</div></div></div></div></section>
+<section class="section demo alt reverse xp-demo" id="xp-video"><div class="container demo-grid"><div class="demo-media reveal"><div class="video-frame"><video autoplay muted loop playsinline preload="auto" poster="../assets/media/98d0d0f9fc32e00e001e.webp" src="../assets/media/15002d042c7d4f8ba1ff.mp4"></video><div class="video-badge">XP Video · active checkpoints</div></div></div><div class="demo-copy reveal"><span class="eyebrow">Blocks inside XP Video</span><h2>Turn video into an active learning journey.</h2><p class="lead">Interactive checkpoints interrupt passive watching at the right moment so learners can answer, practise, reflect and continue through the video as active participants.</p><div class="check-list"><div class="check-item"><span class="checkmark"></span>Watch</div><div class="check-item"><span class="checkmark"></span>Checkpoint activity</div><div class="check-item"><span class="checkmark"></span>Continue watching</div><div class="check-item"><span class="checkmark"></span>Reflect or assess</div></div></div></div></section>
+<section class="section screen" id="screen-desk"><div class="container screen-grid"><div class="screen-copy reveal"><span class="eyebrow">Interactive + printable</span><h2>From screen to desk.</h2><p class="lead">Build the interactive learning once, then let the same lesson continue as paper-and-pen practice. Wistudi connects digital activities with printable worksheet output instead of forcing publishers to rebuild the lesson in another tool.</p><div class="journey-path" aria-label="From digital blocks to printable worksheet"><article class="journey-step"><span class="journey-icon"><img src="../assets/media/3eb59cb8c09b9953cf11.webp" alt="" loading="lazy"></span><strong>Blocks</strong><small>Build with activities</small></article><span class="journey-arrow" aria-hidden="true">→</span><article class="journey-step"><span class="journey-icon"><img src="../assets/media/bd5b16e0a1fdc2bb08f2.webp" alt="" loading="lazy"></span><strong>Interactive Flow</strong><small>Connect the lesson</small></article><span class="journey-arrow" aria-hidden="true">→</span><article class="journey-step"><span class="journey-icon"><img src="../assets/media/45f24f7c4ab301e78162.webp" alt="" loading="lazy"></span><strong>Screen</strong><small>Teach interactively</small></article><span class="journey-plus" aria-hidden="true">+</span><article class="journey-step worksheet-step"><span class="journey-icon"><img src="../assets/media/6126dfbc89cc222f620c.webp" alt="" loading="lazy"></span><strong>Desk worksheet</strong><small>Continue on paper</small></article></div><div class="callout screen-callout"><span class="callout-kicker">One build. Two teaching formats.</span><strong>Build once. Teach across formats.</strong><p>Interactive lesson on screen. Printable follow-up on desk. One connected learning experience.</p></div></div><div class="sheet-visual reveal"><img src="../assets/media/78550310cb5f97da5044.webp" alt="Printable worksheet pages created from an interactive Wistudi learning experience"></div></div></section>
+<section class="section examples"><div class="container"><div class="center reveal"><span class="eyebrow">Create more than activities</span><h2>Use blocks to build real teaching and learning experiences.</h2><p class="lead">The value is in what happens when different blocks work together.</p></div><div class="example-grid"><article class="example-card reveal"><h3>Visual discovery lesson</h3><p>Observe, discover, check understanding and reflect.</p><div class="example-icons"><img src="../assets/media/e78b923b877926662c40.webp" alt="image-discover"><img src="../assets/media/8b5afe917a51b2f41219.webp" alt="multiple-choice"><img src="../assets/media/41a7589e8812f34345af.webp" alt="quick-reflection"></div></article>
+<article class="example-card reveal"><h3>Collaborative classroom session</h3><p>Gather opinions, teach visually and discuss together.</p><div class="example-icons"><img src="../assets/media/db95c0985ed0dfdb7186.webp" alt="polls"><img src="../assets/media/48697f34c830dca5b6dc.webp" alt="whiteboard"><img src="../assets/media/1e642aa150ad327e7254.webp" alt="collaboration"></div></article>
+<article class="example-card reveal"><h3>Assessment sequence</h3><p>Move from quick checks to deeper learner work.</p><div class="example-icons"><img src="../assets/media/b27ec1a793e08bc4b1ae.webp" alt="true-false"><img src="../assets/media/8b5afe917a51b2f41219.webp" alt="multiple-choice"><img src="../assets/media/a674f448b1d5c30384a6.webp" alt="assignment"></div></article>
+<article class="example-card reveal"><h3>Language practice</h3><p>Review, practise and complete language tasks.</p><div class="example-icons"><img src="../assets/media/bb8a488b8cd48c3ce2fb.webp" alt="flashcards"><img src="../assets/media/4f9044b5b3f4b15bc429.webp" alt="fill-blanks"><img src="../assets/media/29ed93f31bfcdd2be728.webp" alt="picture-quiz"></div></article>
+<article class="example-card reveal"><h3>Scenario-led training</h3><p>Use choices and reflection to build decision-led learning.</p><div class="example-icons"><img src="../assets/media/52b41172fe051ef904df.webp" alt="branching-scenario"><img src="../assets/media/41a7589e8812f34345af.webp" alt="quick-reflection"><img src="../assets/media/a674f448b1d5c30384a6.webp" alt="assignment"></div></article>
+<article class="example-card reveal"><h3>Blended learning</h3><p>Teach interactively and continue the same lesson on paper.</p><div class="example-icons"><img src="../assets/media/e78b923b877926662c40.webp" alt="image-discover"><img src="../assets/media/4454533eab62a48cfb47.webp" alt="written-response"><img src="../assets/media/4f9044b5b3f4b15bc429.webp" alt="fill-blanks"><span class="worksheet-word">→ Worksheet</span></div></article></div></div></section>
+<section class="section whiteboard" id="whiteboard"><div class="container"><div class="whiteboard-head reveal"><div><span class="eyebrow">A block built for teaching</span><h2>Teach live. Teach visually. Teach in the classroom.</h2></div><div><p class="lead">The Whiteboard makes Wistudi feel less like a library of activities and more like a place you can actually teach. Use it inside a Flow for tutoring, live online teaching, classroom screens, workshops and training.</p><span class="rollout">Integrated video conferencing shown in preview · rolling out</span></div></div><div class="reveal"><div class="video-frame whiteboard-hd-frame"><video class="whiteboard-hd-video" autoplay muted loop playsinline preload="auto" poster="../assets/media/18cdf4a15b75fea08bd5.webp" src="../assets/media/c1cc39b8199b4fb3b748.mp4"></video></div></div><div class="mode-grid reveal"><div class="mode"><strong>Classroom</strong><span>Big-screen Flow teaching</span></div><div class="mode"><strong>Live online</strong><span>Teach and explain visually</span></div><div class="mode"><strong>Tutoring</strong><span>1:1 or small groups</span></div><div class="mode"><strong>Workshops</strong><span>Interactive facilitation</span></div><div class="mode"><strong>Training</strong><span>Explain, practise, discuss</span></div><div class="mode"><strong>Assignments</strong><span>Send, grade and review</span></div></div></div></section>
+<section class="section integrations" id="integrations"><div class="container"><div class="center reveal"><span class="eyebrow">Powerful independently. Expandable by design.</span><h2>Native first. Integrate when you need more.</h2><p class="lead">Wistudi already includes its own growing interactive block library. Its modular architecture also creates room for specialist external technologies to become part of the same learning stack.</p></div><div class="int-grid"><article class="int-card native reveal"><div class="int-visual"><img src="../assets/media/10ea79e37ac9cdd7ecc5.webp" alt="Wistudi native learning tools working together" loading="lazy"></div><div class="int-copy"><span class="int-kicker">Native Wistudi toolkit</span><h3>Powerful on its own</h3><p>Build interactive learning with Wistudi’s native activities, reflection, assessment, collaboration and teaching tools.</p><div class="int-tags"><span>Native activities</span><span>Flows</span><span>XP Video</span><span>Whiteboard</span><span>Printable</span></div></div></article><div class="int-plus reveal" aria-label="plus">+</div><article class="int-card expand reveal"><div class="int-visual"><img src="../assets/media/8d4e6c49c4b6c25ac98b.webp" alt="Modular hub connecting external technology and integrations" loading="lazy"></div><div class="int-copy"><span class="int-kicker">Modular architecture</span><h3>Expandable by design</h3><p>Connect specialist tools and partner technology through a modular architecture without fragmenting the learner experience.</p><div class="int-tags"><span>Partner tools</span><span>External technology</span><span>Integrations</span><span>Connected experience</span></div></div></article></div></div></section>
+<section class="cta"><div class="container"><div class="cta-box reveal"><h2>Start with one block. Build something bigger.</h2><p>Create an activity, stack it into a Flow, place it inside an XP Video, teach from it live, or extend it into a printable learning experience.</p><div class="actions"><a class="btn primary" href="https://wistudi.com">Start Publishing</a><a class="btn secondary" href="../index.html">Explore the Platform</a></div></div></div></section>
+
+<div class="block-preview-modal" id="blockPreviewModal" aria-hidden="true">
+  <div class="block-preview-backdrop" data-modal-close></div>
+  <section class="block-preview-dialog" role="dialog" aria-modal="true" aria-labelledby="blockModalTitle">
+    <button class="block-modal-close" type="button" aria-label="Close enlarged preview" data-modal-close>×</button>
+    <div class="block-modal-head">
+      <span class="block-modal-chip" id="blockModalCategory">Preview</span>
+      <h3 id="blockModalTitle">Block preview</h3>
+      <p id="blockModalDesc"></p>
+    </div>
+    <div class="block-modal-video-wrap"><video id="blockModalVideo" muted loop playsinline controls></video></div>
+  </section>
+</div>
+</main>
+<footer class="ws-site-footer">
+  <div class="ws-container ws-footer-row">
+    <a class="ws-brand" href="../index.html" aria-label="Wistudi — Platform home"><img class="ws-footer-wordmark" src="../assets/images/wistudi-logo.png" alt="Wistudi"></a>
+    <div class="ws-footer-links"><a href="../index.html">Platform</a><a href="../blocks-activities/index.html">Blocks &amp; Activities</a><a href="../organisations/index.html">Organisations</a><a href="../contact/index.html">Contact</a></div>
+    <div class="ws-footer-contact"><a href="mailto:support@wistudi.com">support@wistudi.com</a><a href="mailto:partnerships@wistudi.com">partnerships@wistudi.com</a><a href="tel:+84879876624">+84 879 876 624</a><span>Operating out of Vietnam</span><span>85 Great Portland Street, First Floor, London, England</span></div>
+    <div class="ws-footer-copy">© 2026 Wistudi</div>
+  </div>
+</footer>
+<script>
+const carouselItems = [{"id": "image-discover", "title": "Image Discover", "category": "Visual", "note": "Turn images into interactive discovery and visual questioning.", "video": "../assets/media/c0300ff6424a0229124c.mp4", "poster": "../assets/media/5810cfdbfb4bec826402.webp"}, {"id": "link-match", "title": "Link & Match", "category": "Practice", "note": "Connect related ideas, vocabulary and information.", "video": "../assets/media/811f0fd3c24ce18983f5.mp4", "poster": "../assets/media/7f593833976f1eefbf5a.webp"}, {"id": "picture-quiz", "title": "Picture Quiz", "category": "Visual", "note": "Use images as the centre of quick understanding checks.", "video": "../assets/media/7ed6ac2dff0141cb3f77.mp4", "poster": "../assets/media/ad9f0b1b68a0ec40d0ca.webp"}, {"id": "polls", "title": "Polls", "category": "Collaboration", "note": "Collect opinions, predictions and live learner responses.", "video": "../assets/media/f4002f3b1f0a139010cc.mp4", "poster": "../assets/media/dad647065e07d7fc5822.webp"}, {"id": "sequence-mapping", "title": "Sequence Mapping", "category": "Ordering", "note": "Let learners arrange steps, events and processes in order.", "video": "../assets/media/12c0817b4c661ecfe3ac.mp4", "poster": "../assets/media/a4664a01dca949ab26de.webp"}, {"id": "smart-sorting", "title": "Smart Sorting", "category": "Practice", "note": "Sort images or concepts into meaningful categories.", "video": "../assets/media/86e7c2a731173e20694c.mp4", "poster": "../assets/media/68fedd2e25bf41cbf168.webp"}, {"id": "whiteboard", "title": "Whiteboard", "category": "Teaching", "note": "Teach live, explain visually and collaborate in real time.", "video": "../assets/media/ad8cc0ebf05350bdbb31.mp4", "poster": "../assets/media/988e9d02fb030409c251.webp"}, {"id": "written-response", "title": "Written Response", "category": "Reflection", "note": "Capture longer-form thinking and learner responses.", "video": "../assets/media/c451709be343bbb96547.mp4", "poster": "../assets/media/0ccbe7aac25006242300.webp"}, {"id": "assignment", "title": "Assignment", "category": "Assessment", "note": "Create structured tasks and graded learning work.", "video": "../assets/media/8c778999f41213deed6e.mp4", "poster": "../assets/media/87f124a564f065d3557f.webp"}, {"id": "fill-blanks", "title": "Fill in the Blanks", "category": "Practice", "note": "Build sentence, vocabulary and comprehension practice.", "video": "../assets/media/ce8099316b3aab807f27.mp4", "poster": "../assets/media/3c2a4511f2cf0c10e02a.webp"}, {"id": "guided-reflection", "title": "Guided Reflection", "category": "Reflection", "note": "Encourage meaning-making and thoughtful response.", "video": "../assets/media/a4c349b5505696758465.mp4", "poster": "../assets/media/5810cfdbfb4bec826402.webp"}];
+const filterRow = document.getElementById('filterRow');
+const categories = ['All', ...new Set(carouselItems.map(i => i.category))];
+filterRow.innerHTML = categories.map((c, idx) => `<button class="filter-btn ${idx===0?'active':''}" data-filter="${c}">${c}</button>`).join('');
+let filtered = [...carouselItems];
+let currentIndex = 0;           // logical index in filtered
+let renderPosition = 0;         // index in the triple-rendered track
+const track = document.getElementById('carouselTrack');
+const shell = document.querySelector('.carousel-shell');
+const statusEl = document.querySelector('.carousel-status');
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let autoTimer = null;
+let resumeTimer = null;
+let hoverPaused = false;
+let modalPaused = false;
+const AUTO_MS = 4300;
+const MANUAL_RESUME_MS = 7000;
+
+function mod(n,m){ return ((n % m) + m) % m; }
+function renderedItems(){
+  if(filtered.length <= 1) return filtered.map((item,i)=>({item,logical:i}));
+  return [...filtered,...filtered,...filtered].map((item,i)=>({item,logical:i % filtered.length}));
+}
+function cardHTML(item, renderedIndex, logicalIndex){
+  return `<article class="carousel-card" data-id="${item.id}" data-logical="${logicalIndex}" data-rendered="${renderedIndex}" tabindex="0">
+    <div class="vidwrap"><video muted loop playsinline preload="metadata" poster="${item.poster}" src="${item.video}"></video></div>
+    <div class="card-body">
+      <div class="carousel-top"><span class="chip">${item.category}</span></div>
+      <h3>${item.title}</h3>
+      <p>${item.note}</p>
+    </div>
+  </article>`;
+}
+function bindCarouselEvents(){
+  [...track.querySelectorAll('.carousel-card')].forEach(card => {
+    const activate = () => {
+      const target = Number(card.dataset.rendered);
+      if(!Number.isFinite(target)) return;
+      registerManualInteraction();
+      renderPosition = target;
+      currentIndex = mod(Number(card.dataset.logical), filtered.length || 1);
+      updateCarousel(true);
+    };
+    card.addEventListener('click', activate);
+    card.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); activate(); } });
+  });
+}
+function renderCarousel(){
+  const rendered = renderedItems();
+  track.innerHTML = rendered.map(({item,logical},i) => cardHTML(item,i,logical)).join('');
+  currentIndex = Math.min(currentIndex, Math.max(0, filtered.length - 1));
+  renderPosition = filtered.length > 1 ? filtered.length + currentIndex : currentIndex;
+  bindCarouselEvents();
+  updateCarousel(false);
+  restartAutoplay(1200);
+}
+function updateCarousel(animate=true){
+  const cards = [...track.querySelectorAll('.carousel-card')];
+  if(!cards.length || !filtered.length) return;
+  renderPosition = Math.max(0, Math.min(renderPosition, cards.length - 1));
+  currentIndex = mod(renderPosition, filtered.length);
+  track.classList.toggle('no-transition', !animate || prefersReducedMotion);
+  cards.forEach((card, i) => {
+    const active = i === renderPosition;
+    card.classList.toggle('active', active);
+    card.setAttribute('aria-current', active ? 'true' : 'false');
+    const v = card.querySelector('video');
+    if(active && !modalPaused){ v.play().catch(() => {}); }
+    else { v.pause(); try{ if(!active) v.currentTime = 0; }catch(err){} }
+    const top = card.querySelector('.carousel-top');
+    const logical = Number(card.dataset.logical);
+    top.innerHTML = `<span class="chip">${filtered[logical]?.category || ''}</span>${active?'<span class="chip playchip">Live preview</span>':''}`;
+  });
+  const gap = 24;
+  const cardW = cards[0].getBoundingClientRect().width;
+  const shellW = shell.getBoundingClientRect().width;
+  const offset = shellW / 2 - cardW / 2 - renderPosition * (cardW + gap);
+  track.style.transform = `translateX(${offset}px)`;
+  requestAnimationFrame(()=>{ if(!animate) track.classList.add('no-transition'); });
+}
+function normalizeInfinitePosition(){
+  const n = filtered.length;
+  if(n <= 1) return;
+  let nextPos = renderPosition;
+  if(renderPosition >= n * 2) nextPos = renderPosition - n;
+  else if(renderPosition < n) nextPos = renderPosition + n;
+  if(nextPos !== renderPosition){
+    renderPosition = nextPos;
+    currentIndex = mod(renderPosition,n);
+    track.classList.add('no-transition');
+    updateCarousel(false);
+    // force the browser to accept the snap before future animated movement
+    void track.offsetWidth;
+    requestAnimationFrame(()=>track.classList.remove('no-transition'));
+  } else {
+    track.classList.remove('no-transition');
+  }
+}
+track.addEventListener('transitionend', e => { if(e.propertyName === 'transform') normalizeInfinitePosition(); });
+
+function stepCarousel(dir, manual=false){
+  if(filtered.length <= 1) return;
+  if(manual) registerManualInteraction();
+  track.classList.remove('no-transition');
+  renderPosition += dir;
+  currentIndex = mod(renderPosition, filtered.length);
+  updateCarousel(true);
+}
+function stopAuto(){ if(autoTimer){ clearInterval(autoTimer); autoTimer = null; } }
+function startAuto(){
+  stopAuto();
+  if(prefersReducedMotion || hoverPaused || modalPaused || filtered.length <= 1) return;
+  autoTimer = setInterval(()=>stepCarousel(1,false), AUTO_MS);
+  if(statusEl) statusEl.dataset.mode = 'auto';
+}
+function restartAutoplay(delay=0){
+  stopAuto();
+  if(resumeTimer) clearTimeout(resumeTimer);
+  if(prefersReducedMotion || hoverPaused || modalPaused || filtered.length <= 1) return;
+  resumeTimer = setTimeout(startAuto, delay);
+}
+function registerManualInteraction(){
+  stopAuto();
+  if(resumeTimer) clearTimeout(resumeTimer);
+  if(statusEl) statusEl.dataset.mode = 'manual';
+  if(!hoverPaused && !modalPaused) resumeTimer = setTimeout(startAuto, MANUAL_RESUME_MS);
+}
+
+document.getElementById('prevBtn').addEventListener('click', () => stepCarousel(-1,true));
+document.getElementById('nextBtn').addEventListener('click', () => stepCarousel(1,true));
+
+shell.addEventListener('mouseenter', () => { hoverPaused = true; stopAuto(); if(resumeTimer) clearTimeout(resumeTimer); });
+shell.addEventListener('mouseleave', () => { hoverPaused = false; restartAutoplay(1200); });
+shell.addEventListener('focusin', () => { hoverPaused = true; stopAuto(); if(resumeTimer) clearTimeout(resumeTimer); });
+shell.addEventListener('focusout', e => { if(!shell.contains(e.relatedTarget)){ hoverPaused = false; restartAutoplay(1500); } });
+
+filterRow.addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if(!btn) return;
+  registerManualInteraction();
+  [...filterRow.querySelectorAll('.filter-btn')].forEach(b => b.classList.toggle('active', b===btn));
+  const f = btn.dataset.filter;
+  filtered = f==='All' ? [...carouselItems] : carouselItems.filter(i => i.category===f);
+  currentIndex = 0;
+  renderCarousel();
+});
+window.addEventListener('resize', () => updateCarousel(false));
+
+window.carouselAutoController = {
+  pause(){ modalPaused = true; stopAuto(); if(resumeTimer) clearTimeout(resumeTimer); },
+  resume(){ modalPaused = false; updateCarousel(false); restartAutoplay(1600); },
+  manual(){ registerManualInteraction(); }
+};
+renderCarousel();
+const reveals = document.querySelectorAll('.reveal');
+if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  const io = new IntersectionObserver(entries => { entries.forEach(ent => { if(ent.isIntersecting){ ent.target.classList.add('in'); io.unobserve(ent.target); } }); }, {threshold:.07, rootMargin:'0px 0px -8% 0px'});
+  reveals.forEach(el => io.observe(el));
+} else {
+  reveals.forEach(el => el.classList.add('in'));
+}
+</script>
+
+<script>
+(function(){
+  const trackEl = document.getElementById('carouselTrack');
+  const modal = document.getElementById('blockPreviewModal');
+  const modalVideo = document.getElementById('blockModalVideo');
+  const modalTitle = document.getElementById('blockModalTitle');
+  const modalDesc = document.getElementById('blockModalDesc');
+  const modalCategory = document.getElementById('blockModalCategory');
+
+  function magnifierButton(card){
+    if(card.querySelector('.zoom-preview-btn')) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'zoom-preview-btn';
+    btn.setAttribute('aria-label','Open larger block preview');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"></circle><path d="M15.6 15.6 21 21"></path></svg>';
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      openPreview(card.dataset.id);
+    });
+    card.appendChild(btn);
+  }
+  function decorateCards(){
+    if(!trackEl) return;
+    trackEl.querySelectorAll('.carousel-card').forEach(magnifierButton);
+  }
+  function openPreview(id){
+    const item = (typeof carouselItems !== 'undefined') ? carouselItems.find(x => x.id === id) : null;
+    if(!item || !modal) return;
+    trackEl && trackEl.querySelectorAll('video').forEach(v => v.pause());
+    if(window.carouselAutoController) window.carouselAutoController.pause();
+    modalTitle.textContent = item.title;
+    modalDesc.textContent = item.note || '';
+    modalCategory.textContent = item.category || 'Preview';
+    modalVideo.src = item.video;
+    modalVideo.currentTime = 0;
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden','false');
+    document.body.classList.add('modal-open');
+    modalVideo.play().catch(()=>{});
+  }
+  function closePreview(){
+    if(!modal) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('modal-open');
+    modalVideo.pause();
+    modalVideo.removeAttribute('src');
+    modalVideo.load();
+    if(typeof updateCarousel === 'function') updateCarousel(false);
+    if(window.carouselAutoController) window.carouselAutoController.resume();
+  }
+  document.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click',closePreview));
+  document.addEventListener('keydown',e => { if(e.key === 'Escape' && modal && modal.classList.contains('open')) closePreview(); });
+  decorateCards();
+  if(trackEl){ new MutationObserver(decorateCards).observe(trackEl,{childList:true}); }
+
+  // scroll progress
+  const progress = document.getElementById('scrollProgressBar');
+  let ticking = false;
+  function onScroll(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+      if(progress) progress.style.width = Math.min(100,Math.max(0,pct)) + '%';
+      ticking = false;
+    });
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+  // active internal navigation as sections enter the viewport
+  const navLinks = [...document.querySelectorAll('.subnav a')];
+  const sections = navLinks.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  if('IntersectionObserver' in window){
+    const spy = new IntersectionObserver(entries => {
+      const visible = entries.filter(e => e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+      if(!visible) return;
+      navLinks.forEach(a => a.classList.toggle('active',a.getAttribute('href') === '#' + visible.target.id));
+    },{rootMargin:'-28% 0px -58% 0px',threshold:[0,.15,.35,.6]});
+    sections.forEach(s => spy.observe(s));
+  }
+
+  // stagger reveal elements within a section for a more deliberate scroll rhythm
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    document.querySelectorAll('section').forEach(section => {
+      [...section.querySelectorAll('.reveal')].forEach((el,i) => { el.style.transitionDelay = Math.min(i*30,120) + 'ms'; });
+    });
+  }
+})();
+</script>
+
+<script src="../assets/js/site-shell.js"></script>
+</body>
+</html>
