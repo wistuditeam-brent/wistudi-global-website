@@ -14,12 +14,25 @@
     document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.ws-lang.open').forEach(x=>x.classList.remove('open'));if(mobile)mobile.classList.remove('open');if(menuBtn)menuBtn.setAttribute('aria-expanded','false');}});
 
     // All publishing CTAs go directly to the Wistudi sign-up page.
-    document.querySelectorAll('a').forEach(a=>{
-      if(a.textContent.trim().toLowerCase()==='start publishing') a.href='https://wistudi.com/sign-up';
-    });
+    const SIGNUP_URL='https://wistudi.com/sign-up';
+    const syncPublishingLinks=()=>{
+      document.querySelectorAll('a').forEach(a=>{
+        if(a.textContent.trim().toLowerCase()==='start publishing') a.href=SIGNUP_URL;
+      });
+    };
+    syncPublishingLinks();
+    // Capture clicks as an extra guarantee even if older HTML still contains wistudi.com.
+    document.addEventListener('click',e=>{
+      const a=e.target.closest?.('a');
+      if(!a)return;
+      if(a.textContent.trim().toLowerCase()==='start publishing'){
+        e.preventDefault();
+        window.location.assign(SIGNUP_URL);
+      }
+    },true);
 
     // Media loading optimisation without changing source quality.
-    // Keep the same original image/video files; only control when they are decoded/loaded/played.
+    // Original image/video files are preserved; only loading/decoding/playback timing changes.
     document.querySelectorAll('img').forEach((img,index)=>{
       if(!img.hasAttribute('decoding')) img.decoding='async';
       const r=img.getBoundingClientRect();
@@ -38,11 +51,8 @@
       const mediaObserver=new IntersectionObserver(entries=>{
         entries.forEach(entry=>{
           const video=entry.target;
-          if(entry.isIntersecting){
-            if(video.autoplay) video.play().catch(()=>{});
-          }else if(video.autoplay){
-            video.pause();
-          }
+          if(entry.isIntersecting){if(video.autoplay) video.play().catch(()=>{});}
+          else if(video.autoplay){video.pause();}
         });
       },{threshold:.08,rootMargin:'180px 0px'});
       siteVideos.forEach(video=>mediaObserver.observe(video));
@@ -92,20 +102,14 @@
       }else{
         const sectionObserver=new IntersectionObserver(entries=>{
           entries.forEach(entry=>{
-            if(entry.isIntersecting){
-              entry.target.classList.add('ws-section-visible');
-              sectionObserver.unobserve(entry.target);
-            }
+            if(entry.isIntersecting){entry.target.classList.add('ws-section-visible');sectionObserver.unobserve(entry.target);}
           });
         },{threshold:.045,rootMargin:'0px 0px -3% 0px'});
         sections.forEach(section=>{
           section.classList.add('ws-scroll-section');
           const r=section.getBoundingClientRect();
-          if(r.top < window.innerHeight*.94 && r.bottom > 0){
-            requestAnimationFrame(()=>section.classList.add('ws-section-visible'));
-          }else{
-            sectionObserver.observe(section);
-          }
+          if(r.top < window.innerHeight*.94 && r.bottom > 0) requestAnimationFrame(()=>section.classList.add('ws-section-visible'));
+          else sectionObserver.observe(section);
         });
       }
     }
@@ -114,61 +118,60 @@
       const stack=document.querySelector('.blocks-demo-video,.media-card.stack-video video');
       if(stack){stack.defaultPlaybackRate=1.3;stack.playbackRate=1.3;stack.addEventListener('loadedmetadata',()=>{stack.defaultPlaybackRate=1.3;stack.playbackRate=1.3;},{once:true});}
 
-      // Correct the carousel against the REAL viewport centre. The page's own carousel
-      // measures a transformed card width, which can increasingly offset the active card.
-      // We correct the final translateX using the active card's rendered centre instead.
-      const track=document.getElementById('carouselTrack');
-      const shell=document.querySelector('.carousel-shell');
-      let recenterRaf=0;
-      let settleTimer=0;
-      const enforcePlayback=()=>{
-        if(!track)return;
-        track.querySelectorAll('.carousel-card').forEach(card=>{
-          const video=card.querySelector('video');
-          if(!video)return;
-          if(card.classList.contains('active')) video.play().catch(()=>{});
-          else{video.pause();try{video.currentTime=0}catch(_){}}
-        });
-      };
-      const recenterActive=()=>{
-        recenterRaf=0;
-        if(!track||!shell)return;
-        const active=track.querySelector('.carousel-card.active');
-        if(!active)return;
-        const shellRect=shell.getBoundingClientRect();
-        const cardRect=active.getBoundingClientRect();
-        const delta=(shellRect.left+shellRect.width/2)-(cardRect.left+cardRect.width/2);
-        if(Math.abs(delta)>.5){
-          let currentX=0;
-          const transform=getComputedStyle(track).transform;
-          if(transform&&transform!=='none'){
-            try{currentX=new DOMMatrixReadOnly(transform).m41;}catch(_){
-              const match=transform.match(/matrix\([^,]+,[^,]+,[^,]+,[^,]+,\s*([^,]+)/);
-              if(match)currentX=parseFloat(match[1])||0;
+      const carouselTrack=document.getElementById('carouselTrack');
+      const carouselShell=document.querySelector('.carousel-shell');
+
+      // Replace the page's original updateCarousel calculation.
+      // The original used getBoundingClientRect().width on a scaled card, so each step
+      // accumulated horizontal error. offsetWidth gives the real untransformed flex width.
+      if(carouselTrack&&carouselShell&&typeof window.updateCarousel==='function'){
+        window.updateCarousel=function(animate=true){
+          const cards=[...carouselTrack.querySelectorAll('.carousel-card')];
+          if(!cards.length || !filtered.length)return;
+
+          renderPosition=Math.max(0,Math.min(renderPosition,cards.length-1));
+          currentIndex=mod(renderPosition,filtered.length);
+          carouselTrack.classList.toggle('no-transition',!animate||prefersReducedMotion);
+
+          cards.forEach((card,i)=>{
+            const active=i===renderPosition;
+            card.classList.toggle('active',active);
+            card.setAttribute('aria-current',active?'true':'false');
+            const video=card.querySelector('video');
+            if(video){
+              if(active&&!modalPaused) video.play().catch(()=>{});
+              else{video.pause();try{if(!active)video.currentTime=0}catch(_){}}
             }
+            const top=card.querySelector('.carousel-top');
+            const logical=Number(card.dataset.logical);
+            if(top) top.innerHTML=`<span class="chip">${filtered[logical]?.category||''}</span>${active?'<span class="chip playchip">Live preview</span>':''}`;
+          });
+
+          const styles=getComputedStyle(carouselTrack);
+          const gap=parseFloat(styles.columnGap||styles.gap)||24;
+          const cardW=cards[0].offsetWidth;
+          const shellW=carouselShell.clientWidth;
+          const offset=shellW/2-cardW/2-renderPosition*(cardW+gap);
+          carouselTrack.style.transform=`translateX(${offset}px)`;
+
+          if(!animate||prefersReducedMotion){
+            requestAnimationFrame(()=>carouselTrack.classList.add('no-transition'));
           }
-          track.style.transform=`translateX(${currentX+delta}px)`;
-        }
-        enforcePlayback();
-      };
-      const scheduleRecenter=(settle=false)=>{
-        if(recenterRaf)cancelAnimationFrame(recenterRaf);
-        recenterRaf=requestAnimationFrame(recenterActive);
-        if(settle){clearTimeout(settleTimer);settleTimer=setTimeout(recenterActive,500);}
-      };
-      if(track&&shell){
-        new MutationObserver(()=>scheduleRecenter(true)).observe(track,{attributes:true,attributeFilter:['style'],childList:true});
-        track.addEventListener('transitionend',()=>scheduleRecenter(false));
-        track.addEventListener('play',e=>{
+        };
+
+        // Apply the corrected centre immediately, and again after layout changes.
+        requestAnimationFrame(()=>window.updateCarousel(false));
+        setTimeout(()=>window.updateCarousel(false),180);
+        window.addEventListener('resize',()=>window.updateCarousel(false),{passive:true});
+        window.addEventListener('orientationchange',()=>setTimeout(()=>window.updateCarousel(false),120),{passive:true});
+
+        // Only the active/centred card is ever allowed to play.
+        carouselTrack.addEventListener('play',e=>{
           const video=e.target;
           if(video?.tagName==='VIDEO'&&!video.closest('.carousel-card')?.classList.contains('active')){
             video.pause();try{video.currentTime=0}catch(_){ }
           }
         },true);
-        window.addEventListener('resize',()=>scheduleRecenter(true),{passive:true});
-        window.addEventListener('orientationchange',()=>scheduleRecenter(true),{passive:true});
-        setTimeout(()=>scheduleRecenter(true),150);
-        setTimeout(()=>scheduleRecenter(false),1000);
       }
     }
   });
@@ -176,80 +179,61 @@
 
 // Keep every long-form page section submenu pinned exactly below the live header height.
 (() => {
-  const header = document.querySelector('.ws-site-header');
-  const subnav = document.querySelector('.ws-section-subnav');
-  if (!header || !subnav) return;
-  const syncStickyOffsets = () => {
-    const headerHeight = Math.ceil(header.getBoundingClientRect().height || 0);
-    const subnavHeight = Math.ceil(subnav.getBoundingClientRect().height || 0);
-    if (headerHeight) document.documentElement.style.setProperty('--ws-header-height', `${headerHeight}px`);
-    if (subnavHeight) document.documentElement.style.setProperty('--ws-subnav-height', `${subnavHeight}px`);
+  const header=document.querySelector('.ws-site-header');
+  const subnav=document.querySelector('.ws-section-subnav');
+  if(!header||!subnav)return;
+  const syncStickyOffsets=()=>{
+    const headerHeight=Math.ceil(header.getBoundingClientRect().height||0);
+    const subnavHeight=Math.ceil(subnav.getBoundingClientRect().height||0);
+    if(headerHeight)document.documentElement.style.setProperty('--ws-header-height',`${headerHeight}px`);
+    if(subnavHeight)document.documentElement.style.setProperty('--ws-subnav-height',`${subnavHeight}px`);
   };
   syncStickyOffsets();
-  window.addEventListener('resize', syncStickyOffsets, {passive:true});
-  window.addEventListener('orientationchange', syncStickyOffsets, {passive:true});
-  if ('ResizeObserver' in window) {
-    const ro = new ResizeObserver(syncStickyOffsets);
-    ro.observe(header);
-    ro.observe(subnav);
-  }
+  window.addEventListener('resize',syncStickyOffsets,{passive:true});
+  window.addEventListener('orientationchange',syncStickyOffsets,{passive:true});
+  if('ResizeObserver'in window){const ro=new ResizeObserver(syncStickyOffsets);ro.observe(header);ro.observe(subnav);}
 })();
 
 // ACTUAL VIEWPORT-STICKY SUBNAV FIX
 (() => {
-  const init = () => {
-    const header = document.querySelector('.ws-site-header');
-    const subnav = document.querySelector('.ws-section-subnav');
-    if (!header || !subnav) return;
-    const placeholder = document.createElement('div');
-    placeholder.className = 'ws-subnav-placeholder';
-    subnav.parentNode.insertBefore(placeholder, subnav);
-    let triggerY = 0;
-    let ticking = false;
-    const setVars = () => {
-      const headerH = Math.ceil(header.getBoundingClientRect().height || 0);
-      const subnavH = Math.ceil(subnav.getBoundingClientRect().height || 0);
-      if (headerH) document.documentElement.style.setProperty('--ws-header-height', `${headerH}px`);
-      if (subnavH) document.documentElement.style.setProperty('--ws-subnav-height', `${subnavH}px`);
-      return {headerH, subnavH};
+  const init=()=>{
+    const header=document.querySelector('.ws-site-header');
+    const subnav=document.querySelector('.ws-section-subnav');
+    if(!header||!subnav)return;
+    const placeholder=document.createElement('div');
+    placeholder.className='ws-subnav-placeholder';
+    subnav.parentNode.insertBefore(placeholder,subnav);
+    let triggerY=0;
+    let ticking=false;
+    const setVars=()=>{
+      const headerH=Math.ceil(header.getBoundingClientRect().height||0);
+      const subnavH=Math.ceil(subnav.getBoundingClientRect().height||0);
+      if(headerH)document.documentElement.style.setProperty('--ws-header-height',`${headerH}px`);
+      if(subnavH)document.documentElement.style.setProperty('--ws-subnav-height',`${subnavH}px`);
+      return{headerH,subnavH};
     };
-    const update = () => {
-      ticking = false;
-      const {subnavH} = setVars();
-      const shouldFix = window.scrollY >= triggerY;
-      if (shouldFix) {
-        placeholder.style.height = `${subnavH}px`;
-        placeholder.classList.add('active');
-        subnav.classList.add('ws-subnav-fixed');
-      } else {
-        subnav.classList.remove('ws-subnav-fixed');
-        placeholder.classList.remove('active');
-        placeholder.style.height = '0px';
-      }
+    const update=()=>{
+      ticking=false;
+      const{subnavH}=setVars();
+      const shouldFix=window.scrollY>=triggerY;
+      if(shouldFix){placeholder.style.height=`${subnavH}px`;placeholder.classList.add('active');subnav.classList.add('ws-subnav-fixed');}
+      else{subnav.classList.remove('ws-subnav-fixed');placeholder.classList.remove('active');placeholder.style.height='0px';}
     };
-    const measure = () => {
+    const measure=()=>{
       subnav.classList.remove('ws-subnav-fixed');
       placeholder.classList.remove('active');
-      placeholder.style.height = '0px';
-      const {headerH} = setVars();
-      triggerY = subnav.getBoundingClientRect().top + window.scrollY - headerH;
+      placeholder.style.height='0px';
+      const{headerH}=setVars();
+      triggerY=subnav.getBoundingClientRect().top+window.scrollY-headerH;
       update();
     };
-    const schedule = () => {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(update);
-      }
-    };
+    const schedule=()=>{if(!ticking){ticking=true;requestAnimationFrame(update);}};
     requestAnimationFrame(measure);
-    window.addEventListener('scroll', schedule, {passive:true});
-    window.addEventListener('resize', measure, {passive:true});
-    window.addEventListener('orientationchange', measure, {passive:true});
-    if ('ResizeObserver' in window) {
-      const ro = new ResizeObserver(measure);
-      ro.observe(header);
-    }
+    window.addEventListener('scroll',schedule,{passive:true});
+    window.addEventListener('resize',measure,{passive:true});
+    window.addEventListener('orientationchange',measure,{passive:true});
+    if('ResizeObserver'in window){const ro=new ResizeObserver(measure);ro.observe(header);}
   };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })();
