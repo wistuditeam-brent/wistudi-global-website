@@ -39,13 +39,40 @@ function localizedTarget(url, locale) {
   return `/${locale}${path === '/' ? '/' : path}${url.search}${url.hash}`;
 }
 
+const EARLY_BOOTSTRAP = `<style id="ws-i18n-preload">html.ws-i18n-pending body{visibility:hidden}html.i18n-ready body{visibility:visible}</style>
+<script>(function(){
+  var supported=['en','vi','zh-cn','th','id','ms','ar'];
+  var parts=location.pathname.split('/').filter(Boolean);
+  var explicit=supported.indexOf((parts[0]||'').toLowerCase())>-1?(parts[0]||'').toLowerCase():null;
+  var map=function(lang){lang=(lang||'').toLowerCase();if(lang.indexOf('zh')===0)return'zh-cn';if(lang.indexOf('vi')===0)return'vi';if(lang.indexOf('th')===0)return'th';if(lang.indexOf('id')===0)return'id';if(lang.indexOf('ms')===0)return'ms';if(lang.indexOf('ar')===0)return'ar';if(lang.indexOf('en')===0)return'en';return null};
+  var cookie=(document.cookie.match(/(?:^|;\\s*)wistudi_locale=([^;]+)/i)||[])[1];
+  try{cookie=cookie?decodeURIComponent(cookie).toLowerCase():null}catch(e){cookie=null}
+  var stored=null;try{stored=localStorage.getItem('wistudi_locale')}catch(e){}
+  var isPage=/^\\/(?:|index\\.html|platform\\/?|platform\\/index\\.html|blocks-activities\\/?|blocks-activities\\/index\\.html|organisations\\/?|organisations\\/index\\.html|contact\\/?|contact\\/index\\.html)$/.test(location.pathname);
+  if(!explicit&&isPage){
+    var langs=navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||'en'];
+    var browser='en';for(var i=0;i<langs.length;i++){var m=map(langs[i]);if(m){browser=m;break}}
+    var preferred=(stored&&supported.indexOf(stored)>-1?stored:null)||(cookie&&supported.indexOf(cookie)>-1?cookie:null)||browser;
+    if(preferred&&preferred!=='en'){
+      var p=location.pathname;if(p==='/index.html'||p==='/platform'||p==='/platform/'||p==='/platform/index.html')p='/';
+      location.replace('/'+preferred+(p==='/'?'/':p)+location.search+location.hash);return;
+    }
+  }
+  if(explicit&&explicit!=='en'){
+    document.documentElement.lang=explicit==='zh-cn'?'zh-CN':explicit;
+    document.documentElement.dir=explicit==='ar'?'rtl':'ltr';
+    document.documentElement.classList.add('ws-i18n-pending');
+    setTimeout(function(){document.documentElement.classList.remove('ws-i18n-pending')},2500);
+  }
+})();</script>`;
+
 export async function onRequest(context) {
   const request = context.request;
   const url = new URL(request.url);
   const explicit = explicitLocale(url.pathname);
 
-  // On unprefixed website pages, use a saved manual choice first, then the
-  // browser/device language. English remains on the canonical root URLs.
+  // Server-side first visit routing. A saved manual choice wins; otherwise use
+  // the browser/device Accept-Language header. English keeps canonical root URLs.
   if (!explicit && isWebsitePage(url.pathname)) {
     const preferred = cookieLocale(request.headers.get('cookie') || '') || browserLocale(request.headers.get('accept-language') || '');
     if (preferred && preferred !== 'en') {
@@ -57,17 +84,10 @@ export async function onRequest(context) {
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.includes('text/html')) return response;
 
-  const locale = explicit || 'en';
-  const dir = locale === 'ar' ? 'rtl' : 'ltr';
-  const lang = locale === 'zh-cn' ? 'zh-CN' : locale;
-  const preload = locale === 'en' ? '' : `
-    <style id="ws-i18n-preload">html.ws-i18n-pending body{visibility:hidden}html.i18n-ready body{visibility:visible}</style>
-    <script>(function(){document.documentElement.lang='${lang}';document.documentElement.dir='${dir}';document.documentElement.classList.add('ws-i18n-pending');setTimeout(function(){document.documentElement.classList.remove('ws-i18n-pending')},2500)})();</script>`;
-
   return new HTMLRewriter()
     .on('head', {
       element(element) {
-        element.append(`${preload}<script src="/assets/js/i18n.js" defer></script>`, { html: true });
+        element.append(`${EARLY_BOOTSTRAP}<script src="/assets/js/i18n.js" defer></script>`, { html: true });
       }
     })
     .transform(response);
