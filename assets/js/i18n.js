@@ -32,14 +32,17 @@
 
   const stripLocale=(pathname=location.pathname)=>{
     const parts=pathname.split('/').filter(Boolean);
-    if(parts.length&&localeCodes.includes(parts[0].toLowerCase())) parts.shift();
+    if(parts.length&&localeCodes.includes(parts[0].toLowerCase()))parts.shift();
     let p='/'+parts.join('/');
     if(pathname.endsWith('/')&&!p.endsWith('/'))p+='/';
-    if(p==='/index.html')p='/';
-    if(p==='/platform/'||p==='/platform/index.html')p='/';
+    if(p==='/index.html'||p==='/platform/'||p==='/platform/index.html'||p==='/platform')p='/';
     return p||'/';
   };
+
   const basePath=stripLocale();
+  const normalizeSeoPath=p=>p==='/'?'/':p.replace(/index\.html$/,'');
+  const seoPath=normalizeSeoPath(basePath);
+
   const withLocale=(code,path=basePath)=>{
     let clean=stripLocale(path);
     if(clean==='/index.html')clean='/';
@@ -73,9 +76,6 @@
   document.head.appendChild(style);
 
   const canonicalOrigin='https://global.wistudi.com';
-  const normalizeSeoPath=p=>p==='/'?'/':p.replace(/index\.html$/,'');
-  const seoPath=normalizeSeoPath(basePath);
-
   const addAlternateLinks=()=>{
     document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el=>el.remove());
     localeCodes.forEach(code=>{
@@ -85,7 +85,8 @@
       link.href=canonicalOrigin+(code==='en'?seoPath:`/${code}${seoPath}`);
       document.head.appendChild(link);
     });
-    const x=document.createElement('link');x.rel='alternate';x.hreflang='x-default';x.href=canonicalOrigin+seoPath;document.head.appendChild(x);
+    const x=document.createElement('link');
+    x.rel='alternate';x.hreflang='x-default';x.href=canonicalOrigin+seoPath;document.head.appendChild(x);
     const canonical=document.querySelector('link[rel="canonical"]');
     if(canonical)canonical.href=canonicalOrigin+(detected==='en'?seoPath:`/${detected}${seoPath}`);
   };
@@ -117,32 +118,45 @@
       if(a.matches('.ws-lang-option,[data-locale]')||a.closest('.ws-lang'))return;
       const raw=a.getAttribute('href');
       if(!raw||raw.startsWith('#')||raw.startsWith('mailto:')||raw.startsWith('tel:')||raw.startsWith('javascript:'))return;
-      let u;
-      try{u=new URL(raw,location.href)}catch(_){return}
+      let u;try{u=new URL(raw,location.href)}catch(_){return}
       if(u.origin!==location.origin)return;
       const stripped=stripLocale(u.pathname);
       const normalized=stripped.replace(/index\.html$/,'')||'/';
       const recognized=knownPages.some(p=>normalizeSeoPath(p)===normalizeSeoPath(stripped))||normalized==='/'||normalized.startsWith('/blocks-activities/')||normalized.startsWith('/organisations/')||normalized.startsWith('/contact/');
       if(!recognized)return;
-      const target=`/${detected}${normalized==='/'?'/':normalized}`;
-      a.href=target+(u.search||'')+(u.hash||'');
+      a.href=`/${detected}${normalized==='/'?'/':normalized}`+(u.search||'')+(u.hash||'');
     });
   };
 
   const normalizeText=s=>(s||'').replace(/\s+/g,' ').trim();
   const translateNode=(node,dict)=>{
     if(node.nodeType===Node.TEXT_NODE){
-      const raw=node.nodeValue||'';const key=normalizeText(raw);if(!key||!dict[key])return;
-      const lead=raw.match(/^\s*/)?.[0]||'';const trail=raw.match(/\s*$/)?.[0]||'';node.nodeValue=lead+dict[key]+trail;return;
+      const raw=node.nodeValue||'';
+      const key=normalizeText(raw);
+      if(!key||!dict[key])return;
+      const lead=raw.match(/^\s*/)?.[0]||'';
+      const trail=raw.match(/\s*$/)?.[0]||'';
+      node.nodeValue=lead+dict[key]+trail;
+      return;
     }
     if(node.nodeType!==Node.ELEMENT_NODE)return;
     const el=node;
-    ['placeholder','title','aria-label','alt'].forEach(attr=>{const v=el.getAttribute?.(attr);const k=normalizeText(v);if(k&&dict[k])el.setAttribute(attr,dict[k]);});
+    ['placeholder','title','aria-label','alt'].forEach(attr=>{
+      const value=el.getAttribute?.(attr);
+      const key=normalizeText(value);
+      if(key&&dict[key])el.setAttribute(attr,dict[key]);
+    });
     [...el.childNodes].forEach(child=>translateNode(child,dict));
   };
 
   const fetchDictionary=async url=>{
-    try{const r=await fetch(url,{cache:'no-cache'});return r.ok?await r.json():null}catch(_){return null}
+    const controller='AbortController'in window?new AbortController():null;
+    const timer=controller?setTimeout(()=>controller.abort(),2500):null;
+    try{
+      const r=await fetch(url,{cache:'default',signal:controller?.signal});
+      return r.ok?await r.json():null;
+    }catch(_){return null}
+    finally{if(timer)clearTimeout(timer)}
   };
 
   const revealTranslatedPage=()=>{
@@ -152,7 +166,7 @@
   };
 
   const loadTranslations=async()=>{
-    if(detected==='en'){revealTranslatedPage();return;}
+    if(detected==='en'){revealTranslatedPage();return}
     try{
       const [base,site,extra]=await Promise.all([
         fetchDictionary(`/assets/i18n/${detected}.json`),
@@ -164,16 +178,16 @@
       const titles=Object.assign({},base.titles||{},site?.titles||{},extra?.titles||{});
       if(titles[seoPath])document.title=titles[seoPath];
       const meta=document.querySelector('meta[name="description"]');
-      if(meta){const key=normalizeText(meta.content);if(dict[key])meta.content=dict[key];}
+      if(meta){const key=normalizeText(meta.content);if(dict[key])meta.content=dict[key]}
       translateNode(document.body,dict);
-      const observer=new MutationObserver(records=>records.forEach(r=>{
-        r.addedNodes.forEach(n=>translateNode(n,dict));
-        if(r.type==='characterData')translateNode(r.target,dict);
+      const observer=new MutationObserver(records=>records.forEach(record=>{
+        record.addedNodes.forEach(node=>translateNode(node,dict));
+        if(record.type==='characterData')translateNode(record.target,dict);
       }));
       observer.observe(document.body,{childList:true,characterData:true,subtree:true});
       revealTranslatedPage();
     }catch(err){
-      console.warn('[Wistudi i18n] Translation dictionary unavailable:',detected,err);
+      console.warn('[Wistudi i18n] Translation unavailable:',detected,err);
       revealTranslatedPage();
     }
   };
