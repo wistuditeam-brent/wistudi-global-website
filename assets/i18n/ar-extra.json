@@ -1,0 +1,35 @@
+{
+  "titles": {
+    "/contact/": "تواصل مع Wistudi"
+  },
+  "strings": {
+    "Talk to Wistudi about organisations, partnerships, publishing, platform use, integrations or general enquiries — or book a meeting directly with the Wistudi team.": "تحدث مع Wistudi حول المؤسسات أو الشراكات أو النشر أو استخدام المنصة أو التكاملات أو الاستفسارات العامة — أو احجز اجتماعًا مباشرة مع فريق Wistudi.",
+    "Whether you're exploring Wistudi for an organisation, looking at a partnership, publishing learning content, or simply have a question, tell us what you're working on.": "سواء كنت تستكشف Wistudi لمؤسستك، أو تبحث عن شراكة، أو تنشر محتوى تعليميًا، أو لديك مجرد سؤال، أخبرنا بما تعمل عليه.",
+    "Choose the route that suits you: send the context, or talk it through with us directly.": "اختر الطريقة الأنسب لك: أرسل لنا التفاصيل أو تحدث معنا مباشرة.",
+    "Ways to contact Wistudi": "طرق التواصل مع Wistudi",
+    "Wistudi contact routes for organisations, schools and universities, partnerships, publishing and general enquiries": "طرق التواصل مع Wistudi للمؤسسات والمدارس والجامعات والشراكات والنشر والاستفسارات العامة",
+    "Publishing workflows, content projects, worksheet and Flow creation, and platform use cases.": "سير عمل النشر، ومشروعات المحتوى، وإنشاء أوراق العمل وFlows، وحالات استخدام المنصة.",
+    "Questions, support, media enquiries, or anything that doesn’t fit the other routes.": "الأسئلة والدعم والاستفسارات الإعلامية أو أي موضوع لا يندرج ضمن الخيارات الأخرى.",
+    "Your enquiry type helps us send it to the right person.": "يساعدنا نوع الاستفسار على توجيهه إلى الشخص المناسب.",
+    "Schools, universities, teams, training providers and larger deployments.": "المدارس والجامعات والفرق ومزودو التدريب وعمليات النشر على نطاق أكبر.",
+    "Bring the opportunity, integration idea or collaboration context.": "شاركنا الفرصة أو فكرة التكامل أو سياق التعاون الذي تفكر فيه.",
+    "By submitting this form, you’re asking Wistudi to contact you about your enquiry. Your details should only be used to respond to this request and related follow-up.": "بإرسال هذا النموذج، فإنك تطلب من Wistudi التواصل معك بخصوص استفسارك. ستُستخدم بياناتك فقط للرد على هذا الطلب والمتابعة المرتبطة به.",
+    "Meeting details": "تفاصيل الاجتماع",
+    "Wistudi conversations can begin with a single use case or a broader organisation, publishing or integration opportunity.": "يمكن أن تبدأ المحادثة مع Wistudi من حالة استخدام واحدة أو من فرصة أوسع تخص مؤسسة أو النشر أو التكامل.",
+    "Publishing and content": "النشر والمحتوى",
+    "Operating out of Vietnam": "نعمل من فيتنام",
+    "Sending…": "جارٍ الإرسال…",
+    "Preview mode: the form is working visually, but no message was sent. Connect /api/contact when this page is deployed.": "وضع المعاينة: النموذج يعمل بصريًا، لكن لم يتم إرسال أي رسالة. اربط /api/contact عند نشر هذه الصفحة.",
+    "Thanks — your enquiry has been sent to Wistudi.": "شكرًا — تم إرسال استفسارك إلى Wistudi.",
+    "We couldn’t send the enquiry yet. Please email support@wistudi.com, or connect the /api/contact endpoint for this page.": "تعذر إرسال الاستفسار حاليًا. يرجى مراسلة support@wistudi.com أو ربط نقطة /api/contact بهذه الصفحة.",
+    "Your enquiry has been sent to Wistudi.": "تم إرسال استفسارك إلى Wistudi.",
+    "General enquiry": "استفسار عام",
+    "Send an enquiry": "إرسال استفسار",
+    "Book a meeting": "حجز اجتماع",
+    "Interactive learning": "التعلم التفاعلي",
+    "XP Video": "XP Video",
+    "Flows and curriculum": "Flows والمناهج",
+    "Training and onboarding": "التدريب والتهيئة",
+    "Platform integrations": "تكاملات المنصة"
+  }
+}

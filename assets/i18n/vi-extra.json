@@ -1,0 +1,35 @@
+{
+  "titles": {
+    "/contact/": "Liên hệ Wistudi"
+  },
+  "strings": {
+    "Talk to Wistudi about organisations, partnerships, publishing, platform use, integrations or general enquiries — or book a meeting directly with the Wistudi team.": "Trao đổi với Wistudi về tổ chức, hợp tác, xuất bản, sử dụng nền tảng, tích hợp hoặc các yêu cầu chung — hoặc đặt lịch họp trực tiếp với đội ngũ Wistudi.",
+    "Whether you're exploring Wistudi for an organisation, looking at a partnership, publishing learning content, or simply have a question, tell us what you're working on.": "Dù bạn đang tìm hiểu Wistudi cho một tổ chức, cân nhắc hợp tác, xuất bản nội dung học tập hay chỉ đơn giản là có câu hỏi, hãy cho chúng tôi biết bạn đang thực hiện điều gì.",
+    "Choose the route that suits you: send the context, or talk it through with us directly.": "Chọn cách phù hợp với bạn: gửi bối cảnh cho chúng tôi hoặc trao đổi trực tiếp cùng đội ngũ Wistudi.",
+    "Ways to contact Wistudi": "Các cách liên hệ với Wistudi",
+    "Wistudi contact routes for organisations, schools and universities, partnerships, publishing and general enquiries": "Các kênh liên hệ Wistudi dành cho tổ chức, trường học và đại học, đối tác, xuất bản và yêu cầu chung",
+    "Publishing workflows, content projects, worksheet and Flow creation, and platform use cases.": "Quy trình xuất bản, dự án nội dung, tạo worksheet và Flow, cùng các trường hợp sử dụng nền tảng.",
+    "Questions, support, media enquiries, or anything that doesn’t fit the other routes.": "Câu hỏi, hỗ trợ, yêu cầu truyền thông hoặc bất kỳ nội dung nào không thuộc các nhóm còn lại.",
+    "Your enquiry type helps us send it to the right person.": "Loại yêu cầu giúp chúng tôi chuyển thông tin đến đúng người phụ trách.",
+    "Schools, universities, teams, training providers and larger deployments.": "Trường học, đại học, đội ngũ, đơn vị đào tạo và các kế hoạch triển khai quy mô lớn.",
+    "Bring the opportunity, integration idea or collaboration context.": "Hãy chia sẻ cơ hội, ý tưởng tích hợp hoặc bối cảnh hợp tác của bạn.",
+    "By submitting this form, you’re asking Wistudi to contact you about your enquiry. Your details should only be used to respond to this request and related follow-up.": "Khi gửi biểu mẫu này, bạn đồng ý để Wistudi liên hệ về yêu cầu của bạn. Thông tin của bạn chỉ được sử dụng để phản hồi yêu cầu này và các trao đổi liên quan.",
+    "Meeting details": "Thông tin cuộc họp",
+    "Wistudi conversations can begin with a single use case or a broader organisation, publishing or integration opportunity.": "Cuộc trao đổi với Wistudi có thể bắt đầu từ một trường hợp sử dụng cụ thể hoặc một cơ hội rộng hơn về tổ chức, xuất bản hay tích hợp.",
+    "Publishing and content": "Xuất bản và nội dung",
+    "Operating out of Vietnam": "Hoạt động từ Việt Nam",
+    "Sending…": "Đang gửi…",
+    "Preview mode: the form is working visually, but no message was sent. Connect /api/contact when this page is deployed.": "Chế độ xem trước: biểu mẫu đang hoạt động về mặt giao diện nhưng chưa gửi tin nhắn. Hãy kết nối /api/contact khi trang được triển khai.",
+    "Thanks — your enquiry has been sent to Wistudi.": "Cảm ơn — yêu cầu của bạn đã được gửi đến Wistudi.",
+    "We couldn’t send the enquiry yet. Please email support@wistudi.com, or connect the /api/contact endpoint for this page.": "Hiện chưa thể gửi yêu cầu. Vui lòng email support@wistudi.com hoặc kết nối endpoint /api/contact cho trang này.",
+    "Your enquiry has been sent to Wistudi.": "Yêu cầu của bạn đã được gửi đến Wistudi.",
+    "General enquiry": "Yêu cầu chung",
+    "Send an enquiry": "Gửi yêu cầu",
+    "Book a meeting": "Đặt lịch họp",
+    "Interactive learning": "Học tập tương tác",
+    "XP Video": "XP Video",
+    "Flows and curriculum": "Flows và chương trình học",
+    "Training and onboarding": "Đào tạo và onboarding",
+    "Platform integrations": "Tích hợp nền tảng"
+  }
+}

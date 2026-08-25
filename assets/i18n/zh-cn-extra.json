@@ -1,0 +1,35 @@
+{
+  "titles": {
+    "/contact/": "联系 Wistudi"
+  },
+  "strings": {
+    "Talk to Wistudi about organisations, partnerships, publishing, platform use, integrations or general enquiries — or book a meeting directly with the Wistudi team.": "与 Wistudi 团队交流组织方案、合作、内容发布、平台使用、集成或一般咨询，也可以直接预约会议。",
+    "Whether you're exploring Wistudi for an organisation, looking at a partnership, publishing learning content, or simply have a question, tell us what you're working on.": "无论你是在为组织了解 Wistudi、探索合作机会、发布学习内容，还是只是有一个问题，都可以告诉我们你正在做什么。",
+    "Choose the route that suits you: send the context, or talk it through with us directly.": "选择最适合你的方式：发送背景信息，或直接与我们沟通。",
+    "Ways to contact Wistudi": "联系 Wistudi 的方式",
+    "Wistudi contact routes for organisations, schools and universities, partnerships, publishing and general enquiries": "适用于组织、学校和大学、合作、发布以及一般咨询的 Wistudi 联系方式",
+    "Publishing workflows, content projects, worksheet and Flow creation, and platform use cases.": "发布流程、内容项目、工作表与 Flow 创建，以及平台应用场景。",
+    "Questions, support, media enquiries, or anything that doesn’t fit the other routes.": "问题、支持、媒体咨询，或任何不属于其他类别的事项。",
+    "Your enquiry type helps us send it to the right person.": "咨询类型可以帮助我们把信息发送给合适的负责人。",
+    "Schools, universities, teams, training providers and larger deployments.": "学校、大学、团队、培训机构以及更大规模的部署。",
+    "Bring the opportunity, integration idea or collaboration context.": "告诉我们你的合作机会、集成想法或协作背景。",
+    "By submitting this form, you’re asking Wistudi to contact you about your enquiry. Your details should only be used to respond to this request and related follow-up.": "提交此表单即表示你同意 Wistudi 就本次咨询与你联系。你的信息仅用于回复本次请求及相关后续沟通。",
+    "Meeting details": "会议信息",
+    "Wistudi conversations can begin with a single use case or a broader organisation, publishing or integration opportunity.": "与 Wistudi 的交流可以从一个具体应用场景开始，也可以围绕更广泛的组织、发布或集成机会展开。",
+    "Publishing and content": "发布与内容",
+    "Operating out of Vietnam": "运营地点：越南",
+    "Sending…": "正在发送…",
+    "Preview mode: the form is working visually, but no message was sent. Connect /api/contact when this page is deployed.": "预览模式：表单界面可正常使用，但不会发送消息。部署此页面后请连接 /api/contact。",
+    "Thanks — your enquiry has been sent to Wistudi.": "谢谢，你的咨询已发送给 Wistudi。",
+    "We couldn’t send the enquiry yet. Please email support@wistudi.com, or connect the /api/contact endpoint for this page.": "暂时无法发送咨询。请发送邮件至 support@wistudi.com，或为此页面连接 /api/contact 接口。",
+    "Your enquiry has been sent to Wistudi.": "你的咨询已发送给 Wistudi。",
+    "General enquiry": "一般咨询",
+    "Send an enquiry": "发送咨询",
+    "Book a meeting": "预约会议",
+    "Interactive learning": "互动学习",
+    "XP Video": "XP Video",
+    "Flows and curriculum": "Flows 与课程体系",
+    "Training and onboarding": "培训与入职",
+    "Platform integrations": "平台集成"
+  }
+}

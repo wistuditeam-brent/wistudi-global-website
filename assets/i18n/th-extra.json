@@ -1,0 +1,35 @@
+{
+  "titles": {
+    "/contact/": "ติดต่อ Wistudi"
+  },
+  "strings": {
+    "Talk to Wistudi about organisations, partnerships, publishing, platform use, integrations or general enquiries — or book a meeting directly with the Wistudi team.": "พูดคุยกับ Wistudi เรื่ององค์กร พาร์ตเนอร์ การเผยแพร่ การใช้งานแพลตฟอร์ม การเชื่อมต่อระบบ หรือคำถามทั่วไป หรือจองประชุมกับทีม Wistudi ได้โดยตรง",
+    "Whether you're exploring Wistudi for an organisation, looking at a partnership, publishing learning content, or simply have a question, tell us what you're working on.": "ไม่ว่าคุณกำลังสำรวจ Wistudi สำหรับองค์กร มองหาโอกาสความร่วมมือ เผยแพร่เนื้อหาการเรียนรู้ หรือมีคำถามทั่วไป บอกเราได้เลยว่าคุณกำลังทำอะไรอยู่",
+    "Choose the route that suits you: send the context, or talk it through with us directly.": "เลือกวิธีที่เหมาะกับคุณ: ส่งรายละเอียดให้เรา หรือพูดคุยกับเราโดยตรง",
+    "Ways to contact Wistudi": "ช่องทางติดต่อ Wistudi",
+    "Wistudi contact routes for organisations, schools and universities, partnerships, publishing and general enquiries": "ช่องทางติดต่อ Wistudi สำหรับองค์กร โรงเรียนและมหาวิทยาลัย พาร์ตเนอร์ การเผยแพร่ และคำถามทั่วไป",
+    "Publishing workflows, content projects, worksheet and Flow creation, and platform use cases.": "เวิร์กโฟลว์การเผยแพร่ โปรเจกต์เนื้อหา การสร้างเวิร์กชีตและ Flow รวมถึงกรณีใช้งานแพลตฟอร์ม",
+    "Questions, support, media enquiries, or anything that doesn’t fit the other routes.": "คำถาม การสนับสนุน สื่อ หรือเรื่องอื่น ๆ ที่ไม่เข้ากับหมวดหมู่อื่น",
+    "Your enquiry type helps us send it to the right person.": "ประเภทคำถามช่วยให้เราส่งเรื่องไปยังคนที่เหมาะสม",
+    "Schools, universities, teams, training providers and larger deployments.": "โรงเรียน มหาวิทยาลัย ทีม ผู้ให้บริการฝึกอบรม และการใช้งานในระดับที่ใหญ่ขึ้น",
+    "Bring the opportunity, integration idea or collaboration context.": "ส่งรายละเอียดโอกาส ไอเดียการเชื่อมต่อ หรือบริบทของความร่วมมือมาให้เรา",
+    "By submitting this form, you’re asking Wistudi to contact you about your enquiry. Your details should only be used to respond to this request and related follow-up.": "เมื่อส่งแบบฟอร์มนี้ คุณยินยอมให้ Wistudi ติดต่อกลับเกี่ยวกับคำถามของคุณ ข้อมูลของคุณจะใช้เพื่อการตอบคำถามและการติดตามที่เกี่ยวข้องเท่านั้น",
+    "Meeting details": "รายละเอียดการประชุม",
+    "Wistudi conversations can begin with a single use case or a broader organisation, publishing or integration opportunity.": "การพูดคุยกับ Wistudi อาจเริ่มจากกรณีใช้งานเดียว หรือขยายไปสู่โอกาสด้านองค์กร การเผยแพร่ หรือการเชื่อมต่อระบบ",
+    "Publishing and content": "การเผยแพร่และเนื้อหา",
+    "Operating out of Vietnam": "ดำเนินงานจากเวียดนาม",
+    "Sending…": "กำลังส่ง…",
+    "Preview mode: the form is working visually, but no message was sent. Connect /api/contact when this page is deployed.": "โหมดพรีวิว: แบบฟอร์มแสดงผลได้ แต่ยังไม่ส่งข้อความ โปรดเชื่อมต่อ /api/contact เมื่อเผยแพร่หน้านี้",
+    "Thanks — your enquiry has been sent to Wistudi.": "ขอบคุณ คำถามของคุณถูกส่งไปยัง Wistudi แล้ว",
+    "We couldn’t send the enquiry yet. Please email support@wistudi.com, or connect the /api/contact endpoint for this page.": "ยังไม่สามารถส่งคำถามได้ โปรดอีเมล support@wistudi.com หรือเชื่อมต่อ /api/contact สำหรับหน้านี้",
+    "Your enquiry has been sent to Wistudi.": "คำถามของคุณถูกส่งไปยัง Wistudi แล้ว",
+    "General enquiry": "คำถามทั่วไป",
+    "Send an enquiry": "ส่งคำถาม",
+    "Book a meeting": "จองประชุม",
+    "Interactive learning": "การเรียนรู้แบบโต้ตอบ",
+    "XP Video": "XP Video",
+    "Flows and curriculum": "Flows และหลักสูตร",
+    "Training and onboarding": "การฝึกอบรมและออนบอร์ดดิ้ง",
+    "Platform integrations": "การเชื่อมต่อแพลตฟอร์ม"
+  }
+}
