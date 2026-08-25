@@ -1,20 +1,36 @@
 (()=>{
   const LOCALES={
-    en:{label:'English',short:'EN',htmlLang:'en',dir:'ltr'},
-    vi:{label:'Tiếng Việt',short:'VI',htmlLang:'vi',dir:'ltr'},
-    'zh-cn':{label:'简体中文',short:'中文',htmlLang:'zh-CN',dir:'ltr'},
-    th:{label:'ไทย',short:'TH',htmlLang:'th',dir:'ltr'},
-    id:{label:'Bahasa Indonesia',short:'ID',htmlLang:'id',dir:'ltr'},
-    ms:{label:'Bahasa Melayu',short:'MS',htmlLang:'ms',dir:'ltr'},
-    ar:{label:'العربية',short:'AR',htmlLang:'ar',dir:'rtl'}
+    en:{label:'English',short:'EN',htmlLang:'en',dir:'ltr',flag:'🇬🇧'},
+    vi:{label:'Tiếng Việt',short:'VI',htmlLang:'vi',dir:'ltr',flag:'🇻🇳'},
+    'zh-cn':{label:'简体中文',short:'中文',htmlLang:'zh-CN',dir:'ltr',flag:'🇨🇳'},
+    th:{label:'ไทย',short:'TH',htmlLang:'th',dir:'ltr',flag:'🇹🇭'},
+    id:{label:'Bahasa Indonesia',short:'ID',htmlLang:'id',dir:'ltr',flag:'🇮🇩'},
+    ms:{label:'Bahasa Melayu',short:'MS',htmlLang:'ms',dir:'ltr',flag:'🇲🇾'},
+    ar:{label:'العربية',short:'AR',htmlLang:'ar',dir:'rtl',flag:'🇸🇦'}
   };
   const localeCodes=Object.keys(LOCALES);
   const knownPages=['/','/index.html','/platform/','/platform/index.html','/blocks-activities/','/blocks-activities/index.html','/organisations/','/organisations/index.html','/contact/','/contact/index.html'];
-
   const ready=fn=>document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn,{once:true}):fn();
+
   const pathParts=location.pathname.split('/').filter(Boolean);
-  const detected=localeCodes.includes((pathParts[0]||'').toLowerCase())?pathParts[0].toLowerCase():'en';
+  const explicitLocale=localeCodes.includes((pathParts[0]||'').toLowerCase())?pathParts[0].toLowerCase():null;
+  const detected=explicitLocale||'en';
   const locale=LOCALES[detected]||LOCALES.en;
+
+  const savePreference=code=>{
+    if(!LOCALES[code])return;
+    try{localStorage.setItem('wistudi_locale',code)}catch(_){ }
+    document.cookie=`wistudi_locale=${encodeURIComponent(code)};path=/;max-age=31536000;SameSite=Lax`;
+  };
+
+  // Migrate any already-saved browser preference into the cookie used by
+  // Cloudflare's server-side first-visit routing.
+  try{
+    const stored=localStorage.getItem('wistudi_locale');
+    if(stored&&LOCALES[stored]&&!document.cookie.includes('wistudi_locale=')){
+      document.cookie=`wistudi_locale=${encodeURIComponent(stored)};path=/;max-age=31536000;SameSite=Lax`;
+    }
+  }catch(_){ }
 
   const stripLocale=(pathname=location.pathname)=>{
     const parts=pathname.split('/').filter(Boolean);
@@ -36,12 +52,14 @@
   document.documentElement.lang=locale.htmlLang;
   document.documentElement.dir=locale.dir;
   document.documentElement.dataset.locale=detected;
-  document.body?.classList.add(`locale-${detected.replace(/[^a-z0-9]/g,'-')}`);
 
   const style=document.createElement('style');
   style.textContent=`
+    .ws-lang-toggle{gap:7px}
+    .ws-lang-flag{display:inline-flex;align-items:center;justify-content:center;font-size:1rem;line-height:1;width:20px;flex:0 0 20px}
     .ws-lang-option[href]{text-decoration:none;cursor:pointer}
     .ws-lang-option[href]:hover{background:#faf8fd;color:#4f465b}
+    .ws-lang-option-main{display:flex;align-items:center;gap:9px;min-width:0}
     [dir="rtl"] body{text-align:right}
     [dir="rtl"] .ws-lang-menu{right:auto;left:0}
     [dir="rtl"] .ws-lang-option{text-align:right}
@@ -55,6 +73,7 @@
   const canonicalOrigin='https://global.wistudi.com';
   const normalizeSeoPath=p=>p==='/'?'/':p.replace(/index\.html$/,'');
   const seoPath=normalizeSeoPath(basePath);
+
   const addAlternateLinks=()=>{
     document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el=>el.remove());
     localeCodes.forEach(code=>{
@@ -75,7 +94,7 @@
       const menu=box.querySelector('.ws-lang-menu');
       if(toggle){
         const svg=toggle.querySelector('svg')?.outerHTML||'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg>';
-        toggle.innerHTML=`${locale.short} ${svg}`;
+        toggle.innerHTML=`<span class="ws-lang-flag" aria-hidden="true">${locale.flag}</span><span>${locale.short}</span>${svg}`;
         toggle.setAttribute('aria-label',`Language: ${locale.label}`);
       }
       if(menu){
@@ -83,8 +102,9 @@
           const item=LOCALES[code];
           const current=code===detected?' current':'';
           const currentAttr=code===detected?' aria-current="page"':'';
-          return `<a class="ws-lang-option${current}" href="${withLocale(code)}" role="menuitem"${currentAttr}><span>${item.label}</span><span>${item.short}</span></a>`;
+          return `<a class="ws-lang-option${current}" data-locale="${code}" href="${withLocale(code)}" role="menuitem"${currentAttr}><span class="ws-lang-option-main"><span class="ws-lang-flag" aria-hidden="true">${item.flag}</span><span>${item.label}</span></span><span>${item.short}</span></a>`;
         }).join('');
+        menu.querySelectorAll('a[data-locale]').forEach(a=>a.addEventListener('click',()=>savePreference(a.dataset.locale)));
       }
     });
   };
@@ -92,6 +112,8 @@
   const localizeInternalLinks=()=>{
     if(detected==='en')return;
     document.querySelectorAll('a[href]').forEach(a=>{
+      // Critical: language-switcher links must retain their own target locale.
+      if(a.matches('.ws-lang-option,[data-locale]')||a.closest('.ws-lang'))return;
       const raw=a.getAttribute('href');
       if(!raw||raw.startsWith('#')||raw.startsWith('mailto:')||raw.startsWith('tel:')||raw.startsWith('javascript:'))return;
       let u;
@@ -114,8 +136,7 @@
     }
     if(node.nodeType!==Node.ELEMENT_NODE)return;
     const el=node;
-    ['placeholder','title','aria-label'].forEach(attr=>{const v=el.getAttribute?.(attr);const k=normalizeText(v);if(k&&dict[k])el.setAttribute(attr,dict[k]);});
-    if(el.tagName==='META'&&el.getAttribute('name')==='description'){const v=el.getAttribute('content');const k=normalizeText(v);if(k&&dict[k])el.setAttribute('content',dict[k]);}
+    ['placeholder','title','aria-label','alt'].forEach(attr=>{const v=el.getAttribute?.(attr);const k=normalizeText(v);if(k&&dict[k])el.setAttribute(attr,dict[k]);});
     [...el.childNodes].forEach(child=>translateNode(child,dict));
   };
 
@@ -123,8 +144,14 @@
     try{const r=await fetch(url,{cache:'no-cache'});return r.ok?await r.json():null}catch(_){return null}
   };
 
+  const revealTranslatedPage=()=>{
+    document.documentElement.classList.add('i18n-ready');
+    document.documentElement.classList.remove('ws-i18n-pending');
+    document.getElementById('ws-i18n-preload')?.remove();
+  };
+
   const loadTranslations=async()=>{
-    if(detected==='en')return;
+    if(detected==='en'){revealTranslatedPage();return;}
     try{
       const [base,extra]=await Promise.all([
         fetchDictionary(`/assets/i18n/${detected}.json`),
@@ -134,16 +161,22 @@
       const dict=Object.assign({},base.strings||base,extra?.strings||extra||{});
       const titles=Object.assign({},base.titles||{},extra?.titles||{});
       if(titles[seoPath])document.title=titles[seoPath];
+      const meta=document.querySelector('meta[name="description"]');
+      if(meta){const key=normalizeText(meta.content);if(dict[key])meta.content=dict[key];}
       translateNode(document.body,dict);
       const observer=new MutationObserver(records=>records.forEach(r=>r.addedNodes.forEach(n=>translateNode(n,dict))));
       observer.observe(document.body,{childList:true,subtree:true});
-      document.documentElement.classList.add('i18n-ready');
-    }catch(err){console.warn('[Wistudi i18n] Translation dictionary unavailable:',detected,err)}
+      revealTranslatedPage();
+    }catch(err){
+      console.warn('[Wistudi i18n] Translation dictionary unavailable:',detected,err);
+      revealTranslatedPage();
+    }
   };
 
   ready(()=>{
     const contactForm=document.getElementById('wistudiContactForm');
     if(contactForm)contactForm.setAttribute('action','/api/contact');
+    document.body?.classList.add(`locale-${detected.replace(/[^a-z0-9]/g,'-')}`);
     buildLanguageMenus();
     localizeInternalLinks();
     addAlternateLinks();
