@@ -23,8 +23,6 @@
     document.cookie=`wistudi_locale=${encodeURIComponent(code)};path=/;max-age=31536000;SameSite=Lax`;
   };
 
-  // Migrate any already-saved browser preference into the cookie used by
-  // Cloudflare's server-side first-visit routing.
   try{
     const stored=localStorage.getItem('wistudi_locale');
     if(stored&&LOCALES[stored]&&!document.cookie.includes('wistudi_locale=')){
@@ -55,6 +53,10 @@
 
   const style=document.createElement('style');
   style.textContent=`
+    .ws-site-header{z-index:10000!important}
+    .ws-lang{z-index:10020!important}
+    .ws-lang-menu{z-index:10030!important}
+    .ws-mobile-menu{position:relative;z-index:10010}
     .ws-lang-toggle{gap:7px}
     .ws-lang-flag{display:inline-flex;align-items:center;justify-content:center;font-size:1rem;line-height:1;width:20px;flex:0 0 20px}
     .ws-lang-option[href]{text-decoration:none;cursor:pointer}
@@ -112,7 +114,6 @@
   const localizeInternalLinks=()=>{
     if(detected==='en')return;
     document.querySelectorAll('a[href]').forEach(a=>{
-      // Critical: language-switcher links must retain their own target locale.
       if(a.matches('.ws-lang-option,[data-locale]')||a.closest('.ws-lang'))return;
       const raw=a.getAttribute('href');
       if(!raw||raw.startsWith('#')||raw.startsWith('mailto:')||raw.startsWith('tel:')||raw.startsWith('javascript:'))return;
@@ -153,19 +154,23 @@
   const loadTranslations=async()=>{
     if(detected==='en'){revealTranslatedPage();return;}
     try{
-      const [base,extra]=await Promise.all([
+      const [base,site,extra]=await Promise.all([
         fetchDictionary(`/assets/i18n/${detected}.json`),
+        fetchDictionary(`/assets/i18n/${detected}-site.json`),
         fetchDictionary(`/assets/i18n/${detected}-extra.json`)
       ]);
       if(!base)throw new Error('base translation unavailable');
-      const dict=Object.assign({},base.strings||base,extra?.strings||extra||{});
-      const titles=Object.assign({},base.titles||{},extra?.titles||{});
+      const dict=Object.assign({},base.strings||base,site?.strings||site||{},extra?.strings||extra||{});
+      const titles=Object.assign({},base.titles||{},site?.titles||{},extra?.titles||{});
       if(titles[seoPath])document.title=titles[seoPath];
       const meta=document.querySelector('meta[name="description"]');
       if(meta){const key=normalizeText(meta.content);if(dict[key])meta.content=dict[key];}
       translateNode(document.body,dict);
-      const observer=new MutationObserver(records=>records.forEach(r=>r.addedNodes.forEach(n=>translateNode(n,dict))));
-      observer.observe(document.body,{childList:true,subtree:true});
+      const observer=new MutationObserver(records=>records.forEach(r=>{
+        r.addedNodes.forEach(n=>translateNode(n,dict));
+        if(r.type==='characterData')translateNode(r.target,dict);
+      }));
+      observer.observe(document.body,{childList:true,characterData:true,subtree:true});
       revealTranslatedPage();
     }catch(err){
       console.warn('[Wistudi i18n] Translation dictionary unavailable:',detected,err);
