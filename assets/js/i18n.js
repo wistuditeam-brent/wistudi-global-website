@@ -47,6 +47,8 @@
     [dir="rtl"] .ws-lang-option{text-align:right}
     [dir="rtl"] .ws-nav-links,[dir="rtl"] .ws-nav-actions,[dir="rtl"] .ws-mobile-actions{direction:rtl}
     [dir="rtl"] .ws-footer-links,[dir="rtl"] .ws-footer-contact{direction:rtl}
+    [dir="rtl"] .hero-copy,[dir="rtl"] .demo-copy,[dir="rtl"] .screen-copy,[dir="rtl"] .contact-copy,[dir="rtl"] .booking-intro,[dir="rtl"] .section-head{text-align:right}
+    [dir="rtl"] .bullet-list,[dir="rtl"] .check-list,[dir="rtl"] .trust-list{padding-right:0}
   `;
   document.head.appendChild(style);
 
@@ -117,14 +119,21 @@
     [...el.childNodes].forEach(child=>translateNode(child,dict));
   };
 
+  const fetchDictionary=async url=>{
+    try{const r=await fetch(url,{cache:'no-cache'});return r.ok?await r.json():null}catch(_){return null}
+  };
+
   const loadTranslations=async()=>{
     if(detected==='en')return;
     try{
-      const response=await fetch(`/assets/i18n/${detected}.json`,{cache:'no-cache'});
-      if(!response.ok)throw new Error(`translation ${response.status}`);
-      const data=await response.json();
-      const dict=data.strings||data;
-      if(data.titles?.[seoPath])document.title=data.titles[seoPath];
+      const [base,extra]=await Promise.all([
+        fetchDictionary(`/assets/i18n/${detected}.json`),
+        fetchDictionary(`/assets/i18n/${detected}-extra.json`)
+      ]);
+      if(!base)throw new Error('base translation unavailable');
+      const dict=Object.assign({},base.strings||base,extra?.strings||extra||{});
+      const titles=Object.assign({},base.titles||{},extra?.titles||{});
+      if(titles[seoPath])document.title=titles[seoPath];
       translateNode(document.body,dict);
       const observer=new MutationObserver(records=>records.forEach(r=>r.addedNodes.forEach(n=>translateNode(n,dict))));
       observer.observe(document.body,{childList:true,subtree:true});
