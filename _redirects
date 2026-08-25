@@ -1,9 +1,16 @@
+/index.html / 301
+/OPEN_WEBSITE.html / 301
 /platform / 301
+/platform/ / 301
+/platform/index.html / 301
 /platform.html / 301
 /The%20Platform.html / 301
 /blocks-activities.html /blocks-activities/ 301
+/blocks-activities/index.html /blocks-activities/ 301
 /organisations.html /organisations/ 301
+/organisations/index.html /organisations/ 301
 /contact.html /contact/ 301
+/contact/index.html /contact/ 301
 
 # Locale-prefixed pages and assets are handled by functions/_middleware.js.
 # This is intentional: Cloudflare Pages does not apply _redirects rules to
