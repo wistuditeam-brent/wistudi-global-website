@@ -133,6 +133,8 @@
   };
 
   ready(()=>{
+    const contactForm=document.getElementById('wistudiContactForm');
+    if(contactForm)contactForm.setAttribute('action','/api/contact');
     buildLanguageMenus();
     localizeInternalLinks();
     addAlternateLinks();
