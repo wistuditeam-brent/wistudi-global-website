@@ -4,3 +4,18 @@
 /blocks-activities.html /blocks-activities/ 301
 /organisations.html /organisations/ 301
 /contact.html /contact/ 301
+
+# Multilingual routes keep one canonical HTML source so current/future layout updates
+# automatically carry across every locale. Locale content is applied by assets/js/i18n.js.
+/vi /vi/ 301
+/vi/* /:splat 200
+/zh-cn /zh-cn/ 301
+/zh-cn/* /:splat 200
+/th /th/ 301
+/th/* /:splat 200
+/id /id/ 301
+/id/* /:splat 200
+/ms /ms/ 301
+/ms/* /:splat 200
+/ar /ar/ 301
+/ar/* /:splat 200
