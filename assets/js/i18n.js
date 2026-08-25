@@ -1,12 +1,12 @@
 (()=>{
   const LOCALES={
-    en:{label:'English',short:'EN',htmlLang:'en',dir:'ltr',flag:'🇬🇧'},
-    vi:{label:'Tiếng Việt',short:'VI',htmlLang:'vi',dir:'ltr',flag:'🇻🇳'},
-    'zh-cn':{label:'简体中文',short:'中文',htmlLang:'zh-CN',dir:'ltr',flag:'🇨🇳'},
-    th:{label:'ไทย',short:'TH',htmlLang:'th',dir:'ltr',flag:'🇹🇭'},
-    id:{label:'Bahasa Indonesia',short:'ID',htmlLang:'id',dir:'ltr',flag:'🇮🇩'},
-    ms:{label:'Bahasa Melayu',short:'MS',htmlLang:'ms',dir:'ltr',flag:'🇲🇾'},
-    ar:{label:'العربية',short:'AR',htmlLang:'ar',dir:'rtl',flag:'🇸🇦'}
+    en:{label:'English',short:'EN',htmlLang:'en',dir:'ltr',flag:'<svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#012169"/><path d="M0 0 30 20M30 0 0 20" stroke="#fff" stroke-width="4"/><path d="M0 0 30 20M30 0 0 20" stroke="#C8102E" stroke-width="2"/><path d="M15 0v20M0 10h30" stroke="#fff" stroke-width="6"/><path d="M15 0v20M0 10h30" stroke="#C8102E" stroke-width="3.4"/></svg>'},
+    vi:{label:'Tiếng Việt',short:'VI',htmlLang:'vi',dir:'ltr',flag:'<svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#DA251D"/><path fill="#FFFF00" d="m15 4.1 1.55 3.18 3.5.5-2.53 2.46.6 3.48L15 12.08l-3.12 1.64.6-3.48-2.53-2.46 3.5-.5z"/></svg>'},
+    'zh-cn':{label:'简体中文',short:'中文',htmlLang:'zh-CN',dir:'ltr',flag:'<svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#DE2910"/><path fill="#FFDE00" d="m6 3.2.9 1.9 2.1.3-1.5 1.45.35 2.05L6 7.9 4.15 8.9l.35-2.05L3 5.4l2.1-.3z"/><circle cx="11.2" cy="3.1" r=".75" fill="#FFDE00"/><circle cx="13.2" cy="5.1" r=".75" fill="#FFDE00"/><circle cx="13.1" cy="7.7" r=".75" fill="#FFDE00"/><circle cx="10.8" cy="9.1" r=".75" fill="#FFDE00"/></svg>'},
+    th:{label:'ไทย',short:'TH',htmlLang:'th',dir:'ltr',flag:'<svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#A51931"/><rect y="3.33" width="30" height="13.34" fill="#fff"/><rect y="6.67" width="30" height="6.66" fill="#2D2A4A"/></svg>'},
+    id:{label:'Bahasa Indonesia',short:'ID',htmlLang:'id',dir:'ltr',flag:'<svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="10" fill="#CE1126"/><rect y="10" width="30" height="10" fill="#fff"/></svg>'},
+    ms:{label:'Bahasa Melayu',short:'MS',htmlLang:'ms',dir:'ltr',flag:'<svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#fff"/><g fill="#CC0001"><rect y="0" width="30" height="1.54"/><rect y="3.08" width="30" height="1.54"/><rect y="6.16" width="30" height="1.54"/><rect y="9.24" width="30" height="1.54"/><rect y="12.32" width="30" height="1.54"/><rect y="15.4" width="30" height="1.54"/><rect y="18.48" width="30" height="1.52"/></g><rect width="15" height="10.78" fill="#010066"/><circle cx="6.2" cy="5.4" r="3.1" fill="#FFCC00"/><circle cx="7.25" cy="5.4" r="2.55" fill="#010066"/><path fill="#FFCC00" d="m11.2 2.7.55 1.2 1.3-.1-.98.88.5 1.22-1.13-.7-1.02.86.28-1.27-1.12-.67 1.3-.12z"/></svg>'},
+    ar:{label:'العربية',short:'AR',htmlLang:'ar',dir:'rtl',flag:'<svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#006C35"/><path d="M7 6.3h16M8 8h14M9 9.7h12" stroke="#fff" stroke-width=".7" stroke-linecap="round"/><path d="M8 14.2h13.5c1.3 0 2.3-.45 3.1-1.15" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round"/></svg>'}
   };
   const localeCodes=Object.keys(LOCALES);
   const knownPages=['/','/index.html','/platform/','/platform/index.html','/blocks-activities/','/blocks-activities/index.html','/organisations/','/organisations/index.html','/contact/','/contact/index.html'];
@@ -61,7 +61,8 @@
     .ws-lang-menu{z-index:10030!important}
     .ws-mobile-menu{position:relative;z-index:10010}
     .ws-lang-toggle{gap:7px}
-    .ws-lang-flag{display:inline-flex;align-items:center;justify-content:center;font-size:1rem;line-height:1;width:20px;flex:0 0 20px}
+    .ws-lang-flag{display:inline-flex;align-items:center;justify-content:center;width:24px;height:16px;flex:0 0 24px;border-radius:2px;overflow:hidden;box-shadow:0 0 0 1px rgba(24,21,35,.12)}
+    .ws-lang-flag svg{display:block;width:24px;height:16px}
     .ws-lang-option[href]{text-decoration:none;cursor:pointer}
     .ws-lang-option[href]:hover{background:#faf8fd;color:#4f465b}
     .ws-lang-option-main{display:flex;align-items:center;gap:9px;min-width:0}
