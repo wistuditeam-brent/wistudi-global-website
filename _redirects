@@ -8,14 +8,20 @@
 # Multilingual routes keep one canonical HTML source so current/future layout updates
 # automatically carry across every locale. Locale content is applied by assets/js/i18n.js.
 /vi /vi/ 301
+/vi/ / 200
 /vi/* /:splat 200
 /zh-cn /zh-cn/ 301
+/zh-cn/ / 200
 /zh-cn/* /:splat 200
 /th /th/ 301
+/th/ / 200
 /th/* /:splat 200
 /id /id/ 301
+/id/ / 200
 /id/* /:splat 200
 /ms /ms/ 301
+/ms/ / 200
 /ms/* /:splat 200
 /ar /ar/ 301
+/ar/ / 200
 /ar/* /:splat 200
