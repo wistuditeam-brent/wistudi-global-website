@@ -8,7 +8,7 @@ body h1,body h2,body h3{font-family:'Be Vietnam Pro',Inter,sans-serif}
 .ws-brand{display:inline-flex;align-items:center;flex:0 0 auto}.ws-brand img{display:block;width:132px;height:auto;max-width:100%}
 .ws-nav-links{display:flex;gap:27px;align-items:center;font-size:.82rem;font-weight:650;color:#6f6879}.ws-nav-links a{position:relative;padding:25px 0;text-decoration:none;color:inherit;white-space:nowrap}.ws-nav-links a:hover,.ws-nav-links a.active{color:var(--ws-ink)}.ws-nav-links a.active:after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:999px;background:linear-gradient(90deg,var(--ws-orange),var(--ws-purple))}
 .ws-nav-actions{display:flex;gap:9px;align-items:center;flex:0 0 auto}.ws-btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 15px;border-radius:14px;border:1px solid transparent;font:700 .78rem/1 Inter,Arial,sans-serif;text-decoration:none;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;background:#fff;color:var(--ws-ink)}.ws-btn:hover{transform:translateY(-2px)}.ws-btn.primary{background:linear-gradient(135deg,var(--ws-purple),#8b5cf6);color:#fff;box-shadow:0 12px 26px rgba(124,58,237,.23)}.ws-btn.secondary{border-color:#e2dceb}.ws-btn.secondary:hover{border-color:#cfc6df;box-shadow:0 10px 24px rgba(34,24,64,.07)}
-.ws-lang{position:relative}.ws-lang-toggle{height:42px;min-width:69px;padding:0 11px;border:1px solid #e2dceb;border-radius:13px;background:#fff;color:#50495b;font:700 .76rem/1 Inter,Arial,sans-serif;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}.ws-lang-toggle svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;transition:transform .2s ease}.ws-lang.open .ws-lang-toggle svg{transform:rotate(180deg)}.ws-lang-menu{position:absolute;right:0;top:calc(100% + 9px);width:188px;padding:7px;border-radius:15px;background:#fff;border:1px solid var(--ws-line);box-shadow:var(--ws-shadow);opacity:0;visibility:hidden;transform:translateY(-5px);transition:.18s ease}.ws-lang.open .ws-lang-menu{opacity:1;visibility:visible;transform:none}.ws-lang-option{width:100%;border:0;border-radius:10px;background:transparent;text-align:left;padding:10px 11px;font:650 .78rem/1.25 Inter,Arial,sans-serif;color:#554e60;display:flex;align-items:center;justify-content:space-between;gap:9px}.ws-lang-option.current{background:#f6f1ff;color:#5b21b6}.ws-lang-option[disabled]{color:#a39baa;cursor:not-allowed}.ws-lang-soon{font-size:.61rem;font-weight:750;padding:4px 6px;border-radius:999px;background:#f3f0f6;color:#918998}
+.ws-lang{position:relative}.ws-lang-toggle{height:42px;min-width:69px;padding:0 11px;border:1px solid #e2dceb;border-radius:13px;background:#fff;color:#50495b;font:700 .76rem/1 Inter,Arial,sans-serif;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}.ws-lang-toggle>svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;transition:transform .2s ease}.ws-lang.open .ws-lang-toggle>svg{transform:rotate(180deg)}.ws-lang-menu{position:absolute;right:0;top:calc(100% + 9px);width:188px;padding:7px;border-radius:15px;background:#fff;border:1px solid var(--ws-line);box-shadow:var(--ws-shadow);opacity:0;visibility:hidden;transform:translateY(-5px);transition:.18s ease}.ws-lang.open .ws-lang-menu{opacity:1;visibility:visible;transform:none}.ws-lang-option{width:100%;border:0;border-radius:10px;background:transparent;text-align:left;padding:10px 11px;font:650 .78rem/1.25 Inter,Arial,sans-serif;color:#554e60;display:flex;align-items:center;justify-content:space-between;gap:9px}.ws-lang-option.current{background:#f6f1ff;color:#5b21b6}.ws-lang-option[disabled]{color:#a39baa;cursor:not-allowed}.ws-lang-soon{font-size:.61rem;font-weight:750;padding:4px 6px;border-radius:999px;background:#f3f0f6;color:#918998}
 .ws-menu-toggle{display:none;width:42px;height:42px;border:1px solid #e7e1ed;border-radius:12px;background:#f7f4fa;color:var(--ws-ink);padding:0;cursor:pointer}.ws-menu-toggle span{display:block;width:18px;height:2px;border-radius:99px;background:currentColor;margin:4px auto;transition:.2s ease}
 .ws-mobile-menu{display:none;border-top:1px solid var(--ws-line);background:#fff}.ws-mobile-inner{padding:14px 0 18px;display:grid;gap:6px}.ws-mobile-inner>a{padding:11px 3px;color:#625b6d;font-weight:650;font-size:.88rem;text-decoration:none}.ws-mobile-inner>a.active{color:var(--ws-purple)}.ws-mobile-actions{display:flex;gap:9px;flex-wrap:wrap;padding-top:8px}.ws-mobile-actions .ws-btn{flex:1 1 150px}
 .ws-site-footer{padding:42px 0 32px;border-top:1px solid var(--ws-line);background:#fff}.ws-footer-row{display:grid;grid-template-columns:170px 1fr 1.4fr auto;gap:28px;align-items:start;font-size:.72rem;color:#7c7584}.ws-footer-wordmark{width:120px;height:auto}.ws-footer-links,.ws-footer-contact{display:grid;gap:7px}.ws-footer-row a{color:inherit;text-decoration:none}.ws-footer-row a:hover{color:var(--ws-purple)}.ws-footer-copy{white-space:nowrap}
@@ -28,8 +28,10 @@ body.page-organisations .control-card{top:96px}
 @media(max-width:900px){.ws-container{width:min(calc(100% - 28px),1180px)}.ws-nav{height:64px}.ws-nav-links{display:none}.ws-nav-actions>.ws-btn{display:none}.ws-menu-toggle{display:block}.ws-mobile-menu.open{display:block}.ws-brand img{width:118px}.ws-site-footer{padding-top:34px}.ws-footer-row{grid-template-columns:1fr 1fr}.ws-footer-row .ws-brand{grid-column:1/-1}.ws-footer-copy{white-space:normal}.subnav-wrap{top:64px!important}}
 @media(max-width:760px){body.page-blocks .carousel-shell{height:360px!important;margin-inline:-14px}body.page-blocks .carousel-card{width:min(82vw,310px)!important;height:auto!important;aspect-ratio:1/1!important}body.page-blocks .carousel-card .vidwrap{flex-basis:53%}body.page-blocks .carousel-card p{-webkit-line-clamp:2}.ws-footer-row{grid-template-columns:1fr}.ws-lang-toggle{min-width:62px}.ws-lang-menu{right:-48px}}
 @media(max-width:420px){.ws-container{width:min(calc(100% - 24px),1180px)}body.page-blocks .carousel-shell{height:330px!important}body.page-blocks .carousel-card .card-body{padding:12px 13px!important}body.page-blocks .carousel-card h3{font-size:.98rem!important}body.page-blocks .carousel-card p{font-size:.76rem!important}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.ws-btn,.ws-lang-menu,.ws-lang-toggle svg,.ws-menu-toggle span{transition:none!important}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.ws-btn,.ws-lang-menu,.ws-lang-toggle>svg,.ws-menu-toggle span{transition:none!important}}
 
+/* Preserve language flag SVG dimensions inside the compact language toggle. */
+.ws-lang-toggle .ws-lang-flag svg{display:block;width:24px;height:16px;stroke:none;fill:initial;transform:none!important;transition:none!important}
 
 /* Shared sticky section navigation — matches the Blocks & Activities sub-menu. */
 .subnav-wrap.ws-section-subnav{position:sticky;top:72px;z-index:220;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(222,216,232,.96);box-shadow:0 9px 26px rgba(34,24,64,.07)}
@@ -44,7 +46,6 @@ body.page-organisations .control-card{top:166px}
 @media(max-width:900px){.subnav-wrap.ws-section-subnav{top:64px}.subnav-wrap.ws-section-subnav .subnav{width:min(calc(100% - 28px),1180px);justify-content:flex-start;min-height:60px;gap:6px;padding:7px 0}.subnav-wrap.ws-section-subnav .subnav a{font-size:.76rem;padding:9px 12px}body.page-platform main section[id],body.page-organisations main section[id]{scroll-margin-top:142px}body.page-organisations .control-card{top:auto}}
 @media(max-width:420px){.subnav-wrap.ws-section-subnav .subnav{width:min(calc(100% - 24px),1180px)}}
 @media(prefers-reduced-motion:reduce){.subnav-wrap.ws-section-subnav .subnav a{transition:none!important}}
-
 
 /* ===== 2026-08-24 unified post-hero sticky subnavigation + faster reveal ===== */
 /* All section submenus begin after the hero in document flow, then pin directly below the main header. */
@@ -150,90 +151,41 @@ body.page-organisations .control-card{top:166px}
   body.page-platform .ws-scroll-section,
   body.page-blocks .ws-scroll-section,
   body.page-organisations .ws-scroll-section{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}
+  body.page-blocks .reveal,body.page-organisations .reveal,body.page-organisations .section-shell-reveal,body.page-platform .scroll-reveal,body.page-platform .reveal-section{transition:none!important;animation:none!important}
 }
 
-/* ===== 2026-08-24 robust sticky section navigation =====
-   Applies to Platform, Blocks & Activities and Organisations only because
-   Contact does not render .ws-section-subnav. Header height is measured by JS. */
+/* ===== END 2026-08-24 unified subnav/reveal update ===== */
+
+/* HARD STICKY OVERRIDE: keep section navigation visible at the viewport top beneath the main header. */
 :root{--ws-header-height:72px;--ws-subnav-height:66px}
 .subnav-wrap.ws-section-subnav{
   position:-webkit-sticky!important;
   position:sticky!important;
   top:var(--ws-header-height)!important;
-  z-index:230!important;
-  width:100%;
-  align-self:start;
-  background:rgba(255,255,255,.97)!important;
-  backdrop-filter:blur(14px)!important;
-  -webkit-backdrop-filter:blur(14px)!important;
-  border-top:1px solid rgba(233,230,239,.82)!important;
-  border-bottom:1px solid rgba(222,216,232,.98)!important;
-  box-shadow:0 8px 22px rgba(34,24,64,.065)!important;
-  transform:translateZ(0);
+  z-index:239!important;
+  width:100%!important;
+  align-self:auto!important;
 }
 body.page-platform main,
 body.page-blocks main,
-body.page-organisations main{overflow:visible!important}
+body.page-organisations main{overflow:visible!important;transform:none!important;filter:none!important;contain:none!important}
+body.page-platform .hero,
+body.page-blocks .hero,
+body.page-organisations .hero{overflow:visible!important}
 body.page-platform main section[id],
 body.page-blocks main section[id],
-body.page-organisations main section[id]{
-  scroll-margin-top:calc(var(--ws-header-height) + var(--ws-subnav-height) + 18px)!important;
-}
-@media(max-width:900px){
-  :root{--ws-header-height:64px;--ws-subnav-height:60px}
-  .subnav-wrap.ws-section-subnav{top:var(--ws-header-height)!important}
-}
+body.page-organisations main section[id]{scroll-margin-top:calc(var(--ws-header-height) + var(--ws-subnav-height) + 20px)!important}
+@media(max-width:900px){:root{--ws-header-height:64px;--ws-subnav-height:60px}}
 
-
-/* ===== ACTUAL VIEWPORT-STICKY SUBNAV FIX ===== */
-/*
-  Chrome can break position:sticky when an ancestor/document establishes an
-  overflow scrolling box. The document now uses overflow-x:clip and this
-  fixed state is applied by JS once the post-hero submenu reaches the header.
-*/
-:root{
-  --ws-header-height:72px;
-  --ws-subnav-height:66px;
-}
-
-.subnav-wrap.ws-section-subnav{
-  position:-webkit-sticky !important;
-  position:sticky !important;
-  top:var(--ws-header-height) !important;
-  z-index:300 !important;
-  width:100% !important;
-}
-
-.ws-subnav-placeholder{
-  display:none;
-  width:100%;
-  height:0;
-  pointer-events:none;
-}
-
-.ws-subnav-placeholder.active{
-  display:block;
-}
-
+/* FINAL VIEWPORT-STICKY SUBNAV: fixed only after its natural scroll position reaches the header. */
+.ws-subnav-placeholder{display:block;height:0}
+.ws-subnav-placeholder.active{height:var(--ws-subnav-height)}
 .subnav-wrap.ws-section-subnav.ws-subnav-fixed{
-  position:fixed !important;
-  top:var(--ws-header-height) !important;
-  left:0 !important;
-  right:0 !important;
-  width:100% !important;
-  z-index:300 !important;
-  margin:0 !important;
-}
-
-body.page-platform main section[id],
-body.page-blocks main section[id],
-body.page-organisations main section[id]{
-  scroll-margin-top:calc(var(--ws-header-height) + var(--ws-subnav-height) + 18px) !important;
-}
-
-@media(max-width:900px){
-  :root{
-    --ws-header-height:64px;
-    --ws-subnav-height:60px;
-  }
+  position:fixed!important;
+  top:var(--ws-header-height)!important;
+  left:0!important;
+  right:0!important;
+  width:100%!important;
+  z-index:239!important;
+  margin:0!important;
 }
