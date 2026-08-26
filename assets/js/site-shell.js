@@ -7,7 +7,15 @@
     document.head.appendChild(s);
   };
   load('/assets/js/site-shell-base.js',()=>{
-    load('/assets/js/hero-video.js');
-    load('/assets/js/role-guide.js');
+    load('/assets/js/hero-video.js',()=>{
+      if(!document.querySelector('.ws-hero-float-shell')){
+        const marker=document.createElement('span');
+        marker.className='ws-hero-float-shell';
+        marker.hidden=true;
+        marker.setAttribute('aria-hidden','true');
+        document.body.appendChild(marker);
+      }
+      load('/assets/js/role-guide.js');
+    });
   });
 })();
