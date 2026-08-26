@@ -1,6 +1,6 @@
 // Home hero: click-to-play overview video with smooth return to the existing showcase.
 (() => {
-  const VIDEO_URL='/assets/media/wistudi-main-video-eng-web.mp4';
+  const VIDEO_URL='/assets/media/HERO%20VIDEO.mp4';
   const COPY={
     en:'Click to watch demo',
     vi:'Nhấp để xem bản demo',
@@ -66,6 +66,9 @@
     mainVideo.controls=true;
     mainVideo.playsInline=true;
     mainVideo.preload='none';
+    mainVideo.defaultMuted=false;
+    mainVideo.muted=false;
+    mainVideo.volume=1;
     mainVideo.setAttribute('aria-label','Wistudi platform overview video');
     mainVideo.dataset.src=VIDEO_URL;
 
@@ -105,7 +108,9 @@
       frame.classList.add('is-loading');
       if(!mainVideo.src){mainVideo.src=mainVideo.dataset.src;mainVideo.load();}
       mainVideo.currentTime=0;
+      mainVideo.defaultMuted=false;
       mainVideo.muted=false;
+      mainVideo.volume=1;
       const playPromise=mainVideo.play();
       if(playPromise?.catch)playPromise.catch(()=>{
         // If a browser delays audible playback, keep the controls visible and allow a second user click.
