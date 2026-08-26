@@ -237,3 +237,60 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })();
+
+// Blocks & Activities integration conversation banner.
+(() => {
+  const COPY={
+    en:{title:'Powerful on its own. Designed to connect.',body:'Use Wistudi independently or connect it with LMS, identity, content and specialist learning technology.',cta:'Discuss an integration',aria:'Wistudi integration options'},
+    vi:{title:'Mạnh mẽ khi hoạt động độc lập. Được thiết kế để kết nối.',body:'Sử dụng Wistudi độc lập hoặc kết nối với LMS, hệ thống định danh, nội dung và công nghệ học tập chuyên biệt.',cta:'Trao đổi về tích hợp',aria:'Các tùy chọn tích hợp Wistudi'},
+    'zh-cn':{title:'独立使用同样强大，也为连接而设计。',body:'可独立使用 Wistudi，也可连接 LMS、身份系统、内容和专业学习技术。',cta:'讨论集成方案',aria:'Wistudi 集成选项'},
+    th:{title:'ทรงพลังด้วยตัวเอง และออกแบบมาเพื่อเชื่อมต่อ',body:'ใช้ Wistudi ได้อย่างอิสระ หรือเชื่อมต่อกับ LMS ระบบยืนยันตัวตน เนื้อหา และเทคโนโลยีการเรียนรู้เฉพาะทาง',cta:'พูดคุยเรื่องการเชื่อมต่อ',aria:'ตัวเลือกการเชื่อมต่อ Wistudi'},
+    id:{title:'Kuat digunakan sendiri. Dirancang untuk terhubung.',body:'Gunakan Wistudi secara mandiri atau hubungkan dengan LMS, identitas, konten, dan teknologi pembelajaran khusus.',cta:'Diskusikan integrasi',aria:'Opsi integrasi Wistudi'},
+    ms:{title:'Berkuasa secara kendiri. Direka untuk berhubung.',body:'Gunakan Wistudi secara kendiri atau hubungkannya dengan LMS, identiti, kandungan dan teknologi pembelajaran khusus.',cta:'Bincangkan integrasi',aria:'Pilihan integrasi Wistudi'},
+    ar:{title:'قوي بمفرده، ومصمم للاتصال.',body:'استخدم Wistudi بشكل مستقل أو اربطه بأنظمة إدارة التعلم والهوية والمحتوى وتقنيات التعلم المتخصصة.',cta:'ناقش تكاملاً',aria:'خيارات تكامل Wistudi'}
+  };
+  const supported=Object.keys(COPY);
+  const init=()=>{
+    if(!document.body?.classList.contains('page-blocks')||document.querySelector('.ws-integration-banner'))return;
+    const header=document.querySelector('.ws-site-header');
+    if(!header)return;
+    const first=(location.pathname.split('/').filter(Boolean)[0]||'').toLowerCase();
+    const locale=supported.includes(first)?first:'en';
+    const copy=COPY[locale]||COPY.en;
+    const contactUrl=locale==='en'?'/contact/?type=partnership#contact-form':`/${locale}/contact/?type=partnership#contact-form`;
+
+    if(!document.getElementById('ws-integration-banner-style')){
+      const style=document.createElement('style');
+      style.id='ws-integration-banner-style';
+      style.textContent=`
+        .ws-integration-banner{position:relative;z-index:2;overflow:hidden;border-bottom:1px solid rgba(124,58,237,.12);background:linear-gradient(100deg,#f8f4ff 0%,#fbf9ff 44%,#fff8f2 100%);opacity:0;transform:translateY(-4px);transition:opacity .28s ease,transform .28s ease}
+        .ws-integration-banner.is-ready{opacity:1;transform:none}
+        .ws-integration-inner{width:min(calc(100% - 40px),1180px);min-height:126px;margin-inline:auto;display:grid;grid-template-columns:92px minmax(300px,1.25fr) auto auto;gap:24px;align-items:center;padding:18px 0}
+        .ws-integration-main-icon{width:86px;height:86px;object-fit:contain;filter:drop-shadow(0 12px 24px rgba(91,33,182,.14));transition:transform .28s ease}
+        .ws-integration-banner:hover .ws-integration-main-icon{transform:translateY(-2px) scale(1.035)}
+        .ws-integration-copy h2{margin:0;font-family:'Be Vietnam Pro',Inter,Arial,sans-serif;font-size:clamp(1.12rem,1.6vw,1.45rem);line-height:1.22;letter-spacing:-.025em;color:#181523}
+        .ws-integration-copy p{margin:7px 0 0;max-width:620px;color:#6d6878;font-size:.88rem;line-height:1.55}
+        .ws-integration-tech{display:flex;align-items:center;gap:7px;white-space:nowrap}
+        .ws-integration-tech-icon{width:44px;height:44px;border:1px solid rgba(124,58,237,.14);border-radius:13px;background:rgba(255,255,255,.72);display:grid;place-items:center;box-shadow:0 8px 22px rgba(61,43,101,.05)}
+        .ws-integration-tech-icon img{width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 5px 10px rgba(91,33,182,.09))}
+        .ws-integration-standards{display:inline-flex;align-items:center;gap:6px;margin-left:3px;padding:8px 12px;border:1px solid rgba(124,58,237,.14);border-radius:999px;background:rgba(255,255,255,.72);color:#7c3aed;font-size:.67rem;font-weight:800;letter-spacing:.02em}
+        .ws-integration-cta{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:0 18px;border-radius:14px;background:linear-gradient(135deg,#f97316,#fb923c);color:#fff;font-size:.78rem;font-weight:800;box-shadow:0 13px 28px rgba(249,115,22,.25);transition:transform .2s ease,box-shadow .2s ease;white-space:nowrap}
+        .ws-integration-cta:hover{transform:translateY(-2px);box-shadow:0 17px 34px rgba(249,115,22,.32)}
+        .ws-integration-cta svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2}
+        @media(max-width:1080px){.ws-integration-inner{grid-template-columns:76px 1fr auto;gap:18px}.ws-integration-main-icon{width:72px;height:72px}.ws-integration-tech{grid-column:2/4;justify-content:flex-start;margin-top:-8px}.ws-integration-inner{padding:16px 0}}
+        @media(max-width:760px){.ws-integration-inner{width:min(calc(100% - 28px),1180px);grid-template-columns:62px 1fr;gap:13px;min-height:0;padding:16px 0}.ws-integration-main-icon{width:58px;height:58px}.ws-integration-copy h2{font-size:1.05rem}.ws-integration-copy p{font-size:.8rem;line-height:1.48}.ws-integration-tech{grid-column:1/-1;gap:6px;margin:0;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}.ws-integration-tech::-webkit-scrollbar{display:none}.ws-integration-tech-icon{width:40px;height:40px;flex:0 0 40px}.ws-integration-tech-icon img{width:34px;height:34px}.ws-integration-standards{font-size:.62rem}.ws-integration-cta{grid-column:1/-1;width:100%;min-height:44px;margin-top:1px}}
+        @media(prefers-reduced-motion:reduce){.ws-integration-banner,.ws-integration-main-icon,.ws-integration-cta{transition:none!important}}
+      `;
+      document.head.appendChild(style);
+    }
+
+    const banner=document.createElement('aside');
+    banner.className='ws-integration-banner';
+    banner.setAttribute('aria-label',copy.aria);
+    banner.innerHTML=`<div class="ws-integration-inner"><img class="ws-integration-main-icon" src="/assets/images/integration-connector.svg" alt="" aria-hidden="true"><div class="ws-integration-copy"><h2>${copy.title}</h2><p>${copy.body}</p></div><div class="ws-integration-tech" aria-hidden="true"><span class="ws-integration-tech-icon"><img src="/assets/images/integration-cloud.svg" alt=""></span><span class="ws-integration-tech-icon"><img src="/assets/images/integration-identity.svg" alt=""></span><span class="ws-integration-tech-icon"><img src="/assets/images/integration-learning.svg" alt=""></span><span class="ws-integration-tech-icon"><img src="/assets/images/integration-code.svg" alt=""></span><span class="ws-integration-standards">LTI&nbsp; • &nbsp;SSO&nbsp; • &nbsp;LMS&nbsp; • &nbsp;API</span></div><a class="ws-integration-cta" href="${contactUrl}">${copy.cta}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>`;
+    header.insertAdjacentElement('afterend',banner);
+    requestAnimationFrame(()=>banner.classList.add('is-ready'));
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
+  else init();
+})();
