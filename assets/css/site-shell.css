@@ -31,7 +31,7 @@ body.page-organisations .control-card{top:96px}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.ws-btn,.ws-lang-menu,.ws-lang-toggle>svg,.ws-menu-toggle span{transition:none!important}}
 
 /* Preserve language flag SVG dimensions inside the compact language toggle. */
-.ws-lang-toggle .ws-lang-flag svg{display:block;width:24px;height:16px;stroke:none;fill:initial;transform:none!important;transition:none!important}
+.ws-lang-toggle .ws-lang-flag svg{display:block;width:24px;height:16px;stroke:none;transform:none!important;transition:none!important}
 
 /* Shared sticky section navigation — matches the Blocks & Activities sub-menu. */
 .subnav-wrap.ws-section-subnav{position:sticky;top:72px;z-index:220;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(222,216,232,.96);box-shadow:0 9px 26px rgba(34,24,64,.07)}
