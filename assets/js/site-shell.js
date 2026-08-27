@@ -18,6 +18,7 @@
       load('/assets/js/role-guide-copy.js',()=>{
         load('/assets/js/role-guide-i18n.js',()=>{
           load('/assets/js/role-guide-v2.js',()=>{
+            load('/assets/js/role-guide-click-only.js');
             load('/assets/js/role-guide-i18n-ui.js');
             load('/assets/js/role-guide-chrome-guard.js');
             load('/assets/js/role-guide-bubble-guard.js');
