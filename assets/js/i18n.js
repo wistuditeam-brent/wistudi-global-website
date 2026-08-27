@@ -35,7 +35,7 @@
     if(parts.length&&localeCodes.includes(parts[0].toLowerCase()))parts.shift();
     let p='/'+parts.join('/');
     if(pathname.endsWith('/')&&!p.endsWith('/'))p+='/';
-    if(p==='/index.html'||p==='/platform/'||p==='/platform/index.html'||p==='/platform')p='/';
+    if(p==='/index.html')p='/';
     return p||'/';
   };
 
@@ -123,7 +123,7 @@
       if(u.origin!==location.origin)return;
       const stripped=stripLocale(u.pathname);
       const normalized=stripped.replace(/index\.html$/,'')||'/';
-      const recognized=knownPages.some(p=>normalizeSeoPath(p)===normalizeSeoPath(stripped))||normalized==='/'||normalized.startsWith('/blocks-activities/')||normalized.startsWith('/organisations/')||normalized.startsWith('/contact/');
+      const recognized=knownPages.some(p=>normalizeSeoPath(p)===normalizeSeoPath(stripped))||normalized==='/'||normalized.startsWith('/platform/')||normalized.startsWith('/blocks-activities/')||normalized.startsWith('/organisations/')||normalized.startsWith('/contact/');
       if(!recognized)return;
       a.href=`/${detected}${normalized==='/'?'/':normalized}`+(u.search||'')+(u.hash||'');
     });
