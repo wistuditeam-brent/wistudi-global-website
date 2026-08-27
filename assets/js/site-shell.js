@@ -8,6 +8,10 @@
   };
   load('/assets/js/resources-site.js');
   load('/assets/js/site-shell-base.js',()=>{
+    // Resources pages do not need homepage hero-video or role-guide/avatar modules.
+    // Keeping those modules off editorial pages avoids unnecessary observers,
+    // media work and the floating guide UI that can interfere with reading/clicks.
+    if(document.body?.classList.contains('page-resources')) return;
     load('/assets/js/hero-video.js',()=>{
       if(!document.querySelector('.ws-hero-float-shell')){
         const marker=document.createElement('span');
