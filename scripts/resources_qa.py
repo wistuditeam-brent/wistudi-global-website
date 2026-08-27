@@ -60,7 +60,7 @@ def check_photo_quality(path:Path, role:str):
         if w < MIN_HERO_WIDTH: err(f'Hero image too small: {path.relative_to(ROOT)} is {w}px wide; hard minimum {MIN_HERO_WIDTH}px')
         elif w < WARN_HERO_WIDTH: warn(f'Hero image below preferred width: {path.relative_to(ROOT)} is {w}px; preferred {WARN_HERO_WIDTH}px+')
     elif w < MIN_INLINE_WIDTH:
-        warn(f'Inline/editorial image is only {w}px wide: {path.relative_to(ROOT)}')
+        err(f'Inline/editorial image too small: {path.relative_to(ROOT)} is {w}px wide; minimum {MIN_INLINE_WIDTH}px')
     mp=max((w*h)/1_000_000,0.01)
     kbpm=(size/1024)/mp
     if fmt in {'WEBP','JPEG'} and kbpm < MIN_PHOTO_KB_PER_MP:
