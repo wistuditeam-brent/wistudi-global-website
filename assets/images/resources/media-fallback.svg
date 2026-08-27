@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="t d">
+  <title id="t">Wistudi media fallback</title><desc id="d">A neutral Wistudi branded placeholder shown only when an editorial image cannot load.</desc>
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6ed"/><stop offset=".55" stop-color="#f7f4ff"/><stop offset="1" stop-color="#eef4ff"/></linearGradient></defs>
+  <rect width="1200" height="675" fill="url(#g)"/>
+  <circle cx="600" cy="300" r="78" fill="#6d28d9" opacity=".08"/>
+  <text x="600" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="54" font-weight="700" fill="#6d28d9">Wi</text>
+  <text x="600" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="600" fill="#514a5d">Wistudi</text>
+  <text x="600" y="452" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#81798b">Image temporarily unavailable</text>
+</svg>
