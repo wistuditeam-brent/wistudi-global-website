@@ -35,7 +35,7 @@
     if(parts.length&&localeCodes.includes(parts[0].toLowerCase()))parts.shift();
     let p='/'+parts.join('/');
     if(pathname.endsWith('/')&&!p.endsWith('/'))p+='/';
-    if(p==='/index.html')p='/';
+    if(p==='/index.html'||p==='/platform/'||p==='/platform/index.html'||p==='/platform')p='/';
     return p||'/';
   };
 
@@ -123,7 +123,7 @@
       if(u.origin!==location.origin)return;
       const stripped=stripLocale(u.pathname);
       const normalized=stripped.replace(/index\.html$/,'')||'/';
-      const recognized=knownPages.some(p=>normalizeSeoPath(p)===normalizeSeoPath(stripped))||normalized==='/'||normalized.startsWith('/platform/')||normalized.startsWith('/blocks-activities/')||normalized.startsWith('/organisations/')||normalized.startsWith('/contact/');
+      const recognized=knownPages.some(p=>normalizeSeoPath(p)===normalizeSeoPath(stripped))||normalized==='/'||normalized.startsWith('/blocks-activities/')||normalized.startsWith('/organisations/')||normalized.startsWith('/contact/');
       if(!recognized)return;
       a.href=`/${detected}${normalized==='/'?'/':normalized}`+(u.search||'')+(u.hash||'');
     });
@@ -176,8 +176,10 @@
       ]);
       if(!base)throw new Error('base translation unavailable');
       const dict=Object.assign({},base.strings||base,site?.strings||site||{},extra?.strings||extra||{});
-      // SEO title, description, canonical and hreflang are injected server-side by
-      // Cloudflare middleware. Keep those authoritative after client translation.
+      const titles=Object.assign({},base.titles||{},site?.titles||{},extra?.titles||{});
+      if(titles[seoPath])document.title=titles[seoPath];
+      const meta=document.querySelector('meta[name="description"]');
+      if(meta){const key=normalizeText(meta.content);if(dict[key])meta.content=dict[key]}
       translateNode(document.body,dict);
       const observer=new MutationObserver(records=>records.forEach(record=>{
         record.addedNodes.forEach(node=>translateNode(node,dict));

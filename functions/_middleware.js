@@ -1,5 +1,5 @@
 const SUPPORTED = ['en','vi','zh-cn','th','id','ms','ar'];
-const CANONICAL_PAGES = new Set(['/', '/platform/', '/blocks-activities/', '/organisations/', '/contact/']);
+const CANONICAL_PAGES = new Set(['/', '/blocks-activities/', '/organisations/', '/contact/']);
 const PROD_ORIGIN = 'https://global.wistudi.com';
 
 const LOCALE_META = {
@@ -16,47 +16,24 @@ const SEO_PAGES = {
   '/': {
     type:'WebPage',
     image:'/assets/media/024ad6399a21183c6bb8.png',
-    label:{en:'Home',vi:'Trang chủ','zh-cn':'首页',th:'หน้าแรก',id:'Beranda',ms:'Laman Utama',ar:'الرئيسية'},
-    title:{
-      en:'Interactive Learning Platform for Lessons, Video & Worksheets | Wistudi',
-      vi:'Nền tảng học tập tương tác cho bài học, video & phiếu bài tập | Wistudi',
-      'zh-cn':'互动学习平台：课程、互动视频与可打印工作表 | Wistudi',
-      th:'แพลตฟอร์มการเรียนรู้แบบโต้ตอบสำหรับบทเรียน วิดีโอ และใบงาน | Wistudi',
-      id:'Platform Pembelajaran Interaktif untuk Pelajaran, Video & Lembar Kerja | Wistudi',
-      ms:'Platform Pembelajaran Interaktif untuk Pelajaran, Video & Lembaran Kerja | Wistudi',
-      ar:'منصة تعلم تفاعلي للدروس والفيديو وأوراق العمل | Wistudi'
-    },
-    description:{
-      en:'Create interactive lessons and interactive video, publish Flows, generate printable worksheets, manage learners and deliver training from one connected learning platform.',
-      vi:'Tạo bài học tương tác và video học tập tương tác, xuất bản Flow, tạo phiếu bài tập có thể in, quản lý người học và triển khai đào tạo trên một nền tảng kết nối.',
-      'zh-cn':'使用 Wistudi 创建互动课程和互动视频、发布 Flow、生成可打印工作表、管理学习者并在一个互联平台上开展教学与培训。',
-      th:'สร้างบทเรียนและวิดีโอการเรียนรู้แบบโต้ตอบ เผยแพร่ Flow สร้างใบงานพิมพ์ได้ จัดการผู้เรียน และส่งมอบการฝึกอบรมบนแพลตฟอร์มเดียว',
-      id:'Buat pelajaran dan video pembelajaran interaktif, terbitkan Flow, hasilkan lembar kerja cetak, kelola pelajar, dan jalankan pelatihan dalam satu platform pembelajaran.',
-      ms:'Cipta pelajaran dan video pembelajaran interaktif, terbitkan Flow, hasilkan lembaran kerja boleh cetak, urus pelajar dan jalankan latihan dalam satu platform pembelajaran.',
-      ar:'أنشئ دروسًا وفيديوهات تعليمية تفاعلية، وانشر Flows، وأنشئ أوراق عمل قابلة للطباعة، وأدر المتعلمين والتدريب من منصة تعلم واحدة مترابطة.'
-    }
-  },
-  '/platform/': {
-    type:'WebPage',
-    image:'/assets/media/024ad6399a21183c6bb8.png',
     label:{en:'Platform',vi:'Nền tảng','zh-cn':'平台',th:'แพลตฟอร์ม',id:'Platform',ms:'Platform',ar:'المنصة'},
     title:{
-      en:'Interactive Lesson Builder & Learning Publishing Platform | Wistudi',
-      vi:'Công cụ tạo bài học tương tác & nền tảng xuất bản học liệu | Wistudi',
-      'zh-cn':'互动课程制作与学习内容发布平台 | Wistudi',
-      th:'เครื่องมือสร้างบทเรียนแบบโต้ตอบและแพลตฟอร์มเผยแพร่การเรียนรู้ | Wistudi',
-      id:'Pembuat Pelajaran Interaktif & Platform Penerbitan Pembelajaran | Wistudi',
-      ms:'Pembina Pelajaran Interaktif & Platform Penerbitan Pembelajaran | Wistudi',
-      ar:'منشئ دروس تفاعلية ومنصة لنشر المحتوى التعليمي | Wistudi'
+      en:'Wistudi — One Platform for the Whole Learning Experience',
+      vi:'Wistudi — Một nền tảng cho toàn bộ trải nghiệm học tập',
+      'zh-cn':'Wistudi — 一个平台，覆盖完整学习体验',
+      th:'Wistudi — แพลตฟอร์มเดียวสำหรับประสบการณ์การเรียนรู้ทั้งหมด',
+      id:'Wistudi — Satu Platform untuk Seluruh Pengalaman Belajar',
+      ms:'Wistudi — Satu Platform untuk Keseluruhan Pengalaman Pembelajaran',
+      ar:'Wistudi — منصة واحدة لتجربة التعلم كاملة'
     },
     description:{
-      en:'Build interactive lessons, XP Video and Flows, turn digital learning into printable worksheets, manage learners, track results and connect with LMS, LTI and SSO.',
-      vi:'Tạo bài học tương tác, XP Video và Flow, chuyển nội dung số thành phiếu bài tập có thể in, quản lý người học, theo dõi kết quả và kết nối LMS, LTI, SSO.',
-      'zh-cn':'创建互动课程、XP Video 与 Flow，将数字学习内容转为可打印工作表，管理学习者、跟踪结果，并连接 LMS、LTI 与 SSO。',
-      th:'สร้างบทเรียนแบบโต้ตอบ XP Video และ Flow แปลงการเรียนรู้ดิจิทัลเป็นใบงานพิมพ์ได้ จัดการผู้เรียน ติดตามผล และเชื่อมต่อ LMS, LTI และ SSO',
-      id:'Bangun pelajaran interaktif, XP Video dan Flow, ubah pembelajaran digital menjadi lembar kerja cetak, kelola pelajar, pantau hasil, dan hubungkan LMS, LTI serta SSO.',
-      ms:'Bina pelajaran interaktif, XP Video dan Flow, tukar pembelajaran digital kepada lembaran kerja boleh cetak, urus pelajar, jejak hasil dan hubungkan LMS, LTI serta SSO.',
-      ar:'أنشئ دروسًا تفاعلية وXP Video وFlows، وحوّل التعلم الرقمي إلى أوراق عمل قابلة للطباعة، وأدر المتعلمين وتتبع النتائج واربط LMS وLTI وSSO.'
+      en:'Create, publish and manage interactive lessons, XP Video, Flows, printable worksheets, courses and learning communities with Wistudi.',
+      vi:'Tạo, xuất bản và quản lý bài học tương tác, XP Video, Flow, worksheet có thể in, khóa học và cộng đồng học tập với Wistudi.',
+      'zh-cn':'使用 Wistudi 创建、发布和管理互动课程、XP Video、Flow、可打印工作表、课程体系和学习社区。',
+      th:'สร้าง เผยแพร่ และจัดการบทเรียนแบบโต้ตอบ XP Video, Flow, ใบงานที่พิมพ์ได้ หลักสูตร และชุมชนการเรียนรู้ด้วย Wistudi',
+      id:'Buat, terbitkan, dan kelola pelajaran interaktif, XP Video, Flow, lembar kerja cetak, kursus, dan komunitas belajar dengan Wistudi.',
+      ms:'Cipta, terbit dan urus pelajaran interaktif, XP Video, Flow, lembaran kerja boleh cetak, kursus dan komuniti pembelajaran dengan Wistudi.',
+      ar:'أنشئ وانشر وأدر الدروس التفاعلية وXP Video وFlows وأوراق العمل القابلة للطباعة والدورات ومجتمعات التعلم باستخدام Wistudi.'
     }
   },
   '/blocks-activities/': {
@@ -64,22 +41,22 @@ const SEO_PAGES = {
     image:'/assets/media/10dd7a92b026aa52af3d.webp',
     label:{en:'Blocks & Activities',vi:'Khối & Hoạt động','zh-cn':'模块与活动',th:'บล็อกและกิจกรรม',id:'Blok & Aktivitas',ms:'Blok & Aktiviti',ar:'الكتل والأنشطة'},
     title:{
-      en:'Interactive Learning Activities & Lesson Blocks | Wistudi',
-      vi:'Hoạt động học tập tương tác & khối bài học | Wistudi',
-      'zh-cn':'互动学习活动与课程模块 | Wistudi',
-      th:'กิจกรรมการเรียนรู้แบบโต้ตอบและบล็อกบทเรียน | Wistudi',
-      id:'Aktivitas Pembelajaran Interaktif & Blok Pelajaran | Wistudi',
-      ms:'Aktiviti Pembelajaran Interaktif & Blok Pelajaran | Wistudi',
-      ar:'أنشطة تعلم تفاعلية وكتل بناء الدروس | Wistudi'
+      en:'Wistudi Blocks & Activities',
+      vi:'Khối & Hoạt động Wistudi',
+      'zh-cn':'Wistudi 模块与活动',
+      th:'บล็อกและกิจกรรม Wistudi',
+      id:'Blok & Aktivitas Wistudi',
+      ms:'Blok & Aktiviti Wistudi',
+      ar:'كتل وأنشطة Wistudi'
     },
     description:{
-      en:'Create interactive learning activities including quizzes, matching, sorting, whiteboards, polls, video checkpoints and printable worksheet activities for lessons and training.',
-      vi:'Tạo hoạt động học tập tương tác như quiz, nối đáp án, sắp xếp, bảng trắng, bình chọn, điểm tương tác trong video và hoạt động phiếu bài tập có thể in.',
-      'zh-cn':'创建互动学习活动，包括测验、配对、分类、白板、投票、视频互动检查点以及可打印工作表活动，适用于课程与培训。',
-      th:'สร้างกิจกรรมการเรียนรู้แบบโต้ตอบ เช่น แบบทดสอบ จับคู่ จัดหมวดหมู่ ไวท์บอร์ด โพล จุดโต้ตอบในวิดีโอ และกิจกรรมใบงานพิมพ์ได้',
-      id:'Buat aktivitas pembelajaran interaktif seperti kuis, mencocokkan, menyortir, papan tulis, polling, checkpoint video, dan aktivitas lembar kerja cetak.',
-      ms:'Cipta aktiviti pembelajaran interaktif seperti kuiz, padanan, pengisihan, papan putih, undian, checkpoint video dan aktiviti lembaran kerja boleh cetak.',
-      ar:'أنشئ أنشطة تعلم تفاعلية تشمل الاختبارات والمطابقة والفرز والسبورات والاستطلاعات ونقاط التفاعل داخل الفيديو وأنشطة أوراق العمل القابلة للطباعة.'
+      en:'Explore Wistudi blocks and activities for interactive lessons, XP Video, assessment, whiteboards, printable worksheets, live teaching and self-paced learning.',
+      vi:'Khám phá các khối và hoạt động Wistudi cho bài học tương tác, XP Video, đánh giá, bảng trắng, worksheet có thể in, dạy trực tiếp và tự học.',
+      'zh-cn':'探索 Wistudi 的互动学习模块与活动，适用于互动课程、XP Video、评估、白板、可打印工作表、现场教学和自主学习。',
+      th:'สำรวจบล็อกและกิจกรรมของ Wistudi สำหรับบทเรียนแบบโต้ตอบ XP Video การประเมิน ไวท์บอร์ด ใบงานพิมพ์ การสอนสด และการเรียนด้วยตนเอง',
+      id:'Jelajahi blok dan aktivitas Wistudi untuk pelajaran interaktif, XP Video, penilaian, papan tulis, lembar kerja cetak, pengajaran langsung, dan belajar mandiri.',
+      ms:'Terokai blok dan aktiviti Wistudi untuk pelajaran interaktif, XP Video, penilaian, papan putih, lembaran kerja boleh cetak, pengajaran langsung dan pembelajaran kendiri.',
+      ar:'استكشف كتل وأنشطة Wistudi للدروس التفاعلية وXP Video والتقييم والسبورات وأوراق العمل القابلة للطباعة والتعليم المباشر والتعلم الذاتي.'
     }
   },
   '/organisations/': {
@@ -87,22 +64,22 @@ const SEO_PAGES = {
     image:'/assets/media/024ad6399a21183c6bb8.png',
     label:{en:'Organisations',vi:'Tổ chức','zh-cn':'机构',th:'องค์กร',id:'Organisasi',ms:'Organisasi',ar:'المؤسسات'},
     title:{
-      en:'Learning Platform for Schools, Training Teams & Publishers | Wistudi',
-      vi:'Nền tảng học tập cho trường học, đội ngũ đào tạo & nhà xuất bản | Wistudi',
-      'zh-cn':'面向学校、培训团队与出版机构的学习平台 | Wistudi',
-      th:'แพลตฟอร์มการเรียนรู้สำหรับโรงเรียน ทีมฝึกอบรม และผู้เผยแพร่ | Wistudi',
-      id:'Platform Pembelajaran untuk Sekolah, Tim Pelatihan & Penerbit | Wistudi',
-      ms:'Platform Pembelajaran untuk Sekolah, Pasukan Latihan & Penerbit | Wistudi',
-      ar:'منصة تعلم للمدارس وفرق التدريب والناشرين | Wistudi'
+      en:'Wistudi for Organisations',
+      vi:'Wistudi cho Tổ chức',
+      'zh-cn':'Wistudi 面向机构',
+      th:'Wistudi สำหรับองค์กร',
+      id:'Wistudi untuk Organisasi',
+      ms:'Wistudi untuk Organisasi',
+      ar:'Wistudi للمؤسسات'
     },
     description:{
-      en:'A learning and publishing platform for schools, universities, training teams and publishers with private workspaces, learner management, reporting and LMS, LTI and SSO integrations.',
-      vi:'Nền tảng học tập và xuất bản cho trường học, đại học, đội ngũ đào tạo và nhà xuất bản với workspace riêng, quản lý người học, báo cáo và tích hợp LMS, LTI, SSO.',
-      'zh-cn':'面向学校、大学、培训团队与出版机构的学习与发布平台，提供私有工作区、学习者管理、数据报告以及 LMS、LTI、SSO 集成。',
-      th:'แพลตฟอร์มการเรียนรู้และเผยแพร่สำหรับโรงเรียน มหาวิทยาลัย ทีมฝึกอบรม และผู้เผยแพร่ พร้อมพื้นที่ส่วนตัว การจัดการผู้เรียน รายงาน และการเชื่อมต่อ LMS, LTI, SSO',
-      id:'Platform pembelajaran dan penerbitan untuk sekolah, universitas, tim pelatihan, dan penerbit dengan workspace privat, manajemen pelajar, pelaporan, serta integrasi LMS, LTI dan SSO.',
-      ms:'Platform pembelajaran dan penerbitan untuk sekolah, universiti, pasukan latihan dan penerbit dengan workspace peribadi, pengurusan pelajar, pelaporan serta integrasi LMS, LTI dan SSO.',
-      ar:'منصة تعلم ونشر للمدارس والجامعات وفرق التدريب والناشرين، مع مساحات عمل خاصة وإدارة المتعلمين والتقارير وتكاملات LMS وLTI وSSO.'
+      en:'Wistudi helps schools, universities, training teams, publishers and partners create, manage, integrate and scale interactive and printable learning.',
+      vi:'Wistudi giúp trường học, đại học, đội ngũ đào tạo, nhà xuất bản và đối tác tạo, quản lý, tích hợp và mở rộng học tập tương tác lẫn bản in.',
+      'zh-cn':'Wistudi 帮助学校、大学、培训团队、出版机构和合作伙伴创建、管理、集成并规模化互动与可打印学习内容。',
+      th:'Wistudi ช่วยโรงเรียน มหาวิทยาลัย ทีมฝึกอบรม ผู้เผยแพร่ และพันธมิตรสร้าง จัดการ เชื่อมต่อ และขยายการเรียนรู้แบบโต้ตอบและแบบพิมพ์',
+      id:'Wistudi membantu sekolah, universitas, tim pelatihan, penerbit, dan mitra membuat, mengelola, mengintegrasikan, dan menskalakan pembelajaran interaktif serta cetak.',
+      ms:'Wistudi membantu sekolah, universiti, pasukan latihan, penerbit dan rakan kongsi mencipta, mengurus, mengintegrasi dan menskalakan pembelajaran interaktif serta boleh cetak.',
+      ar:'يساعد Wistudi المدارس والجامعات وفرق التدريب والناشرين والشركاء على إنشاء التعلم التفاعلي والقابل للطباعة وإدارته ودمجه وتوسيعه.'
     }
   },
   '/contact/': {
@@ -110,55 +87,33 @@ const SEO_PAGES = {
     image:'/assets/media/024ad6399a21183c6bb8.png',
     label:{en:'Contact',vi:'Liên hệ','zh-cn':'联系',th:'ติดต่อ',id:'Kontak',ms:'Hubungi',ar:'تواصل'},
     title:{
-      en:'Contact Wistudi | Interactive Learning Platform',
-      vi:'Liên hệ Wistudi | Nền tảng học tập tương tác',
-      'zh-cn':'联系 Wistudi | 互动学习平台',
-      th:'ติดต่อ Wistudi | แพลตฟอร์มการเรียนรู้แบบโต้ตอบ',
-      id:'Hubungi Wistudi | Platform Pembelajaran Interaktif',
-      ms:'Hubungi Wistudi | Platform Pembelajaran Interaktif',
-      ar:'تواصل مع Wistudi | منصة تعلم تفاعلي'
+      en:'Contact Wistudi',
+      vi:'Liên hệ Wistudi',
+      'zh-cn':'联系 Wistudi',
+      th:'ติดต่อ Wistudi',
+      id:'Hubungi Wistudi',
+      ms:'Hubungi Wistudi',
+      ar:'تواصل مع Wistudi'
     },
     description:{
-      en:'Talk to Wistudi about interactive learning, publishing, schools, training, partnerships, LMS, LTI or SSO integrations, or book a meeting directly with our team.',
-      vi:'Liên hệ Wistudi về học tập tương tác, xuất bản, trường học, đào tạo, hợp tác hoặc tích hợp LMS, LTI, SSO, hoặc đặt lịch họp trực tiếp với đội ngũ của chúng tôi.',
-      'zh-cn':'联系 Wistudi，了解互动学习、内容发布、学校与培训方案、合作以及 LMS、LTI、SSO 集成，或直接预约团队会议。',
-      th:'ติดต่อ Wistudi เรื่องการเรียนรู้แบบโต้ตอบ การเผยแพร่ โรงเรียน การฝึกอบรม ความร่วมมือ หรือการเชื่อมต่อ LMS, LTI, SSO และจองการประชุมกับทีม',
-      id:'Hubungi Wistudi tentang pembelajaran interaktif, penerbitan, sekolah, pelatihan, kemitraan atau integrasi LMS, LTI dan SSO, atau jadwalkan pertemuan dengan tim kami.',
-      ms:'Hubungi Wistudi tentang pembelajaran interaktif, penerbitan, sekolah, latihan, kerjasama atau integrasi LMS, LTI dan SSO, atau tempah mesyuarat dengan pasukan kami.',
-      ar:'تواصل مع Wistudi بشأن التعلم التفاعلي والنشر والمدارس والتدريب والشراكات أو تكاملات LMS وLTI وSSO، أو احجز اجتماعًا مباشرًا مع فريقنا.'
+      en:'Contact Wistudi about organisations, partnerships, publishing, integrations or platform use, or book a 30-minute meeting directly with the Wistudi team.',
+      vi:'Liên hệ Wistudi về tổ chức, hợp tác, xuất bản, tích hợp hoặc sử dụng nền tảng, hoặc đặt trực tiếp cuộc họp 30 phút với đội ngũ Wistudi.',
+      'zh-cn':'就机构方案、合作、内容发布、集成或平台使用联系 Wistudi，或直接预约与 Wistudi 团队进行 30 分钟会议。',
+      th:'ติดต่อ Wistudi เรื่ององค์กร ความร่วมมือ การเผยแพร่ การเชื่อมต่อ หรือการใช้งานแพลตฟอร์ม หรือจองการประชุม 30 นาทีกับทีม Wistudi โดยตรง',
+      id:'Hubungi Wistudi tentang organisasi, kemitraan, penerbitan, integrasi, atau penggunaan platform, atau jadwalkan pertemuan 30 menit langsung dengan tim Wistudi.',
+      ms:'Hubungi Wistudi tentang organisasi, kerjasama, penerbitan, integrasi atau penggunaan platform, atau tempah mesyuarat 30 minit terus dengan pasukan Wistudi.',
+      ar:'تواصل مع Wistudi بشأن المؤسسات أو الشراكات أو النشر أو التكاملات أو استخدام المنصة، أو احجز اجتماعًا لمدة 30 دقيقة مباشرة مع فريق Wistudi.'
     }
   }
 };
 
 const LEGACY_ALIASES = new Map([
   ['/OPEN_WEBSITE.html','/'],
-  ['/platform.html','/platform/'],
-  ['/The%20Platform.html','/platform/'],
-  ['/The Platform.html','/platform/'],
+  ['/platform.html','/'],
+  ['/The%20Platform.html','/'],
+  ['/The Platform.html','/'],
   ['/blocks-activities.html','/blocks-activities/'],
   ['/organisations.html','/organisations/'],
-  ['/contact.html','/contact/']
-]);
-
-const STATIC_ROUTE_MAP = new Map([
-  ['/index.html','/'],
-  ['/OPEN_WEBSITE.html','/'],
-  ['/platform','/platform/'],
-  ['/platform/','/platform/'],
-  ['/platform/index.html','/platform/'],
-  ['/platform.html','/platform/'],
-  ['/The%20Platform.html','/platform/'],
-  ['/blocks-activities','/blocks-activities/'],
-  ['/blocks-activities/','/blocks-activities/'],
-  ['/blocks-activities/index.html','/blocks-activities/'],
-  ['/blocks-activities.html','/blocks-activities/'],
-  ['/organisations','/organisations/'],
-  ['/organisations/','/organisations/'],
-  ['/organisations/index.html','/organisations/'],
-  ['/organisations.html','/organisations/'],
-  ['/contact','/contact/'],
-  ['/contact/','/contact/'],
-  ['/contact/index.html','/contact/'],
   ['/contact.html','/contact/']
 ]);
 
@@ -202,7 +157,7 @@ function stripLocale(pathname) {
 
 function canonicalPagePath(pathname) {
   let path = stripLocale(pathname);
-  if (!path || path === '/' || path === '/index.html') return '/';
+  if (!path || path === '/' || path === '/index.html' || path === '/platform' || path === '/platform/' || path === '/platform/index.html') return '/';
   path = path.replace(/\/index\.html$/i, '/');
   if (!path.endsWith('/')) path += '/';
   return CANONICAL_PAGES.has(path) ? path : null;
@@ -229,35 +184,6 @@ function canonicalAssetUrl(url) {
   return assetUrl;
 }
 
-function canonicalInternalHref(rawHref, locale) {
-  if (!rawHref || rawHref.startsWith('#') || /^(?:mailto:|tel:|javascript:|data:)/i.test(rawHref)) return null;
-  let working = rawHref;
-  if (/^https?:\/\//i.test(working)) {
-    try {
-      const absolute = new URL(working);
-      if (absolute.origin !== PROD_ORIGIN) return null;
-      working = `${absolute.pathname}${absolute.search}${absolute.hash}`;
-    } catch (_) { return null; }
-  }
-  const hashIndex = working.indexOf('#');
-  const hash = hashIndex >= 0 ? working.slice(hashIndex) : '';
-  if (hashIndex >= 0) working = working.slice(0,hashIndex);
-  const queryIndex = working.indexOf('?');
-  const query = queryIndex >= 0 ? working.slice(queryIndex) : '';
-  if (queryIndex >= 0) working = working.slice(0,queryIndex);
-  if (!working) return null;
-  working = working.replace(/^(?:\.\.\/)+/,'/').replace(/^\.\//,'/');
-  if (!working.startsWith('/')) working = '/' + working;
-  const alreadyLocalized = explicitLocale(working);
-  if (alreadyLocalized) return null;
-  let target = STATIC_ROUTE_MAP.get(working);
-  if (!target) {
-    const normalized = canonicalPagePath(working);
-    if (normalized) target = normalized;
-  }
-  return target ? `${localePath(locale,target)}${query}${hash}` : null;
-}
-
 function redirectResponse(url, path, status=301) {
   const target = new URL(path, url.origin);
   target.search = url.search;
@@ -281,7 +207,6 @@ function structuredData(locale, pagePath, meta) {
       logo:{'@type':'ImageObject',url:`${PROD_ORIGIN}/assets/images/wistudi-logo.png`},
       email:'support@wistudi.com',
       telephone:'+84 879 876 624',
-      areaServed:'Worldwide',
       address:{'@type':'PostalAddress',streetAddress:'85 Great Portland Street, First Floor',addressLocality:'London',addressCountry:'GB'},
       contactPoint:[
         {'@type':'ContactPoint',contactType:'customer support',email:'support@wistudi.com',telephone:'+84 879 876 624',availableLanguage:['English','Vietnamese']},
@@ -305,23 +230,9 @@ function structuredData(locale, pagePath, meta) {
       inLanguage:lang,
       isPartOf:{'@id':`${PROD_ORIGIN}/#website`},
       about:{'@id':`${PROD_ORIGIN}/#organization`},
-      audience:{'@type':'EducationalAudience',educationalRole:['teacher','trainer','publisher','learner']},
       primaryImageOfPage:{'@type':'ImageObject',url:PROD_ORIGIN + meta.image}
     }
   ];
-  if (pagePath === '/' || pagePath === '/platform/') {
-    graph.push({
-      '@type':'SoftwareApplication',
-      '@id':`${PROD_ORIGIN}/#software`,
-      name:'Wistudi',
-      url:`${PROD_ORIGIN}/platform/`,
-      applicationCategory:'EducationalApplication',
-      operatingSystem:'Web',
-      description:SEO_PAGES['/platform/'].description[locale] || SEO_PAGES['/platform/'].description.en,
-      publisher:{'@id':`${PROD_ORIGIN}/#organization`},
-      featureList:['Interactive lessons','Interactive video','Learning Flows','Printable worksheets','Learner management','Assessment and reporting','LMS, LTI and SSO integration']
-    });
-  }
   if (pagePath !== '/') {
     graph.push({
       '@type':'BreadcrumbList',
@@ -349,11 +260,7 @@ html.i18n-ready body,html:not(.ws-i18n-pending) body{opacity:1}
   var isRootPage=/^\\/(?:|index\\.html|platform\\/?|platform\\/index\\.html|blocks-activities\\/?|blocks-activities\\/index\\.html|organisations\\/?|organisations\\/index\\.html|contact\\/?|contact\\/index\\.html)$/.test(location.pathname);
   if(!explicit&&isRootPage&&stored&&supported.indexOf(stored)>-1&&stored!=='en'&&stored!==cookie){
     var p=location.pathname;
-    if(p==='/index.html')p='/';
-    else if(p==='/platform'||p==='/platform/index.html')p='/platform/';
-    else if(p==='/blocks-activities'||p==='/blocks-activities/index.html')p='/blocks-activities/';
-    else if(p==='/organisations'||p==='/organisations/index.html')p='/organisations/';
-    else if(p==='/contact'||p==='/contact/index.html')p='/contact/';
+    if(p==='/index.html'||p==='/platform'||p==='/platform/'||p==='/platform/index.html')p='/';
     location.replace('/'+stored+(p==='/'?'/':p)+location.search+location.hash);return;
   }
   if(explicit&&explicit!=='en'){
@@ -379,7 +286,6 @@ function seoHeadMarkup(locale, pagePath, isProduction) {
 ${alternates}
 <link rel="sitemap" type="application/xml" href="/sitemap.xml">
 <meta name="robots" content="${robots}">
-<meta name="application-name" content="Wistudi">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Wistudi">
 <meta property="og:locale" content="${localeMeta.og}">
@@ -388,7 +294,7 @@ ${ogAlternates}
 <meta property="og:description" content="${escapeHtml(description)}">
 <meta property="og:url" content="${pageUrl}">
 <meta property="og:image" content="${image}">
-<meta property="og:image:alt" content="Wistudi interactive learning and publishing platform">
+<meta property="og:image:alt" content="Wistudi learning publishing platform">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${escapeHtml(title)}">
 <meta name="twitter:description" content="${escapeHtml(description)}">
@@ -407,13 +313,6 @@ function injectPage(response, locale, pagePath, isProduction) {
     .on('meta[name="description"]', { element(el) { el.setAttribute('content',meta.description[locale] || meta.description.en); } })
     .on('link[rel="canonical"]', { element(el) { el.remove(); } })
     .on('link[rel="alternate"][hreflang]', { element(el) { el.remove(); } })
-    .on('a[href]', { element(el) { const canonical = canonicalInternalHref(el.getAttribute('href'),locale); if (canonical) el.setAttribute('href',canonical); } })
-    .on('.ws-brand', { element(el) { el.setAttribute('href',localePath(locale,'/')); } })
-    .on('.ws-nav-links a:first-child', { element(el) { el.setAttribute('href',localePath(locale,'/platform/')); } })
-    .on('.ws-mobile-inner > a:first-child', { element(el) { el.setAttribute('href',localePath(locale,'/platform/')); } })
-    .on('.ws-footer-links a:first-child', { element(el) { el.setAttribute('href',localePath(locale,'/platform/')); } })
-    .on('.ws-nav-actions a.ws-btn.secondary', { element(el) { el.setAttribute('href',localePath(locale,'/platform/')); } })
-    .on('.ws-mobile-actions a.ws-btn.secondary', { element(el) { el.setAttribute('href',localePath(locale,'/platform/')); } })
     .on('head', { element(el) { el.append(`${seoHeadMarkup(locale,pagePath,isProduction)}${EARLY_BOOTSTRAP}<script src="/assets/js/i18n.js" defer></script>`, { html:true }); } })
     .transform(response);
   transformed = new Response(transformed.body, transformed);
