@@ -1,6 +1,12 @@
 name: Resources Publishing QA
 
 on:
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: 'Optional Cloudflare Pages preview URL to test instead of the local static server'
+        required: false
+        type: string
   push:
     branches: [feature/community-notes-resources]
     paths:
@@ -88,7 +94,17 @@ jobs:
         run: |
           npm install --no-save playwright
           npx playwright install --with-deps chromium
+      - name: Select browser QA target
+        run: |
+          if [ -n "${{ inputs.preview_url }}" ]; then
+            echo "QA_BASE_URL=${{ inputs.preview_url }}" >> "$GITHUB_ENV"
+            echo 'Testing the supplied Cloudflare preview.'
+          else
+            echo 'QA_BASE_URL=http://127.0.0.1:4173' >> "$GITHUB_ENV"
+            echo 'Testing the checked-out branch on a local static server.'
+          fi
       - name: Start static preview server
+        if: inputs.preview_url == ''
         run: |
           python -m http.server 4173 > /tmp/wistudi-qa-server.log 2>&1 &
           for i in {1..30}; do
@@ -98,8 +114,6 @@ jobs:
           cat /tmp/wistudi-qa-server.log
           exit 1
       - name: Render, scroll, click and inspect all core and Resources pages
-        env:
-          QA_BASE_URL: http://127.0.0.1:4173
         run: node scripts/resources_browser_qa.mjs
       - name: Upload QA screenshots
         if: always()
