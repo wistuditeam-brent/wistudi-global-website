@@ -7,14 +7,13 @@
     document.head.appendChild(s);
   };
 
-  // Resources is intentionally isolated from the homepage/video/role-guide stack.
-  // Those modules are useful elsewhere on the site but are unnecessary on editorial pages.
+  // Resources pages use their own small, isolated shell.
   if(document.body?.classList.contains('page-resources')){
     load('/assets/js/resources-page-shell.js');
     return;
   }
 
-  // Preserve the existing production loader exactly for the rest of the website.
+  // Core website pages keep the existing production loader only.
   load('/assets/js/site-shell-base.js',()=>{
     load('/assets/js/hero-video.js',()=>{
       if(!document.querySelector('.ws-hero-float-shell')){
@@ -36,10 +35,4 @@
       });
     });
   });
-
-  // Resource navigation/badge/home teaser is deliberately deferred until idle so it
-  // never competes with the core page for first render or interaction.
-  const loadResourcesGlobal=()=>load('/assets/js/resources-global.js');
-  if('requestIdleCallback' in window) requestIdleCallback(loadResourcesGlobal,{timeout:2500});
-  else setTimeout(loadResourcesGlobal,1500);
 })();
