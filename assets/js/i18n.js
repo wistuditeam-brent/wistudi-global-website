@@ -176,10 +176,8 @@
       ]);
       if(!base)throw new Error('base translation unavailable');
       const dict=Object.assign({},base.strings||base,site?.strings||site||{},extra?.strings||extra||{});
-      const titles=Object.assign({},base.titles||{},site?.titles||{},extra?.titles||{});
-      if(titles[seoPath])document.title=titles[seoPath];
-      const meta=document.querySelector('meta[name="description"]');
-      if(meta){const key=normalizeText(meta.content);if(dict[key])meta.content=dict[key]}
+      // SEO title, description, canonical and hreflang are injected server-side by
+      // Cloudflare middleware. Keep those authoritative after client translation.
       translateNode(document.body,dict);
       const observer=new MutationObserver(records=>records.forEach(record=>{
         record.addedNodes.forEach(node=>translateNode(node,dict));
