@@ -1,5 +1,5 @@
 const SUPPORTED = ['en','vi','zh-cn','th','id','ms','ar'];
-const CANONICAL_PAGES = new Set(['/', '/blocks-activities/', '/organisations/', '/contact/']);
+const CANONICAL_PAGES = new Set(['/', '/platform/', '/blocks-activities/', '/organisations/', '/contact/']);
 const PROD_ORIGIN = 'https://global.wistudi.com';
 
 const LOCALE_META = {
@@ -16,7 +16,7 @@ const SEO_PAGES = {
   '/': {
     type:'WebPage',
     image:'/assets/media/024ad6399a21183c6bb8.png',
-    label:{en:'Platform',vi:'Nền tảng','zh-cn':'平台',th:'แพลตฟอร์ม',id:'Platform',ms:'Platform',ar:'المنصة'},
+    label:{en:'Home',vi:'Trang chủ','zh-cn':'首页',th:'หน้าแรก',id:'Beranda',ms:'Laman Utama',ar:'الرئيسية'},
     title:{
       en:'Wistudi — One Platform for the Whole Learning Experience',
       vi:'Wistudi — Một nền tảng cho toàn bộ trải nghiệm học tập',
@@ -34,6 +34,29 @@ const SEO_PAGES = {
       id:'Buat, terbitkan, dan kelola pelajaran interaktif, XP Video, Flow, lembar kerja cetak, kursus, dan komunitas belajar dengan Wistudi.',
       ms:'Cipta, terbit dan urus pelajaran interaktif, XP Video, Flow, lembaran kerja boleh cetak, kursus dan komuniti pembelajaran dengan Wistudi.',
       ar:'أنشئ وانشر وأدر الدروس التفاعلية وXP Video وFlows وأوراق العمل القابلة للطباعة والدورات ومجتمعات التعلم باستخدام Wistudi.'
+    }
+  },
+  '/platform/': {
+    type:'WebPage',
+    image:'/assets/media/024ad6399a21183c6bb8.png',
+    label:{en:'Platform',vi:'Nền tảng','zh-cn':'平台',th:'แพลตฟอร์ม',id:'Platform',ms:'Platform',ar:'المنصة'},
+    title:{
+      en:'Wistudi Platform — Interactive Learning, Publishing & Worksheets',
+      vi:'Nền tảng Wistudi — Học tập tương tác, xuất bản & worksheet',
+      'zh-cn':'Wistudi 平台 — 互动学习、内容发布与工作表',
+      th:'แพลตฟอร์ม Wistudi — การเรียนรู้แบบโต้ตอบ การเผยแพร่ และใบงาน',
+      id:'Platform Wistudi — Pembelajaran Interaktif, Penerbitan & Lembar Kerja',
+      ms:'Platform Wistudi — Pembelajaran Interaktif, Penerbitan & Lembaran Kerja',
+      ar:'منصة Wistudi — التعلم التفاعلي والنشر وأوراق العمل'
+    },
+    description:{
+      en:'Explore Wistudi for interactive lessons, XP Video, Flows, printable worksheets, learner management, publishing and scalable learning integrations.',
+      vi:'Khám phá Wistudi cho bài học tương tác, XP Video, Flow, worksheet có thể in, quản lý người học, xuất bản và tích hợp học tập có thể mở rộng.',
+      'zh-cn':'探索 Wistudi 的互动课程、XP Video、Flow、可打印工作表、学习者管理、内容发布及可扩展的学习集成。',
+      th:'สำรวจ Wistudi สำหรับบทเรียนแบบโต้ตอบ XP Video, Flow, ใบงานพิมพ์ การจัดการผู้เรียน การเผยแพร่ และการเชื่อมต่อการเรียนรู้ที่ขยายได้',
+      id:'Jelajahi Wistudi untuk pelajaran interaktif, XP Video, Flow, lembar kerja cetak, manajemen pelajar, penerbitan, dan integrasi pembelajaran yang dapat diskalakan.',
+      ms:'Terokai Wistudi untuk pelajaran interaktif, XP Video, Flow, lembaran kerja boleh cetak, pengurusan pelajar, penerbitan dan integrasi pembelajaran yang boleh diskalakan.',
+      ar:'استكشف Wistudi للدروس التفاعلية وXP Video وFlows وأوراق العمل القابلة للطباعة وإدارة المتعلمين والنشر وتكاملات التعلم القابلة للتوسع.'
     }
   },
   '/blocks-activities/': {
@@ -109,9 +132,9 @@ const SEO_PAGES = {
 
 const LEGACY_ALIASES = new Map([
   ['/OPEN_WEBSITE.html','/'],
-  ['/platform.html','/'],
-  ['/The%20Platform.html','/'],
-  ['/The Platform.html','/'],
+  ['/platform.html','/platform/'],
+  ['/The%20Platform.html','/platform/'],
+  ['/The Platform.html','/platform/'],
   ['/blocks-activities.html','/blocks-activities/'],
   ['/organisations.html','/organisations/'],
   ['/contact.html','/contact/']
@@ -157,7 +180,7 @@ function stripLocale(pathname) {
 
 function canonicalPagePath(pathname) {
   let path = stripLocale(pathname);
-  if (!path || path === '/' || path === '/index.html' || path === '/platform' || path === '/platform/' || path === '/platform/index.html') return '/';
+  if (!path || path === '/' || path === '/index.html') return '/';
   path = path.replace(/\/index\.html$/i, '/');
   if (!path.endsWith('/')) path += '/';
   return CANONICAL_PAGES.has(path) ? path : null;
@@ -260,7 +283,11 @@ html.i18n-ready body,html:not(.ws-i18n-pending) body{opacity:1}
   var isRootPage=/^\\/(?:|index\\.html|platform\\/?|platform\\/index\\.html|blocks-activities\\/?|blocks-activities\\/index\\.html|organisations\\/?|organisations\\/index\\.html|contact\\/?|contact\\/index\\.html)$/.test(location.pathname);
   if(!explicit&&isRootPage&&stored&&supported.indexOf(stored)>-1&&stored!=='en'&&stored!==cookie){
     var p=location.pathname;
-    if(p==='/index.html'||p==='/platform'||p==='/platform/'||p==='/platform/index.html')p='/';
+    if(p==='/index.html')p='/';
+    else if(p==='/platform'||p==='/platform/index.html')p='/platform/';
+    else if(p==='/blocks-activities'||p==='/blocks-activities/index.html')p='/blocks-activities/';
+    else if(p==='/organisations'||p==='/organisations/index.html')p='/organisations/';
+    else if(p==='/contact'||p==='/contact/index.html')p='/contact/';
     location.replace('/'+stored+(p==='/'?'/':p)+location.search+location.hash);return;
   }
   if(explicit&&explicit!=='en'){
