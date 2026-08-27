@@ -20,6 +20,7 @@
           load('/assets/js/role-guide-v2.js',()=>{
             load('/assets/js/role-guide-i18n-ui.js');
             load('/assets/js/role-guide-chrome-guard.js');
+            load('/assets/js/role-guide-bubble-guard.js');
           });
         });
       });
