@@ -6,6 +6,7 @@
     if(onload)s.addEventListener('load',onload,{once:true});
     document.head.appendChild(s);
   };
+  load('/assets/js/resources-site.js');
   load('/assets/js/site-shell-base.js',()=>{
     load('/assets/js/hero-video.js',()=>{
       if(!document.querySelector('.ws-hero-float-shell')){
