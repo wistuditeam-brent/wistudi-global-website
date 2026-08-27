@@ -15,7 +15,7 @@
         marker.setAttribute('aria-hidden','true');
         document.body.appendChild(marker);
       }
-      load('/assets/js/role-guide-copy.js',()=>load('/assets/js/role-guide.js',()=>load('/assets/js/role-guide-initial-position.js')));
+      load('/assets/js/role-guide-copy.js',()=>load('/assets/js/role-guide-v2.js'));
     });
   });
 })();
