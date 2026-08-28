@@ -2,7 +2,6 @@
   'use strict';
 
   const doc=document;
-  const root=doc.documentElement;
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   // Performance/responsiveness overrides are deliberately small and global.
@@ -133,6 +132,7 @@
     video.dataset.wsMediaActivated='true';
     video.setAttribute('src',src);
     video.preload='metadata';
+    if(video.dataset.wsWasAutoplay==='true') video.autoplay=true;
     try{video.load();}catch(_){ }
     if(video.dataset.wsWasAutoplay==='true'&&!reduced){
       const play=()=>video.play().catch(()=>{});
