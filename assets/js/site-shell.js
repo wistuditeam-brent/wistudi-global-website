@@ -157,10 +157,19 @@
     }
   }
 
-  // Stop video decode/playback work when the tab is not visible.
+  // Stop decode/playback work in a background tab and resume only visible autoplay showcases on return.
   doc.addEventListener('visibilitychange',()=>{
-    if(!doc.hidden) return;
-    doc.querySelectorAll('video').forEach(video=>{if(!video.paused) video.pause();});
+    if(doc.hidden){
+      doc.querySelectorAll('video').forEach(video=>{if(!video.paused) video.pause();});
+      return;
+    }
+    if(reduced) return;
+    doc.querySelectorAll('video').forEach(video=>{
+      const shouldAuto=video.autoplay||video.dataset.wsWasAutoplay==='true';
+      if(!shouldAuto||!video.getAttribute('src')) return;
+      const r=video.getBoundingClientRect();
+      if(r.bottom>0&&r.top<window.innerHeight) video.play().catch(()=>{});
+    });
   },{passive:true});
 
   // Script loader. Critical shell and hero interaction start first; the decorative role guide
