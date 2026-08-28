@@ -186,6 +186,7 @@
   const basePromise=load('/assets/js/site-shell-base.js').catch(()=>null);
   const hasHeroOverview=!!doc.querySelector('.hero .hero-visual .hero-media-frame .hero-showcase-video');
   const heroPromise=hasHeroOverview?load('/assets/js/hero-video.js').catch(()=>null):Promise.resolve(null);
+  if(doc.getElementById('carouselTrack')) load('/assets/js/carousel-performance.js').catch(()=>null);
 
   heroPromise.finally(()=>{
     if(!doc.querySelector('.ws-hero-float-shell')){
