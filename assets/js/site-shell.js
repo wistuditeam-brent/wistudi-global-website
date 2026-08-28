@@ -18,9 +18,7 @@
 
     /* One fast reveal language. Remove GPU-expensive blur and long stagger delays. */
     .scroll-reveal,
-    .reveal,
-    .section-shell-reveal,
-    .ws-scroll-section{
+    .reveal{
       filter:none!important;
       transition-delay:0ms!important;
       transition-duration:.22s,.26s!important;
@@ -31,31 +29,20 @@
     .scroll-reveal.reveal-right:not(.is-visible){transform:translate3d(12px,0,0) scale(.998)!important}
     .scroll-reveal.is-visible{transform:none!important;filter:none!important}
 
-    /* The homepage/platform already reveal their children. Do not gate the same section twice. */
-    .reveal-section.reveal-pending{
+    /* Do not stack section-level fades on top of page-level item reveals. */
+    .reveal-section.reveal-pending,
+    .section-shell-reveal,
+    body.page-platform .ws-scroll-section,
+    body.page-blocks .ws-scroll-section,
+    body.page-organisations .ws-scroll-section{
       opacity:1!important;
       transform:none!important;
       filter:none!important;
       transition:none!important;
     }
 
-    /* Faster shared section fade on the long pages. */
-    body.page-platform .ws-scroll-section,
-    body.page-blocks .ws-scroll-section,
-    body.page-organisations .ws-scroll-section{
-      transform:translate3d(0,10px,0)!important;
-      filter:none!important;
-      transition:opacity .20s ease,transform .24s cubic-bezier(.2,.76,.2,1)!important;
-    }
-    body.page-platform .ws-scroll-section.ws-section-visible,
-    body.page-blocks .ws-scroll-section.ws-section-visible,
-    body.page-organisations .ws-scroll-section.ws-section-visible{
-      transform:none!important;
-    }
-
     /* Avoid keeping compositor layers alive once a reveal has completed. */
     .scroll-reveal.is-visible,
-    .ws-scroll-section.ws-section-visible,
     .reveal.in{will-change:auto!important}
 
     @media(max-width:900px){
