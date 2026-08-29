@@ -1,0 +1,125 @@
+name: Resources Publishing QA
+
+on:
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: 'Optional Cloudflare Pages preview URL to test instead of the local static server'
+        required: false
+        type: string
+  push:
+    branches: [feature/community-notes-resources]
+    paths:
+      - 'resources/**'
+      - 'assets/images/resources/**'
+      - 'assets/data/resources-manifest.json'
+      - 'assets/css/resources.css'
+      - 'assets/css/resources-site.css'
+      - 'assets/js/resources-*.js'
+      - 'assets/js/site-shell.js'
+      - 'scripts/resources_qa.py'
+      - 'scripts/resources_browser_qa.mjs'
+      - '.github/workflows/resources-qa.yml'
+  pull_request:
+    paths:
+      - 'resources/**'
+      - 'assets/images/resources/**'
+      - 'assets/data/resources-manifest.json'
+      - 'assets/css/resources.css'
+      - 'assets/css/resources-site.css'
+      - 'assets/js/resources-*.js'
+      - 'assets/js/site-shell.js'
+      - 'scripts/resources_qa.py'
+      - 'scripts/resources_browser_qa.mjs'
+
+jobs:
+  static-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install image validator
+        run: python -m pip install --disable-pip-version-check pillow
+      - name: Validate article routes, links, assets and image quality
+        id: contentqa
+        continue-on-error: true
+        run: python scripts/resources_qa.py
+      - name: Syntax-check Resources JavaScript
+        id: syntaxqa
+        continue-on-error: true
+        run: |
+          node --check assets/js/resources-page-shell.js
+          if [ -f assets/js/resources-site.js ]; then node --check assets/js/resources-site.js; fi
+          node --check scripts/resources_browser_qa.mjs
+      - name: Guard core runtime modules
+        id: coreguard
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          if ! git diff --quiet "origin/${{ github.base_ref }}" -- assets/js/site-shell-base.js assets/js/hero-video.js assets/js/role-guide-copy.js assets/js/role-guide-i18n.js assets/js/role-guide-v2.js assets/js/role-guide-click-only.js assets/js/role-guide-i18n-ui.js assets/js/role-guide-chrome-guard.js assets/js/role-guide-bubble-guard.js; then
+            echo 'Resources publishing must not modify core runtime modules.'
+            git diff "origin/${{ github.base_ref }}" -- assets/js/site-shell-base.js assets/js/hero-video.js assets/js/role-guide-copy.js assets/js/role-guide-i18n.js assets/js/role-guide-v2.js assets/js/role-guide-click-only.js assets/js/role-guide-i18n-ui.js assets/js/role-guide-chrome-guard.js assets/js/role-guide-bubble-guard.js
+            exit 1
+          fi
+      - name: Enforce static QA result
+        if: always()
+        run: |
+          failed=0
+          if [ "${{ steps.contentqa.outcome }}" = "failure" ]; then failed=1; fi
+          if [ "${{ steps.syntaxqa.outcome }}" = "failure" ]; then failed=1; fi
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ steps.coreguard.outcome }}" = "failure" ]; then failed=1; fi
+          if [ "$failed" -ne 0 ]; then
+            echo 'One or more static Resources QA gates failed.'
+            exit 1
+          fi
+
+  browser-qa:
+    needs: static-qa
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser QA
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Select browser QA target
+        run: |
+          if [ -n "${{ inputs.preview_url }}" ]; then
+            echo "QA_BASE_URL=${{ inputs.preview_url }}" >> "$GITHUB_ENV"
+            echo 'Testing the supplied Cloudflare preview.'
+          else
+            echo 'QA_BASE_URL=http://127.0.0.1:4173' >> "$GITHUB_ENV"
+            echo 'Testing the checked-out branch on a local static server.'
+          fi
+      - name: Start static preview server
+        if: inputs.preview_url == ''
+        run: |
+          python -m http.server 4173 > /tmp/wistudi-qa-server.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/resources/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/wistudi-qa-server.log
+          exit 1
+      - name: Render, scroll, click and inspect all core and Resources pages
+        run: node scripts/resources_browser_qa.mjs
+      - name: Upload QA screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resources-qa-screenshots
+          path: qa-artifacts/
+          if-no-files-found: ignore
+          retention-days: 14
