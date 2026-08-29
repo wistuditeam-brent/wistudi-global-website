@@ -1,16 +1,13 @@
 name: Apply Resources Localization Patch
 
 on:
-  push:
-    branches:
-      - fix/resources-localization-article-language
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   apply:
-    if: ${{ !contains(github.event.head_commit.message, '[localization-patch-complete]') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,14 +28,10 @@ jobs:
           node --check functions/_middleware.js
           node --check scripts/resources_localization_qa.mjs
           for f in assets/i18n/*-resources.json assets/data/article-translations/*.json assets/data/resources-manifest.json; do node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" "$f"; done
-      - name: Remove one-use patch files
-        run: |
-          rm scripts/apply_resources_localization_patch.mjs
-          rm .github/workflows/apply-resources-localization-patch.yml
       - name: Commit integrated localization changes
         run: |
           git config user.name "wistuditeam-brent"
           git config user.email "wistudi.team@gmail.com"
-          git add -A
+          git add assets/js/i18n.js assets/js/resources-global.js assets/js/resources-page-shell.js assets/data/resources-manifest.json functions/_middleware.js sitemap.xml
           git commit -m "Complete Resources localization and article language support [localization-patch-complete]"
           git push origin HEAD:fix/resources-localization-article-language
