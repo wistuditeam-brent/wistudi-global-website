@@ -232,7 +232,7 @@ const RESOURCE_PAGE_META = {
       "ar": "ورش عمل وندوات ومعارض وفعاليات مجتمع Wistudi القادمة والسابقة."
     }
   },
-  "${articlePath}": {
+  "/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/": {
     "type": "Article",
     "image": "/assets/images/resources/expo-2026/expo-hero.png",
     "label": {
