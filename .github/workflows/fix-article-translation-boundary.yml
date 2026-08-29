@@ -1,0 +1,36 @@
+name: Fix Article Translation Boundary
+
+on:
+  push:
+    branches:
+      - fix/resources-localization-article-language
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: ${{ !contains(github.event.head_commit.message, '[article-boundary-fixed]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/resources-localization-article-language
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Apply boundary fix
+        run: node scripts/fix_article_translation_boundary.mjs
+      - name: Validate patched scripts
+        run: |
+          node --check assets/js/i18n.js
+          node --check scripts/resources_preview_localization_qa.mjs
+          grep -F "closest?.('.page-resource-article main article')" assets/js/i18n.js
+      - name: Commit product and QA fix only
+        run: |
+          git config user.name "wistuditeam-brent"
+          git config user.email "wistudi.team@gmail.com"
+          git add assets/js/i18n.js scripts/resources_preview_localization_qa.mjs
+          git commit -m "Separate site and article translation layers [article-boundary-fixed]"
+          git push origin HEAD:fix/resources-localization-article-language
