@@ -1,0 +1,36 @@
+name: Fix Resources Article Metadata Key
+
+on:
+  push:
+    branches:
+      - fix/resources-localization-article-language
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: ${{ !contains(github.event.head_commit.message, '[article-meta-fixed]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/resources-localization-article-language
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Correct metadata key
+        run: node scripts/fix_resources_article_meta.mjs
+      - name: Validate middleware
+        run: |
+          node --check functions/_middleware.js
+          grep -F '"/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/": {' functions/_middleware.js
+          if grep -F '"${articlePath}": {' functions/_middleware.js; then exit 1; fi
+      - name: Commit product fix only
+        run: |
+          git config user.name "wistuditeam-brent"
+          git config user.email "wistudi.team@gmail.com"
+          git add functions/_middleware.js
+          git commit -m "Correct localized article SEO metadata key [article-meta-fixed]"
+          git push origin HEAD:fix/resources-localization-article-language
