@@ -196,7 +196,7 @@ function escapeHtml(value='') {
 }
 
 function structuredData(locale, pagePath, meta) {
-  const url = canonicalUrl(locale, pagePath);
+  const url = canonicalUrl(locale,pagePath);
   const lang = LOCALE_META[locale]?.lang || 'en';
   const graph = [
     {
@@ -313,7 +313,7 @@ function injectPage(response, locale, pagePath, isProduction) {
     .on('meta[name="description"]', { element(el) { el.setAttribute('content',meta.description[locale] || meta.description.en); } })
     .on('link[rel="canonical"]', { element(el) { el.remove(); } })
     .on('link[rel="alternate"][hreflang]', { element(el) { el.remove(); } })
-    .on('head', { element(el) { el.append(`${seoHeadMarkup(locale,pagePath,isProduction)}${EARLY_BOOTSTRAP}<script src="/assets/js/i18n.js" defer></script>`, { html:true }); } })
+    .on('head', { element(el) { el.append(`${seoHeadMarkup(locale,pagePath,isProduction)}${EARLY_BOOTSTRAP}<script src="/assets/js/i18n.js" defer></script><script src="/assets/outreach-tracking.js" defer></script>`, { html:true }); } })
     .transform(response);
   transformed = new Response(transformed.body, transformed);
   transformed.headers.set('Content-Language',localeMeta.lang);
