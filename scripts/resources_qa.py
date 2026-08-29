@@ -8,10 +8,17 @@ from urllib.parse import urlparse
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / 'assets/data/resources-manifest.json'
 RESOURCE_ROOT = ROOT / 'resources'
-MIN_HERO_WIDTH = 900
-WARN_HERO_WIDTH = 1400
-MIN_INLINE_WIDTH = 700
-MIN_PHOTO_KB_PER_MP = 55
+
+# Editorial raster images are displayed prominently, so the source must have enough
+# real pixels and enough encoded information to survive desktop and high-DPI screens.
+MIN_HERO_WIDTH = 1200
+MIN_HERO_HEIGHT = 675
+PREFERRED_HERO_WIDTH = 1600
+MIN_INLINE_WIDTH = 900
+MIN_INLINE_HEIGHT = 500
+MIN_PHOTO_KB_PER_MP = 85
+MIN_HERO_FILE_KB = 60
+MIN_INLINE_FILE_KB = 35
 
 errors=[]
 warnings=[]
@@ -43,11 +50,20 @@ def route_to_file(href:str):
     if p.suffix: return p
     return p/'index.html'
 
+def expected_format(path:Path):
+    ext=path.suffix.lower()
+    return {'.webp':'WEBP','.jpg':'JPEG','.jpeg':'JPEG','.png':'PNG','.gif':'GIF'}.get(ext)
+
 def image_metrics(path:Path):
     if not Image: return None
     try:
-        with Image.open(path) as im: im.verify()
-        with Image.open(path) as im: w,h=im.size; fmt=im.format
+        with Image.open(path) as im:
+            im.verify()
+        with Image.open(path) as im:
+            w,h=im.size; fmt=(im.format or '').upper()
+        expected=expected_format(path)
+        if expected and fmt != expected:
+            err(f'Image format does not match extension: {path.relative_to(ROOT)} reports {fmt or "unknown"}, expected {expected}')
         return w,h,fmt,path.stat().st_size
     except Exception as e:
         err(f'Image cannot be decoded: {path.relative_to(ROOT)} ({e})'); return None
@@ -56,13 +72,21 @@ def check_photo_quality(path:Path, role:str):
     m=image_metrics(path)
     if not m: return
     w,h,fmt,size=m
+    size_kb=size/1024
     if role=='hero':
-        if w < MIN_HERO_WIDTH: err(f'Hero image too small: {path.relative_to(ROOT)} is {w}px wide; hard minimum {MIN_HERO_WIDTH}px')
-        elif w < WARN_HERO_WIDTH: warn(f'Hero image below preferred width: {path.relative_to(ROOT)} is {w}px; preferred {WARN_HERO_WIDTH}px+')
-    elif w < MIN_INLINE_WIDTH:
-        err(f'Inline/editorial image too small: {path.relative_to(ROOT)} is {w}px wide; minimum {MIN_INLINE_WIDTH}px')
+        if w < MIN_HERO_WIDTH or h < MIN_HERO_HEIGHT:
+            err(f'Hero image too small: {path.relative_to(ROOT)} is {w}x{h}px; minimum {MIN_HERO_WIDTH}x{MIN_HERO_HEIGHT}px')
+        elif w < PREFERRED_HERO_WIDTH:
+            warn(f'Hero image below preferred width: {path.relative_to(ROOT)} is {w}px; preferred {PREFERRED_HERO_WIDTH}px+')
+        if fmt in {'WEBP','JPEG'} and size_kb < MIN_HERO_FILE_KB:
+            err(f'Hero photo file is suspiciously small: {path.relative_to(ROOT)} = {size_kb:.1f}KB; minimum {MIN_HERO_FILE_KB}KB')
+    else:
+        if w < MIN_INLINE_WIDTH or h < MIN_INLINE_HEIGHT:
+            err(f'Inline/editorial image too small: {path.relative_to(ROOT)} is {w}x{h}px; minimum {MIN_INLINE_WIDTH}x{MIN_INLINE_HEIGHT}px')
+        if fmt in {'WEBP','JPEG'} and size_kb < MIN_INLINE_FILE_KB:
+            err(f'Editorial photo file is suspiciously small: {path.relative_to(ROOT)} = {size_kb:.1f}KB; minimum {MIN_INLINE_FILE_KB}KB')
     mp=max((w*h)/1_000_000,0.01)
-    kbpm=(size/1024)/mp
+    kbpm=size_kb/mp
     if fmt in {'WEBP','JPEG'} and kbpm < MIN_PHOTO_KB_PER_MP:
         err(f'Photo looks over-compressed: {path.relative_to(ROOT)} = {kbpm:.1f} KB/MP; minimum {MIN_PHOTO_KB_PER_MP} KB/MP')
 
@@ -94,8 +118,8 @@ for html in html_files:
     text=html.read_text(encoding='utf-8')
     scan=Scan(); scan.feed(text)
     rel=html.relative_to(ROOT)
-    if '/assets/js/site-shell.js' in scan.scripts:
-        warn(f'{rel} uses global site-shell.js; Resources should prefer resources-page-shell.js directly')
+    if not any(src in {'/assets/js/resources-page-shell.js','/assets/js/site-shell.js'} for src in scan.scripts):
+        err(f'{rel} does not load an approved Resources/runtime shell')
     for src in scan.scripts:
         if src.startswith('/'):
             f=route_to_file(src)
