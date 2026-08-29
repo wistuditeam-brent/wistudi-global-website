@@ -1,13 +1,16 @@
 name: Apply Resources Localization Patch
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - fix/resources-localization-article-language
 
 permissions:
   contents: write
 
 jobs:
   apply:
+    if: ${{ !contains(github.event.head_commit.message, '[localization-patch-complete]') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,6 +20,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Keep workflow files outside the Actions-generated commit
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/apply_resources_localization_patch.mjs')
+          s=p.read_text()
+          marker='// 7) Wire localization checks into Resources QA, including the working branch.'
+          start=s.index(marker)
+          end=s.index("console.log('Resources localization patch applied successfully.');", start)
+          p.write_text(s[:start]+s[end:])
+          PY
       - name: Apply localization patch
         run: node scripts/apply_resources_localization_patch.mjs
       - name: Validate patched JavaScript and JSON
