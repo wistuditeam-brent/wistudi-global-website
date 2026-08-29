@@ -185,7 +185,9 @@
   const basePromise=load('/assets/js/site-shell-base.js').catch(()=>null);
   load('/assets/js/resources-global.js').catch(()=>null);
   if(doc.body?.classList.contains('page-platform')&&doc.getElementById('printable')){
-    load('/assets/js/interactive-printable-slider.js').catch(()=>null);
+    load('/assets/js/interactive-printable-slider.js')
+      .then(()=>load('/assets/js/interactive-printable-slider-fixes.js'))
+      .catch(()=>null);
   }
   const hasHeroOverview=!!doc.querySelector('.hero .hero-visual .hero-media-frame .hero-showcase-video');
   const heroPromise=hasHeroOverview?load('/assets/js/hero-video.js').catch(()=>null):Promise.resolve(null);
