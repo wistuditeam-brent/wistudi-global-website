@@ -36,7 +36,6 @@ for(const viewport of viewports){
       });
       await page.waitForTimeout(450);
 
-      // Give every image that the browser knows about a chance to decode before measuring it.
       await page.evaluate(async()=>{
         await Promise.all([...document.images].map(async img=>{
           if(!img.complete){
@@ -74,7 +73,8 @@ for(const viewport of viewports){
               complete:i.complete,naturalWidth:i.naturalWidth,naturalHeight:i.naturalHeight,
               clientWidth:i.clientWidth,clientHeight:i.clientHeight,
               fallback:i.dataset.wsFallback==='1'||i.classList.contains('res-image-fallback'),
-              objectFit:s.objectFit||'',alt:i.alt||''
+              objectFit:s.objectFit||'',alt:i.alt||'',
+              preserveAspect:!!i.closest('.res-hero-photo,.res-inline-media')
             };
           }),
           visibleBlocks:sections.filter(el=>{const r=el.getBoundingClientRect();const s=getComputedStyle(el);return s.display!=='none'&&s.visibility!=='hidden'&&Number.parseFloat(s.opacity||'1')>.12&&r.height>30}).length,
@@ -104,6 +104,12 @@ for(const viewport of viewports){
         if(isEditorial && i.clientHeight>=300 && i.naturalHeight>0){
           const ratio=i.naturalHeight/i.clientHeight;
           if(ratio<1.1 && i.objectFit!=='cover') failures.push(`${label}: editorial image height is being stretched ${i.currentSrc||i.src} (${i.naturalHeight}px source vs ${i.clientHeight}px rendered)`);
+        }
+        if(isEditorial && i.preserveAspect && i.naturalWidth>0 && i.naturalHeight>0 && i.clientWidth>0 && i.clientHeight>0){
+          const naturalRatio=i.naturalWidth/i.naturalHeight;
+          const renderedRatio=i.clientWidth/i.clientHeight;
+          const distortion=Math.abs(renderedRatio-naturalRatio)/naturalRatio;
+          if(distortion>0.02) failures.push(`${label}: editorial image aspect ratio distorted ${i.currentSrc||i.src} (natural ${naturalRatio.toFixed(3)}, rendered ${renderedRatio.toFixed(3)}, ${(distortion*100).toFixed(1)}% difference)`);
         }
       }
       for(const bad of badImageResponses) failures.push(`${label}: image HTTP failure ${bad}`);
