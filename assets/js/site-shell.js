@@ -2,6 +2,18 @@
   'use strict';
 
   const doc=document;
+
+  // Resources has its own isolated runtime for image fallbacks, archive behavior and
+  // resource navigation state. Delegate immediately so the general website shell cannot
+  // bypass those protections or attach duplicate UI handlers.
+  if(doc.body?.classList.contains('page-resources')){
+    const resourceShell=doc.createElement('script');
+    resourceShell.src='/assets/js/resources-page-shell.js';
+    resourceShell.async=false;
+    doc.head.appendChild(resourceShell);
+    return;
+  }
+
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   // Performance/responsiveness overrides are deliberately small and global.
