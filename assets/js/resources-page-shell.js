@@ -4,16 +4,21 @@
   window.__WISTUDI_RESOURCE_PAGE__=true;
 
   const ready=fn=>document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn,{once:true}):fn();
-  const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+  const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[ch]));
   const storageKey=()=>`wistudi.resources.lastSeen:${window.WISTUDI_VIEWER_ID||'anonymous'}`;
   const FALLBACK='/assets/images/resources/media-fallback.svg';
 
-  function ensureResourceStyles(){
-    if(document.querySelector('link[href="/assets/css/resources-site.css"]')) return;
+  function ensureStylesheet(href){
+    if(document.querySelector(`link[href="${href}"]`)) return;
     const link=document.createElement('link');
     link.rel='stylesheet';
-    link.href='/assets/css/resources-site.css';
+    link.href=href;
     document.head.appendChild(link);
+  }
+
+  function ensureResourceStyles(){
+    ensureStylesheet('/assets/css/resources-site.css');
+    ensureStylesheet('/assets/css/resources-image-integrity.css');
   }
 
   function markSeen(){
