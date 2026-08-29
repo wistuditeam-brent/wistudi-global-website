@@ -1,0 +1,80 @@
+name: Import Expo images once
+
+on:
+  push:
+    branches:
+      - integration/resources-merge-no-deploy
+    paths:
+      - .github/workflows/import-expo-images.yml
+
+permissions:
+  contents: write
+
+jobs:
+  import-images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: integration/resources-merge-no-deploy
+          fetch-depth: 0
+
+      - name: Download original-resolution Expo photos
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/expo-src assets/images/resources/expo-2026
+
+          curl --fail --location --retry 3 --output /tmp/expo-src/hero.jpg 'https://media.canva.com/v2/image-resize/format:JPG/height:1024/quality:90/uri:ifs%3A%2F%2FM%2F6bd29ebc-42c3-4649-b47b-8da53b2313a6/watermark:F/width:1536?csig=AAAAAAAAAAAAAAAAAAAAALaMogcQHTQKZEJiXEJ-xlIc4WKx5LahyWgX935KWi1i&exp=1788019615&osig=AAAAAAAAAAAAAAAAAAAAAO0uXp5XYbXxjoqj2jEjespzM7L5XOErnt9Ic-HIy-qd&signer=media-rpc&x-canva-quality=thumbnail'
+          curl --fail --location --retry 3 --output /tmp/expo-src/demo01.jpg 'https://media.canva.com/v2/image-resize/format:JPG/height:1024/quality:90/uri:ifs%3A%2F%2FM%2F1805729d-1ec9-458a-93a9-f4bc6bd40668/watermark:F/width:1536?csig=AAAAAAAAAAAAAAAAAAAAAO5XbBES__iqEQcJEljoDGDWl-hkABNpy3RpgGeO-hZz&exp=1788022434&osig=AAAAAAAAAAAAAAAAAAAAABegU4nu4_WUgWmvRtVKJeEJPMy8F9EYQ4dOsYg87Awy&signer=media-rpc&x-canva-quality=thumbnail'
+          curl --fail --location --retry 3 --output /tmp/expo-src/demo02.png 'https://media.canva.com/v2/image-resize/format:PNG/height:1024/quality:100/uri:ifs%3A%2F%2FM%2F6411dea0-78e8-4947-91cc-84053b919714/watermark:F/width:1536?csig=AAAAAAAAAAAAAAAAAAAAAKW2noo1DHoddQ696m90_XQIJAtcQh_gevRa8rD28u-E&exp=1788019837&osig=AAAAAAAAAAAAAAAAAAAAAPLzXlz1x-7zHL_1Zp7WRQGkAkbsMDuJWtaIux3fK2wf&signer=media-rpc&x-canva-quality=thumbnail'
+          curl --fail --location --retry 3 --output /tmp/expo-src/demo03.jpg 'https://media.canva.com/v2/image-resize/format:JPG/height:1024/quality:90/uri:ifs%3A%2F%2FM%2F04ba71f7-5d42-4b8f-95a4-f359d737cecb/watermark:F/width:1536?csig=AAAAAAAAAAAAAAAAAAAAAAph6ZHmtNx4bgBeJITELmlfhDuAAQx5j2jZvxMjOBPi&exp=1788021208&osig=AAAAAAAAAAAAAAAAAAAAAAy_JfJ1uzNOpa9T1Uav1mv1mczF9Irz2en4NYogeB7B&signer=media-rpc&x-canva-quality=thumbnail'
+
+      - name: Validate and create high-quality WebP assets
+        shell: bash
+        run: |
+          python -m pip install --quiet pillow
+          python - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+
+          inputs = [
+              ('/tmp/expo-src/hero.jpg', 'assets/images/resources/expo-2026/expo-hero.webp'),
+              ('/tmp/expo-src/demo01.jpg', 'assets/images/resources/expo-2026/expo-demo-01.webp'),
+              ('/tmp/expo-src/demo02.png', 'assets/images/resources/expo-2026/expo-demo-02.webp'),
+              ('/tmp/expo-src/demo03.jpg', 'assets/images/resources/expo-2026/expo-demo-03.webp'),
+          ]
+          for source, target in inputs:
+              im = Image.open(source)
+              im.load()
+              print(f'{source}: {im.size} {im.format}')
+              if im.width < 1200 or im.height < 675:
+                  raise SystemExit(f'Source image too small: {source} {im.size}')
+              im = im.convert('RGB')
+              im.save(target, 'WEBP', quality=88, method=6)
+              check = Image.open(target)
+              check.load()
+              if check.width < 1200 or check.height < 675:
+                  raise SystemExit(f'Output image too small: {target} {check.size}')
+              size = Path(target).stat().st_size
+              if size < 50000:
+                  raise SystemExit(f'Output image suspiciously compressed: {target} {size} bytes')
+              print(f'{target}: {check.size}, {size} bytes')
+          PY
+
+      - name: Commit finished Expo image assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Wistudi Website Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add assets/images/resources/expo-2026/expo-hero.webp \
+                  assets/images/resources/expo-2026/expo-demo-01.webp \
+                  assets/images/resources/expo-2026/expo-demo-02.webp \
+                  assets/images/resources/expo-2026/expo-demo-03.webp
+          if git diff --cached --quiet; then
+            echo 'No image changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Replace Expo resource images with high-resolution originals'
+          git push origin HEAD:integration/resources-merge-no-deploy
