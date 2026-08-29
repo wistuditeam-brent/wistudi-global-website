@@ -1,12 +1,14 @@
 (()=>{
   'use strict';
+  if(window.__WISTUDI_RESOURCES_I18N__) return;
+  window.__WISTUDI_RESOURCES_I18N__=true;
+
   const supported=['en','vi','zh-cn','th','id','ms','ar'];
   const parts=location.pathname.split('/').filter(Boolean);
   const explicit=supported.includes((parts[0]||'').toLowerCase())?(parts[0]||'').toLowerCase():null;
   const locale=explicit||'en';
-  const bare=location.pathname.replace(/^\/(vi|zh-cn|th|id|ms|ar)(?=\/)/,'');
-  const isHome=bare==='/resources/'||bare==='/resources'||bare==='/resources/index.html';
-  if(!isHome)return;
+  const bare=location.pathname.replace(/^\/(vi|zh-cn|th|id|ms|ar)(?=\/)/,'')||'/';
+  if(!(bare==='/resources'||bare==='/resources/'||bare.startsWith('/resources/'))) return;
 
   const chrome={
     vi:{'Platform':'Nền tảng','Blocks & Activities':'Khối & Hoạt động','Organisations':'Tổ chức','Resources':'Tài nguyên','Contact':'Liên hệ','Talk to us':'Trao đổi với chúng tôi','Start publishing':'Bắt đầu xuất bản','Interactive learning, publishing and delivery in one connected platform.':'Học tập tương tác, xuất bản và phân phối trong một nền tảng kết nối.','Contact Wistudi':'Liên hệ Wistudi','New resources':'Tài nguyên mới','Language':'Ngôn ngữ','Open menu':'Mở menu','Wistudi home':'Trang chủ Wistudi'},
@@ -17,16 +19,34 @@
     ar:{'Platform':'المنصة','Blocks & Activities':'الكتل والأنشطة','Organisations':'المؤسسات','Resources':'الموارد','Contact':'تواصل','Talk to us':'تحدث معنا','Start publishing':'ابدأ النشر','Interactive learning, publishing and delivery in one connected platform.':'التعلم التفاعلي والنشر والتقديم في منصة واحدة مترابطة.','Contact Wistudi':'تواصل مع Wistudi','New resources':'موارد جديدة','Language':'اللغة','Open menu':'فتح القائمة','Wistudi home':'الصفحة الرئيسية لـ Wistudi'}
   };
 
+  const plural={
+    vi:{note:'ghi chú',notes:'ghi chú'},'zh-cn':{note:'篇',notes:'篇'},th:{note:'รายการ',notes:'รายการ'},id:{note:'catatan',notes:'catatan'},ms:{note:'catatan',notes:'catatan'},ar:{note:'ملاحظة',notes:'ملاحظات'}
+  };
+  const dateLocales={vi:'vi-VN','zh-cn':'zh-CN',th:'th-TH',id:'id-ID',ms:'ms-MY',ar:'ar'};
+
+  const pending=()=>{
+    if(locale==='en') return;
+    document.documentElement.classList.add('ws-res-i18n-pending');
+    if(document.getElementById('ws-res-i18n-preload'))return;
+    const s=document.createElement('style');
+    s.id='ws-res-i18n-preload';
+    s.textContent='html.ws-res-i18n-pending body{opacity:0}html.ws-res-i18n-ready body{opacity:1;transition:opacity .12s ease}';
+    document.head.appendChild(s);
+  };
+  pending();
+
   const reveal=()=>{
     document.documentElement.classList.add('ws-res-i18n-ready');
     document.documentElement.classList.remove('ws-res-i18n-pending');
+    document.getElementById('ws-res-i18n-preload')?.remove();
   };
 
   if(!explicit){
     let stored=null;
     try{stored=localStorage.getItem('wistudi_locale')}catch(_){}
     if(stored&&supported.includes(stored)&&stored!=='en'){
-      location.replace('/'+stored+'/resources/'+location.search+location.hash);
+      const target='/'+stored+(bare.startsWith('/')?bare:'/'+bare)+location.search+location.hash;
+      location.replace(target);
       return;
     }
   }
@@ -40,23 +60,34 @@
       if(!raw||raw.startsWith('#')||raw.startsWith('mailto:')||raw.startsWith('tel:')||raw.startsWith('javascript:'))return;
       let u;try{u=new URL(raw,location.href)}catch(_){return}
       if(u.origin!==location.origin)return;
-      if(u.pathname==='/resources/'||u.pathname==='/resources/index.html'){
-        el.setAttribute(attr,`/${locale}/resources/${u.search||''}${u.hash||''}`);
+      const clean=u.pathname.replace(/^\/(vi|zh-cn|th|id|ms|ar)(?=\/)/,'');
+      if(clean==='/resources'||clean==='/resources/'||clean.startsWith('/resources/')){
+        el.setAttribute(attr,`/${locale}${clean.startsWith('/')?clean:'/'+clean}${u.search||''}${u.hash||''}`);
       }
     });
   };
 
+  const fetchJson=async url=>{
+    try{const r=await fetch(url,{cache:'default'});return r.ok?await r.json():null}catch(_){return null}
+  };
+
   const translate=(dict)=>{
-    const strings=Object.assign({},chrome[locale]||{},dict?.strings||{});
+    const strings=Object.assign({},chrome[locale]||{},dict||{});
     const translateNode=node=>{
       if(!node)return;
       if(node.nodeType===Node.TEXT_NODE){
         const raw=node.nodeValue||'';
         const key=normalize(raw);
-        if(!key||!strings[key])return;
+        if(!key)return;
+        let value=strings[key];
+        if(!value){
+          const m=key.match(/^(\d+)\s+(note|notes)$/i);
+          if(m&&plural[locale])value=`${m[1]} ${plural[locale][m[2].toLowerCase()]||plural[locale].notes}`;
+        }
+        if(!value)return;
         const lead=(raw.match(/^\s*/)||[''])[0];
         const trail=(raw.match(/\s*$/)||[''])[0];
-        node.nodeValue=lead+strings[key]+trail;
+        node.nodeValue=lead+value+trail;
         return;
       }
       if(node.nodeType!==Node.ELEMENT_NODE)return;
@@ -68,12 +99,23 @@
       });
       [...el.childNodes].forEach(translateNode);
     };
-    if(dict.title)document.title=dict.title;
-    const meta=document.querySelector('meta[name="description"]');
-    if(meta&&dict.description)meta.setAttribute('content',dict.description);
+
     translateNode(document.body);
-    const observer=new MutationObserver(records=>records.forEach(r=>r.addedNodes.forEach(translateNode)));
-    observer.observe(document.body,{childList:true,subtree:true});
+    const observer=new MutationObserver(records=>records.forEach(record=>{
+      if(record.type==='characterData')translateNode(record.target);
+      record.addedNodes?.forEach(translateNode);
+    }));
+    observer.observe(document.body,{childList:true,characterData:true,subtree:true});
+    window.__WISTUDI_RESOURCES_TRANSLATE_NODE__=translateNode;
+  };
+
+  const localizeDates=()=>{
+    if(locale==='en'||!dateLocales[locale])return;
+    document.querySelectorAll('[data-ws-resource-date]').forEach(el=>{
+      const raw=el.getAttribute('data-ws-resource-date');
+      if(!raw)return;
+      try{el.textContent=new Intl.DateTimeFormat(dateLocales[locale],{day:'numeric',month:'short',year:'numeric'}).format(new Date(raw))}catch(_){}
+    });
   };
 
   const addRtl=()=>{
@@ -83,10 +125,11 @@
     const style=document.createElement('style');
     style.id='resources-rtl-fix';
     style.textContent=`
-      [dir="rtl"] .res-hero-grid,[dir="rtl"] .res-head,[dir="rtl"] .res-definition{direction:rtl;text-align:right}
-      [dir="rtl"] .res-search{direction:rtl}
-      [dir="rtl"] .res-feature-copy,[dir="rtl"] .res-card-body,[dir="rtl"] .res-question-intro,[dir="rtl"] .res-progressive-card{text-align:right}
-      [dir="rtl"] .res-byline,[dir="rtl"] .res-card-meta{direction:rtl}
+      [dir="rtl"] .res-hero-grid,[dir="rtl"] .res-head,[dir="rtl"] .res-definition,[dir="rtl"] .res-article-head,[dir="rtl"] .res-article-body,[dir="rtl"] .res-article-aside,[dir="rtl"] .res-soon-inner,[dir="rtl"] .res-control-row{direction:rtl;text-align:right}
+      [dir="rtl"] .res-search,[dir="rtl"] .res-byline,[dir="rtl"] .res-card-meta,[dir="rtl"] .res-results-meta{direction:rtl}
+      [dir="rtl"] .res-feature-copy,[dir="rtl"] .res-card-body,[dir="rtl"] .res-question-intro,[dir="rtl"] .res-progressive-card,[dir="rtl"] .res-related-card{text-align:right}
+      [dir="rtl"] .res-list-card{direction:rtl;text-align:right}
+      [dir="rtl"] .res-list-arrow{transform:scaleX(-1)}
     `;
     document.head.appendChild(style);
   };
@@ -96,9 +139,20 @@
     addRtl();
     if(locale==='en'){reveal();return;}
     try{
-      const r=await fetch(`/assets/i18n/${locale}-resources-home.json`,{cache:'default'});
-      if(!r.ok)throw new Error('resources translation unavailable');
-      translate(await r.json());
+      const [home,extra]=await Promise.all([
+        fetchJson(`/assets/i18n/${locale}-resources-home.json`),
+        fetchJson(`/assets/i18n/${locale}-resources-extra.json`)
+      ]);
+      if(!home&&!extra)throw new Error('resources translations unavailable');
+      const strings=Object.assign({},home?.strings||home||{},extra?.strings||extra||{});
+      translate(strings);
+      const titleMap=Object.assign({},home?.titles||{},extra?.titles||{});
+      const metaMap=Object.assign({},home?.descriptions||{},extra?.descriptions||{});
+      if(titleMap[bare])document.title=titleMap[bare];
+      const meta=document.querySelector('meta[name="description"]');
+      if(metaMap[bare]&&meta)meta.setAttribute('content',metaMap[bare]);
+      localizeDates();
+      localizeResourceLinks();
     }catch(err){
       console.warn('[Wistudi resources i18n]',err);
     }finally{
