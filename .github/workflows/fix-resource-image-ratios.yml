@@ -1,0 +1,40 @@
+name: Fix Resources image aspect ratios
+
+on:
+  push:
+    branches:
+      - integration/resources-merge-no-deploy
+    paths:
+      - '.github/workflows/fix-resource-image-ratios.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: integration/resources-merge-no-deploy
+          fetch-depth: 0
+      - name: Preserve natural photo aspect ratios
+        run: |
+          cat >> assets/css/resources.css <<'CSS'
+
+/* Editorial image integrity: preserve supplied photo proportions. Width/height HTML
+   attributes reserve intrinsic space, but article hero/inline media must scale naturally. */
+.res-hero-photo img,
+.res-inline-media img{
+  width:100%;
+  height:auto !important;
+  aspect-ratio:auto !important;
+  object-fit:contain;
+}
+CSS
+          rm -f .github/workflows/fix-resource-image-ratios.yml
+          git config user.name 'Wistudi Website QA'
+          git config user.email 'actions@users.noreply.github.com'
+          git add assets/css/resources.css .github/workflows/fix-resource-image-ratios.yml
+          git commit -m 'Preserve natural aspect ratio for editorial images'
+          git push origin HEAD:integration/resources-merge-no-deploy
