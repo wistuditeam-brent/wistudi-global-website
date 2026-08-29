@@ -1,11 +1,15 @@
 {
   "schemaVersion": 1,
   "defaultLocale": "en",
-  "generatedAt": "2026-08-27T18:52:00+07:00",
+  "generatedAt": "2026-08-29T12:50:00+07:00",
   "articles": [
     {
       "id": "wistudi-vietnam-edtech-expo-2026",
-      "status": "published",
+      "status": "draft",
+      "qa": {
+        "state": "blocked",
+        "reason": "Replace the corrupted hero image and low-quality derivatives from the original high-resolution Expo photographs, then pass static, desktop/mobile browser and visual screenshot QA before publication."
+      },
       "featured": true,
       "publishedAt": "2026-08-27T12:00:00+07:00",
       "eventDate": "2026-08-15",
