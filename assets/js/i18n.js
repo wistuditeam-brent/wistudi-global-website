@@ -131,6 +131,8 @@
 
   const normalizeText=s=>(s||'').replace(/\s+/g,' ').trim();
   const translateNode=(node,dict)=>{
+    const owner=node.nodeType===Node.ELEMENT_NODE?node:node.parentElement;
+    if(owner?.closest?.('.page-resource-article main article'))return;
     if(node.nodeType===Node.TEXT_NODE){
       const raw=node.nodeValue||'';
       const key=normalizeText(raw);

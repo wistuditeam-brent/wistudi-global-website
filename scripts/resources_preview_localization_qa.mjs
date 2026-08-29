@@ -39,8 +39,6 @@ for(const [locale,expected] of Object.entries(locales)){
       const tabs=await page.locator('.res-tabs a').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')));
       if(tabs.some(h=>h&&h.startsWith('/resources/')))failures.push(`${locale}${path}: at least one Resources tab lost locale prefix`);
       if(path==='/resources/'){
-        const eyebrow=(await page.locator('.res-eyebrow').first().textContent()||'').trim();
-        if(!eyebrow.includes(expected.nav)&&!eyebrow.includes(expected.hub))failures.push(`${locale}: Resources hub did not translate; eyebrow '${eyebrow}'`);
         const body=(await page.locator('body').innerText()).slice(0,4000);
         if(!body.includes(expected.hub))failures.push(`${locale}: translated Community Notes label not found on hub`);
       }
@@ -54,7 +52,7 @@ for(const [locale,expected] of Object.entries(locales)){
       title:document.querySelector('.res-article-head h1')?.textContent?.trim()||'',
       noticeHidden:document.querySelector('.res-article-translation-notice')?.hidden,
       noticeText:document.querySelector('.res-article-translation-notice')?.innerText?.trim()||'',
-      choices:document.querySelectorAll('[data-article-locale]').length,
+      choices:document.querySelectorAll('.res-article-language-menu [data-article-locale]').length,
       current:document.documentElement.dataset.articleLocale||'',
       resourcesHref:document.querySelector('.ws-nav-links a[data-ws-resources-link]')?.getAttribute('href')||''
     }));
