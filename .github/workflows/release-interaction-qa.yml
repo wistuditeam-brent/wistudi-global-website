@@ -1,0 +1,52 @@
+name: Release Interaction QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - integration/resources-merge-no-deploy
+      - main
+    paths:
+      - 'assets/js/role-guide-*.js'
+      - 'assets/css/resources*.css'
+      - 'resources/**'
+      - 'scripts/release_interaction_qa.mjs'
+      - '.github/workflows/release-interaction-qa.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'assets/js/role-guide-*.js'
+      - 'assets/css/resources*.css'
+      - 'resources/**'
+      - 'scripts/release_interaction_qa.mjs'
+      - '.github/workflows/release-interaction-qa.yml'
+
+jobs:
+  interaction-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser QA
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Start local website
+        run: |
+          python -m http.server 4173 > /tmp/wistudi-release-qa.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/wistudi-release-qa.log
+          exit 1
+      - name: Test click-only guide and sticky article navigation
+        env:
+          QA_BASE_URL: http://127.0.0.1:4173
+        run: node scripts/release_interaction_qa.mjs
