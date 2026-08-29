@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 
+// One-use patch: keep site-level i18n out of the editorial article subtree.
 // Keep site-level i18n out of the editorial article itself. The article-language runtime owns that subtree.
 {
   const path='assets/js/i18n.js';
