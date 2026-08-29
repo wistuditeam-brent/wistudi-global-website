@@ -1,0 +1,30 @@
+name: Localized Resources Preview QA
+
+on:
+  push:
+    branches:
+      - fix/resources-localization-article-language
+
+jobs:
+  preview-localization-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install Chromium QA
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Wait for Cloudflare branch preview
+        run: |
+          for i in {1..40}; do
+            if curl -fsS https://fix-resources-localization-a.wistudi-global-website.pages.dev/vi/resources/ >/dev/null; then exit 0; fi
+            sleep 3
+          done
+          exit 1
+      - name: Test all localized Resources routes and article languages
+        env:
+          QA_BASE_URL: https://fix-resources-localization-a.wistudi-global-website.pages.dev
+        run: node scripts/resources_preview_localization_qa.mjs
