@@ -9,7 +9,7 @@
     ar:{label:'العربية',short:'AR',htmlLang:'ar',dir:'rtl',flag:'<svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#006C35"/><path d="M7 6.3h16M8 8h14M9 9.7h12" stroke="#fff" stroke-width=".7" stroke-linecap="round"/><path d="M8 14.2h13.5c1.3 0 2.3-.45 3.1-1.15" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round"/></svg>'}
   };
   const localeCodes=Object.keys(LOCALES);
-  const knownPages=['/','/index.html','/platform/','/platform/index.html','/blocks-activities/','/blocks-activities/index.html','/organisations/','/organisations/index.html','/contact/','/contact/index.html'];
+  const knownPages=['/','/index.html','/platform/','/platform/index.html','/blocks-activities/','/blocks-activities/index.html','/organisations/','/organisations/index.html','/contact/','/contact/index.html','/resources/','/resources/all/','/resources/guides/','/resources/events/','/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/'];
   const ready=fn=>document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn,{once:true}):fn();
 
   const pathParts=location.pathname.split('/').filter(Boolean);
@@ -123,7 +123,7 @@
       if(u.origin!==location.origin)return;
       const stripped=stripLocale(u.pathname);
       const normalized=stripped.replace(/index\.html$/,'')||'/';
-      const recognized=knownPages.some(p=>normalizeSeoPath(p)===normalizeSeoPath(stripped))||normalized==='/'||normalized.startsWith('/blocks-activities/')||normalized.startsWith('/organisations/')||normalized.startsWith('/contact/');
+      const recognized=knownPages.some(p=>normalizeSeoPath(p)===normalizeSeoPath(stripped))||normalized==='/'||normalized.startsWith('/blocks-activities/')||normalized.startsWith('/organisations/')||normalized.startsWith('/contact/')||normalized.startsWith('/resources/');
       if(!recognized)return;
       a.href=`/${detected}${normalized==='/'?'/':normalized}`+(u.search||'')+(u.hash||'');
     });
@@ -131,6 +131,8 @@
 
   const normalizeText=s=>(s||'').replace(/\s+/g,' ').trim();
   const translateNode=(node,dict)=>{
+    const owner=node.nodeType===Node.ELEMENT_NODE?node:node.parentElement;
+    if(owner?.closest?.('.page-resource-article main article'))return;
     if(node.nodeType===Node.TEXT_NODE){
       const raw=node.nodeValue||'';
       const key=normalizeText(raw);
@@ -169,14 +171,16 @@
   const loadTranslations=async()=>{
     if(detected==='en'){revealTranslatedPage();return}
     try{
-      const [base,site,extra]=await Promise.all([
+      const isResources=seoPath.startsWith('/resources/');
+      const [base,site,extra,resources]=await Promise.all([
         fetchDictionary(`/assets/i18n/${detected}.json`),
         fetchDictionary(`/assets/i18n/${detected}-site.json`),
-        fetchDictionary(`/assets/i18n/${detected}-extra.json`)
+        fetchDictionary(`/assets/i18n/${detected}-extra.json`),
+        isResources?fetchDictionary(`/assets/i18n/${detected}-resources.json`):Promise.resolve(null)
       ]);
       if(!base)throw new Error('base translation unavailable');
-      const dict=Object.assign({},base.strings||base,site?.strings||site||{},extra?.strings||extra||{});
-      const titles=Object.assign({},base.titles||{},site?.titles||{},extra?.titles||{});
+      const dict=Object.assign({},base.strings||base,site?.strings||site||{},extra?.strings||extra||{},resources?.strings||resources||{});
+      const titles=Object.assign({},base.titles||{},site?.titles||{},extra?.titles||{},resources?.titles||{});
       if(titles[seoPath])document.title=titles[seoPath];
       const meta=document.querySelector('meta[name="description"]');
       if(meta){const key=normalizeText(meta.content);if(dict[key])meta.content=dict[key]}

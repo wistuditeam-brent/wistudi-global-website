@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "defaultLocale": "en",
-  "generatedAt": "2026-08-29T12:50:00+07:00",
+  "generatedAt": "2026-08-29T20:20:00+07:00",
   "articles": [
     {
       "id": "wistudi-vietnam-edtech-expo-2026",
@@ -53,6 +53,54 @@
           "url": "/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/",
           "seoTitle": "Wistudi at Vietnam EdTech Expo 2026 in Hanoi",
           "metaDescription": "A field note from Wistudi's Vietnam EdTech Expo 2026 experience in Hanoi, including live demonstrations, educator conversations and new EdTech connections."
+        },
+        "vi": {
+          "slug": "wistudi-at-vietnam-edtech-expo-2026",
+          "title": "Wistudi tại Vietnam EdTech Expo 2026",
+          "excerpt": "Một trong những lần xuất hiện quy mô lớn đầu tiên của Wistudi, với một ngày trình diễn trực tiếp, trò chuyện và tạo dựng những kết nối mới tại Hà Nội.",
+          "url": "/vi/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/",
+          "seoTitle": "Wistudi tại Vietnam EdTech Expo 2026 ở Hà Nội",
+          "metaDescription": "Ghi chép thực tế từ trải nghiệm của Wistudi tại Vietnam EdTech Expo 2026 ở Hà Nội, gồm các buổi trình diễn trực tiếp, trao đổi với nhà giáo dục và những kết nối EdTech mới."
+        },
+        "zh-cn": {
+          "slug": "wistudi-at-vietnam-edtech-expo-2026",
+          "title": "Wistudi 亮相 Vietnam EdTech Expo 2026",
+          "excerpt": "这是 Wistudi 首批较大型的公开亮相之一：在河内进行了一整天的现场演示、交流，并建立了新的联系。",
+          "url": "/zh-cn/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/",
+          "seoTitle": "Wistudi 亮相河内 Vietnam EdTech Expo 2026",
+          "metaDescription": "Wistudi 在河内参加 Vietnam EdTech Expo 2026 的现场记录，包括产品演示、与教育工作者的交流以及新的 EdTech 联系。"
+        },
+        "th": {
+          "slug": "wistudi-at-vietnam-edtech-expo-2026",
+          "title": "Wistudi ที่ Vietnam EdTech Expo 2026",
+          "excerpt": "หนึ่งในการออกงานใหญ่ครั้งแรก ๆ ของ Wistudi กับหนึ่งวันที่เต็มไปด้วยการสาธิตสด บทสนทนา และการเชื่อมต่อใหม่ ๆ ในกรุงฮานอย",
+          "url": "/th/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/",
+          "seoTitle": "Wistudi ที่ Vietnam EdTech Expo 2026 ในฮานอย",
+          "metaDescription": "บันทึกภาคสนามจากประสบการณ์ของ Wistudi ที่ Vietnam EdTech Expo 2026 ในฮานอย รวมถึงการสาธิตสด การสนทนากับนักการศึกษา และการสร้างเครือข่าย EdTech ใหม่ ๆ"
+        },
+        "id": {
+          "slug": "wistudi-at-vietnam-edtech-expo-2026",
+          "title": "Wistudi di Vietnam EdTech Expo 2026",
+          "excerpt": "Salah satu penampilan besar pertama Wistudi, dengan satu hari penuh demonstrasi langsung, percakapan, dan koneksi baru di Hanoi.",
+          "url": "/id/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/",
+          "seoTitle": "Wistudi di Vietnam EdTech Expo 2026 di Hanoi",
+          "metaDescription": "Catatan lapangan dari pengalaman Wistudi di Vietnam EdTech Expo 2026 di Hanoi, termasuk demonstrasi langsung, percakapan dengan pendidik, dan koneksi EdTech baru."
+        },
+        "ms": {
+          "slug": "wistudi-at-vietnam-edtech-expo-2026",
+          "title": "Wistudi di Vietnam EdTech Expo 2026",
+          "excerpt": "Salah satu penampilan besar terawal Wistudi, dengan sehari penuh demonstrasi langsung, perbualan dan hubungan baharu di Hanoi.",
+          "url": "/ms/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/",
+          "seoTitle": "Wistudi di Vietnam EdTech Expo 2026 di Hanoi",
+          "metaDescription": "Catatan lapangan daripada pengalaman Wistudi di Vietnam EdTech Expo 2026 di Hanoi, termasuk demonstrasi langsung, perbualan dengan pendidik dan hubungan EdTech baharu."
+        },
+        "ar": {
+          "slug": "wistudi-at-vietnam-edtech-expo-2026",
+          "title": "Wistudi في Vietnam EdTech Expo 2026",
+          "excerpt": "إحدى أولى المشاركات الكبرى لـ Wistudi، في يوم حافل بالعروض المباشرة والنقاشات وبناء علاقات جديدة في هانوي.",
+          "url": "/ar/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/",
+          "seoTitle": "Wistudi في Vietnam EdTech Expo 2026 في هانوي",
+          "metaDescription": "ملاحظات ميدانية من تجربة Wistudi في Vietnam EdTech Expo 2026 في هانوي، بما في ذلك العروض المباشرة والنقاشات مع المعلّمين والعلاقات الجديدة في مجال EdTech."
         }
       }
     }

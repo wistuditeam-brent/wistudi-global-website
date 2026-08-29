@@ -11,17 +11,25 @@ on:
     branches:
       - feature/community-notes-resources
       - integration/resources-merge-no-deploy
+      - fix/resources-localization-article-language
       - main
     paths:
       - 'resources/**'
       - 'assets/images/resources/**'
       - 'assets/data/resources-manifest.json'
+      - 'assets/data/article-translations/**'
+      - 'assets/i18n/*-resources.json'
       - 'assets/css/resources.css'
       - 'assets/css/resources-site.css'
+      - 'assets/css/article-language.css'
       - 'assets/js/resources-*.js'
+      - 'assets/js/article-language.js'
+      - 'assets/js/i18n.js'
       - 'assets/js/site-shell.js'
+      - 'functions/_middleware.js'
       - 'scripts/resources_qa.py'
       - 'scripts/resources_browser_qa.mjs'
+      - 'scripts/resources_localization_qa.mjs'
       - 'docs/RESOURCES_PUBLISHING_QA.md'
       - 'sitemap.xml'
       - '.github/workflows/resources-qa.yml'
@@ -33,12 +41,19 @@ on:
       - 'resources/**'
       - 'assets/images/resources/**'
       - 'assets/data/resources-manifest.json'
+      - 'assets/data/article-translations/**'
+      - 'assets/i18n/*-resources.json'
       - 'assets/css/resources.css'
       - 'assets/css/resources-site.css'
+      - 'assets/css/article-language.css'
       - 'assets/js/resources-*.js'
+      - 'assets/js/article-language.js'
+      - 'assets/js/i18n.js'
       - 'assets/js/site-shell.js'
+      - 'functions/_middleware.js'
       - 'scripts/resources_qa.py'
       - 'scripts/resources_browser_qa.mjs'
+      - 'scripts/resources_localization_qa.mjs'
       - 'docs/RESOURCES_PUBLISHING_QA.md'
       - 'sitemap.xml'
 
@@ -52,15 +67,24 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
       - name: Install image validator
         run: python -m pip install --disable-pip-version-check pillow
       - name: Validate article routes, links, assets and image quality
         run: python scripts/resources_qa.py
-      - name: Syntax-check Resources JavaScript
+      - name: Syntax-check Resources and localization JavaScript
         run: |
           node --check assets/js/resources-page-shell.js
+          node --check assets/js/resources-global.js
+          node --check assets/js/article-language.js
+          node --check assets/js/i18n.js
+          node --check functions/_middleware.js
           if [ -f assets/js/resources-site.js ]; then node --check assets/js/resources-site.js; fi
           node --check scripts/resources_browser_qa.mjs
+          node --check scripts/resources_localization_qa.mjs
+          for f in assets/i18n/*-resources.json assets/data/article-translations/*.json assets/data/resources-manifest.json; do node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" "$f"; done
       - name: Guard core runtime modules
         if: github.event_name == 'pull_request'
         run: |
@@ -108,6 +132,8 @@ jobs:
           exit 1
       - name: Render, scroll, click and inspect desktop and mobile pages
         run: node scripts/resources_browser_qa.mjs
+      - name: Verify Resources localization and article language switching
+        run: node scripts/resources_localization_qa.mjs
       - name: Upload QA screenshots
         if: always()
         uses: actions/upload-artifact@v4

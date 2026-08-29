@@ -107,6 +107,196 @@ const SEO_PAGES = {
   }
 };
 
+const RESOURCE_PAGE_META = {
+  "/resources/": {
+    "type": "CollectionPage",
+    "image": "/assets/images/resources/expo-2026/expo-hero.png",
+    "label": {
+      "en": "Resources",
+      "vi": "Tài nguyên",
+      "zh-cn": "资源",
+      "th": "ทรัพยากร",
+      "id": "Sumber Daya",
+      "ms": "Sumber",
+      "ar": "الموارد"
+    },
+    "title": {
+      "en": "Community Notes | Wistudi Resources",
+      "vi": "Ghi chú cộng đồng | Tài nguyên Wistudi",
+      "zh-cn": "社区札记 | Wistudi 资源",
+      "th": "บันทึกชุมชน | ทรัพยากร Wistudi",
+      "id": "Catatan Komunitas | Sumber Daya Wistudi",
+      "ms": "Nota Komuniti | Sumber Wistudi",
+      "ar": "ملاحظات المجتمع | موارد Wistudi"
+    },
+    "description": {
+      "en": "Community Notes from Wistudi: practical ideas, observations and perspectives on learning, publishing and EdTech.",
+      "vi": "Ghi chú cộng đồng từ Wistudi: ý tưởng, quan sát và góc nhìn thực tế về học tập, xuất bản và EdTech.",
+      "zh-cn": "来自 Wistudi 的社区札记：关于学习、出版和 EdTech 的实用想法、观察与观点。",
+      "th": "บันทึกชุมชนจาก Wistudi: แนวคิด ข้อสังเกต และมุมมองเชิงปฏิบัติเกี่ยวกับการเรียนรู้ การเผยแพร่ และ EdTech",
+      "id": "Catatan Komunitas dari Wistudi: ide, pengamatan, dan perspektif praktis tentang pembelajaran, penerbitan, dan EdTech.",
+      "ms": "Nota Komuniti daripada Wistudi: idea, pemerhatian dan perspektif praktikal tentang pembelajaran, penerbitan dan EdTech.",
+      "ar": "ملاحظات مجتمع من Wistudi: أفكار وملاحظات ووجهات نظر عملية حول التعلم والنشر وEdTech."
+    }
+  },
+  "/resources/all/": {
+    "type": "CollectionPage",
+    "image": "/assets/images/resources/expo-2026/expo-hero.png",
+    "label": {
+      "en": "Resources",
+      "vi": "Tài nguyên",
+      "zh-cn": "资源",
+      "th": "ทรัพยากร",
+      "id": "Sumber Daya",
+      "ms": "Sumber",
+      "ar": "الموارد"
+    },
+    "title": {
+      "en": "Browse Community Notes | Wistudi Resources",
+      "vi": "Duyệt Ghi chú cộng đồng | Tài nguyên Wistudi",
+      "zh-cn": "浏览社区札记 | Wistudi 资源",
+      "th": "เรียกดูบันทึกชุมชน | ทรัพยากร Wistudi",
+      "id": "Jelajahi Catatan Komunitas | Sumber Daya Wistudi",
+      "ms": "Lihat Nota Komuniti | Sumber Wistudi",
+      "ar": "تصفح ملاحظات المجتمع | موارد Wistudi"
+    },
+    "description": {
+      "en": "Search and browse Wistudi Community Notes by topic, type and date.",
+      "vi": "Tìm kiếm và duyệt Ghi chú cộng đồng Wistudi theo chủ đề, loại và ngày.",
+      "zh-cn": "按主题、类型和日期搜索与浏览 Wistudi 社区札记。",
+      "th": "ค้นหาและเรียกดูบันทึกชุมชน Wistudi ตามหัวข้อ ประเภท และวันที่",
+      "id": "Cari dan jelajahi Catatan Komunitas Wistudi berdasarkan topik, jenis, dan tanggal.",
+      "ms": "Cari dan lihat Nota Komuniti Wistudi mengikut topik, jenis dan tarikh.",
+      "ar": "ابحث وتصفح ملاحظات مجتمع Wistudi حسب الموضوع والنوع والتاريخ."
+    }
+  },
+  "/resources/guides/": {
+    "type": "CollectionPage",
+    "image": "/assets/images/resources/expo-2026/expo-demo-01.png",
+    "label": {
+      "en": "Resources",
+      "vi": "Tài nguyên",
+      "zh-cn": "资源",
+      "th": "ทรัพยากร",
+      "id": "Sumber Daya",
+      "ms": "Sumber",
+      "ar": "الموارد"
+    },
+    "title": {
+      "en": "Guides & Resources | Wistudi Resources",
+      "vi": "Hướng dẫn & Tài nguyên | Wistudi",
+      "zh-cn": "指南与资源 | Wistudi",
+      "th": "คู่มือและทรัพยากร | Wistudi",
+      "id": "Panduan & Sumber Daya | Wistudi",
+      "ms": "Panduan & Sumber | Wistudi",
+      "ar": "الأدلة والموارد | Wistudi"
+    },
+    "description": {
+      "en": "Practical Wistudi guides, teaching resources, learning-design references and downloadable materials.",
+      "vi": "Hướng dẫn thực tế, tài nguyên giảng dạy, tài liệu tham khảo thiết kế học tập và nội dung tải xuống của Wistudi.",
+      "zh-cn": "Wistudi 实用指南、教学资源、学习设计参考资料和可下载材料。",
+      "th": "คู่มือ Wistudi เชิงปฏิบัติ ทรัพยากรการสอน เอกสารอ้างอิงด้านการออกแบบการเรียนรู้ และไฟล์ดาวน์โหลด",
+      "id": "Panduan praktis Wistudi, sumber daya pengajaran, referensi desain pembelajaran, dan materi unduhan.",
+      "ms": "Panduan praktikal Wistudi, sumber pengajaran, rujukan reka bentuk pembelajaran dan bahan muat turun.",
+      "ar": "أدلة Wistudi العملية وموارد التدريس ومراجع تصميم التعلم والمواد القابلة للتنزيل."
+    }
+  },
+  "/resources/events/": {
+    "type": "CollectionPage",
+    "image": "/assets/images/resources/expo-2026/expo-demo-03.png",
+    "label": {
+      "en": "Resources",
+      "vi": "Tài nguyên",
+      "zh-cn": "资源",
+      "th": "ทรัพยากร",
+      "id": "Sumber Daya",
+      "ms": "Sumber",
+      "ar": "الموارد"
+    },
+    "title": {
+      "en": "Events | Wistudi Resources",
+      "vi": "Sự kiện | Tài nguyên Wistudi",
+      "zh-cn": "活动 | Wistudi 资源",
+      "th": "กิจกรรม | ทรัพยากร Wistudi",
+      "id": "Acara | Sumber Daya Wistudi",
+      "ms": "Acara | Sumber Wistudi",
+      "ar": "الفعاليات | موارد Wistudi"
+    },
+    "description": {
+      "en": "Upcoming and past Wistudi workshops, webinars, expos and community events.",
+      "vi": "Workshop, webinar, triển lãm và sự kiện cộng đồng Wistudi sắp tới và đã diễn ra.",
+      "zh-cn": "Wistudi 即将举行和往期的工作坊、网络研讨会、展会及社区活动。",
+      "th": "เวิร์กช็อป เว็บบินาร์ งานเอ็กซ์โป และกิจกรรมชุมชน Wistudi ทั้งที่กำลังจะมาถึงและที่ผ่านมา",
+      "id": "Lokakarya, webinar, expo, dan acara komunitas Wistudi yang akan datang dan sebelumnya.",
+      "ms": "Bengkel, webinar, ekspo dan acara komuniti Wistudi yang akan datang dan yang lalu.",
+      "ar": "ورش عمل وندوات ومعارض وفعاليات مجتمع Wistudi القادمة والسابقة."
+    }
+  },
+  "/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/": {
+    "type": "Article",
+    "image": "/assets/images/resources/expo-2026/expo-hero.png",
+    "label": {
+      "en": "Resources",
+      "vi": "Tài nguyên",
+      "zh-cn": "资源",
+      "th": "ทรัพยากร",
+      "id": "Sumber Daya",
+      "ms": "Sumber",
+      "ar": "الموارد"
+    },
+    "title": {
+      "en": "Wistudi at Vietnam EdTech Expo 2026 in Hanoi",
+      "vi": "Wistudi tại Vietnam EdTech Expo 2026 ở Hà Nội",
+      "zh-cn": "Wistudi 亮相河内 Vietnam EdTech Expo 2026",
+      "th": "Wistudi ที่ Vietnam EdTech Expo 2026 ในฮานอย",
+      "id": "Wistudi di Vietnam EdTech Expo 2026 di Hanoi",
+      "ms": "Wistudi di Vietnam EdTech Expo 2026 di Hanoi",
+      "ar": "Wistudi في Vietnam EdTech Expo 2026 في هانوي"
+    },
+    "description": {
+      "en": "A field note from Wistudi's Vietnam EdTech Expo 2026 experience in Hanoi, including live demonstrations, educator conversations and new EdTech connections.",
+      "vi": "Ghi chép thực tế từ trải nghiệm của Wistudi tại Vietnam EdTech Expo 2026 ở Hà Nội, gồm các buổi trình diễn trực tiếp, trao đổi với nhà giáo dục và những kết nối EdTech mới.",
+      "zh-cn": "Wistudi 在河内参加 Vietnam EdTech Expo 2026 的现场记录，包括产品演示、与教育工作者的交流以及新的 EdTech 联系。",
+      "th": "บันทึกภาคสนามจากประสบการณ์ของ Wistudi ที่ Vietnam EdTech Expo 2026 ในฮานอย รวมถึงการสาธิตสด การสนทนากับนักการศึกษา และการสร้างเครือข่าย EdTech ใหม่ ๆ",
+      "id": "Catatan lapangan dari pengalaman Wistudi di Vietnam EdTech Expo 2026 di Hanoi, termasuk demonstrasi langsung, percakapan dengan pendidik, dan koneksi EdTech baru.",
+      "ms": "Catatan lapangan daripada pengalaman Wistudi di Vietnam EdTech Expo 2026 di Hanoi, termasuk demonstrasi langsung, perbualan dengan pendidik dan hubungan EdTech baharu.",
+      "ar": "ملاحظات ميدانية من تجربة Wistudi في Vietnam EdTech Expo 2026 في هانوي، بما في ذلك العروض المباشرة والنقاشات مع المعلّمين والعلاقات الجديدة في مجال EdTech."
+    }
+  }
+};
+const RESOURCE_FALLBACK_META = {
+  "type": "WebPage",
+  "image": "/assets/images/resources/expo-2026/expo-hero.png",
+  "label": {
+    "en": "Resources",
+    "vi": "Tài nguyên",
+    "zh-cn": "资源",
+    "th": "ทรัพยากร",
+    "id": "Sumber Daya",
+    "ms": "Sumber",
+    "ar": "الموارد"
+  },
+  "title": {
+    "en": "Wistudi Resources",
+    "vi": "Tài nguyên Wistudi",
+    "zh-cn": "Wistudi 资源",
+    "th": "ทรัพยากร Wistudi",
+    "id": "Sumber Daya Wistudi",
+    "ms": "Sumber Wistudi",
+    "ar": "موارد Wistudi"
+  },
+  "description": {
+    "en": "Resources, Community Notes, guides and events from Wistudi.",
+    "vi": "Tài nguyên, Ghi chú cộng đồng, hướng dẫn và sự kiện từ Wistudi.",
+    "zh-cn": "来自 Wistudi 的资源、社区札记、指南和活动。",
+    "th": "ทรัพยากร บันทึกชุมชน คู่มือ และกิจกรรมจาก Wistudi",
+    "id": "Sumber daya, Catatan Komunitas, panduan, dan acara dari Wistudi.",
+    "ms": "Sumber, Nota Komuniti, panduan dan acara daripada Wistudi.",
+    "ar": "موارد وملاحظات مجتمع وأدلة وفعاليات من Wistudi."
+  }
+};
+function pageMeta(pagePath){ return SEO_PAGES[pagePath] || RESOURCE_PAGE_META[pagePath] || (pagePath.startsWith('/resources/')?RESOURCE_FALLBACK_META:null); }
+
 const LEGACY_ALIASES = new Map([
   ['/OPEN_WEBSITE.html','/'],
   ['/platform.html','/'],
@@ -160,7 +350,7 @@ function canonicalPagePath(pathname) {
   if (!path || path === '/' || path === '/index.html' || path === '/platform' || path === '/platform/' || path === '/platform/index.html') return '/';
   path = path.replace(/\/index\.html$/i, '/');
   if (!path.endsWith('/')) path += '/';
-  return CANONICAL_PAGES.has(path) ? path : null;
+  return CANONICAL_PAGES.has(path) || path.startsWith('/resources/') ? path : null;
 }
 
 function localePath(locale, pagePath) {
@@ -257,7 +447,7 @@ html.i18n-ready body,html:not(.ws-i18n-pending) body{opacity:1}
   var stored=null;try{stored=localStorage.getItem('wistudi_locale')}catch(e){}
   var cookie=(document.cookie.match(/(?:^|;\\s*)wistudi_locale=([^;]+)/i)||[])[1];
   try{cookie=cookie?decodeURIComponent(cookie).toLowerCase():null}catch(e){cookie=null}
-  var isRootPage=/^\\/(?:|index\\.html|platform\\/?|platform\\/index\\.html|blocks-activities\\/?|blocks-activities\\/index\\.html|organisations\\/?|organisations\\/index\\.html|contact\\/?|contact\\/index\\.html)$/.test(location.pathname);
+  var isRootPage=/^\/(?:|index\.html|platform\/?|platform\/index\.html|blocks-activities\/?|blocks-activities\/index\.html|organisations\/?|organisations\/index\.html|contact\/?|contact\/index\.html)$/.test(location.pathname)||/^\/resources(?:\/|$)/.test(location.pathname);
   if(!explicit&&isRootPage&&stored&&supported.indexOf(stored)>-1&&stored!=='en'&&stored!==cookie){
     var p=location.pathname;
     if(p==='/index.html'||p==='/platform'||p==='/platform/'||p==='/platform/index.html')p='/';
@@ -272,7 +462,7 @@ html.i18n-ready body,html:not(.ws-i18n-pending) body{opacity:1}
 })();</script>`;
 
 function seoHeadMarkup(locale, pagePath, isProduction) {
-  const meta = SEO_PAGES[pagePath];
+  const meta = pageMeta(pagePath);
   const localeMeta = LOCALE_META[locale] || LOCALE_META.en;
   const pageUrl = canonicalUrl(locale, pagePath);
   const title = meta.title[locale] || meta.title.en;
@@ -305,7 +495,7 @@ ${ogAlternates}
 function injectPage(response, locale, pagePath, isProduction) {
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.includes('text/html')) return response;
-  const meta = SEO_PAGES[pagePath];
+  const meta = pageMeta(pagePath);
   const localeMeta = LOCALE_META[locale] || LOCALE_META.en;
   let transformed = new HTMLRewriter()
     .on('html', { element(el) { el.setAttribute('lang',localeMeta.lang); el.setAttribute('dir',localeMeta.dir); el.setAttribute('data-locale',locale); } })
