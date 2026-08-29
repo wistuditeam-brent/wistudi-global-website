@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "defaultLocale": "en",
+  "generatedAt": "2026-08-29T12:50:00+07:00",
+  "articles": [
+    {
+      "id": "wistudi-vietnam-edtech-expo-2026",
+      "status": "published",
+      "qa": {
+        "state": "pending",
+        "reason": "Original high-resolution Expo images supplied and inserted; awaiting automated static/browser QA on this commit."
+      },
+      "featured": true,
+      "publishedAt": "2026-08-27T12:00:00+07:00",
+      "eventDate": "2026-08-15",
+      "type": "Field Note",
+      "topics": [
+        "Events & Field Notes",
+        "EdTech",
+        "Community",
+        "Vietnam"
+      ],
+      "heroImage": "/assets/images/resources/expo-2026/expo-hero.png",
+      "heroAlt": "Wistudi team members speaking with visitors at Vietnam EdTech Expo 2026 in Hanoi",
+      "author": {
+        "name": "Wistudi Editorial Team",
+        "avatar": "/assets/images/wi-circle.png",
+        "description": "Ideas, practices and perspectives from Wistudi."
+      },
+      "media": [
+        {
+          "src": "/assets/images/resources/expo-2026/expo-hero.png",
+          "alt": "Visitors and Wistudi team members gathered around the Wistudi booth at Vietnam EdTech Expo 2026"
+        },
+        {
+          "src": "/assets/images/resources/expo-2026/expo-demo-01.png",
+          "alt": "A live Wistudi demonstration with an attendee at Vietnam EdTech Expo 2026"
+        },
+        {
+          "src": "/assets/images/resources/expo-2026/expo-demo-02.png",
+          "alt": "Visitors watching a live Wistudi demonstration at Vietnam EdTech Expo 2026"
+        },
+        {
+          "src": "/assets/images/resources/expo-2026/expo-demo-03.png",
+          "alt": "A Wistudi team member demonstrating the platform to an Expo visitor"
+        }
+      ],
+      "locales": {
+        "en": {
+          "slug": "wistudi-at-vietnam-edtech-expo-2026",
+          "title": "Wistudi at Vietnam EdTech Expo 2026",
+          "excerpt": "A first major outing for Wistudi, and a day of live demonstrations, conversations and new connections in Hanoi.",
+          "url": "/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/",
+          "seoTitle": "Wistudi at Vietnam EdTech Expo 2026 in Hanoi",
+          "metaDescription": "A field note from Wistudi's Vietnam EdTech Expo 2026 experience in Hanoi, including live demonstrations, educator conversations and new EdTech connections."
+        }
+      }
+    }
+  ],
+  "planned": [
+    {
+      "id": "interactive-activity-to-paper",
+      "type": "Behind the Decision",
+      "topics": [
+        "Interactive + Printable",
+        "Learning Design"
+      ],
+      "locales": {
+        "en": {
+          "title": "What Should Happen When an Interactive Activity Moves to Paper?",
+          "excerpt": "A practical look at preserving the purpose of an activity when it becomes a printable worksheet."
+        }
+      }
+    },
+    {
+      "id": "not-everything-needs-grading",
+      "type": "Wistudi Perspective",
+      "topics": [
+        "Learning Design",
+        "Assessment"
+      ],
+      "locales": {
+        "en": {
+          "title": "Why Every Learning Activity Does Not Need to Be Graded",
+          "excerpt": "Engagement, reflection and practice can be valuable even when they are not part of a score."
+        }
+      }
+    },
+    {
+      "id": "watching-is-not-learning",
+      "type": "Wistudi Perspective",
+      "topics": [
+        "Interactive Video",
+        "Learning Design"
+      ],
+      "locales": {
+        "en": {
+          "title": "Watching Is Not the Same as Learning",
+          "excerpt": "Why adding a question to a video is only the start of designing an active learning experience."
+        }
+      }
+    }
+  ]
+}
