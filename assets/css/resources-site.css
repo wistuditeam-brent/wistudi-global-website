@@ -24,6 +24,10 @@ body.page-resources .res-question{cursor:default;background:#faf9fb;border-color
 body.page-resources .res-question strong{color:#746e78}
 body.page-resources .res-question small{color:#aaa4ad}
 
+/* Article navigation must remain available while the reader moves through the note. */
+body.page-resource-article main{overflow:visible}
+@media(min-width:961px){body.page-resource-article .res-article-layout{overflow:visible}body.page-resource-article .res-article-aside{position:sticky!important;top:96px;align-self:start;height:max-content;max-height:calc(100vh - 120px);overflow:auto}}
+
 /* Keep below-the-fold editorial sections cheap to render until needed. */
 @supports(content-visibility:auto){body.page-resources .res-section,body.page-resources .res-gallery,body.page-resources .res-related{content-visibility:auto;contain-intrinsic-size:1px 680px}}
 
