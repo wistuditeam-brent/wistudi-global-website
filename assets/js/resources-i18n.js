@@ -8,6 +8,11 @@
   const isHome=bare==='/resources/'||bare==='/resources'||bare==='/resources/index.html';
   if(!isHome)return;
 
+  const reveal=()=>{
+    document.documentElement.classList.add('ws-res-i18n-ready');
+    document.documentElement.classList.remove('ws-res-i18n-pending');
+  };
+
   if(!explicit){
     let stored=null;
     try{stored=localStorage.getItem('wistudi_locale')}catch(_){}
@@ -80,13 +85,15 @@
   const apply=async()=>{
     localizeResourceLinks();
     addRtl();
-    if(locale==='en')return;
+    if(locale==='en'){reveal();return;}
     try{
       const r=await fetch(`/assets/i18n/${locale}-resources-home.json`,{cache:'default'});
       if(!r.ok)throw new Error('resources translation unavailable');
       translate(await r.json());
     }catch(err){
       console.warn('[Wistudi resources i18n]',err);
+    }finally{
+      reveal();
     }
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply,{once:true});
