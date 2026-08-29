@@ -8,6 +8,15 @@
   const isHome=bare==='/resources/'||bare==='/resources'||bare==='/resources/index.html';
   if(!isHome)return;
 
+  const chrome={
+    vi:{'Platform':'Nền tảng','Blocks & Activities':'Khối & Hoạt động','Organisations':'Tổ chức','Resources':'Tài nguyên','Contact':'Liên hệ','Talk to us':'Trao đổi với chúng tôi','Start publishing':'Bắt đầu xuất bản','Interactive learning, publishing and delivery in one connected platform.':'Học tập tương tác, xuất bản và phân phối trong một nền tảng kết nối.','Contact Wistudi':'Liên hệ Wistudi','New resources':'Tài nguyên mới','Language':'Ngôn ngữ','Open menu':'Mở menu','Wistudi home':'Trang chủ Wistudi'},
+    'zh-cn':{'Platform':'平台','Blocks & Activities':'模块与活动','Organisations':'机构','Resources':'资源','Contact':'联系','Talk to us':'联系我们','Start publishing':'开始发布','Interactive learning, publishing and delivery in one connected platform.':'互动学习、出版与交付，尽在一个互联平台。','Contact Wistudi':'联系 Wistudi','New resources':'新资源','Language':'语言','Open menu':'打开菜单','Wistudi home':'Wistudi 首页'},
+    th:{'Platform':'แพลตฟอร์ม','Blocks & Activities':'บล็อกและกิจกรรม','Organisations':'องค์กร','Resources':'ทรัพยากร','Contact':'ติดต่อ','Talk to us':'พูดคุยกับเรา','Start publishing':'เริ่มเผยแพร่','Interactive learning, publishing and delivery in one connected platform.':'การเรียนรู้แบบโต้ตอบ การเผยแพร่ และการส่งมอบในแพลตฟอร์มที่เชื่อมต่อเป็นหนึ่งเดียว','Contact Wistudi':'ติดต่อ Wistudi','New resources':'ทรัพยากรใหม่','Language':'ภาษา','Open menu':'เปิดเมนู','Wistudi home':'หน้าแรก Wistudi'},
+    id:{'Platform':'Platform','Blocks & Activities':'Blok & Aktivitas','Organisations':'Organisasi','Resources':'Sumber Daya','Contact':'Kontak','Talk to us':'Hubungi kami','Start publishing':'Mulai menerbitkan','Interactive learning, publishing and delivery in one connected platform.':'Pembelajaran interaktif, penerbitan, dan penyampaian dalam satu platform yang terhubung.','Contact Wistudi':'Hubungi Wistudi','New resources':'Sumber daya baru','Language':'Bahasa','Open menu':'Buka menu','Wistudi home':'Beranda Wistudi'},
+    ms:{'Platform':'Platform','Blocks & Activities':'Blok & Aktiviti','Organisations':'Organisasi','Resources':'Sumber','Contact':'Hubungi','Talk to us':'Hubungi kami','Start publishing':'Mula menerbit','Interactive learning, publishing and delivery in one connected platform.':'Pembelajaran interaktif, penerbitan dan penyampaian dalam satu platform yang saling berhubung.','Contact Wistudi':'Hubungi Wistudi','New resources':'Sumber baharu','Language':'Bahasa','Open menu':'Buka menu','Wistudi home':'Laman utama Wistudi'},
+    ar:{'Platform':'المنصة','Blocks & Activities':'الكتل والأنشطة','Organisations':'المؤسسات','Resources':'الموارد','Contact':'تواصل','Talk to us':'تحدث معنا','Start publishing':'ابدأ النشر','Interactive learning, publishing and delivery in one connected platform.':'التعلم التفاعلي والنشر والتقديم في منصة واحدة مترابطة.','Contact Wistudi':'تواصل مع Wistudi','New resources':'موارد جديدة','Language':'اللغة','Open menu':'فتح القائمة','Wistudi home':'الصفحة الرئيسية لـ Wistudi'}
+  };
+
   const reveal=()=>{
     document.documentElement.classList.add('ws-res-i18n-ready');
     document.documentElement.classList.remove('ws-res-i18n-pending');
@@ -38,7 +47,7 @@
   };
 
   const translate=(dict)=>{
-    const strings=dict?.strings||{};
+    const strings=Object.assign({},chrome[locale]||{},dict?.strings||{});
     const translateNode=node=>{
       if(!node)return;
       if(node.nodeType===Node.TEXT_NODE){
