@@ -1,0 +1,21 @@
+/* Wistudi Resources image integrity safeguards.
+   Editorial photographs must never be distorted by HTML width/height attributes
+   or by responsive container resizing. */
+
+.res-hero-photo img,
+.res-inline-media img {
+  display: block;
+  width: 100%;
+  height: auto !important;
+  aspect-ratio: auto !important;
+  object-fit: contain;
+}
+
+/* Card and gallery media may intentionally crop, but must preserve source proportions. */
+.res-feature-media img,
+.res-card-media img,
+.res-list-image img,
+.res-gallery-btn img {
+  object-fit: cover;
+  object-position: center;
+}
