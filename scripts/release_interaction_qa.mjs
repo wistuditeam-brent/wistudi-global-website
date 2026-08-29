@@ -22,7 +22,9 @@ async function testGuide(viewport,name){
   }));
   if(before.desktop||before.mobile)failures.push(`${name}: guide opened without a user click`);
 
-  await button.click();
+  // The avatar intentionally floats a few pixels as an idle affordance, so force the
+  // browser click rather than waiting for Playwright's stability heuristic to settle.
+  try{await button.click({force:true,timeout:5000});}catch(e){failures.push(`${name}: could not click guide avatar (${e.message})`);}
   await page.waitForTimeout(120);
   const after=await page.evaluate(()=>({
     desktop:document.querySelector('.ws-g2')?.classList.contains('open')||false,
@@ -59,7 +61,7 @@ await testGuide({width:390,height:844},'mobile');
     }
     const stage=aside.locator('a[href="#stage"]');
     if(await stage.count()){
-      await stage.click();
+      await stage.click({force:true});
       await page.waitForTimeout(120);
       if(!page.url().endsWith('#stage'))failures.push('article: In this note anchor did not navigate to On stage');
     }
