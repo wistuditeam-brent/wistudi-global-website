@@ -3,6 +3,16 @@
 
   const doc=document;
 
+  // Load first-party analytics/event instrumentation before page-specific shell delegation.
+  // This keeps conversion tracking active on both the main website and Resources pages.
+  if(!doc.querySelector('script[data-ws-analytics-events]')){
+    const analytics=doc.createElement('script');
+    analytics.src='/assets/js/analytics-events.js';
+    analytics.async=true;
+    analytics.dataset.wsAnalyticsEvents='true';
+    doc.head.appendChild(analytics);
+  }
+
   // Resources has its own isolated runtime for image fallbacks, archive behavior and
   // resource navigation state. Delegate immediately so the general website shell cannot
   // bypass those protections or attach duplicate UI handlers.
