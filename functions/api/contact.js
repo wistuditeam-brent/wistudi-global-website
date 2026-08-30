@@ -85,6 +85,18 @@ export async function onRequestPost(context) {
     const safe = (value) =>
       String(value || '').replace(/[<>]/g, '');
 
+    // The outreach token remains first-party. It is included in Wistudi's own
+    // enquiry email so sales activity can be attributed without sending the
+    // person-level token to Google Analytics.
+    const attributionLines = [
+      data.outreach_token ? `Outreach token: ${safe(data.outreach_token)}` : '',
+      data.utm_source ? `UTM source: ${safe(data.utm_source)}` : '',
+      data.utm_medium ? `UTM medium: ${safe(data.utm_medium)}` : '',
+      data.utm_campaign ? `UTM campaign: ${safe(data.utm_campaign)}` : '',
+      data.utm_content ? `UTM content: ${safe(data.utm_content)}` : '',
+      data.utm_term ? `UTM term: ${safe(data.utm_term)}` : ''
+    ].filter(Boolean);
+
     const text = [
       'New Wistudi website enquiry',
       '',
@@ -95,6 +107,7 @@ export async function onRequestPost(context) {
       `Organisation: ${safe(data.organisation)}`,
       `Organisation email: ${safe(data.organisation_email)}`,
       `Website: ${safe(data.website)}`,
+      ...(attributionLines.length ? ['', 'Attribution:', ...attributionLines] : []),
       '',
       'Message:',
       safe(message)
