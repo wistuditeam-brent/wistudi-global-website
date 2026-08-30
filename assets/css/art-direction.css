@@ -1,0 +1,493 @@
+/*
+  Wistudi art-direction refinement layer
+  2026-08-30
+  Scope: visual treatment only. No copy, supplied media, product claims or page structure changed.
+  Goal: reduce generic SaaS/AI styling habits while preserving the Wistudi identity.
+*/
+
+:root{
+  --ws-refine-radius-xs:8px;
+  --ws-refine-radius-sm:10px;
+  --ws-refine-radius-md:14px;
+  --ws-refine-radius-lg:18px;
+  --ws-refine-line:#e8e4ec;
+  --ws-refine-shadow:0 10px 28px rgba(34,24,64,.055);
+  --ws-refine-shadow-strong:0 18px 46px rgba(34,24,64,.085);
+}
+
+/* ---------- Shared system: quieter, less template-like ---------- */
+.ws-btn,
+.btn,
+.res-btn{
+  border-radius:var(--ws-refine-radius-sm)!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+.ws-btn:hover,
+.btn:hover,
+.res-btn:hover{
+  transform:none!important;
+}
+.ws-btn.primary,
+.btn.primary,
+.res-btn.primary{
+  background:#6f35df!important;
+  box-shadow:none!important;
+}
+.ws-btn.primary:hover,
+.btn.primary:hover,
+.res-btn.primary:hover{
+  background:#5f2fc4!important;
+}
+.ws-btn.secondary:hover,
+.btn.secondary:hover,
+.res-btn.secondary:hover{
+  box-shadow:none!important;
+}
+
+.ws-lang-toggle,
+.ws-lang-menu,
+.ws-menu-toggle{
+  border-radius:var(--ws-refine-radius-sm)!important;
+}
+.ws-lang-option{border-radius:7px!important}
+.ws-lang-soon{border-radius:7px!important}
+
+/* Main navigation uses a simple brand line rather than a gradient flourish. */
+.ws-nav-links a.active:after{
+  height:2px!important;
+  border-radius:0!important;
+  background:#6f35df!important;
+}
+
+/* Subnavigation: compact tabs, not floating gradient pills. */
+.subnav-wrap.ws-section-subnav{
+  box-shadow:none!important;
+  background:rgba(255,255,255,.97)!important;
+}
+.subnav-wrap.ws-section-subnav .subnav a{
+  border-radius:8px!important;
+  padding:9px 12px!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+.subnav-wrap.ws-section-subnav .subnav a:hover{
+  transform:none!important;
+  background:#f6f3f8!important;
+  color:#5f2fc4!important;
+}
+.subnav-wrap.ws-section-subnav .subnav a.active{
+  background:#f4f0f8!important;
+  color:#4f279f!important;
+  box-shadow:inset 0 -2px 0 #6f35df!important;
+}
+
+/* Eyebrows remain Wistudi, but use a small editorial rule rather than a gradient dot. */
+body .eyebrow:before,
+body .res-eyebrow:before{
+  width:16px!important;
+  height:2px!important;
+  border-radius:0!important;
+  background:#f97316!important;
+  flex:0 0 16px!important;
+}
+
+/* Reduce the universal 'everything floats upward' response. */
+.card:hover,
+.cap-card:hover,
+.sector-card:hover,
+.deploy-card:hover,
+.logo-box:hover,
+.env-item:hover,
+.report-level:hover,
+.example-card:hover,
+.route-card:hover,
+.route-card.selected,
+.res-card:hover,
+.res-list-card:hover,
+.res-progressive-card:hover,
+.topic:hover,
+.format-box:hover,
+.org-item:hover,
+.scale-step:hover{
+  transform:none!important;
+}
+
+/* Real media may move subtly; containers generally should not. */
+.card,
+.cap-card,
+.sector-card,
+.deploy-card,
+.logo-panel,
+.logo-box,
+.env-item,
+.format-box,
+.report-level,
+.example-card,
+.route-card,
+.res-card,
+.res-progressive-card,
+.res-list-card,
+.org-item,
+.scale-step{
+  box-shadow:none!important;
+}
+
+/* ---------- Platform / homepage ---------- */
+body.page-platform .hero{
+  background:linear-gradient(180deg,#fff 0%,#fbfafc 100%)!important;
+}
+body.page-platform .hero-media-frame,
+body.page-platform .showcase,
+body.page-platform .media-card,
+body.page-platform .video-frame{
+  border-radius:var(--ws-refine-radius-lg)!important;
+  box-shadow:var(--ws-refine-shadow)!important;
+}
+
+body.page-platform .card,
+body.page-platform .visual-card,
+body.page-platform .org-item,
+body.page-platform .scale-step,
+body.page-platform .metric,
+body.page-platform .social-card,
+body.page-platform .compare-col{
+  border-radius:var(--ws-refine-radius-md)!important;
+}
+
+/* Keep diagrams explanatory, but remove the generated-dashboard aesthetic. */
+body.page-platform .format-map,
+body.page-platform .report-shell{
+  border-radius:var(--ws-refine-radius-lg)!important;
+  box-shadow:none!important;
+  background:#fcfbfd!important;
+}
+body.page-platform .format-node{
+  border-radius:9px!important;
+  box-shadow:none!important;
+  background:#fff!important;
+}
+body.page-platform .core-node{
+  box-shadow:none!important;
+  background:#6f35df!important;
+}
+body.page-platform .floating-card{
+  box-shadow:none!important;
+  border-radius:10px!important;
+}
+body.page-platform .report-grid{
+  border-radius:12px!important;
+}
+body.page-platform .report-side div,
+body.page-platform .metric{
+  box-shadow:none!important;
+}
+body.page-platform .chart-placeholder{
+  border-style:solid!important;
+  border-color:#e4dfe9!important;
+  background:#faf9fb!important;
+  color:#8b8491!important;
+}
+body.page-platform .social-panel{
+  border-radius:var(--ws-refine-radius-lg)!important;
+}
+body.page-platform .social-panel::after{
+  opacity:.28!important;
+  filter:blur(34px)!important;
+}
+body.page-platform .cta-panel{
+  border-radius:var(--ws-refine-radius-lg)!important;
+  box-shadow:none!important;
+  background:#5f2fc4!important;
+}
+
+/* ---------- Organisations: biggest restraint pass ---------- */
+body.page-organisations .hero{
+  background:linear-gradient(180deg,#fbfafc 0%,#fff 100%)!important;
+}
+body.page-organisations .hero:before,
+body.page-organisations .hero-orb{
+  display:none!important;
+}
+body.page-organisations .hero-diagram{
+  animation:none!important;
+  filter:drop-shadow(0 18px 28px rgba(55,40,80,.10))!important;
+}
+body.page-organisations .hero-tags span{
+  border-radius:8px!important;
+  box-shadow:none!important;
+  background:#fff!important;
+}
+body.page-organisations .cap-card,
+body.page-organisations .sector-card,
+body.page-organisations .deploy-card,
+body.page-organisations .logo-panel,
+body.page-organisations .logo-box,
+body.page-organisations .env-item,
+body.page-organisations .format-box,
+body.page-organisations .report-level{
+  border-radius:var(--ws-refine-radius-md)!important;
+  box-shadow:none!important;
+}
+body.page-organisations .cap-card:before{
+  display:none!important;
+}
+body.page-organisations .cap-card:hover,
+body.page-organisations .sector-card:hover,
+body.page-organisations .deploy-card:hover,
+body.page-organisations .logo-box:hover,
+body.page-organisations .env-item:hover,
+body.page-organisations .report-level:hover{
+  transform:none!important;
+  box-shadow:none!important;
+  border-color:#cfc6d7!important;
+}
+body.page-organisations .cap-card:hover .cap-icon,
+body.page-organisations .support-visual:hover img,
+body.page-organisations .arch-visual:hover img{
+  transform:none!important;
+}
+body.page-organisations .cap-tag,
+body.page-organisations .control-row span:last-child{
+  border-radius:7px!important;
+}
+body.page-organisations .sector-card .mini{
+  width:22px!important;
+  height:2px!important;
+  border-radius:0!important;
+  background:#f97316!important;
+}
+body.page-organisations .deploy-card:nth-child(2),
+body.page-organisations .deploy-card:nth-child(3){
+  background:#fff!important;
+}
+body.page-organisations .deploy-number span:last-child{
+  border-radius:9px!important;
+  background:#f4f0f8!important;
+}
+body.page-organisations .architecture{
+  background:#181426!important;
+}
+body.page-organisations .arch-point{
+  border-radius:10px!important;
+  background:rgba(255,255,255,.035)!important;
+}
+body.page-organisations .arch-point:hover{
+  transform:none!important;
+}
+body.page-organisations .arch-point i{
+  border-radius:8px!important;
+  background:#6f35df!important;
+}
+body.page-organisations .control-card{
+  border-radius:var(--ws-refine-radius-lg)!important;
+  box-shadow:none!important;
+  background:#241b47!important;
+}
+body.page-organisations .control-row{
+  border-radius:9px!important;
+}
+body.page-organisations .analytics-mock{
+  border-radius:var(--ws-refine-radius-md)!important;
+  box-shadow:none!important;
+}
+
+/* ---------- Blocks & Activities: preserve product media, quiet the chrome ---------- */
+body.page-blocks .hero-proof span,
+body.page-blocks .filter-btn,
+body.page-blocks .chip,
+body.page-blocks .pill{
+  border-radius:8px!important;
+}
+body.page-blocks .hero-video-shell{
+  border-radius:var(--ws-refine-radius-lg)!important;
+  box-shadow:none!important;
+  background:rgba(255,255,255,.11)!important;
+}
+body.page-blocks .hero-video{
+  border-radius:var(--ws-refine-radius-md)!important;
+  box-shadow:none!important;
+}
+body.page-blocks .carousel-card{
+  border-radius:var(--ws-refine-radius-md)!important;
+  box-shadow:none!important;
+}
+body.page-blocks .carousel-card.active{
+  border-color:#f97316!important;
+  box-shadow:0 0 0 1px rgba(249,115,22,.18)!important;
+}
+body.page-blocks .media-card,
+body.page-blocks .video-frame,
+body.page-blocks .example-card{
+  border-radius:var(--ws-refine-radius-md)!important;
+  box-shadow:none!important;
+}
+body.page-blocks .check-item{
+  border-radius:10px!important;
+}
+body.page-blocks .checkmark{
+  border-radius:7px!important;
+  background:#f97316!important;
+  box-shadow:none!important;
+}
+body.page-blocks .video-badge{
+  border-radius:8px!important;
+  box-shadow:none!important;
+}
+
+/* ---------- Contact: remove generic AI-startup decoration ---------- */
+body.page-contact .hero,
+body.page-contact-page .hero,
+body[class*="contact"] .hero{
+  background:#f7f5f7!important;
+}
+body.page-contact .hero:before,
+body.page-contact .hero:after,
+body.page-contact-page .hero:before,
+body.page-contact-page .hero:after,
+body[class*="contact"] .hero:before,
+body[class*="contact"] .hero:after{
+  display:none!important;
+}
+body[class*="contact"] .hero-copy h1 span{
+  background:none!important;
+  -webkit-background-clip:initial!important;
+  background-clip:initial!important;
+  color:#6f35df!important;
+}
+body[class*="contact"] .contact-diagram{
+  animation:none!important;
+  filter:drop-shadow(0 16px 26px rgba(50,35,90,.08))!important;
+}
+body[class*="contact"] .route-card,
+body[class*="contact"] .direct-contact,
+body[class*="contact"] .form-card,
+body[class*="contact"] .topic{
+  border-radius:var(--ws-refine-radius-md)!important;
+  box-shadow:none!important;
+}
+body[class*="contact"] .route-card:hover,
+body[class*="contact"] .route-card.selected,
+body[class*="contact"] .topic:hover{
+  transform:none!important;
+  box-shadow:none!important;
+}
+body[class*="contact"] .route-arrow{
+  border-radius:8px!important;
+}
+body[class*="contact"] .booking-section{
+  background:#fbfafc!important;
+}
+body[class*="contact"] .booking-section:before,
+body[class*="contact"] .booking-section:after{
+  display:none!important;
+}
+body[class*="contact"] .booking-pill,
+body[class*="contact"] .form-step{
+  border-radius:8px!important;
+  box-shadow:none!important;
+}
+body[class*="contact"] .trust-check{
+  border-radius:7px!important;
+  box-shadow:none!important;
+}
+body[class*="contact"] .field input,
+body[class*="contact"] .field select,
+body[class*="contact"] .field textarea{
+  border-radius:9px!important;
+}
+body[class*="contact"] .form-helper,
+body[class*="contact"] .status{
+  border-radius:9px!important;
+}
+
+/* ---------- Resources: editorial first, not dashboard/card first ---------- */
+body.page-resources .res-hero,
+body.page-resources .res-soon-hero,
+body.page-resources .res-archive-hero,
+body.page-resources .res-article-hero{
+  background:linear-gradient(180deg,#fbfafc 0%,#fff 100%)!important;
+}
+body.page-resources .res-search{
+  border-radius:10px!important;
+  box-shadow:none!important;
+}
+body.page-resources .res-search button,
+body.page-resources .res-chip,
+body.page-resources .res-status{
+  border-radius:8px!important;
+}
+body.page-resources .res-feature{
+  border-radius:var(--ws-refine-radius-lg)!important;
+  box-shadow:none!important;
+}
+body.page-resources .res-card,
+body.page-resources .res-progressive-card,
+body.page-resources .res-question,
+body.page-resources .res-questions,
+body.page-resources .res-list-card{
+  border-radius:var(--ws-refine-radius-md)!important;
+  box-shadow:none!important;
+}
+body.page-resources .res-card:hover,
+body.page-resources .res-list-card:hover{
+  transform:none!important;
+  box-shadow:none!important;
+  border-color:#cdc4d5!important;
+}
+body.page-resources .res-coming,
+body.page-resources .res-questions,
+body.page-resources .res-section.soft{
+  background:#fbfafc!important;
+}
+body.page-resources .res-coming-mark{
+  border-radius:10px!important;
+  box-shadow:none!important;
+}
+body.page-resources .res-definition{
+  border-radius:var(--ws-refine-radius-lg)!important;
+  background:#1d1827!important;
+}
+body.page-resources .res-hero-photo{
+  border-radius:var(--ws-refine-radius-lg)!important;
+  box-shadow:none!important;
+}
+body.page-resources .res-inline-media img{
+  border-radius:12px!important;
+}
+body.page-resources .res-pullquote{
+  border-radius:0 10px 10px 0!important;
+}
+body.page-resources .res-source-note{
+  border-radius:9px!important;
+}
+body.page-resources .res-list-image{
+  border-radius:10px!important;
+}
+body.page-resources .res-list-arrow{
+  border-radius:8px!important;
+}
+body.page-resources .res-empty{
+  border-radius:12px!important;
+}
+
+/* ---------- Motion: purposeful rather than ambient ---------- */
+@media (prefers-reduced-motion:no-preference){
+  body.page-organisations .hero-diagram,
+  body[class*="contact"] .contact-diagram{
+    animation:none!important;
+  }
+}
+
+/* ---------- Mobile: keep the refinement restrained ---------- */
+@media(max-width:700px){
+  .ws-btn,.btn,.res-btn{border-radius:9px!important}
+  .subnav-wrap.ws-section-subnav .subnav a{border-radius:7px!important}
+  body.page-platform .card,
+  body.page-organisations .cap-card,
+  body.page-blocks .carousel-card,
+  body.page-resources .res-card,
+  body[class*="contact"] .route-card{
+    border-radius:12px!important;
+  }
+}
