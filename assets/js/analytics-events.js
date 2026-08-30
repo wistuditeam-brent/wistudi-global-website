@@ -1,6 +1,9 @@
 (()=>{
   'use strict';
 
+  if(window.__WS_ANALYTICS_EVENTS_LOADED__)return;
+  window.__WS_ANALYTICS_EVENTS_LOADED__=true;
+
   const STORAGE_TOKEN='wistudi_outreach_token';
   const STORAGE_ATTR='wistudi_attribution';
   const WST_RE=/^WST-[A-Za-z0-9_-]{3,80}$/i;
