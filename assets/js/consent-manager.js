@@ -43,8 +43,12 @@
     });
   };
 
+  const notifyReady=()=>{
+    try{window.dispatchEvent(new CustomEvent('wistudi:analytics-ready'))}catch(_){ }
+  };
+
   const loadGoogleAnalytics=()=>{
-    if(window.__WS_GA_LOADED__)return;
+    if(window.__WS_GA_LOADED__){notifyReady();return}
     window.__WS_GA_LOADED__=true;
     window.dataLayer=window.dataLayer||[];
     window.gtag=window.gtag||function(){window.dataLayer.push(arguments)};
@@ -57,6 +61,7 @@
     script.async=true;
     script.src=`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(ID)}`;
     script.dataset.wsGa='true';
+    script.addEventListener('load',notifyReady,{once:true});
     document.head.appendChild(script);
   };
 
@@ -128,6 +133,7 @@
 
   if(!required){
     window.__WS_ANALYTICS_ALLOWED__=true;
+    notifyReady();
     return;
   }
 
