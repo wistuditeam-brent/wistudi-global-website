@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "defaultLocale": "en",
-  "generatedAt": "2026-08-29T12:50:00+07:00",
+  "generatedAt": "2026-08-30T18:55:00+07:00",
   "articles": [
     {
       "id": "wistudi-vietnam-edtech-expo-2026",
       "status": "published",
       "qa": {
         "state": "pending",
-        "reason": "Original high-resolution Expo images supplied and inserted; awaiting automated static/browser QA on this commit."
+        "reason": "Featured gallery expanded with ten real Expo photographs; Platform gallery and lightbox added on preview branch."
       },
       "featured": true,
       "publishedAt": "2026-08-27T12:00:00+07:00",
@@ -29,20 +29,44 @@
       },
       "media": [
         {
+          "src": "/assets/images/resources/expo-2026/DSC08140.JPG",
+          "alt": "Wistudi representatives and an Expo visitor posing together at the Wistudi booth"
+        },
+        {
+          "src": "/assets/images/resources/expo-2026/DSC07773.JPG",
+          "alt": "A group of visitors gathered around the Wistudi booth during a live demonstration"
+        },
+        {
+          "src": "/assets/images/resources/expo-2026/expo-demo-01.png",
+          "alt": "A Wistudi team member demonstrating the platform to an Expo visitor"
+        },
+        {
+          "src": "/assets/images/resources/expo-2026/DSC07721.JPG",
+          "alt": "Visitors and a Wistudi team member posing with Wistudi materials at the Expo"
+        },
+        {
           "src": "/assets/images/resources/expo-2026/expo-hero.png",
           "alt": "Visitors and Wistudi team members gathered around the Wistudi booth at Vietnam EdTech Expo 2026"
         },
         {
-          "src": "/assets/images/resources/expo-2026/expo-demo-01.png",
-          "alt": "A live Wistudi demonstration with an attendee at Vietnam EdTech Expo 2026"
+          "src": "/assets/images/resources/expo-2026/DSC08010.JPG",
+          "alt": "Wistudi team members holding Wistudi signs and printed materials at the booth"
         },
         {
-          "src": "/assets/images/resources/expo-2026/expo-demo-02.png",
-          "alt": "Visitors watching a live Wistudi demonstration at Vietnam EdTech Expo 2026"
+          "src": "/assets/images/resources/expo-2026/DSC07757.JPG",
+          "alt": "Expo visitors in conversation with Wistudi representatives"
         },
         {
           "src": "/assets/images/resources/expo-2026/expo-demo-03.png",
-          "alt": "A Wistudi team member demonstrating the platform to an Expo visitor"
+          "alt": "A Wistudi representative guiding a visitor through a platform demonstration"
+        },
+        {
+          "src": "/assets/images/resources/expo-2026/DSC07486.JPG",
+          "alt": "Wistudi printed learning and product materials displayed at the Expo booth"
+        },
+        {
+          "src": "/assets/images/resources/expo-2026/DSC07487.JPG",
+          "alt": "Wistudi branded materials and merchandise displayed at the Expo booth"
         }
       ],
       "locales": {
