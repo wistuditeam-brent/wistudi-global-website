@@ -1,6 +1,7 @@
 const SUPPORTED = ['en','vi','zh-cn','th','id','ms','ar'];
 const CANONICAL_PAGES = new Set(['/', '/blocks-activities/', '/organisations/', '/contact/']);
 const PROD_ORIGIN = 'https://global.wistudi.com';
+const GA_MEASUREMENT_ID = 'G-ET3M465Y98';
 
 const LOCALE_META = {
   en: { lang:'en', dir:'ltr', og:'en_GB' },
@@ -246,6 +247,27 @@ function structuredData(locale, pagePath, meta) {
   return JSON.stringify({'@context':'https://schema.org','@graph':graph}).replace(/</g,'\\u003c');
 }
 
+function googleAnalyticsMarkup(isProduction) {
+  if (!isProduction) return '';
+  return `<script async src="https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '${GA_MEASUREMENT_ID}');
+</script>`;
+}
+
+function injectAnalytics(response, isProduction) {
+  const contentType = response.headers.get('content-type') || '';
+  if (!isProduction || !contentType.includes('text/html')) return response;
+  let transformed = new HTMLRewriter()
+    .on('head', { element(el) { el.prepend(googleAnalyticsMarkup(true), { html:true }); } })
+    .transform(response);
+  transformed = new Response(transformed.body, transformed);
+  return transformed;
+}
+
 const EARLY_BOOTSTRAP = `<style id="ws-i18n-preload">
 html.ws-i18n-pending body{opacity:0;transition:opacity .12s ease}
 html.i18n-ready body,html:not(.ws-i18n-pending) body{opacity:1}
@@ -313,7 +335,10 @@ function injectPage(response, locale, pagePath, isProduction) {
     .on('meta[name="description"]', { element(el) { el.setAttribute('content',meta.description[locale] || meta.description.en); } })
     .on('link[rel="canonical"]', { element(el) { el.remove(); } })
     .on('link[rel="alternate"][hreflang]', { element(el) { el.remove(); } })
-    .on('head', { element(el) { el.append(`${seoHeadMarkup(locale,pagePath,isProduction)}${EARLY_BOOTSTRAP}<script src="/assets/js/i18n.js" defer></script>`, { html:true }); } })
+    .on('head', { element(el) {
+      el.prepend(googleAnalyticsMarkup(isProduction), { html:true });
+      el.append(`${seoHeadMarkup(locale,pagePath,isProduction)}${EARLY_BOOTSTRAP}<script src="/assets/js/i18n.js" defer></script>`, { html:true });
+    } })
     .transform(response);
   transformed = new Response(transformed.body, transformed);
   transformed.headers.set('Content-Language',localeMeta.lang);
@@ -359,7 +384,8 @@ export async function onRequest(context) {
     return injectPage(response, 'en', pagePath, isProduction);
   }
 
-  const response = await context.next();
+  let response = await context.next();
+  response = injectAnalytics(response, isProduction);
   if (!isProduction && (response.headers.get('content-type') || '').includes('text/html')) {
     const safe = new Response(response.body,response);
     safe.headers.set('X-Robots-Tag','noindex, nofollow, noarchive');
