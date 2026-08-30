@@ -13,6 +13,16 @@
     doc.head.appendChild(analytics);
   }
 
+  // Keep the footer structure and social destinations consistent across the full site,
+  // including Resources pages which use their own page runtime below.
+  if(!doc.querySelector('script[data-ws-footer-unify]')){
+    const footerUnify=doc.createElement('script');
+    footerUnify.src='/assets/js/footer-unify.js';
+    footerUnify.async=false;
+    footerUnify.dataset.wsFooterUnify='true';
+    doc.head.appendChild(footerUnify);
+  }
+
   // Resources has its own isolated runtime for image fallbacks, archive behavior and
   // resource navigation state. Delegate immediately so the general website shell cannot
   // bypass those protections or attach duplicate UI handlers.
