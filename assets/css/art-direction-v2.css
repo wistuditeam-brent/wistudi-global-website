@@ -1,0 +1,39 @@
+/* Wistudi art direction — second precision pass */
+:root{--ws-r2:6px;--ws-r3:8px;--ws-r4:10px;--ws-orange-cta:#f97316;--ws-orange-cta-hover:#ea580c}
+
+/* Stronger CTA contrast on purple/dark banners. */
+.cta-panel .btn.primary,.cta .btn.primary,.architecture .btn.primary,.social-panel .btn.primary,body[class*="contact"] .cta .btn.primary,body[class*="contact"] .closing-cta .btn.primary,body[class*="contact"] .final-cta .btn.primary{background:var(--ws-orange-cta)!important;color:#fff!important;border-color:var(--ws-orange-cta)!important;box-shadow:none!important}
+.cta-panel .btn.primary:hover,.cta .btn.primary:hover,.architecture .btn.primary:hover,.social-panel .btn.primary:hover,body[class*="contact"] .cta .btn.primary:hover,body[class*="contact"] .closing-cta .btn.primary:hover,body[class*="contact"] .final-cta .btn.primary:hover{background:var(--ws-orange-cta-hover)!important;border-color:var(--ws-orange-cta-hover)!important;color:#fff!important}
+.cta-panel .btn.secondary,.cta .btn.secondary,.architecture .btn.secondary,.social-panel .btn.secondary,body[class*="contact"] .cta .btn.secondary,body[class*="contact"] .closing-cta .btn.secondary,body[class*="contact"] .final-cta .btn.secondary{background:transparent!important;color:#fff!important;border-color:rgba(255,255,255,.58)!important}
+.cta-panel .btn.secondary:hover,.cta .btn.secondary:hover,.architecture .btn.secondary:hover,.social-panel .btn.secondary:hover{background:rgba(255,255,255,.08)!important;border-color:#fff!important}
+
+/* Pills should be exceptional, not the default. */
+.xp-value-row span,.delivery-flow span,.hero-tags span,.cap-tag,.control-row span:last-child,.res-chip,.res-status,.booking-pill,.form-step,.filter-btn,.chip,.pill,.hero-proof span,.compare-badge,.format-node,.path-row .pill{border-radius:var(--ws-r2)!important}
+.ws-resource-badge{border-radius:50%!important;padding:0!important;width:19px!important;min-width:19px!important;height:19px!important}
+
+/* General component geometry: more rectangular, less bubble-like. */
+body.page-platform .card,body.page-platform .visual-card,body.page-platform .org-item,body.page-platform .scale-step,body.page-platform .social-card,body.page-platform .compare-col,body.page-platform .printable-icon-card,
+body.page-organisations .cap-card,body.page-organisations .sector-card,body.page-organisations .deploy-card,body.page-organisations .logo-panel,body.page-organisations .logo-box,body.page-organisations .env-item,body.page-organisations .format-box,body.page-organisations .report-level,
+body.page-blocks .carousel-card,body.page-blocks .example-card,body.page-blocks .check-item,
+body[class*="contact"] .route-card,body[class*="contact"] .direct-contact,body[class*="contact"] .form-card,body[class*="contact"] .topic,
+body.page-resources .res-card,body.page-resources .res-progressive-card,body.page-resources .res-question,body.page-resources .res-questions,body.page-resources .res-list-card{border-radius:var(--ws-r4)!important}
+body.page-platform .org-item{border-radius:6px!important}
+body.page-platform .org-list{gap:12px!important}
+body.page-platform .org-item{background:#fff!important;border-color:#e5e0e8!important}
+
+/* Number system: circles where a sequence is being communicated. */
+body.page-organisations .deploy-number{align-items:center!important;margin-bottom:38px!important;font-size:1rem!important}
+body.page-organisations .deploy-number>span:first-child{width:44px!important;height:44px!important;display:grid!important;place-items:center!important;border-radius:50%!important;background:#f3eefb!important;border:1px solid #ded3ef!important;color:#6f35df!important;font-size:1rem!important;font-weight:800!important}
+body.page-organisations .deploy-number>span:last-child{width:38px!important;height:38px!important;border-radius:50%!important;background:#faf8fc!important;border:1px solid #e8e2ed!important;color:#6f35df!important}
+body.page-platform .scale-step>span,body.page-platform .card-number,body.page-resources .res-coming-mark{width:38px!important;height:38px!important;display:grid!important;place-items:center!important;border-radius:50%!important;background:#f4effa!important;border:1px solid #e2d8ef!important;color:#6f35df!important;font-size:.78rem!important;font-weight:800!important;letter-spacing:0!important;text-transform:none!important;padding:0!important}
+
+/* Compact controls can stay rounded, but not capsule-shaped. */
+.subnav-wrap.ws-section-subnav .subnav a,.ws-lang-toggle,.ws-menu-toggle,.ws-btn,.btn,.res-btn,.res-search,.res-control-search,.res-select{border-radius:var(--ws-r3)!important}
+
+/* Soften giant rounded banner corners. */
+body.page-platform .cta-panel,body.page-organisations .cta-panel,body[class*="contact"] .cta-panel,body[class*="contact"] .closing-cta,body[class*="contact"] .final-cta{border-radius:14px!important}
+
+/* Keep genuine circles where their geometry is semantically useful. */
+.capability-icon,.checkmark,.compare-symbol,.res-avatar,.ws-hero-watch-button{border-radius:50%!important}
+
+@media(max-width:700px){body.page-platform .card,body.page-platform .org-item,body.page-organisations .deploy-card,body[class*="contact"] .route-card,body.page-resources .res-card{border-radius:8px!important}}
