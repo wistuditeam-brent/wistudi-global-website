@@ -2,6 +2,10 @@ const SUPPORTED = ['en','vi','zh-cn','th','id','ms','ar'];
 const CANONICAL_PAGES = new Set(['/', '/blocks-activities/', '/organisations/', '/contact/']);
 const PROD_ORIGIN = 'https://global.wistudi.com';
 const GA_MEASUREMENT_ID = 'G-ET3M465Y98';
+const ANALYTICS_CONSENT_REGIONS = new Set([
+  'AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE',
+  'IS','LI','NO','GB','CH'
+]);
 
 const LOCALE_META = {
   en: { lang:'en', dir:'ltr', og:'en_GB' },
@@ -247,22 +251,65 @@ function structuredData(locale, pagePath, meta) {
   return JSON.stringify({'@context':'https://schema.org','@graph':graph}).replace(/</g,'\\u003c');
 }
 
-function googleAnalyticsMarkup(isProduction) {
-  if (!isProduction) return '';
-  return `<script async src="https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', '${GA_MEASUREMENT_ID}');
-</script>`;
+function analyticsConsentRequired(request, isProduction) {
+  if (!isProduction) return false;
+  const country = String(request.cf?.country || '').toUpperCase();
+  // Fail privacy-safe if Cloudflare cannot provide a country for a production request.
+  return !country || ANALYTICS_CONSENT_REGIONS.has(country);
 }
 
-function injectAnalytics(response, isProduction) {
+function googleAnalyticsMarkup(isProduction, consentRequired=false) {
+  if (!isProduction) return '';
+
+  const analyticsEvents = `<script src="/assets/js/analytics-events.js" defer></script>`;
+
+  if (consentRequired) {
+    return `<script>
+  window.__WS_GA_ID__='${GA_MEASUREMENT_ID}';
+  window.__WS_CONSENT_REQUIRED__=true;
+  window.__WS_ANALYTICS_ALLOWED__=false;
+  window.dataLayer=window.dataLayer||[];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent','default',{
+    analytics_storage:'denied',
+    ad_storage:'denied',
+    ad_user_data:'denied',
+    ad_personalization:'denied',
+    wait_for_update:500
+  });
+</script>
+<script src="/assets/js/consent-manager.js" defer></script>
+${analyticsEvents}`;
+  }
+
+  return `<script>
+  window.__WS_GA_ID__='${GA_MEASUREMENT_ID}';
+  window.__WS_CONSENT_REQUIRED__=false;
+  window.__WS_ANALYTICS_ALLOWED__=true;
+  window.__WS_GA_LOADED__=true;
+  window.dataLayer=window.dataLayer||[];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent','default',{
+    analytics_storage:'granted',
+    ad_storage:'denied',
+    ad_user_data:'denied',
+    ad_personalization:'denied'
+  });
+  gtag('js',new Date());
+  gtag('config','${GA_MEASUREMENT_ID}',{
+    allow_google_signals:false,
+    allow_ad_personalization_signals:false
+  });
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}"></script>
+${analyticsEvents}`;
+}
+
+function injectAnalytics(response, isProduction, consentRequired) {
   const contentType = response.headers.get('content-type') || '';
   if (!isProduction || !contentType.includes('text/html')) return response;
   let transformed = new HTMLRewriter()
-    .on('head', { element(el) { el.prepend(googleAnalyticsMarkup(true), { html:true }); } })
+    .on('head', { element(el) { el.prepend(googleAnalyticsMarkup(true,consentRequired), { html:true }); } })
     .transform(response);
   transformed = new Response(transformed.body, transformed);
   return transformed;
@@ -324,7 +371,7 @@ ${ogAlternates}
 <script type="application/ld+json">${structuredData(locale,pagePath,meta)}</script>`;
 }
 
-function injectPage(response, locale, pagePath, isProduction) {
+function injectPage(response, locale, pagePath, isProduction, consentRequired) {
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.includes('text/html')) return response;
   const meta = SEO_PAGES[pagePath];
@@ -336,7 +383,7 @@ function injectPage(response, locale, pagePath, isProduction) {
     .on('link[rel="canonical"]', { element(el) { el.remove(); } })
     .on('link[rel="alternate"][hreflang]', { element(el) { el.remove(); } })
     .on('head', { element(el) {
-      el.prepend(googleAnalyticsMarkup(isProduction), { html:true });
+      el.prepend(googleAnalyticsMarkup(isProduction,consentRequired), { html:true });
       el.append(`${seoHeadMarkup(locale,pagePath,isProduction)}${EARLY_BOOTSTRAP}<script src="/assets/js/i18n.js" defer></script>`, { html:true });
     } })
     .transform(response);
@@ -351,6 +398,7 @@ export async function onRequest(context) {
   const request = context.request;
   const url = new URL(request.url);
   const isProduction = url.hostname === 'global.wistudi.com';
+  const consentRequired = analyticsConsentRequired(request,isProduction);
   const explicit = explicitLocale(url.pathname);
 
   if (explicit) {
@@ -377,15 +425,15 @@ export async function onRequest(context) {
       const assetUrl = new URL(url.toString());
       assetUrl.pathname = pagePath;
       const response = await context.env.ASSETS.fetch(assetUrl);
-      return injectPage(response, locale, pagePath, isProduction);
+      return injectPage(response, locale, pagePath, isProduction, consentRequired);
     }
 
     const response = await context.next();
-    return injectPage(response, 'en', pagePath, isProduction);
+    return injectPage(response, 'en', pagePath, isProduction, consentRequired);
   }
 
   let response = await context.next();
-  response = injectAnalytics(response, isProduction);
+  response = injectAnalytics(response, isProduction, consentRequired);
   if (!isProduction && (response.headers.get('content-type') || '').includes('text/html')) {
     const safe = new Response(response.body,response);
     safe.headers.set('X-Robots-Tag','noindex, nofollow, noarchive');
