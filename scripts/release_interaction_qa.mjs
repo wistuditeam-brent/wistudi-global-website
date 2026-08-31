@@ -73,7 +73,6 @@ async function testGuide(viewport,name){
   const normalCopy=surface.locator('.ws-g2-copy');
   try{await normalCopy.waitFor({state:'visible',timeout:2000});}catch(_){failures.push(`${name}: normal guide content did not return after onboarding`);}
 
-  // Regression: switching perspective while open must update in place, not collapse.
   const trainer=surface.locator('.ws-g2-role[data-r="trainer"]');
   if(await trainer.count()){
     await trainer.click({force:true});
@@ -90,7 +89,6 @@ async function testGuide(viewport,name){
     if(!switched.avatar.includes('guide-trainer.svg'))failures.push(`${name}: avatar did not change in place to Trainer`);
   }else failures.push(`${name}: normal role switcher missing after onboarding`);
 
-  // Close through the guide's native close handler, then verify mobile/desktop page remains responsive.
   const close=surface.locator('[data-x]');
   if(await close.count())await close.click({force:true});
   await page.waitForTimeout(100);
@@ -105,8 +103,9 @@ async function testGuide(viewport,name){
   const y2=await page.evaluate(()=>scrollY);
   if(y2<=closed.y)failures.push(`${name}: page did not remain scroll-responsive after closing guide`);
 
-  // Returning visitor: stored name should skip onboarding and allow a normal guide open.
-  await page.evaluate(()=>sessionStorage.removeItem('wistudiGuideWelcomedV2'));
+  // Returning visitor: reset to a normal page-entry position, then simulate a fresh visit.
+  await page.evaluate(()=>{scrollTo(0,0);sessionStorage.removeItem('wistudiGuideWelcomedV2')});
+  await page.waitForTimeout(100);
   await page.reload({waitUntil:'load',timeout:15000});
   const returnButton=page.locator('.ws-g2-btn');
   try{await returnButton.waitFor({state:'visible',timeout:8000});await returnButton.click({force:true});}catch(_){failures.push(`${name}: returning visitor could not reopen guide`);}
@@ -126,7 +125,6 @@ async function testGuide(viewport,name){
 await testGuide({width:1440,height:900},'desktop');
 await testGuide({width:390,height:844},'mobile');
 
-// Verify the article table of contents remains sticky while the article body scrolls.
 {
   const page=await browser.newPage({viewport:{width:1440,height:900}});
   const article='/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/';
