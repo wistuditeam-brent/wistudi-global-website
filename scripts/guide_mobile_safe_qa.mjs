@@ -37,6 +37,39 @@ async function testFirstVisit(viewport,label){
 
   const input=surface.locator('[data-on-name]');
   if(await input.count()){
+    if(label==='mobile'){
+      const autoFocused=await input.evaluate(el=>document.activeElement===el);
+      if(autoFocused)failures.push('mobile: name field auto-focused and opened keyboard before user intent');
+
+      // Simulate a soft keyboard by shrinking the visual viewport after the user focuses
+      // the field. The sheet must move entirely into the remaining visible area.
+      await input.focus();
+      await page.waitForTimeout(30);
+      await page.setViewportSize({width:viewport.width,height:520});
+      await page.waitForTimeout(280);
+      const keyboardState=await page.evaluate(()=>{
+        const sheet=document.querySelector('.ws-g2-sheet');
+        const r=sheet?.getBoundingClientRect();
+        const vv=window.visualViewport;
+        return {
+          aware:sheet?.classList.contains('ws-g2-keyboard-aware')||false,
+          top:r?.top??-1,
+          bottom:r?.bottom??99999,
+          visibleTop:vv?.offsetTop??0,
+          visibleBottom:(vv?.offsetTop||0)+(vv?.height||innerHeight)
+        };
+      });
+      if(!keyboardState.aware)failures.push('mobile: onboarding did not enter keyboard-aware positioning');
+      if(keyboardState.top<keyboardState.visibleTop-2)failures.push(`mobile: onboarding rose above visible viewport (${keyboardState.top}px)`);
+      if(keyboardState.bottom>keyboardState.visibleBottom+2)failures.push(`mobile: onboarding remained behind keyboard (${keyboardState.bottom}px > ${keyboardState.visibleBottom}px)`);
+
+      await input.evaluate(el=>el.blur());
+      await page.setViewportSize(viewport);
+      await page.waitForTimeout(180);
+      const restored=await page.evaluate(()=>!document.querySelector('.ws-g2-sheet')?.classList.contains('ws-g2-keyboard-aware'));
+      if(!restored)failures.push('mobile: keyboard-aware positioning did not clear after keyboard closed');
+    }
+
     await input.fill('Brent');
     await surface.locator('[data-on-next]').click({force:true});
     await page.waitForTimeout(80);
@@ -128,4 +161,4 @@ if(failures.length){
   failures.forEach(f=>console.error(' - '+f));
   process.exit(1);
 }
-console.log('Guide mobile-safe QA PASSED: desktop/mobile first-open personalisation, role switching, close/scroll responsiveness, and returning visits all passed.');
+console.log('Guide mobile-safe QA PASSED: desktop/mobile first-open personalisation, keyboard-aware mobile positioning, role switching, close/scroll responsiveness, and returning visits all passed.');
