@@ -47,8 +47,12 @@
     .ws-g2-on-role img{width:42px;height:42px;flex:0 0 42px;border-radius:50%;object-fit:cover;background:#fff;box-shadow:0 6px 16px rgba(55,38,78,.10)}
     .ws-g2-on-role span{font:750 12px/1.25 'Be Vietnam Pro',Inter,sans-serif}
     .ws-g2-welcome{margin:0 38px 11px 0;color:#302638;font:800 15px/1.35 'Be Vietnam Pro',Inter,sans-serif;letter-spacing:-.015em}
+
+    /* Step 1 becomes a keyboard-aware floating sheet only while the name field is focused. */
+    .ws-g2-sheet.ws-g2-keyboard-aware{transition:top .18s ease,transform .18s ease!important;overscroll-behavior:contain}
+
     @media(max-width:390px){.ws-g2-on-roles{grid-template-columns:1fr}.ws-g2-name-shell{padding-left:13px}.ws-g2-on-next{min-width:92px;padding-inline:13px}}
-    @media(prefers-reduced-motion:reduce){.ws-g2.fresh .ws-g2-ring img,.ws-g2.fresh .ws-g2-ring:after{animation:none!important}.ws-g2-name-shell{transition:none!important}}
+    @media(prefers-reduced-motion:reduce){.ws-g2.fresh .ws-g2-ring img,.ws-g2.fresh .ws-g2-ring:after{animation:none!important}.ws-g2-name-shell,.ws-g2-sheet.ws-g2-keyboard-aware{transition:none!important}}
   `;
   document.head.appendChild(style);
 
@@ -57,8 +61,52 @@
   let pendingName='';
   let savedSurface=null;
   let savedNodes=null;
+  let keyboardBaseline=0;
+  let keyboardRaf=0;
+
+  const clearKeyboardPosition=()=>{
+    const root=document.querySelector('.ws-g2-sheet');
+    if(!root)return;
+    root.classList.remove('ws-g2-keyboard-aware');
+    root.style.removeProperty('top');
+    root.style.removeProperty('bottom');
+    root.style.removeProperty('max-height');
+    root.style.removeProperty('transform');
+  };
+
+  const positionStepAboveKeyboard=()=>{
+    keyboardRaf=0;
+    if(!mobile.matches||!onboarding||step!==1||!savedSurface){clearKeyboardPosition();return}
+    const root=savedSurface;
+    const input=root.querySelector('[data-on-name]');
+    const vv=window.visualViewport;
+    if(!input||document.activeElement!==input||!vv){clearKeyboardPosition();return}
+
+    if(!keyboardBaseline)keyboardBaseline=Math.max(window.innerHeight||0,vv.height||0);
+    const keyboardOpen=vv.height<keyboardBaseline-80;
+    if(!keyboardOpen){clearKeyboardPosition();return}
+
+    const gap=12;
+    const available=Math.max(220,Math.floor(vv.height-gap*2));
+    root.classList.add('ws-g2-keyboard-aware');
+    root.style.bottom='auto';
+    root.style.maxHeight=`${available}px`;
+    root.style.transform='none';
+
+    // Measure after max-height has been applied, then anchor the full card to the
+    // bottom edge of the visible viewport rather than the layout viewport/keyboard.
+    const cardHeight=Math.min(root.getBoundingClientRect().height,available);
+    const top=Math.max(vv.offsetTop+gap,vv.offsetTop+vv.height-cardHeight-gap);
+    root.style.top=`${Math.round(top)}px`;
+  };
+
+  const scheduleKeyboardPosition=()=>{
+    if(!keyboardRaf)keyboardRaf=requestAnimationFrame(positionStepAboveKeyboard);
+  };
 
   const restoreNormal=()=>{
+    clearKeyboardPosition();
+    keyboardBaseline=0;
     if(!onboarding||!savedSurface||!savedNodes)return;
     savedSurface.replaceChildren(savedNodes);
     onboarding=false;
@@ -79,6 +127,8 @@
   const renderOnboarding=()=>{
     const root=savedSurface;
     if(!root||!onboarding)return;
+    clearKeyboardPosition();
+
     if(step===1){
       root.innerHTML=`<button class="ws-g2-x" data-on-close type="button" aria-label="Close guide">×</button><div class="ws-g2-onboard"><div class="ws-g2-on-kicker">Personalise your guide</div><div class="ws-g2-on-steps" aria-hidden="true"><i class="on"></i><i></i></div><h3 class="ws-g2-on-title">What should I call you?</h3><p class="ws-g2-on-copy">Just your first name is enough.</p><div class="ws-g2-name-shell"><input class="ws-g2-name-input" data-on-name type="text" inputmode="text" autocomplete="given-name" maxlength="40" placeholder="Your name" aria-label="Your name"><button class="ws-g2-on-next" data-on-next type="button" disabled>Continue</button></div><div class="ws-g2-on-error" data-on-error aria-live="polite"></div></div>`;
       const input=root.querySelector('[data-on-name]');
@@ -86,15 +136,30 @@
       const error=root.querySelector('[data-on-error]');
       const sync=()=>{const value=(input?.value||'').trim();if(next)next.disabled=!value;if(error)error.textContent=''};
       input?.addEventListener('input',sync);
+      input?.addEventListener('focus',()=>{
+        const vv=window.visualViewport;
+        keyboardBaseline=Math.max(window.innerHeight||0,vv?.height||0);
+        scheduleKeyboardPosition();
+        setTimeout(scheduleKeyboardPosition,80);
+        setTimeout(scheduleKeyboardPosition,220);
+      });
+      input?.addEventListener('blur',()=>{
+        clearKeyboardPosition();
+        keyboardBaseline=0;
+      });
       input?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!next?.disabled)next.click()});
       next?.addEventListener('click',()=>{
         const value=(input?.value||'').trim().replace(/\s+/g,' ').slice(0,40);
         if(!value){if(error)error.textContent='Please enter your name.';input?.focus();return}
         pendingName=value;
+        input?.blur();
+        clearKeyboardPosition();
         step=2;
         renderOnboarding();
       });
-      requestAnimationFrame(()=>input?.focus({preventScroll:true}));
+      // Do not auto-focus on mobile. Let the visitor see the full introduction first;
+      // the keyboard appears only after they intentionally tap the name field.
+      if(!mobile.matches)requestAnimationFrame(()=>input?.focus({preventScroll:true}));
     }else{
       root.innerHTML=`<button class="ws-g2-x" data-on-close type="button" aria-label="Close guide">×</button><div class="ws-g2-onboard"><div class="ws-g2-on-kicker">Personalise your guide</div><div class="ws-g2-on-steps" aria-hidden="true"><i></i><i class="on"></i></div><h3 class="ws-g2-on-title">Nice to meet you, ${esc(pendingName)}.</h3><p class="ws-g2-on-copy">How would you like me to guide you?</p><div class="ws-g2-on-roles">${roleChoices()}</div></div>`;
       root.querySelectorAll('[data-on-role]').forEach(button=>button.addEventListener('click',()=>{
@@ -123,6 +188,7 @@
     onboarding=true;
     step=1;
     pendingName='';
+    keyboardBaseline=Math.max(window.innerHeight||0,window.visualViewport?.height||0);
     savedSurface=root;
     savedNodes=document.createDocumentFragment();
     while(root.firstChild)savedNodes.appendChild(root.firstChild);
@@ -167,6 +233,16 @@
       });
     }
   },true);
+
+  // Track the visible viewport while a soft keyboard is opening, closing or changing size.
+  // This is the source of truth for step 1 on mobile; no hard-coded keyboard height is used.
+  window.visualViewport?.addEventListener('resize',scheduleKeyboardPosition,{passive:true});
+  window.visualViewport?.addEventListener('scroll',scheduleKeyboardPosition,{passive:true});
+  addEventListener('orientationchange',()=>{
+    keyboardBaseline=0;
+    clearKeyboardPosition();
+    setTimeout(scheduleKeyboardPosition,180);
+  },{passive:true});
 
   // If the existing guide closes because the user scrolls into another section,
   // restore the preserved normal DOM without attempting to reopen anything.
