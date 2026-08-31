@@ -54,9 +54,6 @@
       return;
     }
 
-    // Any deliberate interaction inside an already-open guide keeps ownership with
-    // the user session. This is especially important while onboarding DOM is swapped
-    // for the normal mobile sheet after choosing a role.
     const insideGuide=e.target.closest?.('.ws-g2-sheet,.ws-g2-b');
     if(insideGuide&&isOpen()){
       userOpened=true;
@@ -87,10 +84,6 @@
     const hidden=r.top<chromeBottom+8;
     g.classList.toggle('ws-under-chrome',hidden);
 
-    // On desktop the bubble is physically anchored to the avatar, so crossing under
-    // sticky chrome should close it. On mobile the open sheet is independent of the
-    // avatar position; never collapse an intentional mobile sheet because the floating
-    // avatar happens to sit under the header during keyboard/layout changes.
     if(hidden&&!isMobileOpen()){
       g.classList.remove('open');
       userOpened=false;
@@ -101,32 +94,29 @@
   addEventListener('resize',schedule,{passive:true});
   new MutationObserver(()=>{closeUnrequested();schedule();}).observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class','style']});
 
-  // role-guide-v2 starts the avatar off-screen and normally animates its first placement.
-  // On a fast tap, especially on mobile/return visits, that can leave the button technically
-  // outside the tappable viewport for part of a second. If that happens, temporarily disable
-  // only the initial transform transition and ask the native resize handler to recalculate.
-  // Normal section-to-section movement keeps its animation after this one-time correction.
+  // role-guide-v2 creates the avatar with an off-screen transform. Do not animate
+  // that first correction: immediately ask the native resize/placement logic for its
+  // real coordinates while transform transitions are disabled. Subsequent section
+  // movement keeps the normal animation from role-guide-v2.
   let initialPositionSettled=false;
   const settleInitialPosition=()=>{
     if(initialPositionSettled)return;
     const g=guide();
     if(!g)return;
-    const r=g.getBoundingClientRect();
-    const outside=r.right<=8||r.left>=innerWidth-8||r.bottom<=8||r.top>=innerHeight-8;
-    if(!outside){initialPositionSettled=true;return;}
-    const inlineTransition=g.style.transition;
+    const previousInlineTransition=g.style.transition;
     g.style.transition='none';
     dispatchEvent(new Event('resize'));
     void g.offsetWidth;
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      g.style.transition=inlineTransition;
+    requestAnimationFrame(()=>{
+      if(previousInlineTransition)g.style.transition=previousInlineTransition;
+      else g.style.removeProperty('transition');
       initialPositionSettled=true;
       schedule();
-    }));
+    });
   };
 
-  requestAnimationFrame(settleInitialPosition);
+  // Run synchronously because the native guide has already been loaded before this guard.
+  settleInitialPosition();
   setTimeout(settleInitialPosition,80);
-  setTimeout(settleInitialPosition,220);
-  setTimeout(()=>{closeUnrequested();settleInitialPosition();schedule();},700);
+  setTimeout(()=>{closeUnrequested();schedule();},700);
 })();
