@@ -8,9 +8,12 @@ async function testGuide(viewport,name){
   const page=await browser.newPage({viewport});
   await page.addInitScript(()=>{
     try{
-      localStorage.removeItem('wistudiGuideRole');
-      localStorage.removeItem('wistudiVisitorName');
-      sessionStorage.clear();
+      if(sessionStorage.getItem('__qaGuideSeeded')!=='1'){
+        localStorage.removeItem('wistudiGuideRole');
+        localStorage.removeItem('wistudiVisitorName');
+        sessionStorage.clear();
+        sessionStorage.setItem('__qaGuideSeeded','1');
+      }
     }catch(_){ }
   });
   await page.goto(base+'/',{waitUntil:'load',timeout:15000});
