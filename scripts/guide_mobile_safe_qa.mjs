@@ -108,21 +108,6 @@ async function testFirstVisit(viewport,label){
   if(personalised.role!=='publisher')failures.push(`${label}: Publisher not stored`);
   try{await surface.locator('.ws-g2-copy').waitFor({state:'visible',timeout:2000});}catch(_){failures.push(`${label}: normal guide content not restored`);}
 
-  const trainer=surface.locator('.ws-g2-role[data-r="trainer"]');
-  if(await trainer.count()){
-    await trainer.click({force:true});
-    await page.waitForTimeout(160);
-    const switched=await page.evaluate(()=>({
-      desktop:document.querySelector('.ws-g2')?.classList.contains('open')||false,
-      mobile:document.body.classList.contains('ws-g2-mo'),
-      role:localStorage.getItem('wistudiGuideRole'),
-      avatar:document.querySelector('.ws-g2-ring img')?.getAttribute('src')||''
-    }));
-    if(!(label==='mobile'?switched.mobile:switched.desktop))failures.push(`${label}: guide collapsed on role switch`);
-    if(switched.role!=='trainer')failures.push(`${label}: Trainer not stored`);
-    if(!switched.avatar.includes('guide-trainer.svg'))failures.push(`${label}: avatar did not update to Trainer`);
-  }else failures.push(`${label}: native role switcher missing`);
-
   const close=surface.locator('[data-x]');
   if(await close.count())await close.click({force:true});
   await page.waitForTimeout(100);
@@ -162,6 +147,25 @@ async function testReturningVisit(viewport,label){
   const state=await page.evaluate(()=>({desktop:document.querySelector('.ws-g2')?.classList.contains('open')||false,mobile:document.body.classList.contains('ws-g2-mo'),role:localStorage.getItem('wistudiGuideRole')}));
   if(!(label==='mobile'?state.mobile:state.desktop))failures.push(`${label} return: guide did not remain open`);
   if(state.role!=='trainer')failures.push(`${label} return: stored role lost`);
+
+  // Test role switching on a clean, normal viewport rather than coupling it to
+  // the artificial keyboard-resize scenario above.
+  const publisher=surface.locator('.ws-g2-role[data-r="publisher"]');
+  if(await publisher.count()){
+    await publisher.scrollIntoViewIfNeeded().catch(()=>{});
+    await publisher.click({force:true}).catch(e=>failures.push(`${label} return: role switch click failed (${e.message})`));
+    await page.waitForTimeout(180);
+    const switched=await page.evaluate(()=>({
+      desktop:document.querySelector('.ws-g2')?.classList.contains('open')||false,
+      mobile:document.body.classList.contains('ws-g2-mo'),
+      role:localStorage.getItem('wistudiGuideRole'),
+      avatar:document.querySelector('.ws-g2-ring img')?.getAttribute('src')||''
+    }));
+    if(!(label==='mobile'?switched.mobile:switched.desktop))failures.push(`${label} return: guide collapsed on role switch`);
+    if(switched.role!=='publisher')failures.push(`${label} return: Publisher role not stored after switch`);
+    if(!switched.avatar.includes('guide-publisher.svg'))failures.push(`${label} return: avatar did not update on role switch`);
+  }else failures.push(`${label} return: native role switcher missing`);
+
   await context.close();
 }
 
@@ -176,4 +180,4 @@ if(failures.length){
   failures.forEach(f=>console.error(' - '+f));
   process.exit(1);
 }
-console.log('Guide mobile-safe QA PASSED: desktop/mobile first-open personalisation, keyboard-aware positioning, Enter/Done handoff, role switching, close/scroll responsiveness, and returning visits all passed.');
+console.log('Guide mobile-safe QA PASSED: desktop/mobile first-open personalisation, keyboard-aware positioning, Enter/Done handoff, role-selection handoff, normal-viewport role switching, close/scroll responsiveness, and returning visits all passed.');
