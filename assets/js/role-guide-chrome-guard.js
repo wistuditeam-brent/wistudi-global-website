@@ -1,5 +1,26 @@
 (()=>{
   const guide=()=>document.querySelector('.ws-g2');
+  const NAME_KEY='wistudiVisitorName';
+  const ROLE_KEY='wistudiGuideRole';
+  const WELCOME_KEY='wistudiGuideWelcomedV1';
+  const RETURN_CHIP_KEY='wistudiGuideReturnChipV1';
+  const ROLES={
+    teacher:{label:'Teacher',avatar:'/assets/images/guide-teacher.svg'},
+    trainer:{label:'Trainer',avatar:'/assets/images/guide-trainer.svg'},
+    publisher:{label:'Publisher',avatar:'/assets/images/guide-publisher.svg'},
+    organisation:{label:'Organisation',avatar:'/assets/images/guide-organisation.svg'}
+  };
+  const esc=s=>String(s||'').replace(/[&<>\'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  let memoryName='';
+  const readName=()=>{
+    try{return (localStorage.getItem(NAME_KEY)||'').trim()}catch(_){return memoryName}
+  };
+  const writeName=value=>{
+    memoryName=value;
+    try{localStorage.setItem(NAME_KEY,value)}catch(_){ }
+  };
+  const writeRole=value=>{try{localStorage.setItem(ROLE_KEY,value)}catch(_){ }};
+
   const style=document.createElement('style');
   style.textContent=`
     .ws-g2.ws-under-chrome{opacity:0!important;pointer-events:none!important}
@@ -27,6 +48,32 @@
       opacity:0;
       animation:wsGuidePurpleHalo 1.18s ease-out 2;
     }
+
+    /* First-open personalisation deliberately feels conversational rather than form-like. */
+    .ws-g2-onboard{padding:1px 1px 2px}
+    .ws-g2-on-kicker{color:#7c3aed;font:800 11px/1.2 'Be Vietnam Pro',Inter,sans-serif;letter-spacing:.02em;margin:0 40px 12px 0}
+    .ws-g2-on-title{margin:0;color:#302638;font:800 21px/1.23 'Be Vietnam Pro',Inter,sans-serif;letter-spacing:-.025em}
+    .ws-g2-on-copy{margin:7px 0 0;color:#746a7d;font:500 12px/1.55 Inter,sans-serif}
+    .ws-g2-on-steps{display:flex;gap:5px;margin:15px 0 15px}
+    .ws-g2-on-steps i{display:block;width:22px;height:4px;border-radius:99px;background:rgba(124,58,237,.13);transition:.2s ease}
+    .ws-g2-on-steps i.on{width:34px;background:#7c3aed;box-shadow:0 4px 12px rgba(124,58,237,.18)}
+    .ws-g2-name-shell{display:flex;align-items:center;gap:9px;margin-top:16px;padding:5px 5px 5px 16px;border:0;border-radius:17px;background:rgba(255,255,255,.56);box-shadow:inset 0 0 0 1px rgba(124,58,237,.035),0 8px 24px rgba(63,41,89,.06);transition:.2s ease}
+    .ws-g2-name-shell:focus-within{background:rgba(255,255,255,.88);box-shadow:0 0 0 4px rgba(124,58,237,.09),0 10px 28px rgba(63,41,89,.08)}
+    .ws-g2-name-input{min-width:0;flex:1;height:44px;padding:0;border:0;outline:0;background:transparent;color:#302638;font:650 15px/1 Inter,sans-serif}
+    .ws-g2-name-input::placeholder{color:#a49baa;font-weight:550}
+    .ws-g2-on-next{height:44px;min-width:102px;padding:0 16px;border:0;border-radius:13px;background:#7c3aed;color:#fff;font:800 12px/1 Inter,sans-serif;cursor:pointer;box-shadow:0 8px 18px rgba(124,58,237,.18);transition:.2s ease}
+    .ws-g2-on-next:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(124,58,237,.22)}
+    .ws-g2-on-next:disabled{opacity:.36;cursor:default;transform:none;box-shadow:none}
+    .ws-g2-on-error{min-height:16px;margin:6px 2px 0;color:#b45309;font-size:10px;font-weight:650}
+    .ws-g2-on-roles{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
+    .ws-g2-on-role{display:flex;align-items:center;gap:10px;min-height:62px;padding:8px 11px;border:0;border-radius:17px;background:rgba(255,255,255,.52);color:#473c50;cursor:pointer;text-align:left;box-shadow:0 8px 22px rgba(55,38,78,.055);transition:.2s cubic-bezier(.18,.82,.22,1)}
+    .ws-g2-on-role:hover,.ws-g2-on-role:focus-visible{outline:0;background:rgba(255,255,255,.9);transform:translateY(-1px);box-shadow:0 12px 26px rgba(55,38,78,.085),0 0 0 4px rgba(124,58,237,.065)}
+    .ws-g2-on-role img{width:42px;height:42px;flex:0 0 42px;border-radius:50%;object-fit:cover;background:#fff;box-shadow:0 6px 16px rgba(55,38,78,.10)}
+    .ws-g2-on-role span{font:750 12px/1.25 'Be Vietnam Pro',Inter,sans-serif}
+    .ws-g2-welcome{margin:0 38px 11px 0;color:#302638;font:800 15px/1.35 'Be Vietnam Pro',Inter,sans-serif;letter-spacing:-.015em}
+    .ws-g2-return{position:absolute;right:calc(100% + 12px);top:13px;z-index:4;display:inline-flex;align-items:center;white-space:nowrap;min-height:36px;padding:0 13px;border:0;border-radius:999px;background:rgba(247,243,255,.96);color:#5b21b6;font:750 11px/1 Inter,sans-serif;box-shadow:0 10px 28px rgba(72,44,111,.16);cursor:pointer;opacity:0;transform:translateX(7px) scale(.96);animation:wsGuideReturnIn .34s cubic-bezier(.18,.82,.22,1) forwards}
+    .ws-g2-return:after{content:'';position:absolute;right:-5px;top:50%;width:11px;height:11px;background:rgba(247,243,255,.96);transform:translateY(-50%) rotate(45deg);border-radius:2px}
+
     @keyframes wsGuideMessageThrob{
       0%,100%{transform:scale(1)}
       45%{transform:scale(1.055)}
@@ -37,8 +84,16 @@
       30%{opacity:.8;transform:scale(1)}
       100%{opacity:0;transform:scale(1.34)}
     }
+    @keyframes wsGuideReturnIn{to{opacity:1;transform:none}}
+    @media(max-width:760px){
+      .ws-g2-on-title{font-size:20px}.ws-g2-on-roles{grid-template-columns:1fr 1fr}.ws-g2-on-role{min-height:60px}.ws-g2-return{right:calc(100% + 9px);top:9px}
+    }
+    @media(max-width:390px){
+      .ws-g2-on-roles{grid-template-columns:1fr}.ws-g2-name-shell{padding-left:13px}.ws-g2-on-next{min-width:92px;padding-inline:13px}
+    }
     @media(prefers-reduced-motion:reduce){
-      .ws-g2.fresh .ws-g2-ring img,.ws-g2.fresh .ws-g2-ring:after{animation:none!important}
+      .ws-g2.fresh .ws-g2-ring img,.ws-g2.fresh .ws-g2-ring:after,.ws-g2-return{animation:none!important;opacity:1;transform:none}
+      .ws-g2-on-role,.ws-g2-on-next,.ws-g2-name-shell{transition:none!important}
     }
   `;
   document.head.append(style);
@@ -49,9 +104,32 @@
   let userOpened=false;
   let gestureUntil=0;
   let roleSwitchUntil=0;
+  let onboardingActive=false;
+  let onboardingStep=1;
+  let pendingName='';
+  const mobile=()=>matchMedia('(max-width:760px)').matches;
+  const surface=()=>mobile()?document.querySelector('.ws-g2-sheet'):guide()?.querySelector('.ws-g2-b');
   const isOpen=()=>{
     const g=guide();
     return !!(g?.classList.contains('open')||document.body.classList.contains('ws-g2-mo'));
+  };
+  const setOpen=()=>{
+    const g=guide();
+    if(!g)return;
+    g.classList.remove('min');
+    try{sessionStorage.setItem('wistudiGuideMinimizedV4','0')}catch(_){ }
+    if(mobile())document.body.classList.add('ws-g2-mo');
+    else g.classList.add('open');
+    userOpened=true;
+  };
+  const removeReturnChip=()=>guide()?.querySelector('.ws-g2-return')?.remove();
+  const closeOnboarding=()=>{
+    onboardingActive=false;
+    onboardingStep=1;
+    pendingName='';
+    guide()?.classList.remove('open');
+    document.body.classList.remove('ws-g2-mo');
+    userOpened=false;
   };
   const restoreRoleSwitchOpen=(desktopOpen,mobileOpen)=>{
     if(performance.now()>roleSwitchUntil)return;
@@ -61,6 +139,10 @@
     userOpened=desktopOpen||mobileOpen;
   };
   const closeUnrequested=()=>{
+    if(onboardingActive){
+      if(!guide()?.classList.contains('ws-under-chrome'))setOpen();
+      return;
+    }
     if(!isOpen()){
       if(performance.now()>gestureUntil&&performance.now()>roleSwitchUntil)userOpened=false;
       return;
@@ -69,6 +151,124 @@
     guide()?.classList.remove('open');
     document.body.classList.remove('ws-g2-mo');
   };
+
+  const roleChoices=()=>Object.entries(ROLES).map(([key,item])=>`<button class="ws-g2-on-role" type="button" data-on-role="${key}" aria-label="Use the ${esc(item.label)} guide"><img src="${item.avatar}" alt=""><span>${esc(item.label)}</span></button>`).join('');
+
+  const wireOnboarding=root=>{
+    root.querySelector('[data-on-close]')?.addEventListener('click',e=>{e.stopPropagation();closeOnboarding()});
+    if(onboardingStep===1){
+      const input=root.querySelector('[data-on-name]');
+      const next=root.querySelector('[data-on-next]');
+      const error=root.querySelector('[data-on-error]');
+      const sync=()=>{
+        const value=(input?.value||'').trim();
+        if(next)next.disabled=!value;
+        if(error)error.textContent='';
+      };
+      input?.addEventListener('input',sync);
+      input?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!next?.disabled)next.click()});
+      next?.addEventListener('click',()=>{
+        const value=(input?.value||'').trim().replace(/\s+/g,' ').slice(0,40);
+        if(!value){if(error)error.textContent='Please enter your name.';input?.focus();return}
+        pendingName=value;
+        onboardingStep=2;
+        renderOnboarding();
+      });
+      requestAnimationFrame(()=>input?.focus({preventScroll:true}));
+      return;
+    }
+    root.querySelectorAll('[data-on-role]').forEach(button=>button.addEventListener('click',()=>finishOnboarding(button.dataset.onRole)));
+  };
+
+  const renderOnboarding=()=>{
+    const root=surface();
+    if(!root)return;
+    const close='<button class="ws-g2-x" data-on-close type="button" aria-label="Close guide">×</button>';
+    if(onboardingStep===1){
+      root.innerHTML=`${close}<div class="ws-g2-onboard"><div class="ws-g2-on-kicker">Personalise your guide</div><div class="ws-g2-on-steps" aria-hidden="true"><i class="on"></i><i></i></div><h3 class="ws-g2-on-title">What should I call you?</h3><p class="ws-g2-on-copy">Just your first name is enough.</p><div class="ws-g2-name-shell"><input class="ws-g2-name-input" data-on-name type="text" inputmode="text" autocomplete="given-name" maxlength="40" placeholder="Your name" aria-label="Your name"><button class="ws-g2-on-next" data-on-next type="button" disabled>Continue</button></div><div class="ws-g2-on-error" data-on-error aria-live="polite"></div></div>`;
+    }else{
+      root.innerHTML=`${close}<div class="ws-g2-onboard"><div class="ws-g2-on-kicker">Personalise your guide</div><div class="ws-g2-on-steps" aria-hidden="true"><i></i><i class="on"></i></div><h3 class="ws-g2-on-title">Nice to meet you, ${esc(pendingName)}.</h3><p class="ws-g2-on-copy">How would you like me to guide you?</p><div class="ws-g2-on-roles">${roleChoices()}</div></div>`;
+    }
+    wireOnboarding(root);
+  };
+
+  const startOnboarding=()=>{
+    removeReturnChip();
+    onboardingActive=true;
+    onboardingStep=1;
+    pendingName='';
+    gestureUntil=performance.now()+1600;
+    userOpened=true;
+    setOpen();
+    renderOnboarding();
+  };
+
+  const finishOnboarding=selectedRole=>{
+    if(!pendingName||!ROLES[selectedRole])return;
+    writeName(pendingName);
+    writeRole(selectedRole);
+    try{
+      sessionStorage.setItem(WELCOME_KEY,'1');
+      sessionStorage.setItem(RETURN_CHIP_KEY,'1');
+    }catch(_){ }
+    onboardingActive=false;
+    onboardingStep=1;
+    const g=guide();
+    g?.classList.remove('open');
+    document.body.classList.remove('ws-g2-mo');
+    userOpened=false;
+
+    // Re-enter through the guide's normal click path so its own internal role state,
+    // seen-message state and accessibility behavior stay authoritative.
+    queueMicrotask(()=>{
+      const button=g?.querySelector('.ws-g2-btn');
+      button?.click();
+      requestAnimationFrame(()=>{
+        const root=surface();
+        const roleButton=root?.querySelector(`.ws-g2-role[data-r="${selectedRole}"]`);
+        if(roleButton&&!roleButton.classList.contains('on'))roleButton.click();
+      });
+    });
+  };
+
+  const injectWelcome=()=>{
+    const name=readName();
+    if(!name)return;
+    let already=false;
+    try{already=sessionStorage.getItem(WELCOME_KEY)==='1'}catch(_){ }
+    if(already)return;
+    const root=surface();
+    if(!root)return;
+    root.querySelector('.ws-g2-welcome')?.remove();
+    const target=root.querySelector('.ws-g2-k,.ws-g2-copy');
+    if(!target)return;
+    const el=document.createElement('div');
+    el.className='ws-g2-welcome';
+    el.textContent=`Welcome back, ${name}.`;
+    target.before(el);
+    try{sessionStorage.setItem(WELCOME_KEY,'1')}catch(_){ }
+  };
+
+  const showReturnChip=()=>{
+    const g=guide(),name=readName();
+    if(!g||!name||g.querySelector('.ws-g2-return')||onboardingActive)return;
+    let shown=false;
+    try{shown=sessionStorage.getItem(RETURN_CHIP_KEY)==='1'}catch(_){ }
+    if(shown)return;
+    const chip=document.createElement('button');
+    chip.type='button';
+    chip.className='ws-g2-return';
+    chip.textContent=`Hi, ${name}`;
+    chip.setAttribute('aria-label',`Open your guide, ${name}`);
+    chip.addEventListener('click',e=>{
+      e.preventDefault();e.stopPropagation();chip.remove();
+      g.querySelector('.ws-g2-btn')?.click();
+    });
+    g.appendChild(chip);
+    try{sessionStorage.setItem(RETURN_CHIP_KEY,'1')}catch(_){ }
+    setTimeout(()=>chip.remove(),4600);
+  };
+
   document.addEventListener('click',e=>{
     const roleButton=e.target.closest?.('.ws-g2-role');
     if(roleButton){
@@ -90,8 +290,23 @@
 
     const button=e.target.closest?.('.ws-g2-btn');
     if(!button)return;
+
+    // On the visitor's first intentional guide open, replace the normal guide message
+    // with a two-step name + perspective conversation inside the same speech bubble/sheet.
+    if(!readName()&&!onboardingActive){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      startOnboarding();
+      return;
+    }
+
+    removeReturnChip();
     const wasOpen=isOpen();
     gestureUntil=performance.now()+800;
+    if(!wasOpen&&readName()){
+      requestAnimationFrame(()=>injectWelcome());
+      setTimeout(()=>injectWelcome(),90);
+    }
     queueMicrotask(()=>{
       userOpened=!wasOpen&&isOpen();
       if(wasOpen)userOpened=false;
@@ -131,5 +346,5 @@
   addEventListener('scroll',schedule,{passive:true});
   addEventListener('resize',schedule,{passive:true});
   new MutationObserver(()=>{closeUnrequested();schedule();}).observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class','style']});
-  setTimeout(()=>{closeUnrequested();schedule();},80);
+  setTimeout(()=>{closeUnrequested();schedule();if(readName())showReturnChip();},180);
 })();
