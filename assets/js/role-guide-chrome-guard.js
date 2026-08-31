@@ -65,5 +65,33 @@
   addEventListener('scroll',schedule,{passive:true});
   addEventListener('resize',schedule,{passive:true});
   new MutationObserver(()=>{closeUnrequested();schedule();}).observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class','style']});
-  setTimeout(()=>{closeUnrequested();schedule();},80);
+
+  // role-guide-v2 starts the avatar off-screen and normally animates its first placement.
+  // On a fast tap, especially on mobile/return visits, that can leave the button technically
+  // outside the tappable viewport for part of a second. If that happens, temporarily disable
+  // only the initial transform transition and ask the native resize handler to recalculate.
+  // Normal section-to-section movement keeps its animation after this one-time correction.
+  let initialPositionSettled=false;
+  const settleInitialPosition=()=>{
+    if(initialPositionSettled)return;
+    const g=guide();
+    if(!g)return;
+    const r=g.getBoundingClientRect();
+    const outside=r.right<=8||r.left>=innerWidth-8||r.bottom<=8||r.top>=innerHeight-8;
+    if(!outside){initialPositionSettled=true;return;}
+    const inlineTransition=g.style.transition;
+    g.style.transition='none';
+    dispatchEvent(new Event('resize'));
+    void g.offsetWidth;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      g.style.transition=inlineTransition;
+      initialPositionSettled=true;
+      schedule();
+    }));
+  };
+
+  requestAnimationFrame(settleInitialPosition);
+  setTimeout(settleInitialPosition,80);
+  setTimeout(settleInitialPosition,220);
+  setTimeout(()=>{closeUnrequested();settleInitialPosition();schedule();},700);
 })();
