@@ -116,10 +116,15 @@
   const setOpen=()=>{
     const g=guide();
     if(!g)return;
-    g.classList.remove('min');
+    // Keep this idempotent. This function can run alongside a MutationObserver;
+    // repeatedly writing the same class attribute can create an observer feedback loop.
+    if(g.classList.contains('min'))g.classList.remove('min');
     try{sessionStorage.setItem('wistudiGuideMinimizedV4','0')}catch(_){ }
-    if(mobile())document.body.classList.add('ws-g2-mo');
-    else g.classList.add('open');
+    if(mobile()){
+      if(!document.body.classList.contains('ws-g2-mo'))document.body.classList.add('ws-g2-mo');
+    }else if(!g.classList.contains('open')){
+      g.classList.add('open');
+    }
     userOpened=true;
   };
   const removeReturnChip=()=>guide()?.querySelector('.ws-g2-return')?.remove();
@@ -127,29 +132,30 @@
     onboardingActive=false;
     onboardingStep=1;
     pendingName='';
-    guide()?.classList.remove('open');
-    document.body.classList.remove('ws-g2-mo');
+    const g=guide();
+    if(g?.classList.contains('open'))g.classList.remove('open');
+    if(document.body.classList.contains('ws-g2-mo'))document.body.classList.remove('ws-g2-mo');
     userOpened=false;
   };
   const restoreRoleSwitchOpen=(desktopOpen,mobileOpen)=>{
     if(performance.now()>roleSwitchUntil)return;
     const g=guide();
-    if(desktopOpen)g?.classList.add('open');
-    if(mobileOpen)document.body.classList.add('ws-g2-mo');
+    if(desktopOpen&&!g?.classList.contains('open'))g?.classList.add('open');
+    if(mobileOpen&&!document.body.classList.contains('ws-g2-mo'))document.body.classList.add('ws-g2-mo');
     userOpened=desktopOpen||mobileOpen;
   };
   const closeUnrequested=()=>{
-    if(onboardingActive){
-      if(!guide()?.classList.contains('ws-under-chrome'))setOpen();
-      return;
-    }
+    // Onboarding is already opened by a real user click. Do not rewrite classes from
+    // the observer while it is active; doing so can starve the main thread on browsers.
+    if(onboardingActive)return;
     if(!isOpen()){
       if(performance.now()>gestureUntil&&performance.now()>roleSwitchUntil)userOpened=false;
       return;
     }
     if(userOpened||performance.now()<=gestureUntil||performance.now()<=roleSwitchUntil)return;
-    guide()?.classList.remove('open');
-    document.body.classList.remove('ws-g2-mo');
+    const g=guide();
+    if(g?.classList.contains('open'))g.classList.remove('open');
+    if(document.body.classList.contains('ws-g2-mo'))document.body.classList.remove('ws-g2-mo');
   };
 
   const roleChoices=()=>Object.entries(ROLES).map(([key,item])=>`<button class="ws-g2-on-role" type="button" data-on-role="${key}" aria-label="Use the ${esc(item.label)} guide"><img src="${item.avatar}" alt=""><span>${esc(item.label)}</span></button>`).join('');
@@ -214,8 +220,8 @@
     onboardingActive=false;
     onboardingStep=1;
     const g=guide();
-    g?.classList.remove('open');
-    document.body.classList.remove('ws-g2-mo');
+    if(g?.classList.contains('open'))g.classList.remove('open');
+    if(document.body.classList.contains('ws-g2-mo'))document.body.classList.remove('ws-g2-mo');
     userOpened=false;
 
     // Re-enter through the guide's normal click path so its own internal role state,
@@ -331,20 +337,30 @@
     closeUnrequested();
     const g=guide();if(!g)return;
     const chromeBottom=visibleTopChrome();
-    if(!chromeBottom){g.classList.remove('ws-under-chrome');return;}
+    if(!chromeBottom){
+      if(g.classList.contains('ws-under-chrome'))g.classList.remove('ws-under-chrome');
+      return;
+    }
     const r=g.getBoundingClientRect();
     const hidden=r.top<chromeBottom+8;
-    g.classList.toggle('ws-under-chrome',hidden);
+    if(g.classList.contains('ws-under-chrome')!==hidden)g.classList.toggle('ws-under-chrome',hidden);
     if(hidden){
-      g.classList.remove('open');
-      document.body.classList.remove('ws-g2-mo');
+      if(g.classList.contains('open'))g.classList.remove('open');
+      if(document.body.classList.contains('ws-g2-mo'))document.body.classList.remove('ws-g2-mo');
       userOpened=false;
       roleSwitchUntil=0;
+      if(onboardingActive){
+        onboardingActive=false;
+        onboardingStep=1;
+        pendingName='';
+      }
     }
   };
   const schedule=()=>{if(!raf)raf=requestAnimationFrame(sync)};
   addEventListener('scroll',schedule,{passive:true});
   addEventListener('resize',schedule,{passive:true});
-  new MutationObserver(()=>{closeUnrequested();schedule();}).observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class','style']});
+  // Observe class/style changes only to schedule one coalesced sync. Never mutate
+  // guide state directly from the observer callback itself.
+  new MutationObserver(schedule).observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class','style']});
   setTimeout(()=>{closeUnrequested();schedule();if(readName())showReturnChip();},180);
 })();
