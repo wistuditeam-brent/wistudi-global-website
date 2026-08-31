@@ -6,12 +6,14 @@ on:
     branches:
       - integration/resources-merge-no-deploy
       - main
+      - test/guide-personalisation-mobile-safe
     paths:
       - 'assets/js/role-guide-*.js'
       - 'assets/css/resources*.css'
       - 'resources/**'
       - 'scripts/release_interaction_qa.mjs'
       - '.github/workflows/release-interaction-qa.yml'
+      - 'assets/js/site-shell.js'
   pull_request:
     branches:
       - main
@@ -21,6 +23,7 @@ on:
       - 'resources/**'
       - 'scripts/release_interaction_qa.mjs'
       - '.github/workflows/release-interaction-qa.yml'
+      - 'assets/js/site-shell.js'
 
 jobs:
   interaction-qa:
@@ -46,7 +49,7 @@ jobs:
           done
           cat /tmp/wistudi-release-qa.log
           exit 1
-      - name: Test click-only guide and sticky article navigation
+      - name: Test personalised guide, mobile responsiveness and sticky article navigation
         env:
           QA_BASE_URL: http://127.0.0.1:4173
         run: node scripts/release_interaction_qa.mjs
