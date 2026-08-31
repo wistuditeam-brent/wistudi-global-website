@@ -231,6 +231,7 @@
     await heroPromise;
     await load('/assets/js/role-guide-copy.js').catch(()=>null);
     await load('/assets/js/role-guide-v2.js').catch(()=>null);
+    await load('/assets/js/role-guide-personalisation.js').catch(()=>null);
     await load('/assets/js/role-guide-chrome-guard.js').catch(()=>null);
   };
 
