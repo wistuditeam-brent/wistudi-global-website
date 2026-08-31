@@ -171,4 +171,19 @@
   // If the existing guide closes because the user scrolls into another section,
   // restore the preserved normal DOM without attempting to reopen anything.
   addEventListener('scroll',()=>{if(onboarding&&!isOpen())restoreNormal()},{passive:true});
+
+  // role-guide-v2 deliberately creates the avatar off-screen and positions it at the end
+  // of its synchronous setup. Late font/media layout can still make that first coordinate
+  // stale, especially on mobile or a returning visit. Ask the native guide to recalculate
+  // only when the avatar is genuinely outside the viewport; this never opens the guide.
+  const ensureAvatarInViewport=()=>{
+    const g=guide();
+    if(!g)return;
+    const r=g.getBoundingClientRect();
+    const outside=r.right<=8||r.left>=innerWidth-8||r.bottom<=8||r.top>=innerHeight-8;
+    if(outside)dispatchEvent(new Event('resize'));
+  };
+  requestAnimationFrame(ensureAvatarInViewport);
+  setTimeout(ensureAvatarInViewport,180);
+  setTimeout(ensureAvatarInViewport,650);
 })();
