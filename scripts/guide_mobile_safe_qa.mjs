@@ -41,8 +41,6 @@ async function testFirstVisit(viewport,label){
       const autoFocused=await input.evaluate(el=>document.activeElement===el);
       if(autoFocused)failures.push('mobile: name field auto-focused and opened keyboard before user intent');
 
-      // Simulate a soft keyboard by shrinking the visual viewport after the user focuses
-      // the field. The sheet must move entirely into the remaining visible area.
       await input.focus();
       await page.waitForTimeout(30);
       await page.setViewportSize({width:viewport.width,height:520});
@@ -56,23 +54,40 @@ async function testFirstVisit(viewport,label){
           top:r?.top??-1,
           bottom:r?.bottom??99999,
           visibleTop:vv?.offsetTop??0,
-          visibleBottom:(vv?.offsetTop||0)+(vv?.height||innerHeight)
+          visibleBottom:(vv?.offsetTop||0)+(vv?.height||innerHeight),
+          open:document.body.classList.contains('ws-g2-mo')
         };
       });
+      if(!keyboardState.open)failures.push('mobile: guide closed when keyboard viewport opened');
       if(!keyboardState.aware)failures.push('mobile: onboarding did not enter keyboard-aware positioning');
       if(keyboardState.top<keyboardState.visibleTop-2)failures.push(`mobile: onboarding rose above visible viewport (${keyboardState.top}px)`);
       if(keyboardState.bottom>keyboardState.visibleBottom+2)failures.push(`mobile: onboarding remained behind keyboard (${keyboardState.bottom}px > ${keyboardState.visibleBottom}px)`);
 
-      await input.evaluate(el=>el.blur());
-      await page.setViewportSize(viewport);
+      await input.fill('Brent');
+      await input.press('Enter');
       await page.waitForTimeout(180);
-      const restored=await page.evaluate(()=>!document.querySelector('.ws-g2-sheet')?.classList.contains('ws-g2-keyboard-aware'));
-      if(!restored)failures.push('mobile: keyboard-aware positioning did not clear after keyboard closed');
-    }
+      const afterEnter=await page.evaluate(()=>({
+        open:document.body.classList.contains('ws-g2-mo'),
+        aware:document.querySelector('.ws-g2-sheet')?.classList.contains('ws-g2-keyboard-aware')||false,
+        title:document.querySelector('.ws-g2-sheet .ws-g2-on-title')?.textContent||''
+      }));
+      if(!afterEnter.open)failures.push('mobile: guide closed after pressing Enter/Done');
+      if(!afterEnter.title.includes('Nice to meet you, Brent.'))failures.push('mobile: Enter/Done did not advance to role-selection step');
+      if(afterEnter.aware)failures.push('mobile: keyboard-aware positioning remained active after advancing');
 
-    await input.fill('Brent');
-    await surface.locator('[data-on-next]').click({force:true});
-    await page.waitForTimeout(80);
+      await page.setViewportSize(viewport);
+      await page.waitForTimeout(220);
+      const settled=await page.evaluate(()=>({
+        open:document.body.classList.contains('ws-g2-mo'),
+        title:document.querySelector('.ws-g2-sheet .ws-g2-on-title')?.textContent||''
+      }));
+      if(!settled.open)failures.push('mobile: guide closed while keyboard viewport settled back');
+      if(!settled.title.includes('Nice to meet you, Brent.'))failures.push('mobile: role-selection step was lost after keyboard closed');
+    }else{
+      await input.fill('Brent');
+      await surface.locator('[data-on-next]').click({force:true});
+      await page.waitForTimeout(100);
+    }
   }else failures.push(`${label}: name input missing`);
 
   const publisher=surface.locator('[data-on-role="publisher"]');
@@ -161,4 +176,4 @@ if(failures.length){
   failures.forEach(f=>console.error(' - '+f));
   process.exit(1);
 }
-console.log('Guide mobile-safe QA PASSED: desktop/mobile first-open personalisation, keyboard-aware mobile positioning, role switching, close/scroll responsiveness, and returning visits all passed.');
+console.log('Guide mobile-safe QA PASSED: desktop/mobile first-open personalisation, keyboard-aware positioning, Enter/Done handoff, role switching, close/scroll responsiveness, and returning visits all passed.');
