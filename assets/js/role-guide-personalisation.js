@@ -108,6 +108,7 @@
     advancing=false;
     if(!onboarding||!savedSurface||!savedNodes)return;
     savedSurface.replaceChildren(savedNodes);
+    savedSurface.scrollTop=0;
     onboarding=false;
     step=1;
     pendingName='';
@@ -180,11 +181,14 @@
         writeName(pendingName);
         const normalRoot=savedSurface;
         restoreNormal();
+        if(normalRoot)normalRoot.scrollTop=0;
         normalRoot?.querySelector(`.ws-g2-role[data-r="${selected}"]`)?.click();
         requestAnimationFrame(()=>{
+          if(normalRoot)normalRoot.scrollTop=0;
           if(desktopWasOpen)guide()?.classList.add('open');
           if(mobileWasOpen)document.body.classList.add('ws-g2-mo');
         });
+        setTimeout(()=>{if(normalRoot)normalRoot.scrollTop=0},120);
         try{sessionStorage.setItem(WELCOME_KEY,'1')}catch(_){ }
       }));
     }
@@ -236,6 +240,8 @@
       const desktopWasOpen=!!guide()?.classList.contains('open');
       const mobileWasOpen=document.body.classList.contains('ws-g2-mo');
       requestAnimationFrame(()=>{
+        const root=surface();
+        if(root)root.scrollTop=0;
         if(desktopWasOpen)guide()?.classList.add('open');
         if(mobileWasOpen)document.body.classList.add('ws-g2-mo');
       });
