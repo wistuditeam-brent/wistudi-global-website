@@ -5,20 +5,18 @@ const failures=[];
 const browser=await chromium.launch({headless:true});
 
 async function testGuide(viewport,name){
-  const page=await browser.newPage({viewport});
+  const context=await browser.newContext({viewport});
+  const page=await context.newPage();
   await page.addInitScript(()=>{
     try{
-      if(sessionStorage.getItem('__qaGuideSeeded')!=='1'){
-        localStorage.removeItem('wistudiGuideRole');
-        localStorage.removeItem('wistudiVisitorName');
-        sessionStorage.clear();
-        sessionStorage.setItem('__qaGuideSeeded','1');
-      }
+      localStorage.removeItem('wistudiGuideRole');
+      localStorage.removeItem('wistudiVisitorName');
+      sessionStorage.clear();
     }catch(_){ }
   });
   await page.goto(base+'/',{waitUntil:'load',timeout:15000});
   const button=page.locator('.ws-g2-btn');
-  try{await button.waitFor({state:'visible',timeout:8000});}catch(_){failures.push(`${name}: guide avatar did not appear`);await page.close();return;}
+  try{await button.waitFor({state:'visible',timeout:8000});}catch(_){failures.push(`${name}: guide avatar did not appear`);await context.close();return;}
 
   await page.waitForTimeout(2400);
   const before=await page.evaluate(()=>({
@@ -62,17 +60,18 @@ async function testGuide(viewport,name){
   const afterOnboard=await page.evaluate(()=>({
     desktop:document.querySelector('.ws-g2')?.classList.contains('open')||false,
     mobile:document.body.classList.contains('ws-g2-mo'),
-    name:localStorage.getItem('wistudiVisitorName'),
+    visitorName:localStorage.getItem('wistudiVisitorName'),
     role:localStorage.getItem('wistudiGuideRole')
   }));
   const stayedOpen=name==='mobile'?afterOnboard.mobile:afterOnboard.desktop;
   if(!stayedOpen)failures.push(`${name}: guide collapsed after finishing personalisation`);
-  if(afterOnboard.name!=='Brent')failures.push(`${name}: visitor name was not stored`);
+  if(afterOnboard.visitorName!=='Brent')failures.push(`${name}: visitor name was not stored`);
   if(afterOnboard.role!=='publisher')failures.push(`${name}: publisher perspective was not stored`);
 
   const normalCopy=surface.locator('.ws-g2-copy');
   try{await normalCopy.waitFor({state:'visible',timeout:2000});}catch(_){failures.push(`${name}: normal guide content did not return after onboarding`);}
 
+  // Perspective switching must stay open and change avatar/content in place.
   const trainer=surface.locator('.ws-g2-role[data-r="trainer"]');
   if(await trainer.count()){
     await trainer.click({force:true});
@@ -89,6 +88,7 @@ async function testGuide(viewport,name){
     if(!switched.avatar.includes('guide-trainer.svg'))failures.push(`${name}: avatar did not change in place to Trainer`);
   }else failures.push(`${name}: normal role switcher missing after onboarding`);
 
+  // Native close must restore a responsive scrolling page.
   const close=surface.locator('[data-x]');
   if(await close.count())await close.click({force:true});
   await page.waitForTimeout(100);
@@ -103,14 +103,19 @@ async function testGuide(viewport,name){
   const y2=await page.evaluate(()=>scrollY);
   if(y2<=closed.y)failures.push(`${name}: page did not remain scroll-responsive after closing guide`);
 
-  // Returning visitor: reset to a normal page-entry position, then simulate a fresh visit.
-  await page.evaluate(()=>{scrollTo(0,0);sessionStorage.removeItem('wistudiGuideWelcomedV2')});
-  await page.waitForTimeout(100);
-  await page.reload({waitUntil:'load',timeout:15000});
-  const returnButton=page.locator('.ws-g2-btn');
-  try{await returnButton.waitFor({state:'visible',timeout:8000});await returnButton.click({force:true});}catch(_){failures.push(`${name}: returning visitor could not reopen guide`);}
-  await page.waitForTimeout(180);
-  const returnSurface=name==='mobile'?page.locator('.ws-g2-sheet'):page.locator('.ws-g2-b');
+  // Fresh page in the same browser context = same localStorage, new sessionStorage.
+  // This tests a genuine return visit without the first-visit setup script running again.
+  const returnPage=await context.newPage();
+  await returnPage.goto(base+'/',{waitUntil:'load',timeout:15000});
+  const returnButton=returnPage.locator('.ws-g2-btn');
+  try{
+    await returnButton.waitFor({state:'visible',timeout:8000});
+    await returnButton.click({force:true,timeout:5000});
+  }catch(e){
+    failures.push(`${name}: returning visitor could not reopen guide (${e.message})`);
+  }
+  await returnPage.waitForTimeout(200);
+  const returnSurface=name==='mobile'?returnPage.locator('.ws-g2-sheet'):returnPage.locator('.ws-g2-b');
   if(await returnSurface.locator('.ws-g2-onboard').count())failures.push(`${name}: returning visitor was incorrectly shown onboarding again`);
   const welcome=returnSurface.locator('.ws-g2-welcome');
   try{await welcome.waitFor({state:'visible',timeout:1500});}catch(_){failures.push(`${name}: returning visitor greeting did not appear`);}
@@ -118,8 +123,18 @@ async function testGuide(viewport,name){
     const text=(await welcome.textContent())||'';
     if(!text.includes('Welcome back, Brent.'))failures.push(`${name}: returning visitor greeting used unexpected name/copy`);
   }
+  const returnState=await returnPage.evaluate(()=>({
+    desktop:document.querySelector('.ws-g2')?.classList.contains('open')||false,
+    mobile:document.body.classList.contains('ws-g2-mo'),
+    visitorName:localStorage.getItem('wistudiVisitorName'),
+    role:localStorage.getItem('wistudiGuideRole')
+  }));
+  const returnOpen=name==='mobile'?returnState.mobile:returnState.desktop;
+  if(!returnOpen)failures.push(`${name}: returning visitor guide did not remain open`);
+  if(returnState.visitorName!=='Brent')failures.push(`${name}: stored name was lost between visits`);
+  if(returnState.role!=='trainer')failures.push(`${name}: stored guide perspective was lost between visits`);
 
-  await page.close();
+  await context.close();
 }
 
 await testGuide({width:1440,height:900},'desktop');
@@ -161,4 +176,4 @@ if(failures.length){
   failures.forEach(f=>console.error(' - '+f));
   process.exit(1);
 }
-console.log('Release interaction QA PASSED: personalised guide works on desktop/mobile, role switching stays open, mobile remains responsive, and article navigation is sticky.');
+console.log('Release interaction QA PASSED: personalised guide works on desktop/mobile, role switching stays open, mobile remains responsive, returning visits preserve personalisation, and article navigation is sticky.');
