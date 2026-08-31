@@ -12,6 +12,7 @@ on:
       - 'assets/css/resources*.css'
       - 'resources/**'
       - 'scripts/release_interaction_qa.mjs'
+      - 'scripts/guide_mobile_safe_qa.mjs'
       - '.github/workflows/release-interaction-qa.yml'
       - 'assets/js/site-shell.js'
   pull_request:
@@ -22,6 +23,7 @@ on:
       - 'assets/css/resources*.css'
       - 'resources/**'
       - 'scripts/release_interaction_qa.mjs'
+      - 'scripts/guide_mobile_safe_qa.mjs'
       - '.github/workflows/release-interaction-qa.yml'
       - 'assets/js/site-shell.js'
 
@@ -49,7 +51,7 @@ jobs:
           done
           cat /tmp/wistudi-release-qa.log
           exit 1
-      - name: Test personalised guide, mobile responsiveness and sticky article navigation
+      - name: Test mobile-safe personalised guide on desktop and mobile
         env:
           QA_BASE_URL: http://127.0.0.1:4173
-        run: node scripts/release_interaction_qa.mjs
+        run: node scripts/guide_mobile_safe_qa.mjs
