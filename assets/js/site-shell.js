@@ -23,6 +23,29 @@
     doc.head.appendChild(footerUnify);
   }
 
+  // Keep Partners & LTI visible in the shared site header across preview pages.
+  // Individual page HTML can still provide the link itself; this only fills it in when missing.
+  const ensurePartnersNav=()=>{
+    const href='/technology-partners/';
+    const label='Partners & LTI';
+    const isPartners=location.pathname.toLowerCase().includes('/technology-partners');
+
+    const insertLink=(nav,selector)=>{
+      if(!nav||nav.querySelector('a[href*="technology-partners"]')) return;
+      const link=doc.createElement('a');
+      link.href=href;
+      link.textContent=label;
+      if(isPartners) link.classList.add('active');
+      const contact=nav.querySelector(selector);
+      if(contact) nav.insertBefore(link,contact);
+      else nav.appendChild(link);
+    };
+
+    insertLink(doc.querySelector('.ws-nav-links'),'a[href*="contact"]');
+    insertLink(doc.querySelector('.ws-mobile-inner'),'a[href*="contact"]');
+  };
+  ensurePartnersNav();
+
   // Resources has its own isolated runtime for image fallbacks, archive behavior and
   // resource navigation state. Delegate immediately so the general website shell cannot
   // bypass those protections or attach duplicate UI handlers.
