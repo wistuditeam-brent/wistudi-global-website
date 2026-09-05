@@ -17,5 +17,37 @@ body.page-technology-partners #what .pillar:nth-child(2) .pillar-number{backgrou
 body.page-technology-partners #what .pillar h3{position:relative;z-index:2;margin:28px 0 10px!important;font-size:1.14rem!important}
 body.page-technology-partners #what .pillar p{position:relative;z-index:2;margin:0 0 18px!important;color:#6c6878!important;font-size:15px!important;line-height:1.55!important;font-weight:400!important}
 body.page-technology-partners #what .pillar .mini-line{position:relative;z-index:2;margin-top:auto!important;color:#4d4657!important;font-size:13px!important;line-height:1.45!important;font-weight:800!important}
-@media(max-width:700px){body.page-technology-partners #what .pillar{min-height:320px!important;padding:24px!important}body.page-technology-partners #what .pillar::after{width:78px;height:78px;right:16px;top:15px}body.page-technology-partners #what .pillar h3{margin-top:22px!important}body.page-technology-partners #what .pillar p{font-size:15px!important}}
+
+/* One persistent mobile contract for the Partners page. Keep every later change on this branch additive. */
+@media(max-width:700px){
+  html,body,body.page-technology-partners{max-width:100%!important;overflow-x:hidden!important}
+  body.page-technology-partners .partner-announcement{display:none!important}
+  body.page-technology-partners .hero{padding:34px 0 30px!important;overflow:hidden!important}
+  body.page-technology-partners .hero>.container{width:calc(100% - 28px)!important;max-width:calc(100% - 28px)!important;margin-inline:auto!important;padding:0!important}
+  body.page-technology-partners .hero-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:26px!important;width:100%!important;max-width:100%!important;min-width:0!important;align-items:start!important}
+  body.page-technology-partners .hero-copy{width:100%!important;max-width:100%!important;min-width:0!important}
+  body.page-technology-partners .hero .eyebrow{max-width:100%!important;font-size:.64rem!important;line-height:1.35!important;letter-spacing:.10em!important;margin-bottom:12px!important;white-space:normal!important}
+  body.page-technology-partners .hero h1{width:100%!important;max-width:100%!important;min-width:0!important;font-size:clamp(2.35rem,10.7vw,3.05rem)!important;line-height:1.01!important;letter-spacing:-.045em!important;overflow-wrap:normal!important;word-break:normal!important}
+  body.page-technology-partners .hero .lead{width:100%!important;max-width:100%!important;margin-top:18px!important;font-size:.98rem!important;line-height:1.58!important;overflow-wrap:break-word!important}
+  body.page-technology-partners .actions{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:10px!important;width:100%!important;margin-top:22px!important}
+  body.page-technology-partners .actions .cta{width:100%!important;max-width:100%!important;min-height:50px!important;padding-inline:16px!important;text-align:center!important}
+  body.page-technology-partners .hero-proof{display:flex!important;flex-wrap:nowrap!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:auto!important;overflow-y:hidden!important;gap:8px!important;margin-top:18px!important;padding:0 24px 6px 0!important;scrollbar-width:none!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior-inline:contain!important}
+  body.page-technology-partners .hero-proof::-webkit-scrollbar{display:none!important}
+  body.page-technology-partners .hero-proof span{flex:0 0 auto!important;font-size:.69rem!important;padding:7px 10px!important}
+  body.page-technology-partners .hero-demo{position:relative!important;width:100%!important;max-width:100%!important;min-width:0!important;height:clamp(560px,68svh,650px)!important;min-height:560px!important;margin:0!important;overflow:hidden!important}
+  body.page-technology-partners .hero-demo-frame{position:absolute!important;inset:0!important;top:0!important;left:0!important;right:auto!important;width:100%!important;max-width:100%!important;min-width:0!important;height:100%!important;min-height:0!important;margin:0!important;border:0!important;transform:none!important}
+  body.page-technology-partners .hero-fallback{left:50%!important;right:auto!important;top:50%!important;width:calc(100% - 14px)!important;max-width:520px!important;transform:translate(-50%,-50%)!important}
+  body.page-technology-partners .hero-demo.showcase-ready .hero-fallback{transform:translate(-50%,-50%) scale(.97)!important}
+  body.page-technology-partners #what .pillar{min-height:320px!important;padding:24px!important}
+  body.page-technology-partners #what .pillar::after{width:78px;height:78px;right:16px;top:15px}
+  body.page-technology-partners #what .pillar h3{margin-top:22px!important}
+  body.page-technology-partners #what .pillar p{font-size:15px!important}
+}
+@media(max-width:430px){
+  body.page-technology-partners .hero{padding-top:30px!important}
+  body.page-technology-partners .hero>.container{width:calc(100% - 24px)!important;max-width:calc(100% - 24px)!important}
+  body.page-technology-partners .hero h1{font-size:clamp(2.2rem,10.4vw,2.78rem)!important}
+  body.page-technology-partners .hero .lead{font-size:.95rem!important;line-height:1.55!important}
+  body.page-technology-partners .hero-demo{height:66svh!important;min-height:540px!important;max-height:620px!important}
+}
 @media(prefers-reduced-motion:reduce){body.page-technology-partners #what .pillar,body.page-technology-partners #what .pillar::before,body.page-technology-partners #what .pillar::after{transition:none!important}body.page-technology-partners #what .pillar:hover{transform:none!important}}
