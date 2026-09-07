@@ -12,7 +12,6 @@ export async function onRequestPost(context) {
   try {
     const data = await request.json();
 
-    // Honeypot: silently accept bot submissions without storing anything.
     if (data.event_extra_field) return respond(200, { ok: true });
 
     const registration = {
@@ -42,8 +41,9 @@ export async function onRequestPost(context) {
     if (!registration.privacy_consent) return respond(400, { error: 'Privacy Policy agreement is required.' });
 
     const sheetsWebhookUrl = env.EVENTS_SHEETS_WEBHOOK_URL || DEFAULT_EVENTS_SHEETS_WEBHOOK_URL;
+    const sheetsWebhookSecret = env.EVENTS_SHEETS_WEBHOOK_SECRET || env.EVENTS_WEBHOOK_SECRET || '';
 
-    if (!env.EVENTS_SHEETS_WEBHOOK_SECRET) {
+    if (!sheetsWebhookSecret) {
       console.error('Event registration storage secret is not configured.');
       return respond(503, { error: 'Registration storage is being connected. Please try again shortly.' });
     }
@@ -55,7 +55,7 @@ export async function onRequestPost(context) {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        secret: env.EVENTS_SHEETS_WEBHOOK_SECRET,
+        secret: sheetsWebhookSecret,
         action: 'register',
         registration_id: registrationId,
         registered_at: registeredAt,
@@ -75,12 +75,10 @@ export async function onRequestPost(context) {
       return respond(502, { error: storage.error || 'We could not save your registration. Please try again.' });
     }
 
-    // Duplicate registrations are treated as success so the attendee is not blocked.
     if (storage.duplicate) {
       return respond(200, { ok: true, duplicate: true, registration_id: storage.registration_id || null });
     }
 
-    // Optional internal notification. Registration storage remains the source of truth.
     if (env.RESEND_API_KEY) {
       const from = env.EVENTS_FROM_EMAIL || 'Wistudi Events <website@send.wistudi.com>';
       const to = env.EVENTS_NOTIFY_EMAIL || 'support@wistudi.com';
