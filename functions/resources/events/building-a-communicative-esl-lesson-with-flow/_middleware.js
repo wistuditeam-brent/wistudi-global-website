@@ -8,6 +8,7 @@ export async function onRequest(context){
       el.append('<script src="/assets/js/event-registration-live-bridge.js" defer></script>',{html:true});
       el.append('<script src="/assets/js/event-facts-component.js" defer></script>',{html:true});
       el.append('<script src="/assets/js/event-live-session-component.js" defer></script>',{html:true});
+      el.append('<script src="/assets/js/event-hero-actions-component.js" defer></script>',{html:true});
     }})
     .transform(response);
 }
