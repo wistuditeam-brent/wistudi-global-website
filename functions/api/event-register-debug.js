@@ -5,8 +5,10 @@ export async function onRequestGet(context) {
   const keys = Object.keys(env).sort();
   return new Response(JSON.stringify({
     ok: true,
-    environment_has_registration_secret: Boolean(env.EVENTS_SHEETS_WEBHOOK_SECRET),
-    environment_has_resend_key: Boolean(env.RESEND_API_KEY),
+    environment_has_registration_secret: Boolean(env.EVENTS_SHEETS_WEBHOOK_SECRET || env.EVENTS_WEBHOOK_SECRET),
+    environment_has_proton_username: Boolean(env.PROTON_SMTP_USERNAME),
+    environment_has_proton_token: Boolean(env.PROTON_SMTP_TOKEN),
+    environment_has_proton_from_name: Boolean(env.PROTON_SMTP_FROM_NAME),
     available_binding_names: keys
   }), {
     status: 200,
