@@ -11,6 +11,13 @@
       banner.src='/resources/events/event-main-banner.png';
       banner.removeAttribute('srcset');
     }
+    if(location.pathname.includes('/resources/events/building-a-communicative-esl-lesson-with-flow/')){
+      const eventHighlight=doc.createElement('script');
+      eventHighlight.src='/assets/js/event-highlight.js';
+      eventHighlight.async=false;
+      eventHighlight.dataset.wsEventHighlight='true';
+      doc.head.appendChild(eventHighlight);
+    }
   }
 
   // Load first-party analytics/event instrumentation before page-specific shell delegation.
