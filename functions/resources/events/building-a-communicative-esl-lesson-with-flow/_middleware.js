@@ -6,6 +6,7 @@ export async function onRequest(context){
     .on('body',{element(el){
       el.append('<script src="/assets/js/event-registration-component.js" defer></script>',{html:true});
       el.append('<script src="/assets/js/event-registration-live-bridge.js" defer></script>',{html:true});
+      el.append('<script src="/assets/js/event-media-component.js" defer></script>',{html:true});
       el.append('<script src="/assets/js/event-facts-component.js" defer></script>',{html:true});
       el.append('<script src="/assets/js/event-live-session-component.js" defer></script>',{html:true});
       el.append('<script src="/assets/js/event-hero-actions-component.js" defer></script>',{html:true});
