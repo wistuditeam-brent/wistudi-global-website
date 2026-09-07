@@ -1,6 +1,7 @@
 (()=>{
   'use strict';
 
+  const ASSET_ROOT = '/assets/images/resources/events/communicative-esl-flow/';
   const actions = document.querySelector('.hero-actions');
   const register = actions && actions.querySelector('a.primary[href="#register"]');
   const calendar = document.getElementById('addCalendarTop');
@@ -10,182 +11,39 @@
   const style = document.createElement('style');
   style.id = 'event-hero-actions-component-css';
   style.textContent = `
-    .event-hero-actions{
-      display:flex;
-      align-items:center;
-      gap:0;
-      margin-top:22px;
-      font-family:'Be Vietnam Pro',Inter,sans-serif;
-    }
-    .event-hero-register{
-      min-width:245px;
-      min-height:76px;
-      padding:0 28px;
-      border-radius:20px;
-      background:linear-gradient(135deg,#5b28eb 0%,#7b45f5 58%,#8b5cf6 100%) !important;
-      color:#fff !important;
-      border:0 !important;
-      box-shadow:0 16px 30px rgba(103,52,237,.24) !important;
-      font-family:'Be Vietnam Pro',Inter,sans-serif !important;
-      font-size:1.18rem !important;
-      font-weight:700 !important;
-      letter-spacing:-.025em;
-      justify-content:center;
-      flex:0 0 auto;
-    }
+    .event-hero-actions{display:flex;align-items:center;gap:0;margin-top:22px;font-family:'Be Vietnam Pro',Inter,sans-serif}
+    .event-hero-register{min-width:245px;min-height:76px;padding:0 28px;border-radius:20px;background:linear-gradient(135deg,#5b28eb 0%,#7b45f5 58%,#8b5cf6 100%)!important;color:#fff!important;border:0!important;box-shadow:0 16px 30px rgba(103,52,237,.24)!important;font-family:'Be Vietnam Pro',Inter,sans-serif!important;font-size:1.18rem!important;font-weight:700!important;letter-spacing:-.025em;justify-content:center;flex:0 0 auto}
     .event-hero-register:hover{transform:translateY(-2px);box-shadow:0 19px 34px rgba(103,52,237,.29)!important}
-    .event-hero-utility{
-      min-height:76px;
-      padding:0 24px;
-      border:0 !important;
-      background:transparent !important;
-      color:#29233a !important;
-      border-radius:0 !important;
-      box-shadow:none !important;
-      display:flex;
-      align-items:center;
-      gap:13px;
-      font-family:'Be Vietnam Pro',Inter,sans-serif !important;
-      font-size:1.02rem !important;
-      font-weight:700 !important;
-      line-height:1.2;
-      cursor:pointer;
-      position:relative;
-    }
-    .event-hero-utility:hover{transform:none !important;color:#5f31da !important}
-    .event-hero-utility + .event-hero-utility:before{
-      content:'';
-      position:absolute;
-      left:0;
-      top:20px;
-      bottom:20px;
-      width:1px;
-      background:#ded5ef;
-    }
-    .event-action-icon{
-      width:58px;
-      height:58px;
-      flex:0 0 58px;
-      border-radius:50%;
-      background:#f3edff;
-      display:grid;
-      place-items:center;
-      position:relative;
-    }
+    .event-hero-utility{min-height:76px;padding:0 24px;border:0!important;background:transparent!important;color:#29233a!important;border-radius:0!important;box-shadow:none!important;display:flex;align-items:center;gap:13px;font-family:'Be Vietnam Pro',Inter,sans-serif!important;font-size:1.02rem!important;font-weight:700!important;line-height:1.2;cursor:pointer;position:relative}
+    .event-hero-utility:hover{transform:none!important;color:#5f31da!important}
+    .event-hero-utility+.event-hero-utility:before{content:'';position:absolute;left:0;top:20px;bottom:20px;width:1px;background:#ded5ef}
+    .event-action-icon{width:58px;height:58px;flex:0 0 58px;border-radius:50%;background:#f3edff;display:grid;place-items:center;position:relative}
     .event-action-icon svg{width:34px;height:34px;display:block;overflow:visible}
-    .event-action-icon.calendar-icon:after{
-      content:'+';
-      position:absolute;
-      right:-4px;
-      bottom:-2px;
-      width:23px;
-      height:23px;
-      border-radius:50%;
-      display:grid;
-      place-items:center;
-      background:#fff1fb;
-      color:#d23be7;
-      font:800 1rem/1 Inter,sans-serif;
-      box-shadow:0 4px 12px rgba(110,53,210,.12);
-    }
+    .event-action-icon.calendar-icon:after{content:'+';position:absolute;right:-4px;bottom:-2px;width:23px;height:23px;border-radius:50%;display:grid;place-items:center;background:#fff1fb;color:#d23be7;font:800 1rem/1 Inter,sans-serif;box-shadow:0 4px 12px rgba(110,53,210,.12)}
     .event-action-label{display:block;text-align:left;white-space:nowrap}
 
-    .event-share-overlay{
-      position:fixed;
-      inset:0;
-      z-index:10000;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:22px;
-      background:rgba(24,16,42,.42);
-      backdrop-filter:blur(8px);
-    }
+    .event-share-overlay{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(24,16,42,.42);backdrop-filter:blur(8px)}
     .event-share-overlay.open{display:flex}
-    .event-share-modal{
-      width:min(520px,100%);
-      background:#fff;
-      border:1px solid #e6def1;
-      border-radius:22px;
-      box-shadow:0 30px 80px rgba(36,20,65,.24);
-      overflow:hidden;
-      font-family:'Be Vietnam Pro',Inter,sans-serif;
-    }
-    .event-share-head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:22px;
-      padding:24px 26px 18px;
-      border-bottom:1px solid #eee8f3;
-      background:linear-gradient(135deg,#fbf9ff,#f6f0ff);
-    }
+    .event-share-modal{width:min(540px,100%);background:#fff;border:1px solid #e6def1;border-radius:22px;box-shadow:0 30px 80px rgba(36,20,65,.24);overflow:hidden;font-family:'Be Vietnam Pro',Inter,sans-serif}
+    .event-share-head{display:flex;align-items:flex-start;justify-content:space-between;gap:22px;padding:24px 26px 18px;border-bottom:1px solid #eee8f3;background:linear-gradient(135deg,#fbf9ff,#f6f0ff)}
     .event-share-head h3{margin:0;color:#1d1730;font-size:1.35rem;line-height:1.2;letter-spacing:-.03em}
     .event-share-head p{margin:7px 0 0;color:#756c81;font:500 .78rem/1.55 Inter,sans-serif;max-width:360px}
-    .event-share-close{
-      width:36px;height:36px;border:0;background:#fff;border-radius:50%;cursor:pointer;
-      display:grid;place-items:center;color:#6c6278;font-size:1.25rem;box-shadow:0 4px 14px rgba(45,27,72,.08)
-    }
+    .event-share-close{width:36px;height:36px;border:0;background:#fff;border-radius:50%;cursor:pointer;display:grid;place-items:center;color:#6c6278;font-size:1.25rem;box-shadow:0 4px 14px rgba(45,27,72,.08)}
     .event-share-body{padding:22px 26px 26px}
-    .event-share-title{
-      padding:0 0 17px;
-      color:#332d3d;
-      font-size:.82rem;
-      line-height:1.5;
-      font-weight:700;
-    }
-    .event-share-linkrow{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
-      gap:10px;
-      align-items:center;
-      padding:8px 8px 8px 14px;
-      border:1px solid #ddd4e9;
-      border-radius:13px;
-      background:#fff;
-    }
-    .event-share-linkrow span{
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      color:#756d7e;
-      font:500 .73rem/1.2 Inter,sans-serif;
-    }
-    .event-share-copy{
-      min-height:38px;
-      padding:0 15px;
-      border:0;
-      border-radius:9px;
-      background:#6432e8;
-      color:#fff;
-      font:700 .72rem/1 Inter,sans-serif;
-      cursor:pointer;
-    }
-    .event-share-options{display:grid;grid-template-columns:1fr 1fr;margin-top:18px;border-top:1px solid #eee8f3;border-left:1px solid #eee8f3}
-    .event-share-option{
-      min-height:58px;
-      padding:0 14px;
-      border:0;
-      border-right:1px solid #eee8f3;
-      border-bottom:1px solid #eee8f3;
-      background:#fff;
-      color:#342d3f;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      text-decoration:none;
-      font:700 .76rem/1 Inter,sans-serif;
-      cursor:pointer;
-    }
-    .event-share-option:hover{background:#faf7ff;color:#6233d8}
-    .event-share-option span:last-child{color:#9b91a5;font-size:1rem}
+    .event-share-title{padding:0 0 17px;color:#332d3d;font-size:.82rem;line-height:1.5;font-weight:700}
+    .event-share-linkrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 8px 8px 14px;border:1px solid #ddd4e9;border-radius:13px;background:#fff}
+    .event-share-linkrow span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#756d7e;font:500 .73rem/1.2 Inter,sans-serif}
+    .event-share-copy{min-height:38px;padding:0 15px;border:0;border-radius:9px;background:#6432e8;color:#fff;font:700 .72rem/1 Inter,sans-serif;cursor:pointer}
+    .event-share-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+    .event-share-option{min-height:68px;padding:10px 14px;border:1px solid #ece5f3;border-radius:14px;background:#fff;color:#342d3f;display:flex;align-items:center;justify-content:flex-start;gap:12px;text-decoration:none;font:700 .78rem/1 Inter,sans-serif;cursor:pointer;transition:.16s ease}
+    .event-share-option:hover{background:#faf7ff;color:#6233d8;border-color:#d9cceb;transform:translateY(-1px)}
+    .event-share-option img{width:36px;height:36px;object-fit:contain;flex:0 0 36px}
 
     @media(max-width:760px){
       .event-hero-actions{display:grid;grid-template-columns:1fr 1fr;gap:0}
       .event-hero-register{grid-column:1/-1;width:100%;min-width:0;min-height:60px;border-radius:16px;margin-bottom:8px}
       .event-hero-utility{min-height:64px;padding:0 10px;justify-content:center;font-size:.88rem!important}
-      .event-hero-utility + .event-hero-utility:before{top:13px;bottom:13px}
+      .event-hero-utility+.event-hero-utility:before{top:13px;bottom:13px}
       .event-action-icon{width:46px;height:46px;flex-basis:46px}
       .event-action-icon svg{width:27px;height:27px}
       .event-action-label{white-space:normal}
@@ -219,7 +77,6 @@
     </span>`;
 
   actions.classList.add('event-hero-actions');
-
   register.classList.add('event-hero-register');
   register.innerHTML = '<span>Register Free →</span>';
 
@@ -232,7 +89,6 @@
   shareButton.setAttribute('aria-haspopup','dialog');
   shareButton.setAttribute('aria-expanded','false');
   shareButton.innerHTML = `${shareIcon}<span class="event-action-label">Share</span>`;
-
   oldShareWrap.replaceWith(shareButton);
 
   const url = location.href.split('#')[0].split('?')[0];
@@ -258,10 +114,10 @@
           <button class="event-share-copy" type="button">Copy link</button>
         </div>
         <div class="event-share-options">
-          <a class="event-share-option" data-share="email"><span>Email</span><span>↗</span></a>
-          <a class="event-share-option" data-share="whatsapp" target="_blank" rel="noopener"><span>WhatsApp</span><span>↗</span></a>
-          <a class="event-share-option" data-share="facebook" target="_blank" rel="noopener"><span>Facebook</span><span>↗</span></a>
-          <a class="event-share-option" data-share="linkedin" target="_blank" rel="noopener"><span>LinkedIn</span><span>↗</span></a>
+          <a class="event-share-option" data-share="email"><img src="${ASSET_ROOT}share-email.png" alt="" aria-hidden="true"><span>Email</span></a>
+          <a class="event-share-option" data-share="whatsapp" target="_blank" rel="noopener"><img src="${ASSET_ROOT}share-whatsapp.png" alt="" aria-hidden="true"><span>WhatsApp</span></a>
+          <a class="event-share-option" data-share="facebook" target="_blank" rel="noopener"><img src="${ASSET_ROOT}share-facebook.png" alt="" aria-hidden="true"><span>Facebook</span></a>
+          <a class="event-share-option" data-share="linkedin" target="_blank" rel="noopener"><img src="${ASSET_ROOT}share-linkedin.png" alt="" aria-hidden="true"><span>LinkedIn</span></a>
         </div>
       </div>
     </div>`;
