@@ -9,12 +9,7 @@
     s.dataset.wsSiteShellCore='true';
     document.head.appendChild(s);
   };
-
-  if(document.readyState==='loading'){
-    document.write('<script src="/assets/js/site-shell-core.js" data-ws-site-shell-core="true"><\\/script>');
-  }else{
-    loadCore();
-  }
+  loadCore();
 
   const mountHomepageEventBanner=()=>{
     const path=location.pathname.replace(/\/index\.html$/,'/');
