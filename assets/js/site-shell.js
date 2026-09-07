@@ -1,264 +1,53 @@
 (()=>{
   'use strict';
 
-  const doc=document;
-
-  // The workshop branch uses the committed event banner asset instead of the old embedded hero image.
-  // Keep this before the Resources early return so it applies to the event detail page as well.
-  if(doc.body?.classList.contains('event-page')){
-    const banner=doc.querySelector('.hero-banner');
-    if(banner){
-      banner.src='/resources/events/event-main-banner.png';
-      banner.removeAttribute('srcset');
-    }
-    if(location.pathname.includes('/resources/events/building-a-communicative-esl-lesson-with-flow/')){
-      const eventHighlight=doc.createElement('script');
-      eventHighlight.src='/assets/js/event-highlight.js';
-      eventHighlight.async=false;
-      eventHighlight.dataset.wsEventHighlight='true';
-      doc.head.appendChild(eventHighlight);
-    }
-  }
-
-  // Load first-party analytics/event instrumentation before page-specific shell delegation.
-  // This keeps conversion tracking active on both the main website and Resources pages.
-  if(!doc.querySelector('script[data-ws-analytics-events]')){
-    const analytics=doc.createElement('script');
-    analytics.src='/assets/js/analytics-events.js';
-    analytics.async=true;
-    analytics.dataset.wsAnalyticsEvents='true';
-    doc.head.appendChild(analytics);
-  }
-
-  // Keep the footer structure and social destinations consistent across the full site,
-  // including Resources pages which use their own page runtime below.
-  if(!doc.querySelector('script[data-ws-footer-unify]')){
-    const footerUnify=doc.createElement('script');
-    footerUnify.src='/assets/js/footer-unify.js';
-    footerUnify.async=false;
-    footerUnify.dataset.wsFooterUnify='true';
-    doc.head.appendChild(footerUnify);
-  }
-
-  // Resources has its own isolated runtime for image fallbacks, archive behavior and
-  // resource navigation state. Delegate immediately so the general website shell cannot
-  // bypass those protections or attach duplicate UI handlers.
-  if(doc.body?.classList.contains('page-resources')){
-    const resourceShell=doc.createElement('script');
-    resourceShell.src='/assets/js/resources-page-shell.js';
-    resourceShell.async=false;
-    doc.head.appendChild(resourceShell);
-    return;
-  }
-
-  const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
-  // Performance/responsiveness overrides are deliberately small and global.
-  // They preserve the existing visual language while removing expensive blur-based reveals
-  // and making media/flex/grid content safer on narrow screens.
-  const style=doc.createElement('style');
-  style.id='ws-performance-overrides';
-  style.textContent=`
-    img,video,iframe,svg{max-width:100%}
-    img,video{height:auto}
-    iframe{border:0}
-    main :where(.container,.ws-container,.split,.hero-grid,.format-wrap,.org-wrap,.demo-grid,.screen-grid,.contact-wrap,.arch-grid,.library-head)>*{min-width:0}
-    :where(p,h1,h2,h3,h4,a,strong,span){overflow-wrap:break-word}
-
-    /* One fast reveal language. Remove GPU-expensive blur and long stagger delays. */
-    .scroll-reveal,
-    .reveal{
-      filter:none!important;
-      transition-delay:0ms!important;
-      transition-duration:.22s,.26s!important;
-      transition-timing-function:ease,cubic-bezier(.2,.76,.2,1)!important;
-    }
-    .scroll-reveal:not(.is-visible){transform:translate3d(0,12px,0) scale(.998)!important}
-    .scroll-reveal.reveal-left:not(.is-visible){transform:translate3d(-12px,0,0) scale(.998)!important}
-    .scroll-reveal.reveal-right:not(.is-visible){transform:translate3d(12px,0,0) scale(.998)!important}
-    .scroll-reveal.is-visible{transform:none!important;filter:none!important}
-
-    /* Do not stack section-level fades on top of page-level item reveals. */
-    .reveal-section.reveal-pending,
-    .section-shell-reveal,
-    body.page-platform .ws-scroll-section,
-    body.page-blocks .ws-scroll-section,
-    body.page-organisations .ws-scroll-section{
-      opacity:1!important;
-      transform:none!important;
-      filter:none!important;
-      transition:none!important;
-    }
-
-    /* Avoid keeping compositor layers alive once a reveal has completed. */
-    .scroll-reveal.is-visible,
-    .reveal.in{will-change:auto!important}
-
-    @media(max-width:900px){
-      .ws-site-header,
-      .subnav-wrap.ws-section-subnav{
-        backdrop-filter:blur(8px)!important;
-        -webkit-backdrop-filter:blur(8px)!important;
-      }
-      .section{scroll-margin-inline:0}
-      .ws-footer-contact a{overflow-wrap:anywhere}
-    }
-
-    @media(max-width:700px){
-      :where(.section,.booking-section,.cta){max-width:100%;overflow-x:clip}
-      :where(.btn,.ws-btn,button,input,select,textarea){max-width:100%}
-      .hero-grid,.split,.format-wrap,.org-wrap,.demo-grid,.screen-grid,.contact-wrap,.arch-grid{min-width:0}
-    }
-
-    @media(hover:none),(pointer:coarse){
-      .visual-card:hover,.dashboard-feature-grid .card:hover,.scale-step:hover,
-      .route-card:hover,.example-card:hover,.topic:hover,.ws-btn:hover,.btn:hover{
-        transform:none!important;
-      }
-    }
-
-    @media(prefers-reduced-motion:reduce){
-      .scroll-reveal,.reveal,.section-shell-reveal,.ws-scroll-section,.reveal-section{
-        opacity:1!important;transform:none!important;filter:none!important;transition:none!important;animation:none!important
-      }
-    }
-  `;
-  doc.head.appendChild(style);
-
-  // Existing page scripts may already have assigned stagger values before this shared shell runs.
-  // Remove them so content never feels as though it is waiting for the scroll animation.
-  doc.querySelectorAll('.scroll-reveal').forEach(el=>el.style.setProperty('--reveal-delay','0ms'));
-
-  // Progressive image hints. Most page images already declare these in HTML; this catches any that do not.
-  const viewH=Math.max(window.innerHeight||0,600);
-  doc.querySelectorAll('img').forEach(img=>{
-    if(!img.hasAttribute('decoding')) img.decoding='async';
-    const r=img.getBoundingClientRect();
-    const nearTop=r.bottom>0&&r.top<viewH*1.15;
-    if(!nearTop&&!img.hasAttribute('loading')) img.loading='lazy';
-    if(nearTop&&img.closest('.hero')&&'fetchPriority' in img) img.fetchPriority='high';
-  });
-
-  // Park below-the-fold autoplay videos before they can continue buffering large MP4 files.
-  // Source quality is untouched: the exact original file is restored shortly before the section enters view.
-  const parked=[];
-  doc.querySelectorAll('video').forEach(video=>{
-    if(video.closest('.carousel-card')) return;
-    if(video.closest('.hero')) return;
-    if(!video.autoplay) return;
-    const src=video.getAttribute('src');
-    if(!src) return;
-    const r=video.getBoundingClientRect();
-    if(r.top<=viewH*1.2) return;
-
-    video.dataset.wsDeferredSrc=src;
-    video.dataset.wsWasAutoplay='true';
-    video.autoplay=false;
-    try{video.pause();}catch(_){ }
-    video.removeAttribute('src');
-    video.preload='none';
-    try{video.load();}catch(_){ }
-    parked.push(video);
-  });
-
-  const activateVideo=video=>{
-    if(video.dataset.wsMediaActivated==='true') return;
-    const src=video.dataset.wsDeferredSrc;
-    if(!src) return;
-    video.dataset.wsMediaActivated='true';
-    video.setAttribute('src',src);
-    video.preload='metadata';
-    if(video.dataset.wsWasAutoplay==='true') video.autoplay=true;
-    try{video.load();}catch(_){ }
-    if(video.dataset.wsWasAutoplay==='true'&&!reduced){
-      const play=()=>video.play().catch(()=>{});
-      if(video.readyState>=2) play();
-      else video.addEventListener('canplay',play,{once:true});
-    }
+  const loadCore=()=>{
+    if(document.querySelector('script[data-ws-site-shell-core]')) return;
+    const s=document.createElement('script');
+    s.src='/assets/js/site-shell-core.js';
+    s.async=false;
+    s.dataset.wsSiteShellCore='true';
+    document.head.appendChild(s);
   };
 
-  if(parked.length){
-    if('IntersectionObserver' in window){
-      const margin=window.matchMedia?.('(max-width:700px)').matches?'180px 0px':'320px 0px';
-      const mediaObserver=new IntersectionObserver((entries,observer)=>{
-        entries.forEach(entry=>{
-          if(!entry.isIntersecting) return;
-          activateVideo(entry.target);
-          observer.unobserve(entry.target);
-        });
-      },{rootMargin:margin,threshold:.01});
-      parked.forEach(video=>mediaObserver.observe(video));
-    }else{
-      parked.forEach(activateVideo);
-    }
+  if(document.readyState==='loading'){
+    document.write('<script src="/assets/js/site-shell-core.js" data-ws-site-shell-core="true"><\\/script>');
+  }else{
+    loadCore();
   }
 
-  // Stop decode/playback work in a background tab and resume only visible autoplay showcases on return.
-  doc.addEventListener('visibilitychange',()=>{
-    if(doc.hidden){
-      doc.querySelectorAll('video').forEach(video=>{if(!video.paused) video.pause();});
-      return;
-    }
-    if(reduced) return;
-    doc.querySelectorAll('video').forEach(video=>{
-      const shouldAuto=video.autoplay||video.dataset.wsWasAutoplay==='true';
-      if(!shouldAuto||!video.getAttribute('src')) return;
-      const r=video.getBoundingClientRect();
-      if(r.bottom>0&&r.top<window.innerHeight) video.play().catch(()=>{});
-    });
-  },{passive:true});
+  const mountHomepageEventBanner=()=>{
+    const path=location.pathname.replace(/\/index\.html$/,'/');
+    if(path!=='/') return;
+    if(document.getElementById('ws-home-event-promo')) return;
 
-  // Script loader. Critical shell and hero interaction start first; the decorative role guide
-  // waits for an idle slot so it cannot delay initial interaction or compete with page media.
-  const load=src=>new Promise((resolve,reject)=>{
-    const s=doc.createElement('script');
-    s.src=src;
-    s.async=true;
-    s.addEventListener('load',()=>resolve(s),{once:true});
-    s.addEventListener('error',reject,{once:true});
-    doc.head.appendChild(s);
-  });
+    const header=document.querySelector('header');
+    if(!header) return;
 
-  const basePromise=load('/assets/js/site-shell-base.js').catch(()=>null);
-  load('/assets/js/resources-global.js').catch(()=>null);
-  if(doc.body?.classList.contains('page-platform')&&doc.getElementById('printable')){
-    load('/assets/js/interactive-printable-slider.js')
-      .then(()=>load('/assets/js/interactive-printable-slider-fixes.js'))
-      .catch(()=>null);
-  }
-  const hasHeroOverview=!!doc.querySelector('.hero .hero-visual .hero-media-frame .hero-showcase-video');
-  const heroPromise=hasHeroOverview?load('/assets/js/hero-video.js').catch(()=>null):Promise.resolve(null);
-  if(doc.getElementById('carouselTrack')) load('/assets/js/carousel-performance.js').catch(()=>null);
-  if(doc.getElementById('galleryStage')) load('/assets/js/gallery-performance.js').catch(()=>null);
+    const style=document.createElement('style');
+    style.id='ws-home-event-promo-style';
+    style.textContent=`
+      #ws-home-event-promo{padding:18px 0 4px;background:linear-gradient(180deg,#fff 0%,#fdfbff 100%)}
+      #ws-home-event-promo .ws-home-event-promo-inner{width:min(calc(100% - 40px),1320px);margin:0 auto}
+      #ws-home-event-promo .ws-home-event-promo-link{position:relative;display:block;overflow:hidden;border:1px solid rgba(111,77,238,.16);border-radius:26px;background:#fff;box-shadow:0 14px 38px rgba(54,35,94,.09);isolation:isolate;transition:transform .24s ease,box-shadow .24s ease,border-color .24s ease}
+      #ws-home-event-promo .ws-home-event-promo-link:before{content:'';position:absolute;inset:-45% -30%;z-index:2;pointer-events:none;background:linear-gradient(112deg,transparent 38%,rgba(255,255,255,.42) 49%,transparent 60%);transform:translateX(-52%) rotate(3deg);opacity:0;transition:transform .75s ease,opacity .2s ease}
+      #ws-home-event-promo .ws-home-event-promo-image{position:relative;z-index:1;display:block;width:100%;height:auto;transform:scale(1.001);transform-origin:center;transition:transform .55s cubic-bezier(.2,.7,.2,1),filter .35s ease}
+      #ws-home-event-promo .ws-home-event-promo-link:hover{transform:translateY(-3px);border-color:rgba(111,77,238,.26);box-shadow:0 22px 52px rgba(68,39,120,.14)}
+      #ws-home-event-promo .ws-home-event-promo-link:hover:before{opacity:1;transform:translateX(52%) rotate(3deg)}
+      #ws-home-event-promo .ws-home-event-promo-link:hover .ws-home-event-promo-image{transform:scale(1.008);filter:saturate(1.035) contrast(1.01)}
+      #ws-home-event-promo .ws-home-event-promo-link:focus-visible{outline:3px solid rgba(103,52,237,.34);outline-offset:4px}
+      @media(max-width:700px){#ws-home-event-promo{padding:12px 0 2px}#ws-home-event-promo .ws-home-event-promo-inner{width:min(calc(100% - 28px),1320px)}#ws-home-event-promo .ws-home-event-promo-link{border-radius:18px}}
+      @media(prefers-reduced-motion:reduce){#ws-home-event-promo .ws-home-event-promo-link,#ws-home-event-promo .ws-home-event-promo-image,#ws-home-event-promo .ws-home-event-promo-link:before{transition:none!important}#ws-home-event-promo .ws-home-event-promo-link:hover{transform:none}#ws-home-event-promo .ws-home-event-promo-link:hover .ws-home-event-promo-image{transform:none}}
+    `;
+    document.head.appendChild(style);
 
-  heroPromise.finally(()=>{
-    if(!doc.querySelector('.ws-hero-float-shell')){
-      const marker=doc.createElement('span');
-      marker.className='ws-hero-float-shell';
-      marker.hidden=true;
-      marker.setAttribute('aria-hidden','true');
-      doc.body.appendChild(marker);
-    }
-  });
-
-  const runRoleGuide=async()=>{
-    if(location.pathname.toLowerCase().includes('/contact')) return;
-    if(!doc.querySelector('main > section')) return;
-    await basePromise;
-    await heroPromise;
-    await load('/assets/js/role-guide-copy.js').catch(()=>null);
-    await load('/assets/js/role-guide-v2.js').catch(()=>null);
-    await load('/assets/js/role-guide-chrome-guard.js').catch(()=>null);
+    const section=document.createElement('section');
+    section.id='ws-home-event-promo';
+    section.setAttribute('aria-label','Featured live workshop');
+    section.innerHTML=`<div class="ws-home-event-promo-inner"><a class="ws-home-event-promo-link" href="/resources/events/building-a-communicative-esl-lesson-with-flow/" aria-label="View Building a Communicative ESL Lesson with Flow live workshop"><img class="ws-home-event-promo-image" src="/resources/events/Front%20page%20banner.svg" alt="Building a Communicative ESL Lesson with Flow — live workshop for ESL teachers" loading="eager" fetchpriority="high" decoding="async"></a></div>`;
+    header.insertAdjacentElement('afterend',section);
   };
 
-  const scheduleGuide=()=>{
-    if('requestIdleCallback' in window){
-      requestIdleCallback(()=>runRoleGuide(),{timeout:1800});
-    }else{
-      setTimeout(runRoleGuide,900);
-    }
-  };
-
-  if(doc.readyState==='complete') scheduleGuide();
-  else window.addEventListener('load',scheduleGuide,{once:true,passive:true});
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mountHomepageEventBanner,{once:true});
+  else mountHomepageEventBanner();
 })();
