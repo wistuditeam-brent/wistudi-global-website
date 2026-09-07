@@ -3,6 +3,16 @@
 
   const doc=document;
 
+  // The workshop branch uses the committed event banner asset instead of the old embedded hero image.
+  // Keep this before the Resources early return so it applies to the event detail page as well.
+  if(doc.body?.classList.contains('event-page')){
+    const banner=doc.querySelector('.hero-banner');
+    if(banner){
+      banner.src='/resources/events/event-main-banner.png';
+      banner.removeAttribute('srcset');
+    }
+  }
+
   // Load first-party analytics/event instrumentation before page-specific shell delegation.
   // This keeps conversion tracking active on both the main website and Resources pages.
   if(!doc.querySelector('script[data-ws-analytics-events]')){
