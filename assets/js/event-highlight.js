@@ -5,6 +5,18 @@
 
   const style=doc.createElement('style');
   style.textContent=`
+    /* Connected event hero: banner, actions and facts are one unit. */
+    .ws-event-hero-unit{overflow:visible;border:1px solid #e8e0f1;border-radius:24px;background:#fff;box-shadow:0 18px 50px rgba(49,31,85,.10)}
+    .ws-event-hero-unit>.hero-banner{display:block;width:100%;margin:0;border:0!important;border-radius:23px 23px 0 0!important;box-shadow:none!important}
+    .ws-event-hero-unit>.hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0!important;padding:20px 22px;background:#fff;border-top:1px solid #eee7f5}
+    .ws-event-hero-unit>.hero-actions .ev-btn{margin:0}
+    .ws-event-hero-unit>.hero-actions .primary{min-width:190px}
+    .ws-event-hero-unit>.facts{width:100%!important;margin:0!important;border:0!important;border-top:1px solid #eee7f5!important;border-radius:0 0 23px 23px!important;box-shadow:none!important;background:#fff!important}
+    .ws-event-hero-unit>.facts .fact{min-width:0;background:#fff}
+    .ws-event-hero-unit>.facts .fact:first-child{border-bottom-left-radius:23px}
+    .ws-event-hero-unit>.facts .fact:last-child{border-bottom-right-radius:23px}
+    .hero:has(.ws-event-hero-unit){padding-bottom:34px}
+
     #ws-event-highlight-section{padding:74px 0;background:#fff}
     #ws-event-highlight-section .event-highlight-shell{width:min(calc(100% - 40px),1180px);margin:auto;display:grid;grid-template-columns:minmax(0,1.03fr) minmax(360px,.97fr);gap:46px;align-items:center;padding:34px;border:1px solid #ece6f4;border-radius:28px;background:linear-gradient(135deg,#fff 0%,#fcfaff 54%,#f7f1ff 100%);box-shadow:0 18px 54px rgba(52,35,90,.08)}
     #ws-event-highlight-section .event-highlight-art img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;border-radius:22px;border:1px solid #e6dff0;box-shadow:0 14px 34px rgba(54,35,94,.10)}
@@ -16,7 +28,9 @@
     #ws-event-highlight-section .event-highlight-point{display:grid;grid-template-columns:56px 1fr;gap:15px;align-items:center}
     #ws-event-highlight-section .event-highlight-icon{width:56px;height:56px;border-radius:50%;display:grid;place-items:center}
     #ws-event-highlight-section .event-highlight-icon img{display:block;width:34px;height:34px;object-fit:contain}
-    #ws-event-highlight-section .event-highlight-icon.play{background:#fff0f7}.event-highlight-icon.people{background:#f2edff}.event-highlight-icon.idea{background:#eafbf7}
+    #ws-event-highlight-section .event-highlight-icon.play{background:#fff0f7}
+    #ws-event-highlight-section .event-highlight-icon.people{background:#f2edff}
+    #ws-event-highlight-section .event-highlight-icon.idea{background:#eafbf7}
     #ws-event-highlight-section .event-highlight-point strong{display:block;margin-bottom:3px;font:800 1rem/1.25 Inter,sans-serif;color:#211a31}
     #ws-event-highlight-section .event-highlight-point span{display:block;color:#6b6373;font-size:.9rem;line-height:1.48}
     #ws-event-highlight-section .event-highlight-close{margin-top:24px;padding-top:20px;border-top:1px solid #e9e3ef;color:#5d5667;font-size:.95rem;line-height:1.55}
@@ -49,6 +63,8 @@
     .ws-registration-centered .ws-registration-form-panel{min-width:0!important}
 
     @media(max-width:940px){
+      .ws-event-hero-unit>.facts{grid-template-columns:1fr 1fr!important}
+      .ws-event-hero-unit>.facts .fact:last-child{grid-column:1/-1}
       #ws-event-highlight-section .event-highlight-shell{grid-template-columns:1fr;gap:30px}
       #ws-event-highlight-section .event-highlight-art{max-width:720px}
       #ws-event-highlight-section .event-highlight-art img{aspect-ratio:auto}
@@ -58,6 +74,14 @@
       .ws-workshop-features .workshop-icon svg{width:56px;height:56px}
     }
     @media(max-width:620px){
+      .ws-event-hero-unit{border-radius:16px}
+      .ws-event-hero-unit>.hero-banner{border-radius:15px 15px 0 0!important}
+      .ws-event-hero-unit>.hero-actions{display:grid!important;grid-template-columns:1fr 1fr;padding:15px;gap:9px}
+      .ws-event-hero-unit>.hero-actions .primary{grid-column:1/-1;width:100%;min-width:0}
+      .ws-event-hero-unit>.hero-actions .share-wrap,.ws-event-hero-unit>.hero-actions .share-wrap>.ev-btn{width:100%}
+      .ws-event-hero-unit>.facts{grid-template-columns:1fr!important;border-radius:0 0 15px 15px!important}
+      .ws-event-hero-unit>.facts .fact,.ws-event-hero-unit>.facts .fact:last-child{grid-column:auto;border-right:0!important;border-bottom:1px solid #eee8f4}
+      .ws-event-hero-unit>.facts .fact:last-child{border-bottom:0;border-bottom-left-radius:15px;border-bottom-right-radius:15px}
       #ws-event-highlight-section{padding:58px 0}
       #ws-event-highlight-section .event-highlight-shell{width:min(calc(100% - 26px),1180px);padding:20px;border-radius:20px}
       .ws-workshop-features{padding:62px 0 64px!important}
@@ -69,6 +93,20 @@
     }
   `;
   doc.head.appendChild(style);
+
+  const unifyHero=()=>{
+    if(doc.querySelector('.ws-event-hero-unit')) return;
+    const heroEc=doc.querySelector('.hero>.ec');
+    const banner=heroEc?.querySelector('.hero-banner');
+    const actions=heroEc?.querySelector('.hero-actions');
+    const facts=doc.querySelector('main>section.facts, section.ec.facts');
+    if(!heroEc||!banner||!actions||!facts) return;
+    const unit=doc.createElement('div');
+    unit.className='ws-event-hero-unit';
+    heroEc.insertBefore(unit,banner);
+    unit.append(banner,actions,facts);
+  };
+  unifyHero();
 
   const featureIcon=(type)=>{
     const common='fill="none" stroke="#6040e8" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"';
@@ -90,35 +128,34 @@
     featureSection.innerHTML=`<span class="workshop-squiggle" aria-hidden="true"></span><span class="workshop-spark top" aria-hidden="true"><span></span><span></span><span></span></span><span class="workshop-spark bottom" aria-hidden="true"><span></span><span></span><span></span></span><div class="ec"><div class="workshop-eyebrow">In this workshop</div><h2 class="workshop-title">Everything you need for a practical and inspiring session.</h2><div class="workshop-grid"><article class="workshop-item"><div class="workshop-icon">${featureIcon('idea')}</div><div><h3>Practical ESL activities</h3><p>Modern, hands-on ideas for the classroom.</p></div></article><article class="workshop-item"><div class="workshop-icon">${featureIcon('map')}</div><div><h3>Examples across lesson stages</h3><p>See what works at different points in a lesson.</p></div></article><article class="workshop-item"><div class="workshop-icon">${featureIcon('laptop')}</div><div><h3>A complete lesson in Flow</h3><p>Explore a full communicative lesson built in Flow.</p></div></article><article class="workshop-item"><div class="workshop-icon">${featureIcon('journey')}</div><div><h3>From Warm-up to Reflect</h3><p>Follow a purposeful learning journey.</p></div></article><article class="workshop-item"><div class="workshop-icon">${featureIcon('document')}</div><div><h3>Interactive and printable</h3><p>Discover both digital and worksheet versions.</p></div></article><article class="workshop-item"><div class="workshop-icon">${featureIcon('learner')}</div><div><h3>Experience it as a learner</h3><p>Step into the lesson from the learner’s perspective.</p></div></article></div></div>`;
   }
 
+  const centerRegistration=()=>{
+    const form=doc.querySelector('form');
+    if(!form) return;
+    const panel=form.closest('div,section,article');
+    if(!panel) return;
+    let layout=panel.parentElement;
+    while(layout&&layout!==doc.body){
+      const children=[...layout.children].filter(el=>el.nodeType===1);
+      if(children.length>=2 && children.some(el=>el.contains(form))) break;
+      layout=layout.parentElement;
+    }
+    if(!layout||layout===doc.body) return;
+    const formPanel=[...layout.children].find(el=>el.contains(form));
+    if(!formPanel) return;
+    formPanel.classList.add('ws-registration-form-panel');
+    [...layout.children].filter(el=>el!==formPanel).forEach(el=>{
+      if(/save your place|free registration/i.test(el.textContent||'')) el.classList.add('ws-registration-left-hidden');
+    });
+    layout.classList.add('ws-registration-centered');
+  };
+  centerRegistration();
+  new MutationObserver(centerRegistration).observe(doc.body,{childList:true,subtree:true});
+
   if(!doc.getElementById('ws-event-highlight-section')){
     const section=doc.createElement('section');
     section.id='ws-event-highlight-section';
-    section.innerHTML=`<div class="event-highlight-shell"><div class="event-highlight-art"><img src="/resources/events/Banner_section.png" alt="Wistudi lesson example showing a communicative ESL learning journey" loading="lazy" decoding="async"></div><div class="event-highlight-copy"><div class="event-highlight-kicker">Event highlight</div><h2>From Activities to Real Communication</h2><p class="event-highlight-intro">See how a complete lesson in Wistudi can guide learners from familiarising themselves with language to using it confidently and independently.</p><div class="event-highlight-points"><div class="event-highlight-point"><div class="event-highlight-icon play"><img src="/resources/events/icon-play.png" alt=""></div><div><strong>See it in action</strong><span>Explore a real lesson example built in Wistudi.</span></div></div><div class="event-highlight-point"><div class="event-highlight-icon people"><img src="/resources/events/icon-people.png" alt=""></div><div><strong>Practical ideas</strong><span>Discover activities that support each stage of learning.</span></div></div><div class="event-highlight-point"><div class="event-highlight-icon idea"><img src="/resources/events/icon-lightbulb.png" alt=""></div><div><strong>Teaching flexibility</strong><span>Get ideas you can adapt for your own students, online or offline.</span></div></div></div><div class="event-highlight-close">Walk away with clear, practical takeaways to help your students use English with confidence.</div><a class="event-highlight-cta" href="#register">Join the Event <span aria-hidden="true">→</span></a></div></div>`;
-    const trainer=doc.querySelector('.trainer')?.closest('section');
-    if(trainer?.parentNode) trainer.parentNode.insertBefore(section,trainer);
-  }
-
-  const directChild=(ancestor,node)=>{let cur=node;while(cur&&cur.parentElement!==ancestor)cur=cur.parentElement;return cur};
-  const commonAncestor=(a,b)=>{const seen=new Set();for(let n=a;n;n=n.parentElement)seen.add(n);for(let n=b;n;n=n.parentElement)if(seen.has(n))return n;return null};
-  const centerRegistration=()=>{
-    const saveHeading=[...doc.querySelectorAll('h1,h2,h3')].find(el=>el.textContent.trim()==='Save your place.');
-    const detailsHeading=[...doc.querySelectorAll('h1,h2,h3')].find(el=>el.textContent.trim()==='Your details');
-    if(!saveHeading||!detailsHeading) return false;
-    const form=detailsHeading.closest('form')||detailsHeading.parentElement?.querySelector('form')||detailsHeading.closest('div')?.querySelector('form');
-    const target=form||detailsHeading;
-    const shared=commonAncestor(saveHeading,target);
-    if(!shared) return false;
-    const left=directChild(shared,saveHeading);
-    const right=directChild(shared,target);
-    if(!left||!right||left===right) return false;
-    left.classList.add('ws-registration-left-hidden');
-    shared.classList.add('ws-registration-centered');
-    right.classList.add('ws-registration-form-panel');
-    return true;
-  };
-  if(!centerRegistration()){
-    const observer=new MutationObserver(()=>{if(centerRegistration())observer.disconnect()});
-    observer.observe(doc.body,{childList:true,subtree:true});
-    setTimeout(()=>observer.disconnect(),12000);
+    section.innerHTML=`<div class="event-highlight-shell"><div class="event-highlight-art"><img src="/resources/events/Banner_section.png" alt="Wistudi lesson example showing a communicative ESL learning journey" loading="lazy" decoding="async"></div><div class="event-highlight-copy"><div class="event-highlight-kicker">Event highlight</div><h2>From Activities to Real Communication</h2><p class="event-highlight-intro">See how a complete lesson in Wistudi can guide learners from familiarising themselves with language to using it confidently and independently.</p><div class="event-highlight-points"><div class="event-highlight-point"><div class="event-highlight-icon play"><img src="/resources/events/icon-play.png" alt="" aria-hidden="true"></div><div><strong>See it in action</strong><span>Explore a real lesson example built in Wistudi.</span></div></div><div class="event-highlight-point"><div class="event-highlight-icon people"><img src="/resources/events/icon-people.png" alt="" aria-hidden="true"></div><div><strong>Practical ideas</strong><span>Discover activities that support each stage of learning.</span></div></div><div class="event-highlight-point"><div class="event-highlight-icon idea"><img src="/resources/events/icon-lightbulb.png" alt="" aria-hidden="true"></div><div><strong>Teaching flexibility</strong><span>Get ideas you can adapt for your own students, online or offline.</span></div></div></div><div class="event-highlight-close">Walk away with clear, practical takeaways to help your students use English with confidence.</div><a class="event-highlight-cta" href="#register">Join the Event <span aria-hidden="true">→</span></a></div></div>`;
+    const trainerSection=doc.querySelector('.trainer')?.closest('section');
+    if(trainerSection?.parentNode) trainerSection.parentNode.insertBefore(section,trainerSection);
   }
 })();
