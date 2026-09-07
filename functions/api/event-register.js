@@ -4,6 +4,8 @@ const respond = (status, payload) => new Response(JSON.stringify(payload), { sta
 const clean = (value, max = 500) => String(value ?? '').trim().slice(0, max);
 const emailOk = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
+const DEFAULT_EVENTS_SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyyM-dUwPLUk8FyhoLfl-jRJciUK8cU4gn0kTf_g4aqLdQb8uYJfmkuastG1llURxGm/exec';
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -39,15 +41,17 @@ export async function onRequestPost(context) {
     if (!emailOk(registration.email)) return respond(400, { error: 'Please enter a valid email address.' });
     if (!registration.privacy_consent) return respond(400, { error: 'Privacy Policy agreement is required.' });
 
-    if (!env.EVENTS_SHEETS_WEBHOOK_URL || !env.EVENTS_SHEETS_WEBHOOK_SECRET) {
-      console.error('Event registration storage is not configured.');
+    const sheetsWebhookUrl = env.EVENTS_SHEETS_WEBHOOK_URL || DEFAULT_EVENTS_SHEETS_WEBHOOK_URL;
+
+    if (!env.EVENTS_SHEETS_WEBHOOK_SECRET) {
+      console.error('Event registration storage secret is not configured.');
       return respond(503, { error: 'Registration storage is being connected. Please try again shortly.' });
     }
 
     const registrationId = crypto.randomUUID();
     const registeredAt = new Date().toISOString();
 
-    const storageResponse = await fetch(env.EVENTS_SHEETS_WEBHOOK_URL, {
+    const storageResponse = await fetch(sheetsWebhookUrl, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
