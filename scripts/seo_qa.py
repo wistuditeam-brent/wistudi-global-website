@@ -130,12 +130,13 @@ for filename, canonical_path in static_pages.items():
     if re.search(r'<meta\s+name="keywords"', html, re.I):
         warn(f"{filename}: meta keywords are unnecessary and should be removed")
 
-# Event discovery and performance safeguards.
+# Event discovery and media safeguards. The event currently uses the canonical high-resolution
+# PNG; do not fall back to the older duplicated banner nested in the event directory.
 events_hub = read("resources/events/index.html")
-if "/assets/images/resources/events/communicative-esl-flow/event-banner.webp" not in events_hub:
-    fail("Events hub must use the optimized event-banner.webp asset")
+if "/resources/events/event-main-banner.png" not in events_hub:
+    fail("Events hub must use the canonical high-resolution event-main-banner.png asset")
 if "WS%20Banner%20(1).png" in events_hub:
-    fail("Events hub regressed to the large legacy PNG banner")
+    fail("Events hub regressed to the older nested event banner asset")
 
 # Sitemap dates should be real ISO dates. lastmod is useful only when it tracks significant changes.
 if sitemap_path.exists():
