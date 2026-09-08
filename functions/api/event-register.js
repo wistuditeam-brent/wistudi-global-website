@@ -1,16 +1,18 @@
-import { connect } from 'cloudflare:sockets';
-
 const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8' };
 const DEFAULT_EVENTS_SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyyM-dUwPLUk8FyhoLfl-jRJciUK8cU4gn0kTf_g4aqLdQb8uYJfmkuastG1llURxGm/exec';
-const EVENT_START_ISO = '2026-09-15T14:00:00+07:00';
-const EVENT_ZOOM_URL = 'https://us05web.zoom.us/j/89878175931?pwd=GMeXxQKb9nIehaEG7cJaM5bEmrdipU.1';
-const SMTP_HOST = 'smtp.protonmail.ch';
-const SMTP_PORT = 587;
+
+const EVENTS = Object.freeze({
+  'communicative-esl-flow-2026-09-15': Object.freeze({
+    name: 'Building a Communicative ESL Lesson with Flow',
+    startIso: '2026-09-15T14:00:00+07:00',
+    zoomUrl: 'https://us05web.zoom.us/j/89878175931?pwd=GMeXxQKb9nIehaEG7cJaM5bEmrdipU.1',
+    pageUrl: 'https://global.wistudi.com/resources/events/building-a-communicative-esl-lesson-with-flow/'
+  })
+});
 
 const respond = (status, payload) => new Response(JSON.stringify(payload), { status, headers: JSON_HEADERS });
 const clean = (value, max = 500) => String(value ?? '').trim().slice(0, max);
 const emailOk = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-const headerSafe = (value) => String(value ?? '').replace(/[\r\n]+/g, ' ').trim();
 const escapeHtml = (value) => String(value ?? '')
   .replace(/&/g, '&amp;')
   .replace(/</g, '&lt;')
@@ -18,23 +20,7 @@ const escapeHtml = (value) => String(value ?? '')
   .replace(/"/g, '&quot;')
   .replace(/'/g, '&#39;');
 
-function utf8Base64(value) {
-  const bytes = new TextEncoder().encode(String(value));
-  let binary = '';
-  const chunkSize = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-  }
-  return btoa(binary);
-}
-
-function wrapBase64(value, width = 76) {
-  const output = [];
-  for (let i = 0; i < value.length; i += width) output.push(value.slice(i, i + width));
-  return output.join('\r\n');
-}
-
-function eventTimeForTimezone(timezone) {
+function eventTimeForTimezone(startIso, timezone) {
   const fallback = 'Asia/Ho_Chi_Minh';
   let zone = timezone || fallback;
   try {
@@ -42,7 +28,7 @@ function eventTimeForTimezone(timezone) {
   } catch {
     zone = fallback;
   }
-  const start = new Date(EVENT_START_ISO);
+  const start = new Date(startIso);
   const date = new Intl.DateTimeFormat('en-GB', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: zone
   }).format(start);
@@ -52,168 +38,106 @@ function eventTimeForTimezone(timezone) {
   return { date, time, zone };
 }
 
-class SmtpSession {
-  constructor(socket) {
-    this.socket = socket;
-    this.reader = socket.readable.getReader();
-    this.writer = socket.writable.getWriter();
-    this.decoder = new TextDecoder();
-    this.encoder = new TextEncoder();
-    this.buffer = '';
-  }
-
-  async readResponse(expectedCodes) {
-    const expected = new Set(Array.isArray(expectedCodes) ? expectedCodes : [expectedCodes]);
-    const lines = [];
-    let finalCode = null;
-
-    while (finalCode === null) {
-      let newline = this.buffer.indexOf('\n');
-      while (newline >= 0) {
-        const line = this.buffer.slice(0, newline + 1).replace(/\r?\n$/, '');
-        this.buffer = this.buffer.slice(newline + 1);
-        if (line) {
-          lines.push(line);
-          const match = line.match(/^(\d{3})([ -])/);
-          if (match && match[2] === ' ') {
-            finalCode = Number(match[1]);
-            break;
-          }
-        }
-        newline = this.buffer.indexOf('\n');
-      }
-      if (finalCode !== null) break;
-
-      const { value, done } = await this.reader.read();
-      if (done) throw new Error(`SMTP connection closed unexpectedly: ${lines.join(' | ')}`);
-      this.buffer += this.decoder.decode(value, { stream: true });
-    }
-
-    if (!expected.has(finalCode)) {
-      throw new Error(`SMTP ${finalCode}: ${lines.join(' | ')}`);
-    }
-    return { code: finalCode, lines };
-  }
-
-  async writeLine(line) {
-    await this.writer.write(this.encoder.encode(`${line}\r\n`));
-  }
-
-  async command(line, expectedCodes) {
-    await this.writeLine(line);
-    return this.readResponse(expectedCodes);
-  }
-
-  async writeData(message) {
-    const dotStuffed = message.replace(/(^|\r\n)\./g, '$1..');
-    await this.writer.write(this.encoder.encode(`${dotStuffed}\r\n.\r\n`));
-    return this.readResponse(250);
-  }
-
-  release() {
-    try { this.reader.releaseLock(); } catch {}
-    try { this.writer.releaseLock(); } catch {}
-  }
-}
-
-function buildConfirmationEmail(registration, registrationId, fromEmail, fromName) {
-  const { date, time } = eventTimeForTimezone(registration.timezone);
+function buildConfirmationEmail(registration, registrationId, event) {
+  const { date, time } = eventTimeForTimezone(event.startIso, registration.timezone);
   const name = `${registration.first_name} ${registration.last_name}`.trim();
   const safeName = escapeHtml(name);
-  const safeEvent = escapeHtml(registration.event_name);
+  const safeEvent = escapeHtml(event.name);
   const safeEmail = escapeHtml(registration.email);
   const safeRegistrationId = escapeHtml(registrationId || '');
-  const safeZoomUrl = escapeHtml(EVENT_ZOOM_URL);
+  const safeZoomUrl = escapeHtml(event.zoomUrl);
+  const safeEventPage = escapeHtml(event.pageUrl);
+
+  const text = [
+    'Registration confirmed',
+    '',
+    `Hi ${name}, your place has been saved for ${event.name}.`,
+    '',
+    `Date: ${date}`,
+    `Time: ${time}`,
+    'Format: Live online workshop',
+    'Cost: Free',
+    '',
+    'Join the live workshop on Zoom',
+    'The Zoom room opens 15 minutes before the workshop.',
+    event.zoomUrl,
+    '',
+    `Event page: ${event.pageUrl}`,
+    '',
+    `We’ll use ${registration.email} for any final workshop updates.`,
+    `Registration ID: ${registrationId || ''}`,
+    '',
+    'Questions? Email support@wistudi.com.'
+  ].join('\n');
 
   const html = `<!doctype html>
-<html><body style="margin:0;padding:0;background:#f7f4fb;font-family:Arial,Helvetica,sans-serif;color:#211b27;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f7f4fb;padding:28px 12px;"><tr><td align="center">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#ffffff;border:1px solid #e7dff0;border-radius:18px;overflow:hidden;">
-<tr><td style="height:5px;background:linear-gradient(90deg,#ff7142,#7c3aed,#3157f5);"></td></tr>
-<tr><td style="padding:32px 34px 14px;">
-<div style="font-size:24px;font-weight:800;letter-spacing:-0.5px;"><span style="color:#ff7142;">Wi</span><span style="color:#201a27;">studi</span></div>
-<h1 style="margin:28px 0 8px;font-size:26px;line-height:1.2;color:#1f1830;">Registration confirmed</h1>
-<p style="margin:0 0 20px;font-size:15px;line-height:1.65;color:#6d6676;">Hi ${safeName}, your place has been saved for <strong>${safeEvent}</strong>.</p>
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#faf8fd;border:1px solid #eee8f3;border-radius:14px;margin:18px 0 22px;">
-<tr><td style="padding:18px 20px;font-size:14px;line-height:1.8;color:#4b4354;">
-<strong>Event</strong><br>${safeEvent}<br><br>
-<strong>Date</strong><br>${escapeHtml(date)}<br><br>
-<strong>Time</strong><br>${escapeHtml(time)}<br><br>
-<strong>Format</strong><br>Live online workshop<br><br>
-<strong>Cost</strong><br>Free
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Wistudi workshop registration confirmed</title></head>
+<body style="margin:0;padding:0;background-color:#f7f4fb;font-family:Arial,Helvetica,sans-serif;color:#211b27;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background-color:#f7f4fb;"><tr><td align="center" bgcolor="#f7f4fb" style="background-color:#f7f4fb;padding-top:28px;padding-right:12px;padding-bottom:28px;padding-left:12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:620px;background-color:#ffffff;border:1px solid #e7dff0;border-radius:18px;overflow:hidden;">
+<tr><td bgcolor="#6d28d9" style="height:5px;background-color:#6d28d9;font-size:0;line-height:0;">&nbsp;</td></tr>
+<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding-top:32px;padding-right:34px;padding-bottom:28px;padding-left:34px;">
+<p style="margin-top:0;margin-right:0;margin-bottom:24px;margin-left:0;font-family:Arial,Helvetica,sans-serif;font-size:24px;line-height:29px;color:#201a27;font-weight:800;"><span style="color:#ff7142;">Wi</span>studi</p>
+<h1 style="margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0;font-family:Arial,Helvetica,sans-serif;font-size:26px;line-height:32px;color:#1f1830;font-weight:800;">Registration confirmed</h1>
+<p style="margin-top:0;margin-right:0;margin-bottom:20px;margin-left:0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:25px;color:#6d6676;font-weight:400;">Hi ${safeName}, your place has been saved for <strong>${safeEvent}</strong>.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background-color:#faf8fd;border:1px solid #eee8f3;border-radius:14px;"><tr><td bgcolor="#faf8fd" style="background-color:#faf8fd;padding-top:18px;padding-right:20px;padding-bottom:18px;padding-left:20px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:24px;color:#4b4354;">
+<strong>Date</strong><br>${escapeHtml(date)}<br><br><strong>Time</strong><br>${escapeHtml(time)}<br><br><strong>Format</strong><br>Live online workshop<br><br><strong>Cost</strong><br>Free
 </td></tr></table>
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 22px;background:#f6f1ff;border:1px solid #e3d8f6;border-radius:14px;">
-<tr><td style="padding:20px;text-align:center;">
-<div style="font-size:15px;font-weight:800;color:#2b2040;margin-bottom:7px;">Join the live workshop on Zoom</div>
-<div style="font-size:13px;line-height:1.55;color:#746a80;margin-bottom:16px;">The Zoom room opens 15 minutes before the workshop.</div>
-<a href="${safeZoomUrl}" style="display:inline-block;background:#6d28d9;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;padding:12px 20px;border-radius:11px;">Join Zoom session</a>
-<div style="margin-top:14px;font-size:11px;line-height:1.5;color:#92889c;word-break:break-all;">${safeZoomUrl}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin-top:22px;background-color:#f6f1ff;border:1px solid #e3d8f6;border-radius:14px;"><tr><td align="center" bgcolor="#f6f1ff" style="background-color:#f6f1ff;padding-top:22px;padding-right:20px;padding-bottom:22px;padding-left:20px;text-align:center;">
+<p style="margin-top:0;margin-right:0;margin-bottom:7px;margin-left:0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:22px;color:#2b2040;font-weight:800;">Join the live workshop on Zoom</p>
+<p style="margin-top:0;margin-right:0;margin-bottom:17px;margin-left:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;color:#746a80;font-weight:400;">The Zoom room opens 15 minutes before the workshop.</p>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-left:auto;margin-right:auto;"><tr><td align="center" bgcolor="#6d28d9" style="background-color:#6d28d9;border-radius:11px;padding-top:12px;padding-right:20px;padding-bottom:12px;padding-left:20px;"><a href="${safeZoomUrl}" style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:20px;color:#ffffff;font-weight:700;text-decoration:none;display:block;">Join Zoom session</a></td></tr></table>
+<p style="margin-top:14px;margin-right:0;margin-bottom:0;margin-left:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:17px;color:#92889c;font-weight:400;word-break:break-all;">${safeZoomUrl}</p>
 </td></tr></table>
-<p style="margin:0 0 12px;font-size:14px;line-height:1.65;color:#5f5868;">Your Zoom joining link is included above. We’ll use <strong>${safeEmail}</strong> for any final workshop updates.</p>
-<p style="margin:0 0 24px;font-size:14px;line-height:1.65;color:#5f5868;">You do not need to register again.</p>
-<div style="padding-top:18px;border-top:1px solid #eee8f3;font-size:12px;line-height:1.6;color:#948a9d;">Registration ID: ${safeRegistrationId}<br>Questions? Email <a href="mailto:support@wistudi.com" style="color:#6d28d9;">support@wistudi.com</a>.</div>
+<p style="margin-top:20px;margin-right:0;margin-bottom:12px;margin-left:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:23px;color:#5f5868;font-weight:400;">Your Zoom joining link is included above. We’ll use <strong>${safeEmail}</strong> for any final workshop updates.</p>
+<p style="margin-top:0;margin-right:0;margin-bottom:18px;margin-left:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:23px;color:#5f5868;font-weight:400;"><a href="${safeEventPage}" style="color:#6d28d9;text-decoration:none;font-weight:700;">View the event page</a></p>
+<p style="margin-top:0;margin-right:0;margin-bottom:0;margin-left:0;padding-top:18px;border-top:1px solid #eee8f3;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;color:#948a9d;font-weight:400;">Registration ID: ${safeRegistrationId}<br>Questions? Email <a href="mailto:support@wistudi.com" style="color:#6d28d9;text-decoration:none;">support@wistudi.com</a>.</p>
 </td></tr></table>
 </td></tr></table>
 </body></html>`;
 
-  const subject = 'Your Wistudi workshop registration is confirmed';
-  const encodedHtml = wrapBase64(utf8Base64(html));
-  const messageId = `<${crypto.randomUUID()}@wistudi.com>`;
-  const senderName = headerSafe(fromName || 'Wistudi Events');
-  const senderEmail = headerSafe(fromEmail);
-  const recipient = headerSafe(registration.email);
-
-  return [
-    `From: ${senderName} <${senderEmail}>`,
-    `To: ${recipient}`,
-    `Reply-To: ${senderEmail}`,
-    `Subject: ${subject}`,
-    `Date: ${new Date().toUTCString()}`,
-    `Message-ID: ${messageId}`,
-    'MIME-Version: 1.0',
-    'Content-Type: text/html; charset="UTF-8"',
-    'Content-Transfer-Encoding: base64',
-    '',
-    encodedHtml
-  ].join('\r\n');
+  return { html, text };
 }
 
-async function sendProtonConfirmation(env, registration, registrationId) {
-  const username = clean(env.PROTON_SMTP_USERNAME, 240);
-  const token = String(env.PROTON_SMTP_TOKEN || '');
-  const fromName = clean(env.PROTON_SMTP_FROM_NAME || 'Wistudi Events', 120);
-  if (!username || !token) return { sent: false, reason: 'not_configured' };
+async function sendResendConfirmation(env, registration, registrationId, event) {
+  const apiKey = String(env.RESEND_API_KEY || '').trim();
+  if (!apiKey) return { sent: false, reason: 'not_configured' };
 
-  let socket;
-  let secureSocket;
+  const from = clean(env.EVENTS_FROM_EMAIL || 'Wistudi Events <events@send.wistudi.com>', 240);
+  const replyTo = clean(env.EVENTS_REPLY_TO_EMAIL || 'support@wistudi.com', 240);
+  const content = buildConfirmationEmail(registration, registrationId, event);
+
   try {
-    socket = connect({ hostname: SMTP_HOST, port: SMTP_PORT }, { secureTransport: 'starttls' });
-    await socket.opened;
-    const plain = new SmtpSession(socket);
-    await plain.readResponse(220);
-    await plain.command('EHLO wistudi.com', 250);
-    await plain.command('STARTTLS', 220);
-    plain.release();
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from,
+        to: [registration.email],
+        reply_to: replyTo,
+        subject: 'Your Wistudi workshop registration is confirmed',
+        text: content.text,
+        html: content.html,
+        tags: [
+          { name: 'category', value: 'event-registration' },
+          { name: 'event', value: registration.event_id }
+        ]
+      })
+    });
 
-    secureSocket = socket.startTls();
-    await secureSocket.opened;
-    const smtp = new SmtpSession(secureSocket);
-    await smtp.command('EHLO wistudi.com', 250);
-
-    const auth = btoa(`\u0000${username}\u0000${token}`);
-    await smtp.command(`AUTH PLAIN ${auth}`, 235);
-    await smtp.command(`MAIL FROM:<${username}>`, 250);
-    await smtp.command(`RCPT TO:<${registration.email}>`, [250, 251]);
-    await smtp.command('DATA', 354);
-    await smtp.writeData(buildConfirmationEmail(registration, registrationId, username, fromName));
-    try { await smtp.command('QUIT', 221); } catch {}
-    smtp.release();
-    try { await secureSocket.close(); } catch {}
-    return { sent: true };
+    if (!response.ok) {
+      const providerError = await response.text();
+      console.error('Resend confirmation email failed:', providerError);
+      return { sent: false, reason: 'send_failed' };
+    }
+    const provider = await response.json().catch(() => ({}));
+    return { sent: true, id: provider.id || '' };
   } catch (error) {
-    console.error('Proton SMTP confirmation email failed:', error);
-    try { if (secureSocket) await secureSocket.close(); } catch {}
-    try { if (socket) await socket.close(); } catch {}
+    console.error('Resend confirmation email failed:', error);
     return { sent: false, reason: 'send_failed' };
   }
 }
@@ -223,12 +147,15 @@ export async function onRequestPost(context) {
 
   try {
     const data = await request.json();
-
     if (data.event_extra_field) return respond(200, { ok: true });
 
+    const eventId = clean(data.event_id, 120);
+    const event = EVENTS[eventId];
+    if (!event) return respond(400, { error: 'Unknown or unavailable event.' });
+
     const registration = {
-      event_id: clean(data.event_id, 120),
-      event_name: clean(data.event_name, 240),
+      event_id: eventId,
+      event_name: event.name,
       first_name: clean(data.first_name, 100),
       last_name: clean(data.last_name, 100),
       email: clean(data.email, 200).toLowerCase(),
@@ -246,7 +173,7 @@ export async function onRequestPost(context) {
       outreach_token: clean(data.outreach_token, 200)
     };
 
-    if (!registration.event_id || !registration.event_name || !registration.first_name || !registration.last_name || !registration.email || !registration.country || !registration.organisation_type || !registration.role) {
+    if (!registration.first_name || !registration.last_name || !registration.email || !registration.country || !registration.organisation_type || !registration.role) {
       return respond(400, { error: 'Please complete all required registration fields.' });
     }
     if (!emailOk(registration.email)) return respond(400, { error: 'Please enter a valid email address.' });
@@ -254,7 +181,6 @@ export async function onRequestPost(context) {
 
     const sheetsWebhookUrl = env.EVENTS_SHEETS_WEBHOOK_URL || DEFAULT_EVENTS_SHEETS_WEBHOOK_URL;
     const sheetsWebhookSecret = env.EVENTS_SHEETS_WEBHOOK_SECRET || env.EVENTS_WEBHOOK_SECRET || '';
-
     if (!sheetsWebhookSecret) {
       console.error('Event registration storage secret is not configured.');
       return respond(503, { error: 'Registration storage is being connected. Please try again shortly.' });
@@ -262,7 +188,6 @@ export async function onRequestPost(context) {
 
     const registrationId = crypto.randomUUID();
     const registeredAt = new Date().toISOString();
-
     const storageResponse = await fetch(sheetsWebhookUrl, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -288,7 +213,7 @@ export async function onRequestPost(context) {
     }
 
     const storedRegistrationId = storage.registration_id || registrationId;
-    const confirmation = await sendProtonConfirmation(env, registration, storedRegistrationId);
+    const confirmation = await sendResendConfirmation(env, registration, storedRegistrationId, event);
 
     return respond(200, {
       ok: true,
