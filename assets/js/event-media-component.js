@@ -1,9 +1,11 @@
 (()=>{
   'use strict';
 
-  const EVENT_ROOT = '/resources/events/building-a-communicative-esl-lesson-with-flow/';
-  const EVENT_BANNER = EVENT_ROOT + 'WS%20Banner%20(1).png';
-  const NADIA_PROFILE = EVENT_ROOT + 'Team%20Introduction%20.png';
+  // Use the canonical high-resolution PNGs uploaded for this event.
+  // The version tokens deliberately change with the source blobs so browsers/CDN edges
+  // cannot reuse an older low-resolution asset under the production custom domain.
+  const EVENT_BANNER = '/resources/events/event-main-banner.png?v=fc532cbb';
+  const NADIA_PROFILE = '/resources/events/trainer-nadia.png?v=13e69240';
   const HTA_LOGO = '/assets/images/resources/events/communicative-esl-flow/hta-logo.webp';
 
   const hero = document.querySelector('.hero-banner');
