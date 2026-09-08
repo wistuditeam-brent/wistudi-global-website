@@ -18,5 +18,6 @@ if(path.includes('/resources/events/building-a-communicative-esl-lesson-with-flo
   load('/assets/js/event-mobile-stage-fix.js','wsEventMobileStageFix');
   load('/assets/js/event-zoom-bridge.js','wsEventZoomBridge');
   load('/assets/js/event-i18n.js','wsEventI18n');
+  load('/assets/js/event-i18n-content.js','wsEventI18nContent');
 }
 })();
