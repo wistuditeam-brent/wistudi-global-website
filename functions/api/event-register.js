@@ -100,13 +100,9 @@ function buildConfirmationEmail(registration, registrationId, event) {
   return { html, text };
 }
 
-async function sendResendConfirmation(env, registration, registrationId, event) {
+async function sendResend(env, payload) {
   const apiKey = String(env.RESEND_API_KEY || '').trim();
   if (!apiKey) return { sent: false, reason: 'not_configured' };
-
-  const from = clean(env.EVENTS_FROM_EMAIL || 'Wistudi Events <events@send.wistudi.com>', 240);
-  const replyTo = clean(env.EVENTS_REPLY_TO_EMAIL || 'support@wistudi.com', 240);
-  const content = buildConfirmationEmail(registration, registrationId, event);
 
   try {
     const response = await fetch('https://api.resend.com/emails', {
@@ -115,30 +111,120 @@ async function sendResendConfirmation(env, registration, registrationId, event) 
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        from,
-        to: [registration.email],
-        reply_to: replyTo,
-        subject: 'Your Wistudi workshop registration is confirmed',
-        text: content.text,
-        html: content.html,
-        tags: [
-          { name: 'category', value: 'event-registration' },
-          { name: 'event', value: registration.event_id }
-        ]
-      })
+      body: JSON.stringify(payload)
     });
-
     if (!response.ok) {
-      const providerError = await response.text();
-      console.error('Resend confirmation email failed:', providerError);
+      console.error('Resend event email failed:', response.status, await response.text());
       return { sent: false, reason: 'send_failed' };
     }
     const provider = await response.json().catch(() => ({}));
     return { sent: true, id: provider.id || '' };
   } catch (error) {
-    console.error('Resend confirmation email failed:', error);
+    console.error('Resend event email failed:', error);
     return { sent: false, reason: 'send_failed' };
+  }
+}
+
+async function sendResendConfirmation(env, registration, registrationId, event) {
+  const from = clean(env.EVENTS_FROM_EMAIL || 'Wistudi Events <events@send.wistudi.com>', 240);
+  const replyTo = clean(env.EVENTS_REPLY_TO_EMAIL || 'support@wistudi.com', 240);
+  const content = buildConfirmationEmail(registration, registrationId, event);
+  return sendResend(env, {
+    from,
+    to: [registration.email],
+    reply_to: replyTo,
+    subject: 'Your Wistudi workshop registration is confirmed',
+    text: content.text,
+    html: content.html,
+    tags: [
+      { name: 'category', value: 'event-registration' },
+      { name: 'event', value: registration.event_id }
+    ]
+  });
+}
+
+async function sendStorageFallback(env, registration, registrationId, event, storageStatus) {
+  const from = clean(env.EVENTS_FROM_EMAIL || 'Wistudi Events <events@send.wistudi.com>', 240);
+  const to = clean(env.EVENTS_FALLBACK_EMAIL || env.EVENTS_REPLY_TO_EMAIL || 'support@wistudi.com', 240);
+  const text = [
+    'Wistudi event registration — storage fallback',
+    '',
+    'The Google Sheet webhook did not accept this registration. Keep this email as the registration record until Sheet sync is restored.',
+    '',
+    `Registration ID: ${registrationId}`,
+    `Event: ${event.name}`,
+    `First name: ${registration.first_name}`,
+    `Last name: ${registration.last_name}`,
+    `Email: ${registration.email}`,
+    `Country: ${registration.country}`,
+    `Organisation type: ${registration.organisation_type}`,
+    `Organisation / school: ${registration.organisation_name || ''}`,
+    `Role: ${registration.role}`,
+    `Timezone: ${registration.timezone}`,
+    `Privacy consent: ${registration.privacy_consent ? 'Yes' : 'No'}`,
+    `Marketing consent: ${registration.marketing_consent ? 'Yes' : 'No'}`,
+    `UTM source: ${registration.utm_source}`,
+    `UTM medium: ${registration.utm_medium}`,
+    `UTM campaign: ${registration.utm_campaign}`,
+    `UTM content: ${registration.utm_content}`,
+    `Outreach token: ${registration.outreach_token}`,
+    `Storage status: ${storageStatus}`
+  ].join('\n');
+
+  return sendResend(env, {
+    from,
+    to: [to],
+    reply_to: registration.email,
+    subject: `Event registration fallback — ${event.name}`,
+    text,
+    tags: [
+      { name: 'category', value: 'event-registration-storage-fallback' },
+      { name: 'event', value: registration.event_id }
+    ]
+  });
+}
+
+async function storeRegistration(env, registration, registrationId, registeredAt) {
+  const sheetsWebhookUrl = env.EVENTS_SHEETS_WEBHOOK_URL || DEFAULT_EVENTS_SHEETS_WEBHOOK_URL;
+  const sheetsWebhookSecret = env.EVENTS_SHEETS_WEBHOOK_SECRET || env.EVENTS_WEBHOOK_SECRET || '';
+  if (!sheetsWebhookSecret) {
+    console.error('Event registration storage secret is not configured.');
+    return { synced: false, status: 'storage_secret_missing', registrationId, duplicate: false };
+  }
+
+  try {
+    const response = await fetch(sheetsWebhookUrl, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        secret: sheetsWebhookSecret,
+        action: 'register',
+        registration_id: registrationId,
+        registered_at: registeredAt,
+        ...registration
+      })
+    });
+
+    if (!response.ok) {
+      console.error('Event registration sheet webhook failed:', response.status, await response.text());
+      return { synced: false, status: `storage_http_${response.status}`, registrationId, duplicate: false };
+    }
+
+    const storage = await response.json().catch(() => ({}));
+    if (!storage.ok) {
+      console.error('Event registration sheet webhook rejected request:', storage.error || 'unknown rejection');
+      return { synced: false, status: 'storage_rejected', registrationId, duplicate: false };
+    }
+
+    return {
+      synced: true,
+      status: 'synced',
+      registrationId: storage.registration_id || registrationId,
+      duplicate: Boolean(storage.duplicate)
+    };
+  } catch (error) {
+    console.error('Event registration sheet webhook unavailable:', error);
+    return { synced: false, status: 'storage_unavailable', registrationId, duplicate: false };
   }
 }
 
@@ -179,46 +265,27 @@ export async function onRequestPost(context) {
     if (!emailOk(registration.email)) return respond(400, { error: 'Please enter a valid email address.' });
     if (!registration.privacy_consent) return respond(400, { error: 'Privacy Policy agreement is required.' });
 
-    const sheetsWebhookUrl = env.EVENTS_SHEETS_WEBHOOK_URL || DEFAULT_EVENTS_SHEETS_WEBHOOK_URL;
-    const sheetsWebhookSecret = env.EVENTS_SHEETS_WEBHOOK_SECRET || env.EVENTS_WEBHOOK_SECRET || '';
-    if (!sheetsWebhookSecret) {
-      console.error('Event registration storage secret is not configured.');
-      return respond(503, { error: 'Registration storage is being connected. Please try again shortly.' });
-    }
-
     const registrationId = crypto.randomUUID();
     const registeredAt = new Date().toISOString();
-    const storageResponse = await fetch(sheetsWebhookUrl, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        secret: sheetsWebhookSecret,
-        action: 'register',
-        registration_id: registrationId,
-        registered_at: registeredAt,
-        ...registration
-      })
-    });
+    const storage = await storeRegistration(env, registration, registrationId, registeredAt);
 
-    if (!storageResponse.ok) {
-      const providerError = await storageResponse.text();
-      console.error('Event registration sheet webhook failed:', providerError);
-      return respond(502, { error: 'We could not save your registration. Please try again.' });
+    let fallback = { sent: false, reason: '' };
+    if (!storage.synced) {
+      fallback = await sendStorageFallback(env, registration, storage.registrationId, event, storage.status);
+      if (!fallback.sent) {
+        console.error('Event registration could not be secured in Sheet or fallback email.');
+        return respond(502, { error: 'We could not complete your registration. Please try again.' });
+      }
     }
 
-    const storage = await storageResponse.json().catch(() => ({}));
-    if (!storage.ok) {
-      console.error('Event registration sheet webhook rejected request:', storage);
-      return respond(502, { error: storage.error || 'We could not save your registration. Please try again.' });
-    }
-
-    const storedRegistrationId = storage.registration_id || registrationId;
-    const confirmation = await sendResendConfirmation(env, registration, storedRegistrationId, event);
+    const confirmation = await sendResendConfirmation(env, registration, storage.registrationId, event);
 
     return respond(200, {
       ok: true,
-      duplicate: Boolean(storage.duplicate),
-      registration_id: storedRegistrationId,
+      duplicate: storage.duplicate,
+      registration_id: storage.registrationId,
+      storage_synced: storage.synced,
+      storage_status: storage.synced ? 'synced' : 'fallback_email',
       confirmation_email_sent: confirmation.sent,
       confirmation_email_status: confirmation.reason || 'sent'
     });
