@@ -2,6 +2,7 @@ import { chromium } from 'playwright';
 
 const base = process.env.QA_BASE_URL || 'http://127.0.0.1:4173';
 const eventPath = '/resources/events/building-a-communicative-esl-lesson-with-flow/';
+const zoomUrl = 'https://us05web.zoom.us/j/89878175931?pwd=GMeXxQKb9nIehaEG7cJaM5bEmrdipU.1';
 const locales = ['en','vi','zh-cn','th','id','ms','ar'];
 const expectedLang = {en:'en',vi:'vi','zh-cn':'zh-CN',th:'th',id:'id',ms:'ms',ar:'ar'};
 const viewports = [
@@ -23,31 +24,39 @@ async function assertCanonicalEvent(locale, viewport) {
     await page.waitForFunction(() => document.documentElement.dataset.wsEventRuntime === 'ready', null, { timeout: 20000 });
     await page.waitForTimeout(350);
 
-    const state = await page.evaluate(() => ({
-      presentation: document.documentElement.dataset.wsEventPresentation,
-      heroUnit: !!document.querySelector('.ws-event-hero-unit'),
-      supersededUnit: !!document.querySelector('.ws-event-unit'),
-      actions: !!document.querySelector('.event-hero-actions'),
-      workshopFeatures: !!document.querySelector('.ws-workshop-features'),
-      featureItems: document.querySelectorAll('.ws-workshop-features .workshop-item').length,
-      eventHighlight: !!document.querySelector('#ws-event-highlight-section'),
-      registration: !!document.querySelector('#eventRegistrationForm'),
-      registrationCentered: !!document.querySelector('.ws-registration-centered'),
-      registrationLeftVisible: [...document.querySelectorAll('.ws-registration-left,.registration-left,.ws-registration-left-hidden')].some(el => {
-        const style=getComputedStyle(el); return style.display !== 'none' && el.getBoundingClientRect().height > 20;
-      }),
-      trainer: !!document.querySelector('.trainer'),
-      zoomBridge: [...document.scripts].some(s => (s.src || '').includes('event-zoom-bridge.js')),
-      canonicalHighlightLoaded: [...document.scripts].some(s => (s.src || '').includes('event-highlight.js')),
-      competingUpgradeLoaded: [...document.scripts].some(s => (s.src || '').includes('event-upgrades-v2.js')),
-      eventI18nLoaded: [...document.scripts].some(s => (s.src || '').includes('/event-i18n.js')),
-      eventContentI18nLoaded: [...document.scripts].some(s => (s.src || '').includes('/event-i18n-content.js')),
-      resourcePageShellLoaded: [...document.scripts].some(s => (s.src || '').includes('resources-page-shell.js')),
-      locale: document.documentElement.lang,
-      bodyWidth: document.body.scrollWidth,
-      viewportWidth: document.documentElement.clientWidth,
-      text: (document.body.innerText || '').slice(0,20000)
-    }));
+    const state = await page.evaluate(() => {
+      const liveShell=document.querySelector('.event-live-shell');
+      const liveRect=liveShell?.getBoundingClientRect();
+      return {
+        presentation: document.documentElement.dataset.wsEventPresentation,
+        heroUnit: !!document.querySelector('.ws-event-hero-unit'),
+        supersededUnit: !!document.querySelector('.ws-event-unit'),
+        actions: !!document.querySelector('.event-hero-actions'),
+        workshopFeatures: !!document.querySelector('.ws-workshop-features'),
+        featureItems: document.querySelectorAll('.ws-workshop-features .workshop-item').length,
+        eventHighlight: !!document.querySelector('#ws-event-highlight-section'),
+        registration: !!document.querySelector('#eventRegistrationForm'),
+        registrationCentered: !!document.querySelector('.ws-registration-centered'),
+        registrationLeftVisible: [...document.querySelectorAll('.ws-registration-left,.registration-left,.ws-registration-left-hidden')].some(el => {
+          const style=getComputedStyle(el); return style.display !== 'none' && el.getBoundingClientRect().height > 20;
+        }),
+        trainer: !!document.querySelector('.trainer'),
+        liveShell: !!liveShell,
+        liveShellCenter: liveRect ? liveRect.left + liveRect.width / 2 : 0,
+        viewportCenter: document.documentElement.clientWidth / 2,
+        liveShellWidth: liveRect?.width || 0,
+        zoomBridge: [...document.scripts].some(s => (s.src || '').includes('event-zoom-bridge.js')),
+        canonicalHighlightLoaded: [...document.scripts].some(s => (s.src || '').includes('event-highlight.js')),
+        competingUpgradeLoaded: [...document.scripts].some(s => (s.src || '').includes('event-upgrades-v2.js')),
+        eventI18nLoaded: [...document.scripts].some(s => (s.src || '').includes('/event-i18n.js')),
+        eventContentI18nLoaded: [...document.scripts].some(s => (s.src || '').includes('/event-i18n-content.js')),
+        resourcePageShellLoaded: [...document.scripts].some(s => (s.src || '').includes('resources-page-shell.js')),
+        locale: document.documentElement.lang,
+        bodyWidth: document.body.scrollWidth,
+        viewportWidth: document.documentElement.clientWidth,
+        text: (document.body.innerText || '').slice(0,20000)
+      };
+    });
 
     const checks = {
       canonicalPresentationMarker: state.presentation === 'canonical-highlight',
@@ -61,6 +70,9 @@ async function assertCanonicalEvent(locale, viewport) {
       centeredRegistration: state.registrationCentered,
       noOldSplitRegistrationPanel: !state.registrationLeftVisible,
       trainerSection: state.trainer,
+      liveSessionPresent: state.liveShell,
+      liveSessionCentered: Math.abs(state.liveShellCenter - state.viewportCenter) <= 3,
+      liveSessionContained: state.liveShellWidth <= Math.min(state.viewportWidth - (viewport.name === 'mobile' ? 24 : 36), 1188),
       zoomBridge: state.zoomBridge,
       canonicalHighlightRuntime: state.canonicalHighlightLoaded,
       noCompetingUpgradeRuntime: !state.competingUpgradeLoaded,
@@ -100,6 +112,60 @@ async function assertCanonicalEvent(locale, viewport) {
     for (const error of meaningful) failures.push(`[${locale}/${viewport.name}] browser error: ${error}`);
   } catch (error) {
     failures.push(`[${locale}/${viewport.name}] ${error.message}`);
+  } finally {
+    await page.close();
+  }
+}
+
+async function assertLiveSessionZoom() {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  try {
+    await page.goto(`${base}${eventPath}?eventState=live`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(() => document.documentElement.dataset.wsEventRuntime === 'ready', null, { timeout: 20000 });
+    await page.waitForSelector('[data-event-join]', { timeout: 15000 });
+    const state = await page.evaluate(() => {
+      const shell=document.querySelector('.event-live-shell');
+      const rect=shell?.getBoundingClientRect();
+      const join=document.querySelector('[data-event-join]');
+      return {
+        href: join?.href || '',
+        target: join?.target || '',
+        rel: join?.rel || '',
+        center: rect ? rect.left + rect.width/2 : 0,
+        viewportCenter: document.documentElement.clientWidth/2,
+        text: shell?.innerText || ''
+      };
+    });
+    if (state.href !== zoomUrl) failures.push(`[live-session] Zoom join href is incorrect: ${state.href}`);
+    if (state.target !== '_blank' || !state.rel.includes('noopener')) failures.push('[live-session] Zoom join link is missing safe new-tab behaviour');
+    if (Math.abs(state.center - state.viewportCenter) > 3) failures.push('[live-session] live session module is not centered');
+    if (!/Enter live session/i.test(state.text)) failures.push('[live-session] live state CTA is missing');
+  } catch (error) {
+    failures.push(`[live-session] ${error.message}`);
+  } finally {
+    await page.close();
+  }
+}
+
+async function assertCalendarContainsZoom() {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  try {
+    await page.goto(`${base}${eventPath}?eventState=upcoming`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(() => document.documentElement.dataset.wsEventRuntime === 'ready', null, { timeout: 20000 });
+    await page.waitForSelector('[data-event-calendar]', { timeout: 15000 });
+    const opened = await page.evaluate(() => {
+      let captured='';
+      const original=window.open;
+      window.open=url=>{captured=String(url||'');return null;};
+      document.querySelector('[data-event-calendar]')?.click();
+      window.open=original;
+      return captured;
+    });
+    const decoded=decodeURIComponent(opened);
+    if (!opened.includes('calendar.google.com/calendar/render')) failures.push('[calendar] Add to calendar did not create a Google Calendar URL');
+    if (!decoded.includes(zoomUrl)) failures.push('[calendar] calendar/reminder action does not contain the exact Zoom link');
+  } catch (error) {
+    failures.push(`[calendar] ${error.message}`);
   } finally {
     await page.close();
   }
@@ -195,7 +261,6 @@ try {
     for (const locale of locales) await assertCanonicalEvent(locale, viewport);
   }
 
-  // Exercise the real selector from English to Vietnamese and then to Chinese.
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   await page.goto(`${base}${eventPath}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForFunction(() => document.documentElement.dataset.wsEventRuntime === 'ready', null, { timeout: 20000 });
@@ -222,6 +287,8 @@ try {
   }
   await page.close();
 
+  await assertLiveSessionZoom();
+  await assertCalendarContainsZoom();
   for(const locale of locales) await assertResourcesPromo(locale);
   await assertHomepageEventTakeoverRemoved();
 
@@ -230,7 +297,7 @@ try {
     for (const failure of failures) console.error(' - ' + failure);
     process.exit(1);
   }
-  console.log('Current event design, translations, Resources promo and homepage banner state passed regression QA.');
+  console.log('Current event design, centered live session, Zoom actions, translations, Resources promo and homepage banner state passed regression QA.');
 } finally {
   await browser.close();
 }
