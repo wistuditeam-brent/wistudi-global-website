@@ -13,7 +13,9 @@ async function waitForShell(page,locale,isEvent=false){
     const link=document.querySelector('.ws-nav-links [data-ws-resources-link="true"],.ws-nav-links a.ws-resource-nav-link');
     return !!link&&document.documentElement.lang.toLowerCase()===expected.toLowerCase();
   },expectedLang[locale],{timeout:15000});
-  await page.waitForTimeout(120);
+  // Give async shared shell helpers time to finish. This catches late duplicate nav
+  // injection rather than only checking the first frame after translation.
+  await page.waitForTimeout(700);
 }
 
 async function assertNavigation(locale,path,isEvent=false){
@@ -30,6 +32,8 @@ async function assertNavigation(locale,path,isEvent=false){
       const mobile=[...document.querySelectorAll('.ws-mobile-inner [data-ws-resources-link="true"],.ws-mobile-inner a.ws-resource-nav-link')];
       const href=desktop[0]?.href||'';
       const u=href?new URL(href):null;
+      const form=document.querySelector('#eventRegistrationForm');
+      const field=name=>!!form?.querySelector(`[name="${name}"]`);
       return{
         desktopCount:desktop.length,
         mobileCount:mobile.length,
@@ -39,7 +43,18 @@ async function assertNavigation(locale,path,isEvent=false){
         htmlLang:document.documentElement.lang,
         runtimeScripts:[...document.scripts].map(s=>s.src||'').filter(Boolean),
         facts:!!document.querySelector('.event-facts-strip'),
-        registration:!!document.querySelector('#eventRegistrationForm'),
+        registration:!!form,
+        registrationFields:{
+          first:field('first_name'),
+          last:field('last_name'),
+          email:field('email'),
+          country:field('country'),
+          organisationType:field('organisation_type'),
+          organisationName:field('organisation_name'),
+          role:field('role'),
+          privacy:field('privacy_consent')
+        },
+        registrationSubmit:!!form?.querySelector('button[type="submit"],input[type="submit"]'),
         bodyWidth:document.body.scrollWidth,
         viewportWidth:document.documentElement.clientWidth
       };
@@ -64,8 +79,19 @@ async function assertNavigation(locale,path,isEvent=false){
       for(const [name,count] of Object.entries(counts)) if(count!==1) failures.push(`[${locale}/event] expected one ${name} runtime, found ${count}`);
       if(!state.facts) failures.push(`[${locale}/event] event facts component did not render`);
       if(!state.registration) failures.push(`[${locale}/event] registration form did not render`);
+      for(const [name,present] of Object.entries(state.registrationFields)) if(!present) failures.push(`[${locale}/event] registration field missing: ${name}`);
+      if(!state.registrationSubmit) failures.push(`[${locale}/event] registration submit control did not render`);
+
+      // The production bug left the translated page stuck after the top of the form.
+      // Prove the event loop remains responsive and the lower form is actually reachable.
+      await page.locator('#eventRegistrationForm').scrollIntoViewIfNeeded();
       const delay=await page.evaluate(()=>new Promise(resolve=>{const start=performance.now();setTimeout(()=>resolve(performance.now()-start),75)}));
       if(delay>400) failures.push(`[${locale}/event] event loop is blocked: ${Math.round(delay)}ms for 75ms timer`);
+      const email=page.locator('#eventRegistrationForm [name="email"]');
+      if(await email.count()){
+        await email.fill('qa-locale@example.com');
+        if(await email.inputValue()!=='qa-locale@example.com') failures.push(`[${locale}/event] translated registration form is not interactive`);
+      }
     }
 
     for(const error of errors.filter(e=>!/favicon|Failed to load resource.*404|net::ERR_ABORTED/i.test(e))) failures.push(`[${locale}${path}] browser error: ${error}`);
