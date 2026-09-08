@@ -1,6 +1,14 @@
 (()=>{
 'use strict';
-const load=(src,key)=>{if(document.querySelector(`script[data-${key}]`))return;const s=document.createElement('script');s.src=src;s.async=false;s.dataset[key]='true';document.head.appendChild(s)};
+const load=(src,key)=>{
+  const absolute=new URL(src,location.href).href;
+  if([...document.scripts].some(script=>script.dataset?.[key]==='true'||script.getAttribute('src')===src||script.src===absolute))return;
+  const s=document.createElement('script');
+  s.src=src;
+  s.async=false;
+  s.dataset[key]='true';
+  document.head.appendChild(s);
+};
 
 // Load the shared language runtime on every public page so language changes stay on
 // the current page and never fall through to incomplete locale-prefixed routes.
