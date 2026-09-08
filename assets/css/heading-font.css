@@ -1,0 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700;800&display=swap');
+
+/* Global heading typography */
+h1,h2,h3,h4,h5,h6,
+[role="heading"],
+.heading,
+.section-heading,
+.card-heading,
+.hero-heading {
+  font-family:'Be Vietnam Pro',Inter,Arial,sans-serif !important;
+}
