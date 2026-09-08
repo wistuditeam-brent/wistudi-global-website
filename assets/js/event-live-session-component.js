@@ -4,7 +4,7 @@
   const START = new Date('2026-09-15T14:00:00+07:00');
   const DURATION_MINUTES = 90;
   const ROOM_OPEN_MINUTES = 15;
-  const ZOOM_JOIN_URL = '';
+  const ZOOM_JOIN_URL = 'https://us05web.zoom.us/j/89878175931?pwd=GMeXxQKb9nIehaEG7cJaM5bEmrdipU.1';
   const ASSET_ROOT = '/assets/images/resources/events/communicative-esl-flow/';
 
   const existing = document.querySelector('section.ec.live-card');
@@ -50,7 +50,16 @@
     .event-live-card.is-ended .event-live-statusicon{background:#e3e3ea;border-color:#e3e3ea}
     .event-live-card.is-ended .event-live-statusicon img{filter:grayscale(1);opacity:.72}
     @media(max-width:900px){.event-live-card{grid-template-columns:1fr}.event-live-side{padding:18px 24px 24px}.event-live-side:before{left:24px;right:24px;top:0;bottom:auto;width:auto;height:1px}}
-    @media(max-width:620px){.event-live-shell{width:min(calc(100% - 26px),var(--max))}.event-live-main{grid-template-columns:58px minmax(0,1fr);gap:14px;padding:20px}.event-live-iconbox{width:58px;height:58px;border-radius:15px}.event-live-iconbox img{width:39px;height:39px}.event-live-copy h2{font-size:1.14rem}.event-live-side{padding:17px 20px 20px}.event-live-side:before{left:20px;right:20px}.event-live-actions{grid-template-columns:1fr}.event-live-timechip{min-width:42px}.event-live-statuspanel{min-height:58px}}
+    @media(max-width:620px){
+      .event-live-shell{width:min(calc(100% - 26px),var(--max))}
+      .event-live-main{grid-template-columns:1fr;gap:14px;padding:22px 20px 18px;align-items:start}
+      .event-live-iconbox{width:68px;height:68px;border-radius:17px}.event-live-iconbox img{width:45px;height:45px}
+      .event-live-copy h2{font-size:1.3rem}.event-live-copy>p{font-size:.83rem;line-height:1.55}
+      .event-live-countdown{display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));gap:9px;width:100%;margin-top:16px;align-items:center}
+      .event-live-countdown svg{display:none}.event-live-countdown-label{grid-column:1/-1;margin:0 0 2px;font-size:.76rem}
+      .event-live-timechip{min-width:0;width:100%;height:48px;border-radius:13px;font-size:.92rem}
+      .event-live-side{padding:17px 20px 20px}.event-live-side:before{left:20px;right:20px}.event-live-actions{grid-template-columns:1fr}.event-live-statuspanel{min-height:58px}
+    }
     @media(prefers-reduced-motion:reduce){.event-live-action,.event-live-join{transition:none}.event-live-action:hover,.event-live-join:hover{transform:none}}
   `;
   document.head.appendChild(style);
@@ -67,8 +76,8 @@
     url.searchParams.set('action','TEMPLATE');
     url.searchParams.set('text','Building a Communicative ESL Lesson with Flow');
     url.searchParams.set('dates',`${basic(START)}/${basic(end)}`);
-    url.searchParams.set('details',`Free live workshop for ESL teachers with Trainer Nadia, presented by Wistudi in collaboration with Happy Teachers Academy.\n\nEvent page: ${location.href.split('#')[0].split('?')[0]}`);
-    url.searchParams.set('location','Online');
+    url.searchParams.set('details',`Free live workshop for ESL teachers with Trainer Nadia, presented by Wistudi in collaboration with Happy Teachers Academy.\n\nJoin on Zoom: ${ZOOM_JOIN_URL}\n\nEvent page: ${location.href.split('#')[0].split('?')[0]}`);
+    url.searchParams.set('location',ZOOM_JOIN_URL);
     return url.toString();
   };
 
@@ -102,7 +111,7 @@
     if (state === 'upcoming') {
       markup = `<span class="event-live-kicker">Upcoming</span><div class="event-live-card is-upcoming"><div class="event-live-main"><div class="event-live-iconbox"><img src="${ASSET_ROOT}upcoming.webp" alt=""></div><div class="event-live-copy"><h2>Join the live session</h2><p>The live room opens 15 minutes before the workshop.</p>${countdownMarkup(now)}</div></div><div class="event-live-side"><div class="event-live-statuspanel"><span class="event-live-statusicon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10M7 21h10M8 3c0 4 1 5 4 7-3 2-4 3-4 7M16 3c0 4-1 5-4 7 3 2 4 3 4 7"/></svg></span><div><strong>Coming soon</strong><small>Get ready for the live session.</small></div></div>${actionButtons()}</div></div>`;
     } else if (state === 'live') {
-      markup = `<span class="event-live-kicker">Live</span><div class="event-live-card is-live"><div class="event-live-main"><div class="event-live-iconbox"><img src="${ASSET_ROOT}live-signal.webp" alt=""></div><div class="event-live-copy"><h2>Enter live session</h2><p>The room is now open — join the workshop live.</p><img class="event-live-badge" src="${ASSET_ROOT}live-badge.webp" alt="Live now"></div></div><div class="event-live-side"><a class="event-live-join" href="${ZOOM_JOIN_URL || '#'}" data-event-join ${ZOOM_JOIN_URL ? 'target="_blank" rel="noopener"' : ''}><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span>Enter live session</span><span aria-hidden="true">→</span></a><div class="event-live-preview-note" data-event-preview-note>Preview only: the Zoom joining link will be connected before the event.</div>${actionButtons()}</div></div>`;
+      markup = `<span class="event-live-kicker">Live</span><div class="event-live-card is-live"><div class="event-live-main"><div class="event-live-iconbox"><img src="${ASSET_ROOT}live-signal.webp" alt=""></div><div class="event-live-copy"><h2>Enter live session</h2><p>The room is now open — join the workshop live.</p><img class="event-live-badge" src="${ASSET_ROOT}live-badge.webp" alt="Live now"></div></div><div class="event-live-side"><a class="event-live-join" href="${ZOOM_JOIN_URL}" data-event-join target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span>Enter live session</span><span aria-hidden="true">→</span></a>${actionButtons()}</div></div>`;
     } else {
       markup = `<span class="event-live-kicker">Event ended</span><div class="event-live-card is-ended"><div class="event-live-main"><div class="event-live-iconbox"><img src="${ASSET_ROOT}ended.webp" alt=""></div><div class="event-live-copy"><h2>Live session</h2><p>This event has already finished.</p></div></div><div class="event-live-side"><div class="event-live-statuspanel"><span class="event-live-statusicon"><img src="${ASSET_ROOT}ended.webp" alt=""></span><div><strong>Event has passed</strong><small>The live room is now closed.</small></div></div>${actionButtons()}</div></div>`;
     }
@@ -112,14 +121,6 @@
     shell.querySelectorAll('[data-event-calendar],[data-event-reminder]').forEach(button => {
       button.addEventListener('click',()=>window.open(calendarUrl(),'_blank','noopener'));
     });
-
-    const join = shell.querySelector('[data-event-join]');
-    if (join && !ZOOM_JOIN_URL) {
-      join.addEventListener('click',event => {
-        event.preventDefault();
-        shell.querySelector('[data-event-preview-note]')?.classList.add('show');
-      });
-    }
   }
 
   render();
