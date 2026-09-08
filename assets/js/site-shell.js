@@ -14,7 +14,8 @@ const load=(src,key)=>new Promise(resolve=>{
   if(existing){
     const perf=performance.getEntriesByName(existing.src||absolute);
     if(existing.dataset.wsLoaded==='true'||perf.some(entry=>entry.responseEnd>0)){resolve(existing);return;}
-    const done=()=>{existing.dataset.wsLoaded='true';resolve(existing)};
+    let settled=false;
+    const done=()=>{if(settled)return;settled=true;existing.dataset.wsLoaded='true';resolve(existing)};
     existing.addEventListener('load',done,{once:true});
     existing.addEventListener('error',done,{once:true});
     setTimeout(done,5000);
@@ -24,24 +25,24 @@ const load=(src,key)=>new Promise(resolve=>{
   s.src=src;
   s.async=false;
   s.dataset[key]='true';
-  const done=()=>{s.dataset.wsLoaded='true';resolve(s)};
+  let settled=false;
+  const done=()=>{if(settled)return;settled=true;s.dataset.wsLoaded='true';resolve(s)};
   s.addEventListener('load',done,{once:true});
   s.addEventListener('error',done,{once:true});
   document.head.appendChild(s);
 });
 
 const bootEvent=async()=>{
-  // The event detail page has its own canonical runtime. Do not pass it through the
-  // generic Resources shell because that shell starts its own translators before the
-  // event DOM is finished, which is what caused translated pages to fall back to the
-  // older layout and could leave several MutationObservers fighting over the page.
+  // The event detail page owns its runtime. Keep generic Resources renderers and their
+  // translators out of this route so every locale starts from the same canonical DOM.
   await load('/assets/js/analytics-events.js','wsAnalyticsEvents');
   await load('/assets/js/footer-unify.js','wsFooterUnify');
   await load('/assets/js/site-shell-base.js','wsBase');
 
-  // One presentation pipeline only. event-upgrades-v2 is the later consolidated
-  // event presentation and supersedes event-highlight.js on this detail page.
-  await load('/assets/js/event-upgrades-v2.js','wsEventUpgrades');
+  // Canonical presentation = the version built through the workshop feature, highlight,
+  // centred registration and unified hero commits. Do not load event-upgrades-v2 here;
+  // it is a competing renderer and was the source of the visual rollback.
+  await load('/assets/js/event-highlight.js','wsEventHighlight');
   await load('/assets/js/event-hero-actions-component.js','wsEventHeroActions');
   await load('/assets/js/event-live-session-component.js','wsEventLiveSession');
   await load('/assets/js/event-registration-component.js','wsEventRegistration');
@@ -49,12 +50,12 @@ const bootEvent=async()=>{
   await load('/assets/js/event-mobile-stage-fix.js','wsEventMobileStageFix');
   await load('/assets/js/event-zoom-bridge.js','wsEventZoomBridge');
 
-  // Translate only after the final English DOM exists. This guarantees every language
-  // uses the same current layout instead of allowing translation to change selectors
-  // while the page is still being constructed.
+  // Translate only after the final presentation is in place. There is one event-specific
+  // translator, which prevents MutationObserver loops and layout differences by locale.
   await load('/assets/js/i18n.js','wsI18n');
   await load('/assets/js/event-i18n-content.js','wsEventI18nContent');
   document.documentElement.dataset.wsEventRuntime='ready';
+  document.documentElement.dataset.wsEventPresentation='canonical-highlight';
 };
 
 const bootSite=async()=>{
