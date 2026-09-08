@@ -21,12 +21,6 @@
   const detected=localeCodes.includes(requested)?requested:(explicitLocale||storedLocale||'en');
   const locale=LOCALES[detected]||LOCALES.en;
 
-  const savePreference=code=>{
-    if(!LOCALES[code])return;
-    try{localStorage.setItem('wistudi_locale',code)}catch(_){ }
-    document.cookie=`wistudi_locale=${encodeURIComponent(code)};path=/;max-age=31536000;SameSite=Lax`;
-  };
-
   const stripLocale=(pathname=location.pathname)=>{
     const parts=pathname.split('/').filter(Boolean);
     if(parts.length&&localeCodes.includes(parts[0].toLowerCase()))parts.shift();
@@ -36,9 +30,21 @@
     return p||'/';
   };
 
-  const basePath=stripLocale();
   const normalizeSeoPath=p=>p==='/'?'/':p.replace(/index\.html$/,'');
-  const seoPath=normalizeSeoPath(basePath);
+  const basePath=normalizeSeoPath(stripLocale());
+
+  const safeCookie=()=>{
+    // Cloudflare's legacy locale-prefix redirect reads this cookie. Keep that
+    // redirect neutral while the selected locale is stored client-side so all
+    // public pages stay on their real asset paths and cannot lose CSS/JS.
+    document.cookie='wistudi_locale=en;path=/;max-age=31536000;SameSite=Lax';
+  };
+
+  const savePreference=code=>{
+    if(!LOCALES[code])return;
+    try{localStorage.setItem('wistudi_locale',code)}catch(_){ }
+    safeCookie();
+  };
 
   const withLocale=(code,path=basePath)=>{
     const clean=normalizeSeoPath(stripLocale(path));
@@ -50,6 +56,17 @@
     u.hash=location.hash;
     return u.pathname+(u.search||'')+(u.hash||'');
   };
+
+  // Rescue legacy /vi/, /th/, /zh-cn/, etc. URLs. The middleware always injects
+  // this script with an absolute path, so even an old locale page whose relative
+  // assets fail can recover to the canonical page before the user is left with
+  // an unstyled screen.
+  if(explicitLocale&&explicitLocale!=='en'&&!requested){
+    safeCookie();
+    try{localStorage.setItem('wistudi_locale',explicitLocale)}catch(_){ }
+    const target=withLocale(explicitLocale,basePath);
+    if(target!==location.pathname+location.search+location.hash){location.replace(target);return;}
+  }
 
   document.documentElement.lang=locale.htmlLang;
   document.documentElement.dir=locale.dir;
@@ -65,6 +82,7 @@
   document.head.appendChild(style);
 
   const canonicalOrigin='https://global.wistudi.com';
+  const seoPath=basePath;
   const addAlternateLinks=()=>{
     document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el=>el.remove());
     localeCodes.forEach(code=>{
