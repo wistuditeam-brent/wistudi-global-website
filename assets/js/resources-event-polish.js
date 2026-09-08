@@ -15,7 +15,7 @@ if(!d.getElementById('ws-res-event-polish')){
   style.id='ws-res-event-polish';
   style.textContent=`
   .res-event-feature{padding:72px 0 78px!important}
-  .res-event-card{grid-template-columns:minmax(0,1.18fr) minmax(340px,.82fr)!important;align-items:center!important;overflow:hidden!important;border-radius:26px!important}
+  .res-event-card{grid-template-columns:minmax(0,1.18fr) minmax(340px,.82fr)!important;align-items:center!important;overflow:hidden!important;border-radius:26px!important;width:100%!important;max-width:1120px!important;margin-left:auto!important;margin-right:auto!important}
   .res-event-art{display:block!important;width:100%!important;min-width:0!important;aspect-ratio:16/9!important;align-self:center!important;overflow:hidden!important;background:#f7f2ff!important}
   .res-event-art img{display:block!important;width:100%!important;height:100%!important;min-height:0!important;aspect-ratio:16/9!important;object-fit:contain!important;object-position:center center!important;background:#fff!important}
   .res-event-copy{align-self:stretch!important;justify-content:center!important;padding:36px 40px!important;min-width:0!important}
@@ -28,13 +28,13 @@ if(!d.getElementById('ws-res-event-polish')){
   [dir="rtl"] .res-event-copy{text-align:right}
   [dir="rtl"] .res-event-link:hover span{transform:translateX(-3px)!important}
   @media(max-width:900px){
-    .res-event-card{grid-template-columns:1fr!important;align-items:stretch!important}
+    .res-event-card{grid-template-columns:1fr!important;align-items:stretch!important;max-width:760px!important}
     .res-event-art{aspect-ratio:16/9!important}
     .res-event-copy{padding:30px!important}
   }
   @media(max-width:560px){
     .res-event-feature{padding:50px 0 56px!important}
-    .res-event-card{border-radius:20px!important}
+    .res-event-card{border-radius:20px!important;max-width:none!important}
     .res-event-copy{padding:24px 20px!important}
     .res-event-link{width:100%!important;min-width:0!important;min-height:52px!important;margin-top:22px!important}
   }
