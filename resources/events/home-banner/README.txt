@@ -1,0 +1,1 @@
+Activity sprite is generated from the six supplied workshop activity icons for the responsive homepage event banner.
