@@ -71,6 +71,8 @@ function ensureResourcesNav(){
       const contact=[...nav.querySelectorAll('a')].find(a=>internalPath(a).startsWith('/contact'));
       contact?nav.insertBefore(link,contact):nav.appendChild(link);
     }
+    link.dataset.wsResourcesLink='true';
+    link.classList.add('ws-resource-nav-link');
     link.href=href;
     link.textContent=RESOURCE_LABEL[locale]||RESOURCE_LABEL.en;
     link.classList.toggle('active',active);
@@ -149,6 +151,10 @@ const bootEvent=async()=>{
   await load('/assets/js/footer-unify.js','wsFooterUnify');
   await load('/assets/js/site-shell-base.js','wsBase');
 
+  // Preserve every visual component that previously came from the route middleware,
+  // but load each exactly once and in a deterministic order here.
+  await load('/assets/js/event-media-component.js','wsEventMedia');
+  await load('/assets/js/event-facts-component.js','wsEventFacts');
   await load('/assets/js/event-highlight.js','wsEventHighlight');
   await load('/assets/js/event-hero-actions-component.js','wsEventHeroActions');
   await load('/assets/js/event-live-session-component.js','wsEventLiveSession');
