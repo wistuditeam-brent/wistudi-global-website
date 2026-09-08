@@ -32,6 +32,7 @@ on:
       - 'scripts/resources_event_center_qa.mjs'
       - 'scripts/locale_routing_qa.mjs'
       - 'scripts/locale_navigation_browser_qa.mjs'
+      - 'scripts/localized_preview_server.py'
       - 'docs/RESOURCES_PUBLISHING_QA.md'
       - 'sitemap.xml'
       - '.github/workflows/resources-qa.yml'
@@ -59,6 +60,7 @@ on:
       - 'scripts/resources_event_center_qa.mjs'
       - 'scripts/locale_routing_qa.mjs'
       - 'scripts/locale_navigation_browser_qa.mjs'
+      - 'scripts/localized_preview_server.py'
       - 'docs/RESOURCES_PUBLISHING_QA.md'
       - 'sitemap.xml'
       - '.github/workflows/resources-qa.yml'
@@ -96,6 +98,7 @@ jobs:
           node --check scripts/resources_event_center_qa.mjs
           node --check scripts/locale_routing_qa.mjs
           node --check scripts/locale_navigation_browser_qa.mjs
+          python -m py_compile scripts/localized_preview_server.py
       - name: Verify locale routing defaults and canonical language URLs
         run: node scripts/locale_routing_qa.mjs
       - name: Verify event registration confirmation and Zoom delivery
@@ -132,12 +135,12 @@ jobs:
             echo 'Testing the supplied Cloudflare preview.'
           else
             echo 'QA_BASE_URL=http://127.0.0.1:4173' >> "$GITHUB_ENV"
-            echo 'Testing the checked-out branch on a local static server.'
+            echo 'Testing the checked-out branch on the locale-aware static preview server.'
           fi
       - name: Start static preview server
         if: inputs.preview_url == ''
         run: |
-          python -m http.server 4173 > /tmp/wistudi-qa-server.log 2>&1 &
+          python scripts/localized_preview_server.py > /tmp/wistudi-qa-server.log 2>&1 &
           for i in {1..30}; do
             if curl -fsS http://127.0.0.1:4173/resources/ >/dev/null; then exit 0; fi
             sleep 1
