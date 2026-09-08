@@ -13,7 +13,7 @@
   const style = document.createElement('style');
   style.id = 'event-live-session-component-css';
   style.textContent = `
-    .event-live-shell{margin:0 auto 54px}
+    .event-live-shell{width:min(calc(100% - 40px),var(--max));margin:0 auto 54px}
     .event-live-kicker{display:block;margin:0 0 10px 5px;font:800 .66rem/1 Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#78708c}
     .event-live-card{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,.72fr);align-items:stretch;border:1px solid #e3dcf1;border-radius:22px;background:#fff;box-shadow:0 12px 35px rgba(48,31,80,.065);overflow:hidden}
     .event-live-main{display:grid;grid-template-columns:72px minmax(0,1fr);gap:20px;align-items:center;padding:25px 30px}
