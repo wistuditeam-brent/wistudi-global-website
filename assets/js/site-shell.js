@@ -12,6 +12,7 @@ if(path==='/') load('/assets/js/home-event-banner-v2.js','wsHomeEventBanner');
 if(path.includes('/resources/events/building-a-communicative-esl-lesson-with-flow/')){
   load('/assets/js/event-upgrades-v2.js','wsEventUpgrades');
   load('/assets/js/event-mobile-stage-fix.js','wsEventMobileStageFix');
+  load('/assets/js/event-zoom-bridge.js','wsEventZoomBridge');
   load('/assets/js/event-i18n.js','wsEventI18n');
 }
 })();
