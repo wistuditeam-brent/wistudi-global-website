@@ -34,6 +34,7 @@ async function assertNavigation(locale,path,isEvent=false){
       const u=href?new URL(href):null;
       const form=document.querySelector('#eventRegistrationForm');
       const field=name=>!!form?.querySelector(`[name="${name}"]`);
+      const htaLogo=document.querySelector('.hta-box img');
       return{
         desktopCount:desktop.length,
         mobileCount:mobile.length,
@@ -55,6 +56,8 @@ async function assertNavigation(locale,path,isEvent=false){
           privacy:field('privacy_consent')
         },
         registrationSubmit:!!form?.querySelector('button[type="submit"],input[type="submit"]'),
+        htaLogoSrc:htaLogo?.getAttribute('src')||'',
+        htaLogoLoaded:!!htaLogo&&htaLogo.complete&&htaLogo.naturalWidth>0,
         bodyWidth:document.body.scrollWidth,
         viewportWidth:document.documentElement.clientWidth
       };
@@ -81,6 +84,8 @@ async function assertNavigation(locale,path,isEvent=false){
       if(!state.registration) failures.push(`[${locale}/event] registration form did not render`);
       for(const [name,present] of Object.entries(state.registrationFields)) if(!present) failures.push(`[${locale}/event] registration field missing: ${name}`);
       if(!state.registrationSubmit) failures.push(`[${locale}/event] registration submit control did not render`);
+      if(!state.htaLogoSrc.includes('/assets/images/resources/events/communicative-esl-flow/hta-logo.webp')) failures.push(`[${locale}/event] supplied transparent HTA logo is not active`);
+      if(!state.htaLogoLoaded) failures.push(`[${locale}/event] supplied transparent HTA logo did not load`);
 
       // The production bug left the translated page stuck after the top of the form.
       // Prove the event loop remains responsive and the lower form is actually reachable.
@@ -111,4 +116,4 @@ if(failures.length){
   console.error('Locale/navigation browser QA failed:\n- '+failures.join('\n- '));
   process.exit(1);
 }
-console.log('Locale/navigation browser QA passed for all seven languages on the homepage and event page.');
+console.log('Locale/navigation browser QA passed for all seven languages on the homepage and event page, including the supplied HTA collaboration logo.');
