@@ -50,9 +50,12 @@ const bootEvent=async()=>{
   await load('/assets/js/event-mobile-stage-fix.js','wsEventMobileStageFix');
   await load('/assets/js/event-zoom-bridge.js','wsEventZoomBridge');
 
-  // Translate only after the final presentation is in place. There is one event-specific
-  // translator, which prevents MutationObserver loops and layout differences by locale.
+  // Translate only after the final presentation is in place. The two event translators
+  // are complementary: event-i18n covers the current page structure and controls, while
+  // event-i18n-content covers the extended workshop prose and highlight content. Both
+  // only translate from the canonical English source, so they do not fight each other.
   await load('/assets/js/i18n.js','wsI18n');
+  await load('/assets/js/event-i18n.js','wsEventI18n');
   await load('/assets/js/event-i18n-content.js','wsEventI18nContent');
   document.documentElement.dataset.wsEventRuntime='ready';
   document.documentElement.dataset.wsEventPresentation='canonical-highlight';
@@ -61,7 +64,12 @@ const bootEvent=async()=>{
 const bootSite=async()=>{
   await load('/assets/js/site-shell-core.js','wsCore');
   await load('/assets/js/i18n.js','wsI18n');
-  if(normalized==='/') await load('/assets/js/home-event-banner-v2.js','wsHomeEventBanner');
+
+  // The temporary event takeover banner on the Platform homepage is intentionally off.
+  // Keep the workshop promotion inside Resources until we explicitly choose to restore it.
+  if(normalized==='/resources/'||normalized==='/resources'){
+    await load('/assets/js/resources-event-polish.js','wsResourcesEventPolish');
+  }
 };
 
 (isEvent?bootEvent():bootSite()).catch(error=>console.error('[Wistudi shell]',error));
