@@ -3,6 +3,7 @@ import { connect } from 'cloudflare:sockets';
 const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8' };
 const DEFAULT_EVENTS_SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyyM-dUwPLUk8FyhoLfl-jRJciUK8cU4gn0kTf_g4aqLdQb8uYJfmkuastG1llURxGm/exec';
 const EVENT_START_ISO = '2026-09-15T14:00:00+07:00';
+const EVENT_ZOOM_URL = 'https://us05web.zoom.us/j/89878175931?pwd=GMeXxQKb9nIehaEG7cJaM5bEmrdipU.1';
 const SMTP_HOST = 'smtp.protonmail.ch';
 const SMTP_PORT = 587;
 
@@ -122,6 +123,7 @@ function buildConfirmationEmail(registration, registrationId, fromEmail, fromNam
   const safeEvent = escapeHtml(registration.event_name);
   const safeEmail = escapeHtml(registration.email);
   const safeRegistrationId = escapeHtml(registrationId || '');
+  const safeZoomUrl = escapeHtml(EVENT_ZOOM_URL);
 
   const html = `<!doctype html>
 <html><body style="margin:0;padding:0;background:#f7f4fb;font-family:Arial,Helvetica,sans-serif;color:#211b27;">
@@ -140,7 +142,14 @@ function buildConfirmationEmail(registration, registrationId, fromEmail, fromNam
 <strong>Format</strong><br>Live online workshop<br><br>
 <strong>Cost</strong><br>Free
 </td></tr></table>
-<p style="margin:0 0 12px;font-size:14px;line-height:1.65;color:#5f5868;">We will send joining details and any final workshop information to <strong>${safeEmail}</strong> before the session.</p>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 22px;background:#f6f1ff;border:1px solid #e3d8f6;border-radius:14px;">
+<tr><td style="padding:20px;text-align:center;">
+<div style="font-size:15px;font-weight:800;color:#2b2040;margin-bottom:7px;">Join the live workshop on Zoom</div>
+<div style="font-size:13px;line-height:1.55;color:#746a80;margin-bottom:16px;">The Zoom room opens 15 minutes before the workshop.</div>
+<a href="${safeZoomUrl}" style="display:inline-block;background:#6d28d9;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;padding:12px 20px;border-radius:11px;">Join Zoom session</a>
+<div style="margin-top:14px;font-size:11px;line-height:1.5;color:#92889c;word-break:break-all;">${safeZoomUrl}</div>
+</td></tr></table>
+<p style="margin:0 0 12px;font-size:14px;line-height:1.65;color:#5f5868;">Your Zoom joining link is included above. We’ll use <strong>${safeEmail}</strong> for any final workshop updates.</p>
 <p style="margin:0 0 24px;font-size:14px;line-height:1.65;color:#5f5868;">You do not need to register again.</p>
 <div style="padding-top:18px;border-top:1px solid #eee8f3;font-size:12px;line-height:1.6;color:#948a9d;">Registration ID: ${safeRegistrationId}<br>Questions? Email <a href="mailto:support@wistudi.com" style="color:#6d28d9;">support@wistudi.com</a>.</div>
 </td></tr></table>
