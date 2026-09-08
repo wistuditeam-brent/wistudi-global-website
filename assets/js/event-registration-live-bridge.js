@@ -4,6 +4,7 @@
   const EVENT_ID='communicative-esl-flow-2026-09-15';
   const EVENT_NAME='Building a Communicative ESL Lesson with Flow';
   const EVENT_START=new Date('2026-09-15T14:00:00+07:00');
+  const EVENT_ZOOM_URL='https://us05web.zoom.us/j/89878175931?pwd=GMeXxQKb9nIehaEG7cJaM5bEmrdipU.1';
   const ENDPOINT='/api/event-register';
 
   const style=document.createElement('style');
@@ -21,6 +22,9 @@
     .reg-confirm-grid{display:grid;grid-template-columns:minmax(120px,.42fr) minmax(0,1fr);gap:11px 22px;margin:0}
     .reg-confirm-grid dt{margin:0;color:#918799;font-size:.75rem;font-weight:650}
     .reg-confirm-grid dd{margin:0;color:#443c4c;font-size:.79rem;line-height:1.5;overflow-wrap:anywhere}
+    .reg-confirm-zoom{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;margin-top:18px;padding:17px 18px;border-radius:15px;background:linear-gradient(135deg,#f4efff,#eee7ff);border:1px solid #dfd1f7;color:#39265f}
+    .reg-confirm-zoom strong{display:block;font-size:.82rem;line-height:1.35}.reg-confirm-zoom span{display:block;margin-top:4px;color:#75688a;font-size:.7rem;line-height:1.45}
+    .reg-confirm-zoom a{min-height:42px;padding:0 17px;border-radius:11px;background:#6d28d9;color:#fff;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:800;white-space:nowrap;box-shadow:0 8px 18px rgba(109,40,217,.18)}
     .reg-confirm-email{display:grid;grid-template-columns:42px 1fr;gap:13px;align-items:start;margin-top:18px;padding:15px 16px;border-radius:14px;background:#f6f1ff;border:1px solid #e5daf8;color:#5c4b74}
     .reg-confirm-email-icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:#fff;color:#6d28d9;box-shadow:0 5px 14px rgba(76,44,123,.08)}
     .reg-confirm-email-icon svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2}
@@ -30,7 +34,7 @@
     .reg-confirm-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
     .reg-confirm-back{min-height:46px;border:1px solid #d9cfee;border-radius:13px;background:#fff;color:#6d28d9;padding:0 18px;font:inherit;font-size:.78rem;font-weight:750;cursor:pointer;transition:.18s ease}
     .reg-confirm-back:hover{background:#faf7ff;border-color:#bea9e8}
-    @media(max-width:620px){.registration-card.registration-complete{padding:22px}.reg-confirm-head{grid-template-columns:48px 1fr;gap:14px}.reg-confirm-check{width:48px;height:48px;border-radius:15px}.reg-confirm-head h3{font-size:1.45rem}.reg-confirm-panel{padding:18px}.reg-confirm-grid{grid-template-columns:1fr;gap:3px}.reg-confirm-grid dd{margin-bottom:9px}.reg-confirm-actions{justify-content:stretch}.reg-confirm-back{width:100%}}
+    @media(max-width:620px){.registration-card.registration-complete{padding:22px}.reg-confirm-head{grid-template-columns:48px 1fr;gap:14px}.reg-confirm-check{width:48px;height:48px;border-radius:15px}.reg-confirm-head h3{font-size:1.45rem}.reg-confirm-panel{padding:18px}.reg-confirm-grid{grid-template-columns:1fr;gap:3px}.reg-confirm-grid dd{margin-bottom:9px}.reg-confirm-zoom{grid-template-columns:1fr}.reg-confirm-zoom a{width:100%}.reg-confirm-actions{justify-content:stretch}.reg-confirm-back{width:100%}}
   `;
   document.head.appendChild(style);
 
@@ -60,7 +64,7 @@
         <div class="reg-confirm-check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></div>
         <div>
           <h3>${duplicate?'You’re already registered':'Registration complete'}</h3>
-          <p>${duplicate?'Your existing registration for this workshop is active.':'Your place has been saved for this workshop.'} Further information and joining details will be sent to the email address you provided.</p>
+          <p>${duplicate?'Your existing registration for this workshop is active.':'Your place has been saved for this workshop.'} The Zoom joining link is available below and is also included in your confirmation email.</p>
         </div>
       </div>
       <div class="reg-confirm-panel">
@@ -78,11 +82,15 @@
           <dt>Role</dt><dd>${escapeHtml(payload.role)}</dd>
         </dl>
       </div>
+      <div class="reg-confirm-zoom">
+        <div><strong>Join the live workshop on Zoom</strong><span>The room opens 15 minutes before the workshop.</span></div>
+        <a href="${EVENT_ZOOM_URL}" target="_blank" rel="noopener">Join Zoom session</a>
+      </div>
       <div class="reg-confirm-email${emailSent?'':' email-warning'}">
         <div class="reg-confirm-email-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 5h18v14H3zM3 7l9 6 9-6"/></svg></div>
         <div>
-          <p>${emailSent?`A confirmation email has been sent to <strong>${escapeHtml(payload.email)}</strong>.`:`Your registration is saved. We could not send the confirmation email right now.`}</p>
-          <p>${emailSent?'We’ll send joining details and any final workshop information to the same address before the session.':'Please keep this page as confirmation. If you do not receive an email, contact support@wistudi.com.'}</p>
+          <p>${emailSent?`A confirmation email with the Zoom link has been sent to <strong>${escapeHtml(payload.email)}</strong>.`:`Your registration is saved. We could not send the confirmation email right now.`}</p>
+          <p>${emailSent?'We’ll send any final workshop information to the same address before the session.':'The Zoom link is available above. If you need support, contact support@wistudi.com.'}</p>
         </div>
       </div>
       <div class="reg-confirm-actions"><button type="button" class="reg-confirm-back" id="registrationBackToEvent">Back to event</button></div>`;
