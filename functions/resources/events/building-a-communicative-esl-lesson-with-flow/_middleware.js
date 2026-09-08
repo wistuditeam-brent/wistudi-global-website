@@ -1,15 +1,6 @@
 export async function onRequest(context){
-  const response=await context.next();
-  const type=response.headers.get('content-type')||'';
-  if(!type.includes('text/html')) return response;
-  return new HTMLRewriter()
-    .on('body',{element(el){
-      el.append('<script src="/assets/js/event-registration-component.js" defer></script>',{html:true});
-      el.append('<script src="/assets/js/event-registration-live-bridge.js" defer></script>',{html:true});
-      el.append('<script src="/assets/js/event-media-component.js" defer></script>',{html:true});
-      el.append('<script src="/assets/js/event-facts-component.js" defer></script>',{html:true});
-      el.append('<script src="/assets/js/event-live-session-component.js" defer></script>',{html:true});
-      el.append('<script src="/assets/js/event-hero-actions-component.js" defer></script>',{html:true});
-    }})
-    .transform(response);
+  // The event page runtime is loaded in one ordered sequence by assets/js/site-shell.js.
+  // Do not inject duplicate component scripts here: the previous double-loading created
+  // competing renderers, timers and translation observers on production Pages routes.
+  return context.next();
 }
