@@ -1,10 +1,83 @@
 (()=>{
 'use strict';
+
+const SUPPORTED=['en','vi','zh-cn','th','id','ms','ar'];
+const RESOURCE_LABEL={
+  en:'Resources',
+  vi:'Tài nguyên',
+  'zh-cn':'资源',
+  th:'ทรัพยากร',
+  id:'Sumber Daya',
+  ms:'Sumber',
+  ar:'الموارد'
+};
 const EVENT_PATH='/resources/events/building-a-communicative-esl-lesson-with-flow/';
-const normalized=(window.__WS_PREVIEW_PATH||location.pathname)
-  .replace(/\/index\.html$/,'/')
-  .replace(/^\/(vi|zh-cn|th|id|ms|ar)(?=\/)/,'');
+
+const selectedLocale=()=>{
+  const params=new URLSearchParams(location.search);
+  const requested=(params.get('lang')||'').toLowerCase();
+  if(SUPPORTED.includes(requested))return requested;
+  const first=(location.pathname.split('/').filter(Boolean)[0]||'').toLowerCase();
+  return SUPPORTED.includes(first)?first:'en';
+};
+
+const stripLocale=pathname=>{
+  const parts=(pathname||'/').split('/').filter(Boolean);
+  if(parts.length&&SUPPORTED.includes(parts[0].toLowerCase()))parts.shift();
+  let path='/'+parts.join('/');
+  if(!parts.length)path='/';
+  else if((pathname||'').endsWith('/')&&!path.endsWith('/'))path+='/';
+  return path;
+};
+
+const normalized=stripLocale((window.__WS_PREVIEW_PATH||location.pathname).replace(/\/index\.html$/,'/'));
 const isEvent=normalized.includes(EVENT_PATH);
+
+const internalPath=a=>{
+  try{return stripLocale(new URL(a.getAttribute('href')||'',location.href).pathname)}catch(_){return''}
+};
+
+function ensureResourcesNav(){
+  const locale=selectedLocale();
+  const href=locale==='en'?'/resources/':`/resources/?lang=${encodeURIComponent(locale)}`;
+  const active=normalized==='/resources/'||normalized.startsWith('/resources/');
+
+  document.querySelectorAll('.ws-nav-links').forEach(nav=>{
+    let link=[...nav.querySelectorAll('a')].find(a=>a.dataset.wsResourcesLink==='true'||internalPath(a).startsWith('/resources/'));
+    if(!link){
+      link=document.createElement('a');
+      link.dataset.wsResourcesLink='true';
+      link.className='ws-resource-nav-link';
+      const contact=[...nav.querySelectorAll('a')].find(a=>internalPath(a).startsWith('/contact'));
+      contact?nav.insertBefore(link,contact):nav.appendChild(link);
+    }
+    link.dataset.wsResourcesLink='true';
+    link.href=href;
+    link.classList.add('ws-resource-nav-link');
+    link.classList.toggle('active',active);
+    const badge=link.querySelector('.ws-resource-badge')||document.createElement('span');
+    if(!badge.classList.contains('ws-resource-badge'))badge.className='ws-resource-badge';
+    badge.hidden=true;
+    badge.setAttribute('aria-label','New resources');
+    link.textContent=RESOURCE_LABEL[locale]||RESOURCE_LABEL.en;
+    link.appendChild(badge);
+  });
+
+  document.querySelectorAll('.ws-mobile-inner').forEach(nav=>{
+    let link=[...nav.querySelectorAll('a')].find(a=>a.dataset.wsResourcesLink==='true'||internalPath(a).startsWith('/resources/'));
+    if(!link){
+      link=document.createElement('a');
+      link.dataset.wsResourcesLink='true';
+      const contact=[...nav.querySelectorAll('a')].find(a=>internalPath(a).startsWith('/contact'));
+      contact?nav.insertBefore(link,contact):nav.appendChild(link);
+    }
+    link.href=href;
+    link.textContent=RESOURCE_LABEL[locale]||RESOURCE_LABEL.en;
+    link.classList.toggle('active',active);
+  });
+}
+
+ensureResourcesNav();
 
 const load=(src,key)=>new Promise(resolve=>{
   const absolute=new URL(src,location.href).href;
@@ -32,16 +105,50 @@ const load=(src,key)=>new Promise(resolve=>{
   document.head.appendChild(s);
 });
 
+const loadWithMutationGuard=async(src,key)=>{
+  const Native=window.MutationObserver;
+  if(typeof Native!=='function')return load(src,key);
+
+  class GuardedMutationObserver{
+    constructor(callback){
+      this.callback=callback;
+      this.target=null;
+      this.options=null;
+      this.disconnected=false;
+      this.native=new Native(records=>{
+        const target=this.target;
+        const options=this.options;
+        this.native.disconnect();
+        try{this.callback(records,this)}finally{
+          if(target&&options&&!this.disconnected){
+            queueMicrotask(()=>{
+              if(!this.disconnected&&this.target===target)this.native.observe(target,options);
+            });
+          }
+        }
+      });
+    }
+    observe(target,options){
+      this.target=target;
+      this.options=options;
+      this.disconnected=false;
+      this.native.observe(target,options);
+    }
+    disconnect(){this.disconnected=true;this.native.disconnect()}
+    takeRecords(){return this.native.takeRecords()}
+  }
+
+  window.MutationObserver=GuardedMutationObserver;
+  try{return await load(src,key)}finally{window.MutationObserver=Native}
+};
+
 const bootEvent=async()=>{
-  // The event detail page owns its runtime. Keep generic Resources renderers and their
-  // translators out of this route so every locale starts from the same canonical DOM.
+  // The event detail page owns one ordered runtime. This prevents duplicate renderers,
+  // duplicated timers and translation observers from competing with the registration UI.
   await load('/assets/js/analytics-events.js','wsAnalyticsEvents');
   await load('/assets/js/footer-unify.js','wsFooterUnify');
   await load('/assets/js/site-shell-base.js','wsBase');
 
-  // Canonical presentation = the version built through the workshop feature, highlight,
-  // centred registration and unified hero commits. Do not load event-upgrades-v2 here;
-  // it is a competing renderer and was the source of the visual rollback.
   await load('/assets/js/event-highlight.js','wsEventHighlight');
   await load('/assets/js/event-hero-actions-component.js','wsEventHeroActions');
   await load('/assets/js/event-live-session-component.js','wsEventLiveSession');
@@ -50,13 +157,15 @@ const bootEvent=async()=>{
   await load('/assets/js/event-mobile-stage-fix.js','wsEventMobileStageFix');
   await load('/assets/js/event-zoom-bridge.js','wsEventZoomBridge');
 
-  // Translate only after the final presentation is in place. The two event translators
-  // are complementary: event-i18n covers the current page structure and controls, while
-  // event-i18n-content covers the extended workshop prose and highlight content. Both
-  // only translate from the canonical English source, so they do not fight each other.
   await load('/assets/js/i18n.js','wsI18n');
-  await load('/assets/js/event-i18n.js','wsEventI18n');
-  await load('/assets/js/event-i18n-content.js','wsEventI18nContent');
+
+  // event-i18n updates translated date/time values from a MutationObserver. Guard the
+  // observer while its callback runs so its own text updates cannot recursively retrigger
+  // the same observer and lock the page. The observer remains active for later UI changes.
+  await loadWithMutationGuard('/assets/js/event-i18n.js','wsEventI18n');
+  await loadWithMutationGuard('/assets/js/event-i18n-content.js','wsEventI18nContent');
+
+  ensureResourcesNav();
   document.documentElement.dataset.wsEventRuntime='ready';
   document.documentElement.dataset.wsEventPresentation='canonical-highlight';
 };
@@ -64,6 +173,7 @@ const bootEvent=async()=>{
 const bootSite=async()=>{
   await load('/assets/js/site-shell-core.js','wsCore');
   await load('/assets/js/i18n.js','wsI18n');
+  ensureResourcesNav();
 
   // The temporary event takeover banner on the Platform homepage is intentionally off.
   // Keep the workshop promotion inside Resources until we explicitly choose to restore it.
