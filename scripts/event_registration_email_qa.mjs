@@ -10,6 +10,29 @@ const expect = (condition, message) => {
   if (!condition) failures.push(message);
 };
 
+const registrationBody = (overrides = {}) => ({
+  event_id: EVENT_ID,
+  event_name: 'ATTACKER CONTROLLED EVENT NAME',
+  first_name: 'QA',
+  last_name: 'Registrant',
+  email: 'qa-registrant@example.com',
+  country: 'Vietnam',
+  organisation_type: 'School',
+  organisation_name: 'QA School',
+  role: 'Teacher',
+  timezone: 'Asia/Ho_Chi_Minh',
+  privacy_consent: true,
+  marketing_consent: false,
+  ...overrides
+});
+
+const testEnv = {
+  EVENTS_SHEETS_WEBHOOK_SECRET: 'qa-secret',
+  RESEND_API_KEY: 'qa-resend-key',
+  EVENTS_FROM_EMAIL: 'Wistudi Events <events@send.wistudi.com>',
+  EVENTS_REPLY_TO_EMAIL: 'support@wistudi.com'
+};
+
 async function runSuccessfulRegistrationTest() {
   const calls = [];
   globalThis.fetch = async (url, options = {}) => {
@@ -32,36 +55,15 @@ async function runSuccessfulRegistrationTest() {
   const request = new Request('https://preview.example/api/event-register', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      event_id: EVENT_ID,
-      event_name: 'ATTACKER CONTROLLED EVENT NAME',
-      first_name: 'QA',
-      last_name: 'Registrant',
-      email: 'qa-registrant@example.com',
-      country: 'Vietnam',
-      organisation_type: 'School',
-      organisation_name: 'QA School',
-      role: 'Teacher',
-      timezone: 'Asia/Ho_Chi_Minh',
-      privacy_consent: true,
-      marketing_consent: false
-    })
+    body: JSON.stringify(registrationBody())
   });
-
-  const response = await onRequestPost({
-    request,
-    env: {
-      EVENTS_SHEETS_WEBHOOK_SECRET: 'qa-secret',
-      RESEND_API_KEY: 'qa-resend-key',
-      EVENTS_FROM_EMAIL: 'Wistudi Events <events@send.wistudi.com>',
-      EVENTS_REPLY_TO_EMAIL: 'support@wistudi.com'
-    }
-  });
+  const response = await onRequestPost({ request, env: testEnv });
   const body = await response.json();
 
   expect(response.status === 200, `expected registration 200, got ${response.status}`);
   expect(body.ok === true, 'expected registration response ok=true');
   expect(body.duplicate === true, 'expected duplicate registrations to remain successful');
+  expect(body.storage_synced === true, 'expected successful Sheet storage to report storage_synced=true');
   expect(body.confirmation_email_sent === true, 'expected confirmation_email_sent=true when Resend accepts the message');
   expect(calls.length === 2, `expected two provider calls, got ${calls.length}`);
 
@@ -88,6 +90,57 @@ async function runSuccessfulRegistrationTest() {
   }
 }
 
+async function runSheetUnauthorizedFallbackTest() {
+  const calls = [];
+  globalThis.fetch = async (url, options = {}) => {
+    calls.push({ url: String(url), options });
+    if (String(url).includes('script.google.com')) {
+      return new Response(JSON.stringify({ ok: false, error: 'Unauthorized' }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+    if (String(url) === 'https://api.resend.com/emails') {
+      return new Response(JSON.stringify({ id: `qa-resend-${calls.length}` }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+    throw new Error(`Unexpected fetch target: ${url}`);
+  };
+
+  const request = new Request('https://preview.example/api/event-register', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(registrationBody())
+  });
+  const response = await onRequestPost({ request, env: testEnv });
+  const body = await response.json();
+
+  expect(response.status === 200, `Sheet Unauthorized fallback should still return 200, got ${response.status}`);
+  expect(body.ok === true, 'Sheet Unauthorized fallback should still complete registration');
+  expect(body.storage_synced === false, 'Sheet Unauthorized fallback should report storage_synced=false');
+  expect(body.storage_status === 'fallback_email', 'Sheet Unauthorized fallback should report fallback_email storage status');
+  expect(body.confirmation_email_sent === true, 'registrant confirmation should still be sent after fallback record is secured');
+  expect(calls.length === 3, `expected Sheet + fallback email + confirmation email calls, got ${calls.length}`);
+
+  const resendCalls = calls.filter(call => call.url === 'https://api.resend.com/emails').map(call => JSON.parse(call.options.body || '{}'));
+  const fallback = resendCalls.find(email => /storage fallback/i.test(email.subject || ''));
+  const confirmation = resendCalls.find(email => /registration is confirmed/i.test(email.subject || ''));
+  expect(!!fallback, 'internal storage fallback email was not sent');
+  expect(!!confirmation, 'registrant confirmation email was not sent after Sheet rejection');
+  if (fallback) {
+    expect(Array.isArray(fallback.to) && fallback.to[0] === 'support@wistudi.com', 'fallback registration record is not routed to support');
+    expect(fallback.reply_to === 'qa-registrant@example.com', 'fallback reply-to does not point to the registrant');
+    expect((fallback.text || '').includes('qa-registrant@example.com'), 'fallback record does not include registrant email');
+    expect((fallback.text || '').includes('storage_rejected'), 'fallback record does not identify storage rejection');
+    expect(!(fallback.text || '').includes('qa-secret'), 'fallback record must never expose the Sheets webhook secret');
+  }
+  if (confirmation) {
+    expect(confirmation.html.includes(ZOOM) && confirmation.text.includes(ZOOM), 'fallback confirmation does not contain the exact Zoom URL');
+  }
+}
+
 async function runUnknownEventTest() {
   let providerCalls = 0;
   globalThis.fetch = async () => {
@@ -98,17 +151,7 @@ async function runUnknownEventTest() {
   const request = new Request('https://preview.example/api/event-register', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      event_id: 'made-up-event-id',
-      event_name: 'Made Up Event',
-      first_name: 'QA',
-      last_name: 'Registrant',
-      email: 'qa-registrant@example.com',
-      country: 'Vietnam',
-      organisation_type: 'School',
-      role: 'Teacher',
-      privacy_consent: true
-    })
+    body: JSON.stringify(registrationBody({ event_id: 'made-up-event-id', event_name: 'Made Up Event' }))
   });
 
   const response = await onRequestPost({ request, env: {} });
@@ -120,6 +163,7 @@ async function runUnknownEventTest() {
 
 try {
   await runSuccessfulRegistrationTest();
+  await runSheetUnauthorizedFallbackTest();
   await runUnknownEventTest();
 } finally {
   globalThis.fetch = originalFetch;
@@ -131,4 +175,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('Event registration confirmation QA passed: canonical event identity, registrant delivery, exact Zoom URL in HTML/text, and unknown-event rejection verified.');
+console.log('Event registration confirmation QA passed: Sheet success, Sheet Unauthorized fallback, registrant delivery, exact Zoom URL, and unknown-event rejection verified.');
