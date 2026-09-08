@@ -36,6 +36,7 @@ const isEvent=normalized.includes(EVENT_PATH);
 const internalPath=a=>{
   try{return stripLocale(new URL(a.getAttribute('href')||'',location.href).pathname)}catch(_){return''}
 };
+const isResourceLink=a=>a?.dataset?.wsResourcesLink==='true'||a?.classList?.contains('ws-resource-nav-link')||internalPath(a).startsWith('/resources/');
 
 function ensureResourcesNav(){
   const locale=selectedLocale();
@@ -43,43 +44,62 @@ function ensureResourcesNav(){
   const active=normalized==='/resources/'||normalized.startsWith('/resources/');
 
   document.querySelectorAll('.ws-nav-links').forEach(nav=>{
-    let link=[...nav.querySelectorAll('a')].find(a=>a.dataset.wsResourcesLink==='true'||internalPath(a).startsWith('/resources/'));
+    const candidates=[...nav.querySelectorAll('a')].filter(isResourceLink);
+    let link=candidates.shift();
+    candidates.forEach(extra=>extra.remove());
     if(!link){
       link=document.createElement('a');
-      link.dataset.wsResourcesLink='true';
-      link.className='ws-resource-nav-link';
       const contact=[...nav.querySelectorAll('a')].find(a=>internalPath(a).startsWith('/contact'));
       contact?nav.insertBefore(link,contact):nav.appendChild(link);
     }
     link.dataset.wsResourcesLink='true';
-    link.href=href;
     link.classList.add('ws-resource-nav-link');
     link.classList.toggle('active',active);
+    if(link.getAttribute('href')!==href)link.setAttribute('href',href);
     const badge=link.querySelector('.ws-resource-badge')||document.createElement('span');
-    if(!badge.classList.contains('ws-resource-badge'))badge.className='ws-resource-badge';
+    badge.className='ws-resource-badge';
     badge.hidden=true;
     badge.setAttribute('aria-label','New resources');
-    link.textContent=RESOURCE_LABEL[locale]||RESOURCE_LABEL.en;
-    link.appendChild(badge);
+    const label=RESOURCE_LABEL[locale]||RESOURCE_LABEL.en;
+    const currentLabel=[...link.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.textContent).join('').trim();
+    if(currentLabel!==label){
+      [...link.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).forEach(n=>n.remove());
+      link.prepend(document.createTextNode(label));
+    }
+    if(!badge.isConnected)link.appendChild(badge);
   });
 
   document.querySelectorAll('.ws-mobile-inner').forEach(nav=>{
-    let link=[...nav.querySelectorAll('a')].find(a=>a.dataset.wsResourcesLink==='true'||internalPath(a).startsWith('/resources/'));
+    const candidates=[...nav.querySelectorAll('a')].filter(isResourceLink);
+    let link=candidates.shift();
+    candidates.forEach(extra=>extra.remove());
     if(!link){
       link=document.createElement('a');
-      link.dataset.wsResourcesLink='true';
       const contact=[...nav.querySelectorAll('a')].find(a=>internalPath(a).startsWith('/contact'));
       contact?nav.insertBefore(link,contact):nav.appendChild(link);
     }
     link.dataset.wsResourcesLink='true';
     link.classList.add('ws-resource-nav-link');
-    link.href=href;
-    link.textContent=RESOURCE_LABEL[locale]||RESOURCE_LABEL.en;
     link.classList.toggle('active',active);
+    if(link.getAttribute('href')!==href)link.setAttribute('href',href);
+    const label=RESOURCE_LABEL[locale]||RESOURCE_LABEL.en;
+    if(link.textContent.trim()!==label)link.textContent=label;
   });
 }
 
 ensureResourcesNav();
+
+// site-shell-core loads resources-global asynchronously. Its legacy nav helper only
+// recognises href="/resources/" and can otherwise insert a second English Resources link
+// after a translated link. Watch only the two nav containers and collapse any late duplicate.
+const watchResourcesNav=()=>{
+  document.querySelectorAll('.ws-nav-links,.ws-mobile-inner').forEach(nav=>{
+    if(nav.dataset.wsResourcesWatched==='true')return;
+    nav.dataset.wsResourcesWatched='true';
+    new MutationObserver(()=>queueMicrotask(ensureResourcesNav)).observe(nav,{childList:true});
+  });
+};
+watchResourcesNav();
 
 const load=(src,key)=>new Promise(resolve=>{
   const absolute=new URL(src,location.href).href;
@@ -172,6 +192,7 @@ const bootEvent=async()=>{
   await loadWithMutationGuard('/assets/js/event-i18n-content.js','wsEventI18nContent');
 
   ensureResourcesNav();
+  watchResourcesNav();
   document.documentElement.dataset.wsEventRuntime='ready';
   document.documentElement.dataset.wsEventPresentation='canonical-highlight';
 };
@@ -180,6 +201,7 @@ const bootSite=async()=>{
   await load('/assets/js/site-shell-core.js','wsCore');
   await load('/assets/js/i18n.js','wsI18n');
   ensureResourcesNav();
+  watchResourcesNav();
 
   // The temporary event takeover banner on the Platform homepage is intentionally off.
   // Keep the workshop promotion inside Resources until we explicitly choose to restore it.
