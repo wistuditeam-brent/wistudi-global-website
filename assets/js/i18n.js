@@ -10,15 +10,17 @@
     ms:{label:'Bahasa Melayu',short:'MS',htmlLang:'ms',dir:'ltr',flag:'<svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#fff"/><g fill="#CC0001"><rect y="0" width="30" height="1.54"/><rect y="3.08" width="30" height="1.54"/><rect y="6.16" width="30" height="1.54"/><rect y="9.24" width="30" height="1.54"/><rect y="12.32" width="30" height="1.54"/><rect y="15.4" width="30" height="1.54"/><rect y="18.48" width="30" height="1.52"/></g><rect width="15" height="10.78" fill="#010066"/><circle cx="6.2" cy="5.4" r="3.1" fill="#FFCC00"/><circle cx="7.25" cy="5.4" r="2.55" fill="#010066"/><path fill="#FFCC00" d="m11.2 2.7.55 1.2 1.3-.1-.98.88.5 1.22-1.13-.7-1.02.86.28-1.27-1.12-.67 1.3-.12z"/></svg>'},
     ar:{label:'العربية',short:'AR',htmlLang:'ar',dir:'rtl',flag:'<svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#006C35"/><path d="M7 6.3h16M8 8h14M9 9.7h12" stroke="#fff" stroke-width=".7" stroke-linecap="round"/><path d="M8 14.2h13.5c1.3 0 2.3-.45 3.1-1.15" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round"/></svg>'}
   };
+
   const localeCodes=Object.keys(LOCALES);
   const ready=fn=>document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn,{once:true}):fn();
   const params=new URLSearchParams(location.search);
   const requested=(params.get('lang')||'').toLowerCase();
   const pathParts=location.pathname.split('/').filter(Boolean);
   const explicitLocale=localeCodes.includes((pathParts[0]||'').toLowerCase())?pathParts[0].toLowerCase():null;
-  let storedLocale=null;
-  try{const stored=localStorage.getItem('wistudi_locale');if(localeCodes.includes(stored))storedLocale=stored}catch(_){ }
-  const detected=localeCodes.includes(requested)?requested:(explicitLocale||storedLocale||'en');
+
+  // A URL has one language. Stored/browser preferences never silently translate the
+  // English canonical URL; users move to an explicit language path instead.
+  const detected=explicitLocale||(localeCodes.includes(requested)?requested:'en');
   const locale=LOCALES[detected]||LOCALES.en;
 
   const stripLocale=(pathname=location.pathname)=>{
@@ -30,47 +32,45 @@
     return p||'/';
   };
 
-  const normalizeSeoPath=p=>p==='/'?'/':p.replace(/index\.html$/,'');
-  const basePath=normalizeSeoPath(stripLocale());
-
-  const safeCookie=()=>{
-    // Cloudflare's legacy locale-prefix redirect reads this cookie. Keep that
-    // redirect neutral while the selected locale is stored client-side so all
-    // public pages stay on their real asset paths and cannot lose CSS/JS.
-    document.cookie='wistudi_locale=en;path=/;max-age=31536000;SameSite=Lax';
+  const normalizeSeoPath=p=>{
+    if(!p||p==='/')return'/';
+    let clean=p.replace(/\/index\.html$/i,'/');
+    if(clean==='/platform/'||clean==='/platform')return'/';
+    return clean;
   };
+  const basePath=normalizeSeoPath(stripLocale());
 
   const savePreference=code=>{
     if(!LOCALES[code])return;
     try{localStorage.setItem('wistudi_locale',code)}catch(_){ }
-    safeCookie();
+    document.cookie=`wistudi_locale=${encodeURIComponent(code)};path=/;max-age=31536000;SameSite=Lax`;
   };
 
-  const withLocale=(code,path=basePath)=>{
+  const withoutLangQuery=search=>{
+    const source=new URLSearchParams(search||'');
+    source.delete('lang');
+    const value=source.toString();
+    return value?`?${value}`:'';
+  };
+
+  const withLocale=(code,path=basePath,search=location.search,hash=location.hash)=>{
     const clean=normalizeSeoPath(stripLocale(path));
-    const u=new URL(clean,location.origin);
-    const current=new URLSearchParams(location.search);
-    current.delete('lang');
-    current.forEach((value,key)=>u.searchParams.append(key,value));
-    if(code!=='en')u.searchParams.set('lang',code);
-    u.hash=location.hash;
-    return u.pathname+(u.search||'')+(u.hash||'');
+    const prefix=code==='en'?'':`/${code}`;
+    const pathname=clean==='/'?`${prefix}/`:`${prefix}${clean}`;
+    return pathname+withoutLangQuery(search)+(hash||'');
   };
 
-  // Rescue legacy /vi/, /th/, /zh-cn/, etc. URLs. The middleware always injects
-  // this script with an absolute path, so even an old locale page whose relative
-  // assets fail can recover to the canonical page before the user is left with
-  // an unstyled screen.
-  if(explicitLocale&&explicitLocale!=='en'&&!requested){
-    safeCookie();
-    try{localStorage.setItem('wistudi_locale',explicitLocale)}catch(_){ }
-    const target=withLocale(explicitLocale,basePath);
+  // Client-side migration fallback for cached pages. The edge middleware performs the
+  // same migration as a 301, but this keeps old cached ?lang= links from lingering.
+  if(!explicitLocale&&localeCodes.includes(requested)){
+    const target=withLocale(requested,basePath);
     if(target!==location.pathname+location.search+location.hash){location.replace(target);return;}
   }
 
   document.documentElement.lang=locale.htmlLang;
   document.documentElement.dir=locale.dir;
   document.documentElement.dataset.locale=detected;
+  savePreference(detected);
 
   const style=document.createElement('style');
   style.textContent=`
@@ -83,16 +83,21 @@
 
   const canonicalOrigin='https://global.wistudi.com';
   const seoPath=basePath;
+  const seoUrl=(code,path=seoPath)=>canonicalOrigin+withLocale(code,path,'','');
+
   const addAlternateLinks=()=>{
     document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el=>el.remove());
     localeCodes.forEach(code=>{
       const link=document.createElement('link');
-      link.rel='alternate';link.hreflang=LOCALES[code].htmlLang;
-      link.href=canonicalOrigin+seoPath+(code==='en'?'':`${seoPath.includes('?')?'&':'?'}lang=${code}`);
+      link.rel='alternate';
+      link.hreflang=LOCALES[code].htmlLang;
+      link.href=seoUrl(code);
       document.head.appendChild(link);
     });
-    const x=document.createElement('link');x.rel='alternate';x.hreflang='x-default';x.href=canonicalOrigin+seoPath;document.head.appendChild(x);
-    const canonical=document.querySelector('link[rel="canonical"]');if(canonical)canonical.href=canonicalOrigin+seoPath;
+    const x=document.createElement('link');
+    x.rel='alternate';x.hreflang='x-default';x.href=seoUrl('en');document.head.appendChild(x);
+    const canonical=document.querySelector('link[rel="canonical"]');
+    if(canonical)canonical.href=seoUrl(detected);
   };
 
   const buildLanguageMenus=()=>{
@@ -106,7 +111,9 @@
       }
       if(menu){
         menu.innerHTML=localeCodes.map(code=>{
-          const item=LOCALES[code];const current=code===detected?' current':'';const currentAttr=code===detected?' aria-current="page"':'';
+          const item=LOCALES[code];
+          const current=code===detected?' current':'';
+          const currentAttr=code===detected?' aria-current="page"':'';
           return `<a class="ws-lang-option${current}" data-locale="${code}" href="${withLocale(code)}" role="menuitem"${currentAttr}><span class="ws-lang-option-main"><span class="ws-lang-flag" aria-hidden="true">${item.flag}</span><span>${item.label}</span></span><span>${item.short}</span></a>`;
         }).join('');
         menu.querySelectorAll('a[data-locale]').forEach(a=>a.addEventListener('click',()=>savePreference(a.dataset.locale)));
@@ -114,53 +121,88 @@
     });
   };
 
-  const localizeInternalLinks=()=>{
-    document.querySelectorAll('a[href]').forEach(a=>{
-      if(a.matches('.ws-lang-option,[data-locale]')||a.closest('.ws-lang'))return;
-      const raw=a.getAttribute('href');
-      if(!raw||raw.startsWith('#')||raw.startsWith('mailto:')||raw.startsWith('tel:')||raw.startsWith('javascript:'))return;
-      let u;try{u=new URL(raw,location.href)}catch(_){return}
-      if(u.origin!==location.origin)return;
-      const cleanPath=normalizeSeoPath(stripLocale(u.pathname));
-      if(cleanPath.startsWith('/assets/')||cleanPath.startsWith('/api/')||cleanPath.startsWith('/functions/'))return;
-      const next=new URL(cleanPath,location.origin);
-      u.searchParams.forEach((value,key)=>{if(key!=='lang')next.searchParams.append(key,value)});
-      if(detected!=='en')next.searchParams.set('lang',detected);
-      next.hash=u.hash;
-      a.href=next.pathname+(next.search||'')+(next.hash||'');
-    });
+  const desiredInternalUrl=(raw)=>{
+    if(!raw||raw.startsWith('#')||/^(mailto:|tel:|javascript:)/i.test(raw))return null;
+    let u;try{u=new URL(raw,location.href)}catch(_){return null}
+    if(u.origin!==location.origin)return null;
+    const cleanPath=normalizeSeoPath(stripLocale(u.pathname));
+    if(cleanPath.startsWith('/assets/')||cleanPath.startsWith('/api/')||cleanPath.startsWith('/functions/'))return null;
+    return withLocale(detected,cleanPath,u.search,u.hash);
+  };
+
+  const localizeElementLink=el=>{
+    if(!el||el.closest?.('.ws-lang')||el.matches?.('.ws-lang-option,[data-locale]'))return;
+    const attr=el.tagName==='FORM'?'action':'href';
+    const raw=el.getAttribute?.(attr);
+    const desired=desiredInternalUrl(raw);
+    if(desired&&raw!==desired)el.setAttribute(attr,desired);
+  };
+
+  const localizeInternalLinks=(root=document)=>{
+    if(root.matches?.('a[href],form[action]'))localizeElementLink(root);
+    root.querySelectorAll?.('a[href],form[action]').forEach(localizeElementLink);
   };
 
   const normalizeText=s=>(s||'').replace(/\s+/g,' ').trim();
   const translateNode=(node,dict)=>{
-    if(node.nodeType===Node.TEXT_NODE){const raw=node.nodeValue||'';const key=normalizeText(raw);if(!key||!dict[key])return;const lead=raw.match(/^\s*/)?.[0]||'';const trail=raw.match(/\s*$/)?.[0]||'';node.nodeValue=lead+dict[key]+trail;return}
+    if(node.nodeType===Node.TEXT_NODE){
+      const raw=node.nodeValue||'';const key=normalizeText(raw);if(!key||!dict[key])return;
+      const lead=raw.match(/^\s*/)?.[0]||'';const trail=raw.match(/\s*$/)?.[0]||'';node.nodeValue=lead+dict[key]+trail;return;
+    }
     if(node.nodeType!==Node.ELEMENT_NODE)return;
-    const el=node;['placeholder','title','aria-label','alt'].forEach(attr=>{const value=el.getAttribute?.(attr);const key=normalizeText(value);if(key&&dict[key])el.setAttribute(attr,dict[key])});[...el.childNodes].forEach(child=>translateNode(child,dict));
+    const el=node;
+    ['placeholder','title','aria-label','alt'].forEach(attr=>{const value=el.getAttribute?.(attr);const key=normalizeText(value);if(key&&dict[key])el.setAttribute(attr,dict[key])});
+    [...el.childNodes].forEach(child=>translateNode(child,dict));
   };
 
   const fetchDictionary=async url=>{try{const r=await fetch(url,{cache:'default'});return r.ok?await r.json():null}catch(_){return null}};
   const revealTranslatedPage=()=>{document.documentElement.classList.add('i18n-ready');document.documentElement.classList.remove('ws-i18n-pending');document.getElementById('ws-i18n-preload')?.remove()};
 
   const loadTranslations=async()=>{
-    if(detected==='en'){revealTranslatedPage();return}
+    if(detected==='en'){revealTranslatedPage();return null}
     try{
-      const [base,site,extra]=await Promise.all([fetchDictionary(`/assets/i18n/${detected}.json`),fetchDictionary(`/assets/i18n/${detected}-site.json`),fetchDictionary(`/assets/i18n/${detected}-extra.json`)]);
+      const [base,site,extra]=await Promise.all([
+        fetchDictionary(`/assets/i18n/${detected}.json`),
+        fetchDictionary(`/assets/i18n/${detected}-site.json`),
+        fetchDictionary(`/assets/i18n/${detected}-extra.json`)
+      ]);
       if(!base)throw new Error('base translation unavailable');
       const dict=Object.assign({},base.strings||base,site?.strings||site||{},extra?.strings||extra||{});
       const titles=Object.assign({},base.titles||{},site?.titles||{},extra?.titles||{});
       if(titles[seoPath])document.title=titles[seoPath];
-      const meta=document.querySelector('meta[name="description"]');if(meta){const key=normalizeText(meta.content);if(dict[key])meta.content=dict[key]}
       translateNode(document.body,dict);
-      const observer=new MutationObserver(records=>records.forEach(record=>{record.addedNodes.forEach(node=>translateNode(node,dict));if(record.type==='characterData')translateNode(record.target,dict)}));observer.observe(document.body,{childList:true,characterData:true,subtree:true});
       window.__WISTUDI_TRANSLATE_NODE__=node=>translateNode(node,dict);
       revealTranslatedPage();
-    }catch(err){console.warn('[Wistudi i18n] Translation unavailable:',detected,err);revealTranslatedPage()}
+      return dict;
+    }catch(err){console.warn('[Wistudi i18n] Translation unavailable:',detected,err);revealTranslatedPage();return null}
   };
 
-  ready(()=>{
-    savePreference(detected);
+  ready(async()=>{
     document.body?.classList.add(`locale-${detected.replace(/[^a-z0-9]/g,'-')}`);
-    buildLanguageMenus();localizeInternalLinks();addAlternateLinks();loadTranslations();
-    new MutationObserver(()=>localizeInternalLinks()).observe(document.body,{childList:true,subtree:true});
+    buildLanguageMenus();
+    localizeInternalLinks();
+    addAlternateLinks();
+    const dict=await loadTranslations();
+
+    let rewriting=false;
+    const observer=new MutationObserver(records=>{
+      if(rewriting)return;
+      rewriting=true;
+      try{
+        records.forEach(record=>{
+          if(record.type==='attributes')localizeElementLink(record.target);
+          if(record.type==='characterData'&&dict)translateNode(record.target,dict);
+          record.addedNodes?.forEach(node=>{
+            if(dict)translateNode(node,dict);
+            if(node.nodeType===Node.ELEMENT_NODE)localizeInternalLinks(node);
+          });
+        });
+      }finally{queueMicrotask(()=>{rewriting=false})}
+    });
+    observer.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['href','action']});
+    // A few shared components initialise after DOM ready. One final pass keeps their
+    // links on the same language path without waiting for a user interaction.
+    setTimeout(()=>localizeInternalLinks(),0);
+    setTimeout(()=>localizeInternalLinks(),350);
   });
 })();
