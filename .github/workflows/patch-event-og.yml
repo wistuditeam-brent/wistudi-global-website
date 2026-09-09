@@ -1,0 +1,71 @@
+name: Patch event Open Graph
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/og-event-patch-trigger
+
+permissions:
+  contents: write
+
+jobs:
+  patch-event-og:
+    if: github.event.head_commit.message == 'Run event OG patch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Add event Open Graph image metadata
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('resources/events/building-a-communicative-esl-lesson-with-flow/index.html')
+          html = path.read_text(encoding='utf-8')
+
+          old = '<meta property="og:type" content="website"><meta property="og:title" content="Building a Communicative ESL Lesson with Flow"><meta property="og:description" content="A free live workshop for ESL teachers with Trainer Nadia, presented by Wistudi in collaboration with Happy Teachers Academy."><meta property="og:url" content="https://global.wistudi.com/resources/events/building-a-communicative-esl-lesson-with-flow/"><meta name="twitter:card" content="summary_large_image">'
+
+          new = '''<meta property="og:type" content="website">
+<meta property="og:site_name" content="Wistudi">
+<meta property="og:title" content="Building a Communicative ESL Lesson with Flow">
+<meta property="og:description" content="A free live workshop for ESL teachers with Trainer Nadia, presented by Wistudi in collaboration with Happy Teachers Academy.">
+<meta property="og:url" content="https://global.wistudi.com/resources/events/building-a-communicative-esl-lesson-with-flow/">
+<meta property="og:image" content="https://global.wistudi.com/resources/events/building-a-communicative-esl-lesson-with-flow/WS%20Banner%20(1).png">
+<meta property="og:image:secure_url" content="https://global.wistudi.com/resources/events/building-a-communicative-esl-lesson-with-flow/WS%20Banner%20(1).png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1672">
+<meta property="og:image:height" content="941">
+<meta property="og:image:alt" content="Building a Communicative ESL Lesson with Flow — free live workshop for ESL teachers with Trainer Nadia">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Building a Communicative ESL Lesson with Flow">
+<meta name="twitter:description" content="A free live workshop for ESL teachers with Trainer Nadia, presented by Wistudi in collaboration with Happy Teachers Academy.">
+<meta name="twitter:image" content="https://global.wistudi.com/resources/events/building-a-communicative-esl-lesson-with-flow/WS%20Banner%20(1).png">'''
+
+          if old not in html:
+              raise SystemExit('Expected Open Graph metadata block was not found; refusing to modify the file.')
+
+          html = html.replace(old, new, 1)
+
+          schema_needle = '"eventAttendanceMode":"https://schema.org/OnlineEventAttendanceMode","location":'
+          schema_replacement = '"eventAttendanceMode":"https://schema.org/OnlineEventAttendanceMode","image":"https://global.wistudi.com/resources/events/building-a-communicative-esl-lesson-with-flow/WS%20Banner%20(1).png","location":'
+          if schema_needle in html:
+              html = html.replace(schema_needle, schema_replacement, 1)
+
+          path.write_text(html, encoding='utf-8')
+
+      - name: Commit event metadata
+        run: |
+          git config user.name "Wistudi Site Automation"
+          git config user.email "wistudi.team@gmail.com"
+          git add resources/events/building-a-communicative-esl-lesson-with-flow/index.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Set event Open Graph banner"
+            git push origin main
+          fi
