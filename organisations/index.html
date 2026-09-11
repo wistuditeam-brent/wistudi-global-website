@@ -209,6 +209,126 @@
   }
 }
 </style>
+<style id="wistudi-technology-ecosystem-refinement">
+/* Technology ecosystem: more prominent logos, cleaner open layout, simple dividers instead of cards. */
+#technology{
+  background:linear-gradient(180deg,#fff 0%,#fbfaff 48%,#fff 100%);
+}
+#technology .section-head{
+  max-width:900px;
+}
+#technology .logo-bands{
+  gap:0;
+  margin-top:48px;
+  border-top:1px solid #e6e0eb;
+  border-bottom:1px solid #e6e0eb;
+}
+#technology .logo-panel{
+  border:0;
+  border-radius:0;
+  background:transparent;
+  padding:32px 34px 30px;
+  box-shadow:none;
+}
+#technology .logo-panel:hover{
+  transform:none;
+  box-shadow:none;
+}
+#technology .logo-panel + .logo-panel{
+  border-left:1px solid #e6e0eb;
+}
+#technology .logo-panel h3{
+  font-size:1.22rem;
+  margin-bottom:8px;
+}
+#technology .logo-panel>p{
+  font-size:.94rem;
+  line-height:1.6;
+  margin-bottom:28px;
+}
+#technology .logo-row{
+  gap:0;
+  align-items:stretch;
+}
+#technology .logo-box{
+  position:relative;
+  height:132px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  padding:20px 24px;
+  box-shadow:none;
+  transform:none;
+}
+#technology .logo-box + .logo-box{
+  border-left:1px solid #ece7f0;
+}
+#technology .logo-box:hover{
+  transform:none;
+  box-shadow:none;
+  border-color:#ece7f0;
+}
+#technology .logo-box img{
+  max-height:80px;
+  max-width:92%;
+}
+#technology .logo-box-with-link{
+  flex-direction:column;
+  gap:12px;
+}
+#technology .logo-box-with-link img{
+  max-height:62px;
+}
+#technology .logo-learn-more{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  font-family:"B Vietnam Pro",Inter,sans-serif;
+  font-size:.78rem;
+  font-weight:700;
+  color:var(--purple);
+  text-decoration:none;
+  line-height:1;
+}
+#technology .logo-learn-more:hover{
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+#technology .logo-note{
+  margin-top:22px;
+  padding-top:18px;
+  border-top:1px solid #ece7f0;
+  font-size:.8rem;
+  line-height:1.55;
+}
+@media(max-width:1020px){
+  #technology .logo-bands{
+    border-bottom:0;
+  }
+  #technology .logo-panel{
+    padding:30px 0;
+    border-bottom:1px solid #e6e0eb;
+  }
+  #technology .logo-panel + .logo-panel{
+    border-left:0;
+  }
+}
+@media(max-width:760px){
+  #technology .logo-bands{margin-top:36px}
+  #technology .logo-row{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #technology .logo-box{height:112px;padding:16px 12px}
+  #technology .logo-box img{max-height:64px;max-width:90%}
+  #technology .logo-box-with-link{gap:9px}
+  #technology .logo-box-with-link img{max-height:48px}
+  #technology .logo-learn-more{font-size:.72rem}
+}
+@media(max-width:520px){
+  #technology .logo-panel>p{margin-bottom:20px}
+  #technology .logo-box{height:100px;padding:14px 9px}
+  #technology .logo-box img{max-height:56px}
+  #technology .logo-box-with-link img{max-height:42px}
+}
+</style>
 
 <link rel="icon" type="image/png" sizes="64x64" href="../assets/images/favicon-64.png">
 <link rel="apple-touch-icon" href="../assets/images/apple-touch-icon.png">
@@ -319,7 +439,7 @@
 <div class="section-head reveal reveal-up"><span class="eyebrow">Learning technology ecosystem</span><h2>Designed to work with the technology around you.</h2><p class="lead">Wistudi is being designed to connect with established learning environments and interoperability standards. Integration ecosystem logos are shown separately from organisations and communities we work with.</p></div>
 <div class="logo-bands">
 <div class="logo-panel reveal reveal-pop"><h3>Integration ecosystems &amp; standards</h3><p>Examples of systems and standards Wistudi is designed to connect with or support through interoperability pathways.</p><div class="logo-row"><div class="logo-box"><img alt="Moodle" src="../assets/media/8eb2a0153a721ad1568d.webp"/></div><div class="logo-box"><img alt="Canvas" src="../assets/media/51e8fec0885c099fae21.webp"/></div><div class="logo-box"><img alt="Learning Tools Interoperability" src="../assets/media/1b5e45b5a0ab5eec4e70.webp"/></div></div><div class="logo-note">Logos indicate intended compatibility / interoperability context, not commercial partnership.</div></div>
-<div class="logo-panel reveal reveal-pop" data-delay="1"><h3>Education &amp; community relationships</h3><p>Organisations and communities Wistudi works with can be shown separately from technical integration ecosystems.</p><div class="logo-row"><div class="logo-box"><img alt="EA EdTech Agency" src="../assets/media/d683b3ff121f8c875639.webp"/></div><div class="logo-box"><img alt="Happy Teachers Academy" src="../assets/media/315a1404e27c9be52f55.webp"/></div><div class="logo-box"><img alt="Vietnam STEM" src="../assets/media/fa3dc0ef53bd113764ff.webp"/></div></div><div class="logo-note">Partnership and relationship presentation can evolve as programmes and collaborations develop.</div></div>
+<div class="logo-panel reveal reveal-pop" data-delay="1"><h3>Education &amp; community relationships</h3><p>Organisations and communities Wistudi works with can be shown separately from technical integration ecosystems.</p><div class="logo-row"><div class="logo-box"><img alt="EA EdTech Agency" src="../assets/media/d683b3ff121f8c875639.webp"/></div><div class="logo-box"><img alt="Happy Teachers Academy" src="../assets/media/315a1404e27c9be52f55.webp"/></div><div class="logo-box logo-box-with-link"><img alt="Vietnam STEM" src="../assets/media/fa3dc0ef53bd113764ff.webp"/><a class="logo-learn-more" href="https://vietnamstem.vn/" target="_blank" rel="noopener noreferrer">Learn More <span aria-hidden="true">↗</span></a></div></div><div class="logo-note">Partnership and relationship presentation can evolve as programmes and collaborations develop.</div></div>
 </div>
 </div>
 </section>
