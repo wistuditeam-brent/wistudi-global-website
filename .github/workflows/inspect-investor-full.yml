@@ -1,0 +1,43 @@
+name: Inspect full investor deck OCR
+
+on:
+  push:
+    branches:
+      - investor-room
+    paths:
+      - ".github/workflows/inspect-investor-full.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: investor-room
+          fetch-depth: 0
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils tesseract-ocr
+      - shell: bash
+        run: |
+          set -euo pipefail
+          PDF="investor-room/assets/presentation/investor-partnership-2026-optimized.pdf"
+          OUT="investor-room/assets/presentation/full-deck-ocr.txt"
+          TMP="$(mktemp -d)"
+          : > "$OUT"
+          for page in $(seq 1 17); do
+            pdftoppm -f "$page" -singlefile -png -r 180 "$PDF" "$TMP/slide-$page" >/dev/null 2>&1
+            echo "===== SLIDE $page =====" >> "$OUT"
+            tesseract "$TMP/slide-$page.png" stdout --psm 6 2>/dev/null >> "$OUT"
+            printf "\n\n" >> "$OUT"
+          done
+      - shell: bash
+        run: |
+          git config user.name "wistuditeam-brent"
+          git config user.email "wistudi.team@gmail.com"
+          git add "investor-room/assets/presentation/full-deck-ocr.txt"
+          git commit -m "Inspect full investor deck content"
+          git push origin HEAD:investor-room
