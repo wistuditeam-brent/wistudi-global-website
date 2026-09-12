@@ -9,6 +9,7 @@ const viewports = [
   {name:'desktop', width:1440, height:1000},
   {name:'mobile', width:390, height:844}
 ];
+const localizedPath=(locale,path)=>locale==='en'?path:`/${locale}${path==='/'?'/':path}`;
 
 const browser = await chromium.launch({ headless: true });
 const failures = [];
@@ -19,8 +20,8 @@ async function assertCanonicalEvent(locale, viewport) {
   page.on('pageerror', error => errors.push(String(error)));
   page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
   try {
-    const suffix = locale === 'en' ? '' : `?lang=${locale}`;
-    await page.goto(`${base}${eventPath}${suffix}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    const requestedPath=localizedPath(locale,eventPath);
+    await page.goto(`${base}${requestedPath}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForFunction(() => document.documentElement.dataset.wsEventRuntime === 'ready', null, { timeout: 20000 });
     await page.waitForTimeout(350);
 
@@ -28,6 +29,8 @@ async function assertCanonicalEvent(locale, viewport) {
       const liveShell=document.querySelector('.event-live-shell');
       const liveRect=liveShell?.getBoundingClientRect();
       return {
+        pathname:location.pathname,
+        search:location.search,
         presentation: document.documentElement.dataset.wsEventPresentation,
         heroUnit: !!document.querySelector('.ws-event-hero-unit'),
         supersededUnit: !!document.querySelector('.ws-event-unit'),
@@ -59,6 +62,7 @@ async function assertCanonicalEvent(locale, viewport) {
     });
 
     const checks = {
+      stableCanonicalPath: state.pathname===requestedPath && !state.search.includes('lang='),
       canonicalPresentationMarker: state.presentation === 'canonical-highlight',
       canonicalHeroUnit: state.heroUnit,
       noCompetingEventUnit: !state.supersededUnit,
@@ -174,8 +178,8 @@ async function assertCalendarContainsZoom() {
 async function assertResourcesPromo(locale) {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   try {
-    const suffix = locale === 'en' ? '' : `?lang=${locale}`;
-    await page.goto(`${base}/resources/${suffix}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    const requestedPath=localizedPath(locale,'/resources/');
+    await page.goto(`${base}${requestedPath}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForFunction(() => !!document.getElementById('ws-res-event-polish'), null, { timeout: 15000 });
     await page.waitForTimeout(250);
     const state = await page.evaluate(eventPath => {
@@ -191,6 +195,8 @@ async function assertResourcesPromo(locale) {
       const imgStyle=img?getComputedStyle(img):null;
       const buttonStyle=button?getComputedStyle(button):null;
       return {
+        pathname:location.pathname,
+        search:location.search,
         promo: !!promo,
         card: !!card,
         polishLoaded: [...document.scripts].some(s => (s.src || '').includes('resources-event-polish.js')),
@@ -212,6 +218,7 @@ async function assertResourcesPromo(locale) {
     }, eventPath);
 
     const checks={
+      stableCanonicalPath: state.pathname===requestedPath && !state.search.includes('lang='),
       promoPresent: state.promo && state.card,
       polishRuntimeLoaded: state.polishLoaded,
       linksToEvent: state.links >= 2,
@@ -277,12 +284,16 @@ try {
     ]);
     await page.waitForFunction(() => document.documentElement.dataset.wsEventRuntime === 'ready', null, { timeout: 20000 });
     const state = await page.evaluate(() => ({
+      pathname:location.pathname,
+      search:location.search,
       canonical: !!document.querySelector('.ws-event-hero-unit') && !!document.querySelector('.ws-workshop-features') && !!document.querySelector('#ws-event-highlight-section'),
       competingUnit: !!document.querySelector('.ws-event-unit'),
       competingRuntime: [...document.scripts].some(s => (s.src || '').includes('event-upgrades-v2.js')),
       resourceShell: [...document.scripts].some(s => (s.src || '').includes('resources-page-shell.js')),
       translated: !/Everything you need for a practical and inspiring session\./.test(document.body.innerText||'')
     }));
+    const expected=localizedPath(locale,eventPath);
+    if(state.pathname!==expected||state.search.includes('lang=')) failures.push(`language-menu switch to ${locale} did not land on canonical path ${expected}`);
     if (!state.canonical || state.competingUnit || state.competingRuntime || state.resourceShell || !state.translated) failures.push(`language-menu switch to ${locale} changed the event away from the canonical translated current design`);
   }
   await page.close();
@@ -297,7 +308,7 @@ try {
     for (const failure of failures) console.error(' - ' + failure);
     process.exit(1);
   }
-  console.log('Current event design, centered live session, Zoom actions, translations, Resources promo and homepage banner state passed regression QA.');
+  console.log('Current event design, centered live session, Zoom actions, canonical language paths, translations, Resources promo and homepage banner state passed regression QA.');
 } finally {
   await browser.close();
 }

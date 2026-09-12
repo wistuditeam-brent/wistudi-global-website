@@ -1,0 +1,38 @@
+name: SEO QA
+
+on:
+  pull_request:
+    paths:
+      - '**/*.html'
+      - 'functions/**'
+      - 'assets/js/i18n.js'
+      - 'assets/i18n/**'
+      - 'robots.txt'
+      - 'sitemap.xml'
+      - 'scripts/seo_qa.py'
+      - '.github/workflows/seo-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - '**/*.html'
+      - 'functions/**'
+      - 'assets/js/i18n.js'
+      - 'assets/i18n/**'
+      - 'robots.txt'
+      - 'sitemap.xml'
+      - 'scripts/seo_qa.py'
+
+jobs:
+  seo-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check JavaScript syntax
+        run: |
+          node --check assets/js/i18n.js
+          node --check functions/_middleware.js
+      - name: Run SEO regression checks
+        run: python scripts/seo_qa.py

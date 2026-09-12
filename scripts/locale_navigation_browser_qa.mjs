@@ -7,6 +7,8 @@ const expectedLang={en:'en',vi:'vi','zh-cn':'zh-CN',th:'th',id:'id',ms:'ms',ar:'
 const failures=[];
 const browser=await chromium.launch({headless:true});
 
+const localizedPath=(locale,path)=>locale==='en'?path:`/${locale}${path==='/'?'/':path}`;
+
 async function waitForShell(page,locale,isEvent=false){
   if(isEvent) await page.waitForFunction(()=>document.documentElement.dataset.wsEventRuntime==='ready',null,{timeout:20000});
   await page.waitForFunction(expected=>{
@@ -24,8 +26,8 @@ async function assertNavigation(locale,path,isEvent=false){
   page.on('pageerror',error=>errors.push(String(error)));
   page.on('console',msg=>{if(msg.type()==='error')errors.push(msg.text())});
   try{
-    const suffix=locale==='en'?'':`${path.includes('?')?'&':'?'}lang=${locale}`;
-    await page.goto(`${base}${path}${suffix}`,{waitUntil:'domcontentloaded',timeout:30000});
+    const requestedPath=localizedPath(locale,path);
+    await page.goto(`${base}${requestedPath}`,{waitUntil:'domcontentloaded',timeout:30000});
     await waitForShell(page,locale,isEvent);
     const state=await page.evaluate(()=>{
       const desktop=[...document.querySelectorAll('.ws-nav-links [data-ws-resources-link="true"],.ws-nav-links a.ws-resource-nav-link')];
@@ -36,6 +38,8 @@ async function assertNavigation(locale,path,isEvent=false){
       const field=name=>!!form?.querySelector(`[name="${name}"]`);
       const htaLogo=document.querySelector('.hta-box img');
       return{
+        pathname:location.pathname,
+        search:location.search,
         desktopCount:desktop.length,
         mobileCount:mobile.length,
         resourcePath:u?.pathname||'',
@@ -62,11 +66,13 @@ async function assertNavigation(locale,path,isEvent=false){
         viewportWidth:document.documentElement.clientWidth
       };
     });
+    if(state.pathname!==requestedPath) failures.push(`[${locale}${path}] browser left canonical path; now ${state.pathname}${state.search}`);
+    if(state.search.includes('lang=')) failures.push(`[${locale}${path}] canonical language URL still carries a lang query`);
     if(state.desktopCount!==1) failures.push(`[${locale}${path}] expected exactly one desktop Resources link, found ${state.desktopCount}`);
     if(state.mobileCount!==1) failures.push(`[${locale}${path}] expected exactly one mobile Resources link, found ${state.mobileCount}`);
-    if(state.resourcePath!=='/resources/') failures.push(`[${locale}${path}] Resources href path is ${state.resourcePath}`);
-    if(locale==='en'&&state.resourceLang) failures.push(`[${locale}${path}] English Resources link should not carry lang=${state.resourceLang}`);
-    if(locale!=='en'&&state.resourceLang!==locale) failures.push(`[${locale}${path}] Resources link lost locale; href lang=${state.resourceLang||'(none)'}`);
+    const expectedResourcePath=localizedPath(locale,'/resources/');
+    if(state.resourcePath!==expectedResourcePath) failures.push(`[${locale}${path}] Resources href path is ${state.resourcePath}; expected ${expectedResourcePath}`);
+    if(state.resourceLang) failures.push(`[${locale}${path}] Resources href should not carry lang=${state.resourceLang}`);
     if(state.bodyWidth>state.viewportWidth+8) failures.push(`[${locale}${path}] horizontal overflow ${state.bodyWidth}/${state.viewportWidth}`);
 
     if(isEvent){
@@ -116,4 +122,4 @@ if(failures.length){
   console.error('Locale/navigation browser QA failed:\n- '+failures.join('\n- '));
   process.exit(1);
 }
-console.log('Locale/navigation browser QA passed for all seven languages on the homepage and event page, including the supplied HTA collaboration logo.');
+console.log('Locale/navigation browser QA passed for all seven canonical language paths on the homepage and event page, including the supplied HTA collaboration logo.');
