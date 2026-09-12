@@ -34,10 +34,12 @@ jobs:
             tesseract "$TMP/slide-$page.jpg" stdout --psm 6 2>/dev/null >> "$OUT"
             printf "\n\n" >> "$OUT"
           done
+          cat "$OUT"
       - shell: bash
         run: |
           git config user.name "wistuditeam-brent"
           git config user.email "wistudi.team@gmail.com"
           git add "investor-room/assets/presentation/slides-1-11-ocr.txt"
-          git commit -m "Inspect investor slides 1-11"
+          git commit -m "Inspect investor slides 1-11" || exit 0
+          git pull --rebase origin investor-room
           git push origin HEAD:investor-room
