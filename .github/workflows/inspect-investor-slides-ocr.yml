@@ -1,0 +1,52 @@
+name: Inspect investor slides 14-17 OCR
+
+on:
+  push:
+    branches:
+      - investor-room
+    paths:
+      - ".github/workflows/inspect-investor-slides-ocr.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out investor branch
+        uses: actions/checkout@v4
+        with:
+          ref: investor-room
+          fetch-depth: 0
+
+      - name: Install rendering and OCR tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils tesseract-ocr
+
+      - name: Render and OCR slides 14-17
+        shell: bash
+        run: |
+          set -euo pipefail
+          PDF="investor-room/assets/presentation/investor-partnership-2026-optimized.pdf"
+          OUT="investor-room/assets/presentation/slides-14-17-ocr.txt"
+          TMP="$(mktemp -d)"
+          : > "$OUT"
+          for page in 14 15 16 17; do
+            pdftoppm -f "$page" -singlefile -png -r 180 "$PDF" "$TMP/slide-$page" >/dev/null 2>&1
+            echo "===== SLIDE $page =====" >> "$OUT"
+            tesseract "$TMP/slide-$page.png" stdout --psm 6 2>/dev/null >> "$OUT"
+            printf "\n\n" >> "$OUT"
+          done
+          cat "$OUT"
+
+      - name: Commit OCR extraction
+        shell: bash
+        run: |
+          git config user.name "wistuditeam-brent"
+          git config user.email "wistudi.team@gmail.com"
+          git add "investor-room/assets/presentation/slides-14-17-ocr.txt"
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Inspect investor slides 14-17 content"
+          git push origin HEAD:investor-room
