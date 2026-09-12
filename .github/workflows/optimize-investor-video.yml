@@ -1,0 +1,99 @@
+name: Optimize investor room video
+
+on:
+  push:
+    branches:
+      - investor-room
+    paths:
+      - ".github/workflows/optimize-investor-video.yml"
+      - "investor-room/assets/MAIN VIDEO - ENG (1).mp4"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout investor-room
+        uses: actions/checkout@v4
+        with:
+          ref: investor-room
+          fetch-depth: 0
+
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Check source size
+        id: check
+        shell: bash
+        run: |
+          FILE="investor-room/assets/MAIN VIDEO - ENG (1).mp4"
+          SIZE=$(stat -c%s "$FILE")
+          echo "size=$SIZE" >> "$GITHUB_OUTPUT"
+          echo "Current size: $SIZE bytes"
+          if [ "$SIZE" -le 24000000 ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Optimize to Cloudflare-safe size
+        if: steps.check.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          IN="investor-room/assets/MAIN VIDEO - ENG (1).mp4"
+          OUT="investor-room/assets/MAIN VIDEO - ENG (1).optimized.mp4"
+
+          DURATION=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$IN")
+          TARGET_BYTES=21500000
+          AUDIO_KBPS=96
+
+          VIDEO_KBPS=$(python3 - <<PY
+duration=float("$DURATION")
+target_bytes=$TARGET_BYTES
+audio_kbps=$AUDIO_KBPS
+total_kbps=(target_bytes*8/1000)/duration
+video_kbps=max(350, int(total_kbps-audio_kbps-24))
+print(video_kbps)
+PY
+          )
+
+          echo "Duration: $DURATION sec"
+          echo "Target video bitrate: ${VIDEO_KBPS}k"
+
+          ffmpeg -y -i "$IN" \
+            -map 0:v:0 -map 0:a:0? \
+            -c:v libx264 -preset medium -b:v "${VIDEO_KBPS}k" \
+            -maxrate "$((VIDEO_KBPS*12/10))k" -bufsize "$((VIDEO_KBPS*2))k" \
+            -vf "scale='min(1920,iw)':-2:force_original_aspect_ratio=decrease" \
+            -c:a aac -b:a "${AUDIO_KBPS}k" \
+            -movflags +faststart \
+            "$OUT"
+
+          mv "$OUT" "$IN"
+          FINAL=$(stat -c%s "$IN")
+          echo "Optimized size: $FINAL bytes"
+
+          if [ "$FINAL" -gt 25000000 ]; then
+            echo "Optimized file is still above Cloudflare Pages 25 MB limit."
+            exit 1
+          fi
+
+      - name: Commit optimized video
+        if: steps.check.outputs.skip != 'true'
+        shell: bash
+        run: |
+          git config user.name "Wistudi Build Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add "investor-room/assets/MAIN VIDEO - ENG (1).mp4"
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Optimize investor room video for Cloudflare Pages [skip video optimize]"
+          git push origin HEAD:investor-room
