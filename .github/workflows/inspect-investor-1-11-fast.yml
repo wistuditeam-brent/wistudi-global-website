@@ -1,0 +1,43 @@
+name: Inspect investor slides 1-11 fast
+
+on:
+  push:
+    branches:
+      - investor-room
+    paths:
+      - ".github/workflows/inspect-investor-1-11-fast.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: investor-room
+          fetch-depth: 0
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils tesseract-ocr
+      - shell: bash
+        run: |
+          set -euo pipefail
+          PDF="investor-room/assets/presentation/investor-partnership-2026-optimized.pdf"
+          OUT="investor-room/assets/presentation/slides-1-11-ocr.txt"
+          TMP="$(mktemp -d)"
+          : > "$OUT"
+          for page in $(seq 1 11); do
+            pdftoppm -f "$page" -singlefile -jpeg -jpegopt quality=70 -r 110 "$PDF" "$TMP/slide-$page" >/dev/null 2>&1
+            echo "===== SLIDE $page =====" >> "$OUT"
+            tesseract "$TMP/slide-$page.jpg" stdout --psm 6 2>/dev/null >> "$OUT"
+            printf "\n\n" >> "$OUT"
+          done
+      - shell: bash
+        run: |
+          git config user.name "wistuditeam-brent"
+          git config user.email "wistudi.team@gmail.com"
+          git add "investor-room/assets/presentation/slides-1-11-ocr.txt"
+          git commit -m "Inspect investor slides 1-11"
+          git push origin HEAD:investor-room
