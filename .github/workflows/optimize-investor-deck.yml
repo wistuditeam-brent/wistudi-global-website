@@ -1,0 +1,92 @@
+name: Optimize investor deck
+
+on:
+  push:
+    branches:
+      - investor-room
+    paths:
+      - ".github/workflows/optimize-investor-deck.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out investor branch
+        uses: actions/checkout@v4
+        with:
+          ref: investor-room
+          fetch-depth: 0
+
+      - name: Install Ghostscript
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ghostscript poppler-utils
+
+      - name: Optimize investor PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="investor-room/assets/presentation/Investor Partnership   2026.pdf"
+          OUT="investor-room/assets/presentation/investor-partnership-2026-optimized.pdf"
+
+          test -f "$SRC"
+
+          gs -sDEVICE=pdfwrite \
+            -dCompatibilityLevel=1.6 \
+            -dNOPAUSE -dQUIET -dBATCH \
+            -dDetectDuplicateImages=true \
+            -dCompressFonts=true \
+            -dSubsetFonts=true \
+            -dDownsampleColorImages=true \
+            -dColorImageResolution=144 \
+            -dColorImageDownsampleType=/Bicubic \
+            -dColorImageFilter=/DCTEncode \
+            -dJPEGQ=88 \
+            -dDownsampleGrayImages=true \
+            -dGrayImageResolution=144 \
+            -dGrayImageDownsampleType=/Bicubic \
+            -dGrayImageFilter=/DCTEncode \
+            -dDownsampleMonoImages=true \
+            -dMonoImageResolution=300 \
+            -sOutputFile="$OUT" \
+            "$SRC"
+
+          pdfinfo "$OUT" | grep -E "Pages|Page size"
+          bytes=$(stat -c%s "$OUT")
+          echo "Optimized PDF size: $bytes bytes"
+          test "$bytes" -lt 25000000
+
+      - name: Point viewer to optimized deck
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("investor-room/index.html")
+          s = p.read_text()
+          candidates = [
+              "https://raw.githubusercontent.com/wistuditeam-brent/wistudi-global-website/2b9783b3776a8a1dec5c55d0cb1ab426265506e3/investor-room/assets/presentation/Investor%20Partnership%20%20%202026.pdf",
+              "./assets/presentation/Investor Partnership   2026.pdf",
+              "./assets/presentation/wistudi-investor-presentation-2026-optimized.pdf",
+          ]
+          target = "./assets/presentation/investor-partnership-2026-optimized.pdf"
+          for old in candidates:
+              s = s.replace(old, target)
+          p.write_text(s)
+          PY
+
+      - name: Commit optimized deck
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "wistuditeam-brent"
+          git config user.email "wistudi.team@gmail.com"
+          git add "investor-room/assets/presentation/investor-partnership-2026-optimized.pdf" "investor-room/index.html"
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Optimize updated investor partnership deck"
+          git push origin HEAD:investor-room
