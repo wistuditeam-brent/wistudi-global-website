@@ -1,0 +1,3 @@
+Production redeploy trigger after Organisations art-direction and typography update.
+Source commit: 9e212ace9446a54a7e531da41083666ce3d1e189
+Triggered: 2026-09-13 Asia/Ho_Chi_Minh
