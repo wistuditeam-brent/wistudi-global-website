@@ -165,6 +165,419 @@ body.modal-open{overflow:hidden}
 @media (max-width:600px){.journey-path{grid-template-columns:1fr 24px 1fr;gap:8px}.journey-step{min-height:136px;padding:12px 8px}.journey-icon{width:68px;height:68px}.journey-step strong{font-size:.72rem}.journey-step small{font-size:.58rem}.journey-arrow,.journey-plus{font-size:1.1rem}.screen-callout{padding:20px}.screen-callout strong{font-size:1.02rem}.sheet-visual{min-height:340px}.sheet-visual img{width:min(95%,470px)}.int-card{grid-template-columns:1fr;text-align:center;padding:27px 22px}.int-visual{height:132px}.int-visual img{width:128px;height:128px;margin-inline:auto}.int-kicker{margin-top:2px}.int-card p{margin-inline:auto}.int-tags{justify-content:center}}
 @media (prefers-reduced-motion:reduce){.journey-arrow,.journey-plus,.int-plus,.carousel-status:before{animation:none!important}}
 
+
+/* ===== Editorial product-showcase pass v7 =====
+   Reduce generic SaaS/AI chrome: fewer pills, wrappers, shadows and repetitive cards.
+   Keep product media and functional controls prominent. */
+
+/* Hero proof: information, not four UI pills */
+.hero-proof{
+  gap:0;
+  margin-top:24px;
+  align-items:center;
+}
+.hero-proof span{
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  backdrop-filter:none!important;
+  box-shadow:none!important;
+  font-size:.73rem;
+  font-weight:650;
+  color:rgba(255,255,255,.82);
+}
+.hero-proof span + span::before{
+  content:"·";
+  display:inline-block;
+  margin:0 11px;
+  color:rgba(255,255,255,.48);
+}
+
+/* Filters: tabs, not pills */
+.filter-row{
+  gap:22px;
+  margin:24px 0 30px;
+  border-bottom:1px solid rgba(255,255,255,.16);
+}
+.filter-btn{
+  position:relative;
+  padding:7px 0 12px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:rgba(255,255,255,.62)!important;
+  font-size:.73rem;
+}
+.filter-btn::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-1px;
+  height:2px;
+  background:transparent;
+}
+.filter-btn.active,
+.filter-btn:hover{
+  color:#fff!important;
+}
+.filter-btn.active::after{
+  background:var(--orange);
+}
+
+/* Carousel: product media remains a real card, but labels become editorial metadata */
+.carousel-card{
+  border-radius:12px!important;
+  box-shadow:none!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+}
+.carousel-card.active{
+  box-shadow:0 0 0 1px rgba(249,115,22,.35)!important;
+}
+.chip{
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:#8c8497!important;
+  letter-spacing:.08em;
+}
+.playchip{display:none!important}
+.zoom-preview-btn{
+  border-radius:8px!important;
+  box-shadow:none!important;
+}
+.carousel-status::before{animation:none!important}
+
+/* Architecture sequence: one continuous editorial sequence */
+.steps{
+  gap:0;
+  margin-top:32px;
+  border-top:1px solid var(--line);
+}
+.step{
+  grid-template-columns:42px 1fr;
+  gap:14px;
+  padding:17px 0;
+  border-bottom:1px solid var(--line);
+}
+.step b{
+  width:auto;
+  height:auto;
+  border-radius:0;
+  background:transparent;
+  color:var(--purple);
+  justify-content:start;
+  font-size:.7rem;
+}
+.step:hover{transform:none!important}
+
+/* Flow / XP Video lists: remove mini-card wrappers */
+.check-list{
+  gap:0;
+  margin-top:30px;
+  border-top:1px solid var(--line);
+}
+.check-item{
+  padding:13px 0!important;
+  border:0!important;
+  border-bottom:1px solid var(--line)!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.check-item:hover{transform:none!important}
+.checkmark{
+  width:18px!important;
+  height:18px!important;
+  flex-basis:18px!important;
+  border-radius:50%!important;
+  box-shadow:none!important;
+}
+.video-badge{
+  border:0!important;
+  border-radius:0!important;
+  background:rgba(24,21,35,.82)!important;
+  color:#fff!important;
+  box-shadow:none!important;
+}
+
+/* Screen to desk: icons + type carry the diagram, not four floating cards */
+.journey-path{
+  margin-top:34px;
+  gap:10px;
+}
+.journey-step{
+  min-height:138px;
+  padding:12px 8px 14px!important;
+  border:0!important;
+  border-top:1px solid #d9d3e0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible;
+}
+.journey-step::after{display:none!important}
+.journey-step:hover{
+  transform:none!important;
+  box-shadow:none!important;
+  border-color:#d9d3e0!important;
+  background:transparent!important;
+}
+.journey-step:hover .journey-icon img{transform:none!important}
+.worksheet-step{border-color:rgba(249,115,22,.6)!important}
+.journey-arrow,
+.journey-plus{animation:none!important}
+.screen-callout{
+  padding:19px 0 0 20px!important;
+  border-left:3px solid var(--orange)!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.screen-callout::after{display:none!important}
+
+/* Examples: open editorial grid with rules rather than six repeated cards */
+.example-grid{
+  gap:0!important;
+  border-top:1px solid var(--line);
+  border-left:1px solid transparent;
+}
+.example-card{
+  padding:26px 26px 28px 0!important;
+  border:0!important;
+  border-bottom:1px solid var(--line)!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.example-card:nth-child(3n+2),
+.example-card:nth-child(3n+3){
+  padding-left:26px!important;
+  border-left:1px solid var(--line)!important;
+}
+.example-card:hover{
+  transform:none!important;
+  box-shadow:none!important;
+}
+.example-icons img{
+  filter:none!important;
+}
+
+/* Whiteboard modes: typographic grid with dividing rules */
+.mode-grid{
+  gap:0!important;
+  border-top:1px solid rgba(255,255,255,.2);
+  border-left:1px solid rgba(255,255,255,.12);
+}
+.mode{
+  min-height:108px!important;
+  padding:20px 16px!important;
+  border:0!important;
+  border-right:1px solid rgba(255,255,255,.12)!important;
+  border-bottom:1px solid rgba(255,255,255,.16)!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.mode:hover{
+  transform:none!important;
+  background:rgba(255,255,255,.035)!important;
+  box-shadow:none!important;
+}
+.rollout{
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:#c8d8ee!important;
+  font-weight:600;
+}
+
+/* Integrations: two open architecture columns instead of oversized SaaS cards */
+.int-grid{
+  grid-template-columns:1fr 56px 1fr!important;
+  gap:28px!important;
+  align-items:stretch!important;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.int-card{
+  min-height:0!important;
+  padding:44px 14px 44px 0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  grid-template-columns:145px 1fr!important;
+  overflow:visible!important;
+}
+.int-card.expand{
+  padding-left:14px!important;
+}
+.int-card.native,
+.int-card.expand{
+  border-top:0!important;
+  box-shadow:none!important;
+}
+.int-card::before{display:none!important}
+.int-card:hover{
+  transform:none!important;
+  box-shadow:none!important;
+}
+.int-card:hover .int-visual img{transform:none!important}
+.int-plus{
+  align-self:stretch!important;
+  justify-self:center;
+  width:1px!important;
+  height:auto!important;
+  min-height:100%;
+  border:0!important;
+  border-radius:0!important;
+  background:var(--line)!important;
+  box-shadow:none!important;
+  animation:none!important;
+  color:transparent!important;
+  position:relative;
+}
+.int-plus::after{
+  content:"+";
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
+  background:#fff;
+  color:var(--purple);
+  font:700 1.15rem/1 'Be Vietnam Pro',Inter,sans-serif;
+}
+.int-tags{
+  gap:0!important;
+  margin-top:19px!important;
+}
+.int-tags span{
+  padding:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:#766f7e!important;
+  font-size:.7rem!important;
+}
+.int-tags span + span::before{
+  content:"·";
+  display:inline-block;
+  margin:0 9px;
+  color:#b5afba;
+}
+
+/* Product media: no decorative float/glow loops */
+.hero-video-shell,
+.whiteboard-hd-frame{
+  animation:none!important;
+}
+.reveal{
+  filter:none!important;
+  transform:translateY(12px)!important;
+  transition:opacity .36s ease,transform .36s ease!important;
+}
+.reveal.in{transform:none!important}
+
+/* Final CTA: typographic close, not another rounded gradient component */
+.cta{
+  padding:92px 0 96px!important;
+  background:#171225;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+.cta-box{
+  max-width:900px;
+  padding:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  text-align:left!important;
+}
+.cta-box h2{
+  max-width:720px;
+}
+.cta-box p{
+  max-width:680px!important;
+  margin:16px 0 0!important;
+}
+.cta-box .actions{
+  justify-content:flex-start!important;
+}
+
+/* Keep section rhythm varied; avoid every surface looking like a rounded component */
+.media-card,
+.video-frame{
+  border-radius:14px!important;
+  box-shadow:none!important;
+}
+.whiteboard-hd-frame{border-radius:14px!important}
+.hero-video-shell{border-radius:16px!important;box-shadow:none!important}
+.hero-video{border-radius:10px!important;box-shadow:none!important}
+
+/* Responsive corrections for the open layouts */
+@media (max-width:1020px){
+  .example-card:nth-child(3n+2),
+  .example-card:nth-child(3n+3){
+    padding-left:0!important;
+    border-left:0!important;
+  }
+  .example-card:nth-child(even){
+    padding-left:24px!important;
+    border-left:1px solid var(--line)!important;
+  }
+  .int-grid{
+    grid-template-columns:1fr!important;
+    border-top:1px solid var(--line);
+  }
+  .int-card,
+  .int-card.expand{
+    padding:34px 0!important;
+  }
+  .int-plus{
+    width:100%!important;
+    height:1px!important;
+    min-height:1px!important;
+  }
+}
+@media (max-width:760px){
+  .hero-proof{row-gap:7px}
+  .hero-proof span + span::before{margin:0 8px}
+  .filter-row{
+    gap:18px;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .filter-row::-webkit-scrollbar{display:none}
+  .example-card,
+  .example-card:nth-child(even),
+  .example-card:nth-child(3n+2),
+  .example-card:nth-child(3n+3){
+    padding:22px 0!important;
+    border-left:0!important;
+  }
+  .int-card,
+  .int-card.expand{
+    grid-template-columns:1fr!important;
+    text-align:left!important;
+  }
+  .int-visual{
+    justify-content:start!important;
+  }
+  .int-visual img{
+    margin-inline:0!important;
+  }
+  .int-card p{margin-inline:0!important}
+  .int-tags{justify-content:flex-start!important}
+  .cta{padding:72px 0!important}
+}
+
 </style>
 
 <link rel="icon" type="image/png" sizes="64x64" href="../assets/images/favicon-64.png">
