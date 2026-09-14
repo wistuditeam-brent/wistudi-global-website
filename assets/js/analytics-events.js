@@ -58,17 +58,48 @@
   try{storedAttr=JSON.parse(safeStorage.get(STORAGE_ATTR)||'{}')||{}}catch(_){storedAttr={}}
 
   let outreachVisitSent=false;
-  const sendOutreachVisit=()=>{
+  const visitSessionKey=(()=>{
+    try{return crypto.randomUUID?crypto.randomUUID():('ws-'+Date.now()+'-'+Math.random().toString(36).slice(2))}
+    catch(_){return 'ws-'+Date.now()+'-'+Math.random().toString(36).slice(2)}
+  })();
+
+  const sendFirstPartyOutreachVisit=()=>{
     if(outreachVisitSent||!incomingToken||!WST_RE.test(incomingToken))return;
-    if(window.__WS_ANALYTICS_ALLOWED__===false)return;
     outreachVisitSent=true;
+    const isInvestorRoom=/^\/investor-room\/?$/i.test(location.pathname);
+    const payload={
+      token:incomingToken,
+      event:isInvestorRoom?'investor_room_visit':'website_visit',
+      confidence:'direct_unique_link',
+      path:location.pathname,
+      client_timestamp:new Date().toISOString(),
+      session_key:visitSessionKey
+    };
+    fetch('/api/outreach-visit',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload),
+      keepalive:true,
+      credentials:'same-origin'
+    }).catch(()=>{});
+  };
+
+  const sendAnalyticsOutreachVisit=()=>{
+    if(!incomingToken||!WST_RE.test(incomingToken))return;
+    if(window.__WS_ANALYTICS_ALLOWED__===false)return;
     track('outreach_visit',{
       campaign_channel:'direct_outreach',
-      outreach_present:true
+      outreach_present:true,
+      destination:/^\/investor-room\/?$/i.test(location.pathname)?'investor_room':'website'
     });
   };
-  sendOutreachVisit();
-  window.addEventListener('wistudi:analytics-ready',sendOutreachVisit);
+
+  // First-party recipient tracking is separate from GA4. The WST token is sent
+  // only to our own endpoint, which validates it and forwards the event to the
+  // Wistudi Make tracker. The raw token is never sent to Google Analytics.
+  sendFirstPartyOutreachVisit();
+  sendAnalyticsOutreachVisit();
+  window.addEventListener('wistudi:analytics-ready',sendAnalyticsOutreachVisit);
 
   const injectAttributionIntoForm=()=>{
     const form=document.getElementById('wistudiContactForm');
