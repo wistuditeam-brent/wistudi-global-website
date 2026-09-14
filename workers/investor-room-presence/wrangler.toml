@@ -1,0 +1,12 @@
+name = "wistudi-investor-room-presence"
+main = "index.js"
+compatibility_date = "2026-09-14"
+
+[durable_objects]
+bindings = [
+  { name = "INVESTOR_ROOM_PRESENCE", class_name = "InvestorRoomPresence" }
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["InvestorRoomPresence"]
