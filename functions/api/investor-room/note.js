@@ -8,13 +8,14 @@ export async function onRequestPost(context){
   const payload={
     full_name:clean(body.full_name,120),
     organisation:clean(body.organisation,160),
+    email:clean(body.email,180),
     note:clean(body.note,2500),
     session_id:clean(body.session_id,140),
     wst:clean(body.wst,100),
     url:clean(body.url,500),
     slide:Math.max(1,Math.min(parseInt(body.slide,10)||1,500))
   };
-  if(!payload.full_name||!payload.organisation||!payload.note)return json({ok:false,error:'missing_fields'},400);
+  if(!payload.full_name||!payload.organisation||!payload.email||!payload.note)return json({ok:false,error:'missing_fields'},400);
   if(payload.wst&&!TOKEN_RE.test(payload.wst))return json({ok:false,error:'invalid_token'},400);
 
   try{
