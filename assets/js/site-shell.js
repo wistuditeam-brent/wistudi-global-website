@@ -198,7 +198,6 @@ const bootEvent=async()=>{
 };
 
 const bootSite=async()=>{
-  await load('/assets/js/footer-unify.js','wsFooterUnify');
   await load('/assets/js/site-shell-core.js','wsCore');
   await load('/assets/js/i18n.js','wsI18n');
   ensureResourcesNav();
