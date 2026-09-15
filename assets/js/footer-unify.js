@@ -9,7 +9,7 @@
       footer.innerHTML=`<div class="ws-container ws-footer-row">
         <a class="ws-brand" href="/" aria-label="Wistudi — Platform home"><img class="ws-footer-wordmark" src="/assets/images/wistudi-logo.png" alt="Wistudi"></a>
         <div class="ws-footer-links"><a href="/">Platform</a><a href="/blocks-activities/">Blocks &amp; Activities</a><a href="/organisations/">Organisations</a><a href="/resources/">Resources</a><a href="/contact/">Contact</a></div>
-        <div class="ws-footer-contact"><a href="mailto:support@wistudi.com">support@wistudi.com</a><a href="mailto:partnerships@wistudi.com">partnerships@wistudi.com</a><a href="tel:+84879876624">+84 879 876 624</a><span>Operating out of Vietnam</span><span>85 Great Portland Street, First Floor, London, England</span></div>
+        <div class="ws-footer-contact"><a href="mailto:support@wistudi.com">support@wistudi.com</a><a href="mailto:partnerships@wistudi.com">partnerships@wistudi.com</a><a href="tel:+84879876624">+84 879 876 624</a><span>Operating out of Vietnam</span><a href="https://find-and-update.company-information.service.gov.uk/company/17458982" target="_blank" rel="noopener noreferrer">Wistudi Publishing LTD</a><a href="https://find-and-update.company-information.service.gov.uk/company/17458982" target="_blank" rel="noopener noreferrer">Company Number 17458982</a><a href="https://find-and-update.company-information.service.gov.uk/company/17458982" target="_blank" rel="noopener noreferrer">128 City Road, London, United Kingdom, EC1V 2NX</a></div>
         <div class="ws-footer-copy">© 2026 Wistudi</div>
       </div>`;
     });
