@@ -5,6 +5,23 @@
 
   function updateCompanyDetails(){
     document.querySelectorAll('footer.ws-site-footer .ws-footer-contact').forEach(contact=>{
+      const companyUrl='https://find-and-update.company-information.service.gov.uk/company/17458982';
+      const expected=[
+        ['Wistudi Publishing LTD',companyUrl],
+        ['Company Number 17458982',companyUrl],
+        ['128 City Road, London, United Kingdom, EC1V 2NX',companyUrl]
+      ];
+
+      const alreadyCorrect=expected.every(([label,href])=>
+        [...contact.querySelectorAll('a')].some(a=>
+          (a.textContent||'').trim()===label && a.href===href
+        )
+      ) && ![...contact.querySelectorAll('span,a')].some(el=>
+        /85 Great Portland Street/i.test((el.textContent||'').trim())
+      );
+
+      if(alreadyCorrect) return;
+
       [...contact.querySelectorAll('span,a')].forEach(el=>{
         const text=(el.textContent||'').trim();
         if(
@@ -15,25 +32,14 @@
         ) el.remove();
       });
 
-      const company=document.createElement('a');
-      company.href='https://find-and-update.company-information.service.gov.uk/company/17458982';
-      company.target='_blank';
-      company.rel='noopener noreferrer';
-      company.textContent='Wistudi Publishing LTD';
-
-      const number=document.createElement('a');
-      number.href=company.href;
-      number.target='_blank';
-      number.rel='noopener noreferrer';
-      number.textContent='Company Number 17458982';
-
-      const address=document.createElement('a');
-      address.href=company.href;
-      address.target='_blank';
-      address.rel='noopener noreferrer';
-      address.textContent='128 City Road, London, United Kingdom, EC1V 2NX';
-
-      contact.append(company,number,address);
+      expected.forEach(([label,href])=>{
+        const a=document.createElement('a');
+        a.href=href;
+        a.target='_blank';
+        a.rel='noopener noreferrer';
+        a.textContent=label;
+        contact.appendChild(a);
+      });
     });
   }
 
@@ -64,7 +70,7 @@
     normalizeResourcesFooter();
     updateCompanyDetails();
     fixSocialLinks();
-    const observer=new MutationObserver(()=>{ updateCompanyDetails(); fixSocialLinks(); });
+    const observer=new MutationObserver(()=>fixSocialLinks());
     observer.observe(document.documentElement,{childList:true,subtree:true});
     setTimeout(()=>observer.disconnect(),5000);
   }
