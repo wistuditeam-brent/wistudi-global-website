@@ -30,39 +30,38 @@
 
 /* Workshop worksheet resource */
 .worksheet-section{padding:78px 0;background:
-radial-gradient(circle at 92% 12%,rgba(255,123,53,.18),transparent 26%),
-radial-gradient(circle at 8% 88%,rgba(103,52,237,.14),transparent 30%),
-linear-gradient(135deg,#f7f2ff 0%,#fff8f1 100%);border-top:1px solid #eee4fa;border-bottom:1px solid #f1e5da}
-.worksheet-shell{position:relative;display:grid;grid-template-columns:minmax(0,.88fr) minmax(420px,1.12fr);gap:42px;align-items:center;padding:34px;border:1px solid rgba(103,52,237,.14);border-radius:28px;background:rgba(255,255,255,.78);box-shadow:0 24px 70px rgba(55,34,89,.10);backdrop-filter:blur(10px)}
-.worksheet-copy{padding:4px 2px 2px}
-.worksheet-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;background:#fff;border:1px solid #eadffd;color:#6230d8;font-size:.68rem;font-weight:800;letter-spacing:.055em;text-transform:uppercase;box-shadow:0 7px 20px rgba(76,45,128,.07)}
-.worksheet-badge:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px rgba(255,123,53,.12)}
-.worksheet-copy h2{font-family:'Be Vietnam Pro',Inter;font-size:clamp(2.15rem,4vw,3.35rem);line-height:1.03;letter-spacing:-.045em;margin:17px 0 16px;max-width:580px}
-.worksheet-copy>p{margin:0;max-width:600px;color:#635b6c;font-size:1rem;line-height:1.72}
-.worksheet-flow-chip{display:inline-flex;align-items:center;gap:9px;margin-top:20px;padding:10px 13px;border-radius:13px;background:#f3edff;color:#5c31c9;font-size:.78rem;font-weight:750}
-.worksheet-flow-chip .arrow{color:var(--orange);font-size:1rem}
-.worksheet-meta{display:flex;gap:9px;flex-wrap:wrap;margin:21px 0 0}
-.worksheet-meta span{padding:7px 10px;border-radius:999px;background:#fff;border:1px solid #ebe4f0;color:#716879;font-size:.7rem;font-weight:650}
-.worksheet-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:25px}
-.worksheet-actions .ev-btn{min-height:52px}
-.worksheet-copy-link{min-height:52px;padding:0 16px;border-radius:14px;border:1px solid #ded5e8;background:#fff;color:#423a4a;font:700 .85rem Inter,sans-serif;cursor:pointer;transition:.18s ease}
-.worksheet-copy-link:hover{transform:translateY(-2px);border-color:#cdbcf2;color:var(--p)}
-.worksheet-note{margin-top:14px;color:#8a8191;font-size:.69rem;line-height:1.5}
-.worksheet-preview{position:relative;min-width:0}
-.worksheet-preview-card{position:relative;overflow:hidden;border-radius:22px;background:#2a2135;border:1px solid rgba(66,47,89,.18);box-shadow:0 24px 50px rgba(36,22,56,.16)}
-.worksheet-preview-head{height:48px;padding:0 15px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#261f30;color:#fff}
-.worksheet-preview-title{display:flex;align-items:center;gap:9px;min-width:0;font-size:.72rem;font-weight:700}
-.worksheet-preview-title span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.worksheet-pdf-icon{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:#ff7540;color:#fff;font-size:.58rem;font-weight:900;letter-spacing:.03em}
-.worksheet-preview-head a{color:#d9cff2;text-decoration:none;font-size:.7rem;font-weight:700;white-space:nowrap}
-.worksheet-preview-head a:hover{color:#fff}
-.worksheet-frame-wrap{height:620px;background:#d8d3de}
-.worksheet-frame{display:block;width:100%;height:100%;border:0;background:#fff}
-.worksheet-preview-foot{display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 12px;background:#fff;color:#817889;font-size:.66rem;border-top:1px solid #eee9f1}
-.worksheet-preview-foot:before{content:"↕";font-size:.9rem;color:var(--p)}
+radial-gradient(circle at 92% 12%,rgba(255,123,53,.10),transparent 28%),
+radial-gradient(circle at 8% 88%,rgba(103,52,237,.09),transparent 31%),
+linear-gradient(135deg,#fbf9ff 0%,#fff 58%,#fffaf5 100%);border-top:1px solid #eee8f5;border-bottom:1px solid #f1ebe5}
+.worksheet-shell{padding:34px 0 4px}
+.worksheet-kicker{display:block;margin:0 0 10px;color:#756d80;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.worksheet-copy h2{font-family:'Be Vietnam Pro',Inter;font-size:clamp(2.15rem,4vw,3.25rem);line-height:1.04;letter-spacing:-.045em;margin:0 0 12px;max-width:760px}
+.worksheet-copy>p{margin:0;max-width:760px;color:#686170;font-size:1rem;line-height:1.68}
+.worksheet-preview{margin-top:32px}
+.worksheet-pager{min-height:42px;display:flex;align-items:center;justify-content:center;gap:11px;margin-bottom:14px;color:#5c5564;font-size:.78rem;font-weight:700}
+.worksheet-page-button{width:34px;height:34px;border:0;background:transparent;color:#2f2937;font-size:1.55rem;line-height:1;display:grid;place-items:center;cursor:pointer;border-radius:8px}
+.worksheet-page-button:hover{background:rgba(103,52,237,.07);color:var(--p)}
+.worksheet-page-button:disabled{opacity:.28;cursor:default;background:transparent}
+.worksheet-page-label{display:flex;align-items:center;gap:7px}
+.worksheet-page-input{width:44px;height:34px;border:1px solid #ded8e5;border-radius:8px;background:#fff;color:#2f2937;text-align:center;font:700 .78rem Inter,sans-serif;outline:none;appearance:textfield;-moz-appearance:textfield}
+.worksheet-page-input::-webkit-inner-spin-button,.worksheet-page-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.worksheet-page-input:focus{border-color:#a98cf5;box-shadow:0 0 0 3px rgba(103,52,237,.08)}
+.worksheet-page-stage{position:relative;min-height:640px;display:flex;align-items:flex-start;justify-content:center;overflow:auto;background:rgba(255,255,255,.48);border-top:1px solid rgba(103,52,237,.10);border-bottom:1px solid rgba(103,52,237,.10)}
+.worksheet-page-canvas{display:block;max-width:100%;height:auto;margin:0 auto;background:#fff;box-shadow:0 12px 34px rgba(39,28,60,.13)}
+.worksheet-loading{position:absolute;inset:0;display:grid;place-items:center;color:#81798a;font-size:.78rem;background:linear-gradient(135deg,rgba(255,255,255,.72),rgba(248,245,255,.72))}
+.worksheet-loading[hidden]{display:none}
+.worksheet-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:20px}
+.worksheet-download,.worksheet-copy-link{min-height:50px;padding:0 18px;border-radius:12px;font:700 .86rem Inter,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:9px;text-decoration:none;cursor:pointer;transition:.18s ease}
+.worksheet-download{border:1px solid transparent;background:linear-gradient(135deg,var(--p),#8456f5);color:#fff;box-shadow:0 10px 22px rgba(103,52,237,.18)}
+.worksheet-copy-link{border:1px solid #ddd7e5;background:#fff;color:#38313f}
+.worksheet-download:hover,.worksheet-copy-link:hover{transform:translateY(-1px)}
+.worksheet-copy-link:hover{border-color:#cdbcf2;color:var(--p)}
+.worksheet-copy-link.copied{border-color:#bda8f5;color:var(--p)}
+.worksheet-fallback{display:none;margin:18px 0 0;color:#7a7282;font-size:.76rem}
+.worksheet-fallback.show{display:block}
 
-@media(max-width:940px){.worksheet-shell{grid-template-columns:1fr;gap:28px;padding:28px}.worksheet-copy{padding:0}.worksheet-preview{max-width:760px;width:100%;margin:auto}.worksheet-frame-wrap{height:590px}.facts{grid-template-columns:1fr 1fr}.fact{border-bottom:1px solid #eee8f4}.fact:nth-child(even){border-right:0}.fact:last-child{grid-column:1/-1;border-bottom:0}.about-grid,.trainer{grid-template-columns:1fr}.trainer-photo{max-width:520px}.features{grid-template-columns:1fr 1fr}.live-card{grid-template-columns:auto 1fr}.live-actions{grid-column:1/-1}.cta-inner{grid-template-columns:1fr}.cta .ev-btn{justify-self:start}}
-@media(max-width:620px){.worksheet-section{padding:58px 0}.worksheet-shell{padding:17px;border-radius:20px;gap:22px}.worksheet-copy h2{font-size:2rem;margin-top:14px}.worksheet-actions{display:grid;grid-template-columns:1fr}.worksheet-actions .ev-btn,.worksheet-copy-link{width:100%}.worksheet-frame-wrap{height:510px}.worksheet-preview-card{border-radius:16px}.worksheet-preview-title span:last-child{max-width:190px}.ec{width:min(calc(100% - 26px),var(--max))}.hero-banner{border-radius:16px}.hero-actions{display:grid;grid-template-columns:1fr 1fr}.hero-actions .primary{grid-column:1/-1}.share-wrap,.share-wrap>.ev-btn{width:100%}.share-menu{width:100%}.facts{grid-template-columns:1fr}.fact,.fact:nth-child(even),.fact:last-child{grid-column:auto;border-right:0;border-bottom:1px solid #eee8f4}.fact:last-child{border-bottom:0}.live-card{grid-template-columns:1fr;padding:22px}.live-actions{grid-template-columns:1fr}.live-actions .join{grid-row:auto;min-width:0}.section{padding:58px 0}.features,.takeaways{grid-template-columns:1fr}.about-grid{gap:28px}.trainer{gap:28px}.hta-box{align-items:flex-start;flex-direction:column}.cta .ev-btn{width:100%;justify-self:stretch}}
+@media(max-width:940px){.worksheet-section{padding:68px 0}.worksheet-page-stage{min-height:560px}.facts{grid-template-columns:1fr 1fr}.fact{border-bottom:1px solid #eee8f4}.fact:nth-child(even){border-right:0}.fact:last-child{grid-column:1/-1;border-bottom:0}.about-grid,.trainer{grid-template-columns:1fr}.trainer-photo{max-width:520px}.features{grid-template-columns:1fr 1fr}.live-card{grid-template-columns:auto 1fr}.live-actions{grid-column:1/-1}.cta-inner{grid-template-columns:1fr}.cta .ev-btn{justify-self:start}}
+@media(max-width:620px){.worksheet-section{padding:54px 0}.worksheet-shell{padding-top:14px}.worksheet-copy h2{font-size:2rem}.worksheet-copy>p{font-size:.92rem;line-height:1.62}.worksheet-preview{margin-top:24px}.worksheet-page-stage{min-height:430px}.worksheet-pager{margin-bottom:10px}.worksheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.worksheet-download,.worksheet-copy-link{width:100%;padding:0 13px}.ec{width:min(calc(100% - 26px),var(--max))}.hero-banner{border-radius:16px}.hero-actions{display:grid;grid-template-columns:1fr 1fr}.hero-actions .primary{grid-column:1/-1}.share-wrap,.share-wrap>.ev-btn{width:100%}.share-menu{width:100%}.facts{grid-template-columns:1fr}.fact,.fact:nth-child(even),.fact:last-child{grid-column:auto;border-right:0;border-bottom:1px solid #eee8f4}.fact:last-child{border-bottom:0}.live-card{grid-template-columns:1fr;padding:22px}.live-actions{grid-template-columns:1fr}.live-actions .join{grid-row:auto;min-width:0}.section{padding:58px 0}.features,.takeaways{grid-template-columns:1fr}.about-grid{gap:28px}.trainer{gap:28px}.hta-box{align-items:flex-start;flex-direction:column}.cta .ev-btn{width:100%;justify-self:stretch}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}.ev-btn:hover{transform:none}}
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Event","name":"Building a Communicative ESL Lesson with Flow","description":"A free live workshop for ESL teachers exploring purposeful activity choices, learner support and communicative lesson design with Flow.","startDate":"2026-09-15T14:00:00+07:00","eventStatus":"https://schema.org/EventScheduled","eventAttendanceMode":"https://schema.org/OnlineEventAttendanceMode","image":"https://global.wistudi.com/resources/events/event-main-banner.png?v=fc532cbb","location":{"@type":"VirtualLocation","url":"https://global.wistudi.com/resources/events/building-a-communicative-esl-lesson-with-flow/"},"organizer":{"@type":"Organization","name":"Wistudi","url":"https://global.wistudi.com/"},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://global.wistudi.com/resources/events/building-a-communicative-esl-lesson-with-flow/#register"}}</script>
@@ -90,29 +89,28 @@ linear-gradient(135deg,#f7f2ff 0%,#fff8f1 100%);border-top:1px solid #eee4fa;bor
 <section class="worksheet-section" id="workshop-worksheet"><div class="ec">
   <div class="worksheet-shell">
     <div class="worksheet-copy">
-      <span class="worksheet-badge">Workshop resource</span>
-      <h2>Take the lesson with you.</h2>
-      <p>This 24-page printable worksheet was created from the same interactive Wistudi lesson used in the workshop. Scroll through the preview, then download a copy to use offline, print, or adapt for your own teaching.</p>
-      <div class="worksheet-flow-chip"><span>Interactive lesson</span><span class="arrow">→</span><span>Printable worksheet</span></div>
-      <div class="worksheet-meta"><span>24 pages</span><span>Printable PDF</span><span>Free workshop resource</span></div>
-      <div class="worksheet-actions">
-        <a class="ev-btn primary" href="/resources/events/building-a-communicative-esl-lesson-with-flow/worksheet?download=1" download>Download worksheet ↓</a>
-        <a class="ev-btn secondary" href="/resources/events/building-a-communicative-esl-lesson-with-flow/worksheet" target="_blank" rel="noopener">Open full PDF</a>
-        <button class="worksheet-copy-link" type="button" id="copyWorksheetLink">Copy download link</button>
-      </div>
-      <div class="worksheet-note">The worksheet is hosted with this Wistudi event and can be shared as its own direct link.</div>
+      <span class="worksheet-kicker">Workshop worksheet</span>
+      <h2>Workshop worksheet</h2>
+      <p>This printable worksheet was created from the interactive lesson and can be previewed here, downloaded as a PDF, or shared directly.</p>
     </div>
-    <div class="worksheet-preview">
-      <div class="worksheet-preview-card">
-        <div class="worksheet-preview-head">
-          <div class="worksheet-preview-title"><span class="worksheet-pdf-icon">PDF</span><span>Building a Complete Communicative ESL Lesson with Flow</span></div>
-          <a href="/resources/events/building-a-communicative-esl-lesson-with-flow/worksheet" target="_blank" rel="noopener">Open ↗</a>
-        </div>
-        <div class="worksheet-frame-wrap">
-          <iframe class="worksheet-frame" title="Preview the Building a Complete Communicative ESL Lesson with Flow worksheet" loading="lazy" src="/resources/events/building-a-communicative-esl-lesson-with-flow/worksheet#page=1&zoom=page-width&toolbar=0&navpanes=0"></iframe>
-        </div>
-        <div class="worksheet-preview-foot">Scroll inside the preview to explore the worksheet</div>
+    <div class="worksheet-preview" aria-label="Worksheet preview">
+      <div class="worksheet-pager" aria-label="Worksheet page selector">
+        <button class="worksheet-page-button" id="worksheetPrevPage" type="button" aria-label="Previous page">‹</button>
+        <label class="worksheet-page-label" for="worksheetPageInput">Page
+          <input class="worksheet-page-input" id="worksheetPageInput" type="number" min="1" value="1" inputmode="numeric" aria-label="Worksheet page number">
+          <span>of <span id="worksheetPageCount">24</span></span>
+        </label>
+        <button class="worksheet-page-button" id="worksheetNextPage" type="button" aria-label="Next page">›</button>
       </div>
+      <div class="worksheet-page-stage" id="worksheetPageStage">
+        <canvas class="worksheet-page-canvas" id="worksheetCanvas" aria-label="Page 1 of the workshop worksheet"></canvas>
+        <div class="worksheet-loading" id="worksheetLoading">Loading worksheet preview…</div>
+      </div>
+      <div class="worksheet-fallback" id="worksheetFallback">The preview could not load. You can still download the worksheet below.</div>
+    </div>
+    <div class="worksheet-actions">
+      <a class="worksheet-download" href="/resources/events/building-a-communicative-esl-lesson-with-flow/worksheet?download=1" download>Download PDF ↓</a>
+      <button class="worksheet-copy-link" type="button" id="copyWorksheetLink">Copy Link</button>
     </div>
   </div>
 </div></section>
@@ -124,21 +122,82 @@ linear-gradient(135deg,#f7f2ff 0%,#fff8f1 100%);border-top:1px solid #eee4fa;bor
 <footer class="ws-site-footer"><div class="ws-container ws-footer-row"><a class="ws-brand" href="/"><img class="ws-footer-wordmark" src="/assets/images/wistudi-logo.png" alt="Wistudi"></a><div class="ws-footer-links"><a href="/">Platform</a><a href="/blocks-activities/">Blocks &amp; Activities</a><a href="/organisations/">Organisations</a><a href="/resources/">Resources</a><a href="/contact/">Contact</a></div><div class="ws-footer-contact"><span>Interactive learning, publishing and delivery in one connected platform.</span><a href="/contact/">Contact Wistudi</a></div><div class="ws-footer-copy">© 2026 Wistudi</div></div></footer>
 <script>
 (()=>{const START=new Date('2026-09-15T14:00:00+07:00'),DUR=90,OPEN=15,ZOOM_JOIN_URL='';const fd=new Intl.DateTimeFormat(undefined,{day:'numeric',month:'long',year:'numeric'}),ft=new Intl.DateTimeFormat(undefined,{hour:'numeric',minute:'2-digit',timeZoneName:'short'}),tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Ho_Chi_Minh';eventDate.textContent=fd.format(START);eventLocalTime.textContent=ft.format(START);eventTimezone.textContent='Your local time · '+tz;const cal=()=>{const end=new Date(START.getTime()+DUR*60000),basic=d=>d.toISOString().replace(/[-:]|\.\d{3}/g,'');const u=new URL('https://calendar.google.com/calendar/render');u.searchParams.set('action','TEMPLATE');u.searchParams.set('text','Building a Communicative ESL Lesson with Flow');u.searchParams.set('dates',basic(START)+'/'+basic(end));u.searchParams.set('details','Free live workshop for ESL teachers with Trainer Nadia, presented by Wistudi in collaboration with Happy Teachers Academy.\n\nEvent page: '+location.href.split('#')[0]);u.searchParams.set('location','Online');return u.toString()};[addCalendarTop,addCalendarLive].forEach(b=>b.addEventListener('click',()=>window.open(cal(),'_blank','noopener')));getReminder.addEventListener('click',()=>window.open(cal(),'_blank','noopener'));function live(){const n=Date.now(),o=START.getTime()-OPEN*60000,c=START.getTime()+(DUR+30)*60000;if(n<o){const m=Math.ceil((o-n)/60000),d=Math.floor(m/1440);liveStatus.textContent=d>0?`The live room opens 15 minutes before the workshop · ${d} day${d===1?'':'s'} to go.`:`The live room opens in about ${Math.max(1,m)} minutes.`;joinLiveButton.classList.add('disabled');joinLiveButton.href='#'}else if(n<=c&&ZOOM_JOIN_URL){liveStatus.textContent='The live room is open now.';joinLiveButton.classList.remove('disabled');joinLiveButton.removeAttribute('aria-disabled');joinLiveButton.href=ZOOM_JOIN_URL;joinLiveButton.target='_blank'}else if(n<=c){liveStatus.textContent='The session window is open, but the Zoom joining link has not been configured yet.'}else liveStatus.textContent='This live session has ended.'}live();setInterval(live,60000);const title='Building a Communicative ESL Lesson with Flow',url=location.href.split('#')[0];shareButton.addEventListener('click',async()=>{if(navigator.share){try{await navigator.share({title,text:'Free live workshop for ESL teachers with Trainer Nadia.',url});return}catch(e){if(e.name==='AbortError')return}}shareWrap.classList.toggle('open')});copyEventLink.addEventListener('click',async()=>{await navigator.clipboard.writeText(url);copyEventLink.textContent='Copied';setTimeout(()=>copyEventLink.textContent='Copy link',1200)});shareEmail.href='mailto:?subject='+encodeURIComponent(title)+'&body='+encodeURIComponent('I thought you might be interested in this Wistudi event:\n\n'+url);shareWhatsapp.href='https://wa.me/?text='+encodeURIComponent(title+' '+url);shareFacebook.href='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url);shareLinkedin.href='https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(url);document.addEventListener('click',e=>{if(!shareWrap.contains(e.target))shareWrap.classList.remove('open')})})();
-</script><script>
-(()=>{
-  const b=document.getElementById('copyWorksheetLink');
-  if(!b)return;
-  b.addEventListener('click',async()=>{
-    const u=new URL('/resources/events/building-a-communicative-esl-lesson-with-flow/worksheet?download=1',location.origin).toString();
-    try{
-      await navigator.clipboard.writeText(u);
-      const old=b.textContent;
-      b.textContent='Link copied';
-      setTimeout(()=>b.textContent=old,1400);
-    }catch(e){
-      window.prompt('Copy this worksheet link:',u);
-    }
-  });
-})();
+</script><script type="module">
+import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs';
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';
+
+const PDF_URL='/resources/events/building-a-communicative-esl-lesson-with-flow/worksheet';
+const DOWNLOAD_URL='/resources/events/building-a-communicative-esl-lesson-with-flow/worksheet?download=1';
+const canvas=document.getElementById('worksheetCanvas');
+const stage=document.getElementById('worksheetPageStage');
+const loading=document.getElementById('worksheetLoading');
+const fallback=document.getElementById('worksheetFallback');
+const input=document.getElementById('worksheetPageInput');
+const count=document.getElementById('worksheetPageCount');
+const prev=document.getElementById('worksheetPrevPage');
+const next=document.getElementById('worksheetNextPage');
+const copy=document.getElementById('copyWorksheetLink');
+
+let pdf=null,pageNum=1,renderTask=null,resizeTimer=null;
+
+function updateControls(){
+  if(!pdf)return;
+  input.value=pageNum;
+  input.max=pdf.numPages;
+  count.textContent=pdf.numPages;
+  prev.disabled=pageNum<=1;
+  next.disabled=pageNum>=pdf.numPages;
+  canvas.setAttribute('aria-label',`Page ${pageNum} of the workshop worksheet`);
+}
+
+async function renderPage(n){
+  if(!pdf)return;
+  pageNum=Math.max(1,Math.min(pdf.numPages,n));
+  updateControls();
+  if(renderTask){try{renderTask.cancel()}catch(e){}}
+  loading.hidden=false;
+  const page=await pdf.getPage(pageNum);
+  const base=page.getViewport({scale:1});
+  const available=Math.max(280,Math.min(stage.clientWidth,980));
+  const scale=available/base.width;
+  const viewport=page.getViewport({scale});
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  canvas.width=Math.floor(viewport.width*dpr);
+  canvas.height=Math.floor(viewport.height*dpr);
+  canvas.style.width=Math.floor(viewport.width)+'px';
+  canvas.style.height=Math.floor(viewport.height)+'px';
+  const ctx=canvas.getContext('2d',{alpha:false});
+  const transform=dpr===1?null:[dpr,0,0,dpr,0,0];
+  renderTask=page.render({canvasContext:ctx,viewport,transform});
+  try{await renderTask.promise}catch(e){if(e?.name!=='RenderingCancelledException')throw e}
+  finally{renderTask=null;loading.hidden=true}
+}
+
+prev.addEventListener('click',()=>renderPage(pageNum-1));
+next.addEventListener('click',()=>renderPage(pageNum+1));
+input.addEventListener('change',()=>renderPage(Number(input.value)||1));
+input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();input.blur()}});
+window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>renderPage(pageNum),160)});
+
+copy.addEventListener('click',async()=>{
+  const u=new URL(DOWNLOAD_URL,location.origin).toString();
+  try{
+    await navigator.clipboard.writeText(u);
+    copy.textContent='Link copied';
+    copy.classList.add('copied');
+    setTimeout(()=>{copy.textContent='Copy Link';copy.classList.remove('copied')},1400);
+  }catch(e){window.prompt('Copy this worksheet link:',u)}
+});
+
+try{
+  pdf=await pdfjsLib.getDocument(PDF_URL).promise;
+  await renderPage(1);
+}catch(e){
+  loading.hidden=true;
+  fallback.classList.add('show');
+  prev.disabled=true;
+  next.disabled=true;
+  input.disabled=true;
+}
 </script><script src="/assets/js/site-shell.js"></script>
 </body></html>
