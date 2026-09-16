@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" sizes="64x64" href="/assets/images/favicon-64.png">
 <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/css/site-shell.css?v=20260916-orgmenu3">
+<link rel="stylesheet" href="/assets/css/site-shell.css?v=20260916-langmenu1">
 <style>
 :root{
   --doc-bg:#f7f6f8;
@@ -152,6 +152,13 @@ a{color:inherit}
       <a href="/contact/">Contact</a>
     </nav>
     <div class="ws-nav-actions">
+      <div class="ws-lang">
+        <button class="ws-lang-toggle" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Language: English">
+          <span>EN</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg>
+        </button>
+        <div class="ws-lang-menu" role="menu"></div>
+      </div>
       <a class="ws-btn secondary" href="/contact/">Talk to us</a>
       <a class="ws-btn primary" href="https://wistudi.com/sign-up">Start publishing</a>
       <button class="ws-menu-toggle" type="button" aria-expanded="false" aria-label="Open menu"><span></span><span></span><span></span></button>
@@ -159,7 +166,13 @@ a{color:inherit}
   </div></div>
   <div class="ws-mobile-menu"><div class="ws-container ws-mobile-inner">
     <a href="/">Platform</a><a href="/blocks-activities/">Blocks &amp; Activities</a><a href="/organisations/">Organisations</a><a href="/resources/">Resources</a><a href="/contact/">Contact</a>
-    <div class="ws-mobile-actions"><a class="ws-btn secondary" href="/contact/">Talk to us</a><a class="ws-btn primary" href="https://wistudi.com/sign-up">Start publishing</a></div>
+    <div class="ws-mobile-actions"><div class="ws-lang">
+        <button class="ws-lang-toggle" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Language: English">
+          <span>EN</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg>
+        </button>
+        <div class="ws-lang-menu" role="menu"></div>
+      </div><a class="ws-btn secondary" href="/contact/">Talk to us</a><a class="ws-btn primary" href="https://wistudi.com/sign-up">Start publishing</a></div>
   </div></div>
 </header>
 
@@ -504,7 +517,7 @@ a{color:inherit}
     <div class="ws-footer-copy">© 2026 Wistudi</div>
   </div>
 </footer>
-<script src="/assets/js/site-shell.js?v=20260916-orgmenu3"></script>
+<script src="/assets/js/site-shell.js?v=20260916-langmenu1"></script>
 <script>
 (function(){
   const links=[...document.querySelectorAll('.doc-scroll-nav a')];
