@@ -57,7 +57,6 @@
     "Manage people, learning, content, assessment, results and reporting.": "Quản lý con người, học tập, nội dung, đánh giá, kết quả và báo cáo.",
     "Deploy branded experiences and connect Wistudi into wider learning ecosystems.": "Triển khai trải nghiệm mang thương hiệu và kết nối Wistudi vào hệ sinh thái học tập rộng hơn.",
     "Start with a lesson. Build a course. Publish a curriculum. Create an interactive learning world around what you know.": "Bắt đầu với một bài học. Xây dựng khóa học. Xuất bản chương trình. Tạo một thế giới học tập tương tác quanh kiến thức của bạn.",
-
     "Explore Wistudi's modular blocks and activities for Flows, XP Video, live teaching and printable-connected learning.": "Khám phá các khối và hoạt động mô-đun của Wistudi cho Flows, XP Video, dạy trực tiếp và học tập kết nối với bản in.",
     "Flows + XP Video": "Flows + XP Video",
     "Turn the stack into lessons, training, courses, curricula and blended learning experiences.": "Biến chuỗi khối thành bài học, đào tạo, khóa học, chương trình và trải nghiệm học tập kết hợp.",
@@ -131,7 +130,6 @@
     "Build sentence, vocabulary and comprehension practice.": "Xây dựng bài luyện câu, từ vựng và đọc hiểu.",
     "Guided Reflection": "Phản tư có hướng dẫn",
     "Encourage meaning-making and thoughtful response.": "Khuyến khích người học tạo ý nghĩa và phản hồi có suy nghĩ.",
-
     "Use Wistudi as your learning and publishing platform, connect it with systems you already rely on, or expand it with specialist technology — without fragmenting the learner experience.": "Dùng Wistudi làm nền tảng học tập và xuất bản, kết nối với các hệ thống bạn đang sử dụng hoặc mở rộng bằng công nghệ chuyên biệt — mà không làm phân mảnh trải nghiệm người học.",
     "Diagram showing Wistudi at the centre of an organisation learning ecosystem, connected to existing systems, publishing, teams and scalable deployment": "Sơ đồ Wistudi ở trung tâm hệ sinh thái học tập của tổ chức, kết nối với hệ thống hiện có, xuất bản, đội ngũ và triển khai có thể mở rộng",
     "The core platform remains connected, while your people, brand, content, permissions, reporting and integrations can be organised around your own model.": "Nền tảng cốt lõi vẫn được kết nối, trong khi con người, thương hiệu, nội dung, quyền, báo cáo và tích hợp có thể được tổ chức theo mô hình riêng của bạn.",
@@ -258,6 +256,11 @@
     "Use Wistudi independently, shape it around your people and content, connect it to existing systems, or expand it through specialist partner technology.": "Sử dụng Wistudi độc lập, định hình quanh con người và nội dung của bạn, kết nối với hệ thống hiện có hoặc mở rộng bằng công nghệ chuyên biệt từ đối tác.",
     "Technology or distribution partner? Discuss a partnership →": "Đối tác công nghệ hoặc phân phối? Trao đổi về hợp tác →",
     "Close image": "Đóng hình ảnh",
-    "Expanded Wistudi event image": "Hình ảnh sự kiện Wistudi được phóng to"
+    "Expanded Wistudi event image": "Hình ảnh sự kiện Wistudi được phóng to",
+    "Organisation overview": "Tổng quan tổ chức",
+    "Plans, publishing and learning for schools, teams and organisations.": "Kế hoạch, xuất bản và học tập cho trường học, đội ngũ và tổ chức.",
+    "Integration Documentation": "Tài liệu tích hợp",
+    "Integration models, LTI 1.3, grading, data exchange and partner requirements.": "Mô hình tích hợp, LTI 1.3, chấm điểm, trao đổi dữ liệu và yêu cầu đối tác.",
+    "Open Organisations menu": "Mở menu Tổ chức"
   }
 }

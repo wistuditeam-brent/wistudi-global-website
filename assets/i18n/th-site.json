@@ -57,7 +57,6 @@
     "Manage people, learning, content, assessment, results and reporting.": "จัดการบุคลากร การเรียนรู้ เนื้อหา การประเมิน ผลลัพธ์ และรายงาน",
     "Deploy branded experiences and connect Wistudi into wider learning ecosystems.": "นำประสบการณ์ตามแบรนด์ไปใช้และเชื่อม Wistudi เข้ากับระบบการเรียนรู้ที่กว้างขึ้น",
     "Start with a lesson. Build a course. Publish a curriculum. Create an interactive learning world around what you know.": "เริ่มจากบทเรียน สร้างหลักสูตร เผยแพร่แผนการเรียน และสร้างโลกการเรียนรู้แบบโต้ตอบจากสิ่งที่คุณรู้",
-
     "Explore Wistudi's modular blocks and activities for Flows, XP Video, live teaching and printable-connected learning.": "สำรวจบล็อกและกิจกรรมแบบโมดูลของ Wistudi สำหรับ Flows, XP Video, การสอนสด และการเรียนรู้ที่เชื่อมกับสื่อสิ่งพิมพ์",
     "Flows + XP Video": "Flows + XP Video",
     "Turn the stack into lessons, training, courses, curricula and blended learning experiences.": "เปลี่ยนชุดบล็อกให้เป็นบทเรียน การฝึกอบรม หลักสูตร แผนการเรียน และการเรียนรู้แบบผสมผสาน",
@@ -131,7 +130,6 @@
     "Build sentence, vocabulary and comprehension practice.": "สร้างแบบฝึกประโยค คำศัพท์ และความเข้าใจ",
     "Guided Reflection": "การสะท้อนคิดแบบมีแนวทาง",
     "Encourage meaning-making and thoughtful response.": "ส่งเสริมการสร้างความหมายและคำตอบที่ผ่านการคิด",
-
     "Use Wistudi as your learning and publishing platform, connect it with systems you already rely on, or expand it with specialist technology — without fragmenting the learner experience.": "ใช้ Wistudi เป็นแพลตฟอร์มการเรียนรู้และเผยแพร่ เชื่อมกับระบบที่คุณใช้อยู่ หรือขยายด้วยเทคโนโลยีเฉพาะทาง — โดยไม่ทำให้ประสบการณ์ผู้เรียนแยกส่วน",
     "Diagram showing Wistudi at the centre of an organisation learning ecosystem, connected to existing systems, publishing, teams and scalable deployment": "แผนภาพ Wistudi ที่อยู่ศูนย์กลางระบบการเรียนรู้ขององค์กร เชื่อมกับระบบเดิม การเผยแพร่ ทีม และการใช้งานที่ขยายได้",
     "The core platform remains connected, while your people, brand, content, permissions, reporting and integrations can be organised around your own model.": "แพลตฟอร์มหลักยังคงเชื่อมถึงกัน ขณะที่บุคลากร แบรนด์ เนื้อหา สิทธิ์ รายงาน และการเชื่อมต่อต่าง ๆ สามารถจัดตามโมเดลขององค์กรคุณเอง",
@@ -258,6 +256,11 @@
     "Use Wistudi independently, shape it around your people and content, connect it to existing systems, or expand it through specialist partner technology.": "ใช้ Wistudi แบบอิสระ ปรับให้เข้ากับบุคลากรและเนื้อหาของคุณ เชื่อมกับระบบเดิม หรือขยายด้วยเทคโนโลยีพาร์ตเนอร์เฉพาะทาง",
     "Technology or distribution partner? Discuss a partnership →": "พาร์ตเนอร์ด้านเทคโนโลยีหรือการจัดจำหน่าย? พูดคุยเรื่องความร่วมมือ →",
     "Close image": "ปิดภาพ",
-    "Expanded Wistudi event image": "ภาพกิจกรรม Wistudi ที่ขยายแล้ว"
+    "Expanded Wistudi event image": "ภาพกิจกรรม Wistudi ที่ขยายแล้ว",
+    "Organisation overview": "ภาพรวมองค์กร",
+    "Plans, publishing and learning for schools, teams and organisations.": "แผน การเผยแพร่ และการเรียนรู้สำหรับโรงเรียน ทีม และองค์กร",
+    "Integration Documentation": "เอกสารการเชื่อมต่อ",
+    "Integration models, LTI 1.3, grading, data exchange and partner requirements.": "รูปแบบการเชื่อมต่อ LTI 1.3 การให้คะแนน การแลกเปลี่ยนข้อมูล และข้อกำหนดสำหรับพาร์ทเนอร์",
+    "Open Organisations menu": "เปิดเมนูองค์กร"
   }
 }

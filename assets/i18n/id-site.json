@@ -57,7 +57,6 @@
     "Manage people, learning, content, assessment, results and reporting.": "Kelola orang, pembelajaran, konten, penilaian, hasil, dan pelaporan.",
     "Deploy branded experiences and connect Wistudi into wider learning ecosystems.": "Terapkan pengalaman bermerek dan hubungkan Wistudi ke ekosistem pembelajaran yang lebih luas.",
     "Start with a lesson. Build a course. Publish a curriculum. Create an interactive learning world around what you know.": "Mulai dari satu pelajaran. Bangun kursus. Terbitkan kurikulum. Ciptakan dunia belajar interaktif dari pengetahuan Anda.",
-
     "Explore Wistudi's modular blocks and activities for Flows, XP Video, live teaching and printable-connected learning.": "Jelajahi block dan aktivitas modular Wistudi untuk Flows, XP Video, pengajaran langsung, dan pembelajaran yang terhubung dengan versi cetak.",
     "Flows + XP Video": "Flows + XP Video",
     "Turn the stack into lessons, training, courses, curricula and blended learning experiences.": "Ubah susunan block menjadi pelajaran, pelatihan, kursus, kurikulum, dan pengalaman blended learning.",
@@ -131,7 +130,6 @@
     "Build sentence, vocabulary and comprehension practice.": "Bangun latihan kalimat, kosakata, dan pemahaman.",
     "Guided Reflection": "Refleksi Terpandu",
     "Encourage meaning-making and thoughtful response.": "Dorong pemaknaan dan respons yang lebih mendalam.",
-
     "Use Wistudi as your learning and publishing platform, connect it with systems you already rely on, or expand it with specialist technology — without fragmenting the learner experience.": "Gunakan Wistudi sebagai platform belajar dan penerbitan Anda, hubungkan dengan sistem yang sudah digunakan, atau perluas dengan teknologi spesialis — tanpa memecah pengalaman pelajar.",
     "Diagram showing Wistudi at the centre of an organisation learning ecosystem, connected to existing systems, publishing, teams and scalable deployment": "Diagram Wistudi di pusat ekosistem pembelajaran organisasi, terhubung ke sistem yang ada, penerbitan, tim, dan deployment yang dapat diperluas",
     "The core platform remains connected, while your people, brand, content, permissions, reporting and integrations can be organised around your own model.": "Platform inti tetap terhubung, sementara orang, merek, konten, izin, pelaporan, dan integrasi dapat diatur sesuai model organisasi Anda sendiri.",
@@ -258,6 +256,11 @@
     "Use Wistudi independently, shape it around your people and content, connect it to existing systems, or expand it through specialist partner technology.": "Gunakan Wistudi secara mandiri, bentuk sesuai orang dan konten Anda, hubungkan ke sistem yang ada, atau perluas melalui teknologi partner spesialis.",
     "Technology or distribution partner? Discuss a partnership →": "Partner teknologi atau distribusi? Diskusikan kemitraan →",
     "Close image": "Tutup gambar",
-    "Expanded Wistudi event image": "Gambar acara Wistudi yang diperbesar"
+    "Expanded Wistudi event image": "Gambar acara Wistudi yang diperbesar",
+    "Organisation overview": "Ikhtisar organisasi",
+    "Plans, publishing and learning for schools, teams and organisations.": "Paket, penerbitan, dan pembelajaran untuk sekolah, tim, dan organisasi.",
+    "Integration Documentation": "Dokumentasi Integrasi",
+    "Integration models, LTI 1.3, grading, data exchange and partner requirements.": "Model integrasi, LTI 1.3, penilaian, pertukaran data, dan persyaratan mitra.",
+    "Open Organisations menu": "Buka menu Organisasi"
   }
 }
