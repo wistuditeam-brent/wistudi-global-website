@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Partner Integrations | Wistudi</title>
-<meta name="description" content="Explore Wistudi partner integration options, inline learning experiences, LTI 1.3 pathways, content workflow integrations and early partner applications for the 15 October 2026 launch.">
+<meta name="description" content="A practical overview of Wistudi partner integration options, inline learning experiences, LTI 1.3 pathways and early partner applications ahead of the 15 October 2026 launch.">
 <link rel="canonical" href="https://global.wistudi.com/partners/integrations/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,179 +14,125 @@
 <link rel="stylesheet" href="/assets/css/site-shell.css">
 <style>
 :root{
-  --pi-bg:#ffffff;
-  --pi-soft:#f7f5fa;
-  --pi-ink:#181523;
-  --pi-muted:#676170;
-  --pi-line:#e5e0ea;
-  --pi-purple:#6d36df;
-  --pi-purple-dark:#4f25aa;
-  --pi-orange:#ee7419;
-  --pi-green:#17865b;
-  --pi-navy:#211a33;
-  --pi-max:1180px;
+  --pa-ink:#181523;
+  --pa-muted:#686272;
+  --pa-line:#e7e2ec;
+  --pa-soft:#f8f6fb;
+  --pa-purple:#6f3be4;
+  --pa-purple-dark:#4f25aa;
+  --pa-orange:#f2761d;
+  --pa-green:#187f58;
+  --pa-amber:#8f6411;
+  --pa-max:1180px;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--pi-bg);color:var(--pi-ink);font-family:Inter,Arial,sans-serif;line-height:1.66;-webkit-font-smoothing:antialiased}
+body{margin:0;background:#fff;color:var(--pa-ink);font-family:Inter,Arial,sans-serif;line-height:1.68;-webkit-font-smoothing:antialiased}
 a{color:inherit}
-img{max-width:100%}
-h1,h2,h3,h4{font-family:'Be Vietnam Pro',Inter,sans-serif;letter-spacing:-.035em;margin:0;color:var(--pi-ink)}
-p{margin:0;color:var(--pi-muted)}
-.pi-container{width:min(calc(100% - 40px),var(--pi-max));margin-inline:auto}
-.pi-section{padding:92px 0;border-bottom:1px solid var(--pi-line)}
-.pi-section.soft{background:var(--pi-soft)}
-.pi-kicker{display:block;margin-bottom:15px;color:var(--pi-purple);font-size:.75rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
-.pi-lead{font-size:clamp(1.03rem,1.8vw,1.2rem);line-height:1.74;max-width:780px}
-.pi-btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border:1px solid transparent;border-radius:9px;font-size:.86rem;font-weight:750;text-decoration:none;transition:.18s ease}
-.pi-btn.primary{background:var(--pi-purple);color:#fff}
-.pi-btn.primary:hover{background:var(--pi-purple-dark);transform:translateY(-1px)}
-.pi-btn.secondary{background:#fff;border-color:#d9d2e0;color:var(--pi-ink)}
-.pi-btn.secondary:hover{border-color:#bdb3c8;transform:translateY(-1px)}
-.pi-actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:30px}
+h1,h2,h3,h4{font-family:'Be Vietnam Pro',Inter,sans-serif;letter-spacing:-.035em;color:var(--pa-ink)}
+p{margin:0 0 1.25rem;color:var(--pa-muted)}
+.pa-container{width:min(calc(100% - 40px),var(--pa-max));margin-inline:auto}
+.pa-breadcrumbs{font-size:.76rem;color:#8c8595;padding:22px 0 0}
+.pa-breadcrumbs a{text-decoration:none}
+.pa-breadcrumbs a:hover{color:var(--pa-purple)}
+.pa-article-head{padding:72px 0 52px;border-bottom:1px solid var(--pa-line)}
+.pa-kicker{display:block;margin-bottom:14px;color:var(--pa-purple);font-size:.76rem;font-weight:800;letter-spacing:.095em;text-transform:uppercase}
+.pa-article-head h1{font-size:clamp(2.65rem,5.6vw,4.9rem);line-height:1.02;margin:0;max-width:980px}
+.pa-deck{margin-top:22px;max-width:860px;font-size:1.13rem;line-height:1.72;color:#5e5768}
+.pa-meta{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:24px;color:#847d8c;font-size:.78rem}
+.pa-meta strong{color:#5f5868}
+.pa-notice{margin-top:34px;border:1px solid #ded6e7;border-left:4px solid var(--pa-orange);background:#faf8fc;padding:20px 22px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center}
+.pa-notice strong{display:block;color:var(--pa-ink);font-size:.93rem;margin-bottom:4px}
+.pa-notice p{margin:0;font-size:.84rem;line-height:1.55}
+.pa-btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 15px;border-radius:8px;background:var(--pa-purple);color:#fff;text-decoration:none;font-size:.79rem;font-weight:750;white-space:nowrap}
+.pa-btn:hover{background:var(--pa-purple-dark)}
 
-/* launch banner */
-.pi-launch{background:var(--pi-navy);color:#fff;border-bottom:1px solid rgba(255,255,255,.1)}
-.pi-launch-inner{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:28px;padding:12px 0}
-.pi-launch-copy{display:flex;align-items:flex-start;gap:18px}
-.pi-launch-date{flex:0 0 auto;border-left:3px solid var(--pi-orange);padding-left:13px}
-.pi-launch-date strong{display:block;color:#fff;font-size:.89rem}
-.pi-launch-date span{display:block;color:#beb6cb;font-size:.72rem;margin-top:1px}
-.pi-launch-text{color:#ded8e6;font-size:.84rem;line-height:1.5;max-width:690px}
-.pi-launch .pi-btn{min-height:42px;background:#fff;color:#2a203d;border-radius:8px;white-space:nowrap}
+.pa-article-wrap{display:grid;grid-template-columns:minmax(0,760px) 250px;gap:82px;align-items:start;padding:58px 0 90px}
+.pa-body{min-width:0}
+.pa-body>p:first-child{font-size:1.04rem;color:#514a5a}
+.pa-body h2{font-size:2rem;line-height:1.16;margin:52px 0 18px}
+.pa-body h3{font-size:1.23rem;line-height:1.25;margin:30px 0 12px}
+.pa-body ul{margin:0 0 1.5rem;padding-left:1.2rem}
+.pa-body li{margin:0 0 .65rem;color:var(--pa-muted)}
+.pa-body strong{color:var(--pa-ink)}
+.pa-aside{position:sticky;top:98px;border-left:1px solid var(--pa-line);padding-left:22px}
+.pa-aside strong{display:block;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:#837b8c;margin-bottom:12px}
+.pa-aside a{display:block;text-decoration:none;color:#736c7a;font-size:.78rem;line-height:1.45;padding:7px 0}
+.pa-aside a:hover{color:var(--pa-purple)}
 
-/* hero */
-.pi-hero{padding:98px 0 84px;background:#fff;border-bottom:1px solid var(--pi-line)}
-.pi-hero-grid{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(360px,.98fr);gap:72px;align-items:center}
-.pi-hero h1{font-size:clamp(3rem,6vw,5.25rem);line-height:1.01;font-weight:800;max-width:820px}
-.pi-hero .pi-lead{margin-top:24px}
-.pi-hero-note{margin-top:22px;padding-left:16px;border-left:3px solid var(--pi-orange);font-size:.86rem;color:#5d5667;max-width:720px}
-.pi-architecture{border:1px solid #dcd5e3;background:#fbfafc;padding:22px;box-shadow:0 16px 38px rgba(33,26,51,.07)}
-.pi-architecture-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;font-weight:800;color:#70677b;margin-bottom:17px}
-.pi-flow-line{display:grid;grid-template-columns:1fr 36px 1.28fr 36px 1fr;align-items:stretch}
-.pi-node{border:1px solid #d7d0de;background:#fff;padding:18px 15px;min-height:126px;display:flex;flex-direction:column;justify-content:center}
-.pi-node strong{font-family:'Be Vietnam Pro',Inter,sans-serif;font-size:1rem}
-.pi-node span{font-size:.75rem;color:#766e80;margin-top:7px;line-height:1.45}
-.pi-node.partner{border-top:4px solid var(--pi-orange)}
-.pi-node.flow{border-top:4px solid var(--pi-purple)}
-.pi-node.result{border-top:4px solid var(--pi-green)}
-.pi-arrow{display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#8f8798}
-.pi-architecture-foot{margin-top:16px;padding-top:15px;border-top:1px solid #e5dfe9;font-size:.76rem;color:#746d7b;line-height:1.55}
+.pa-pull{margin:28px 0;padding:24px 24px 24px 26px;border-left:4px solid var(--pa-purple);background:#faf8fd;color:#4d4656;font-size:1rem;line-height:1.65}
+.pa-diagram{margin:30px 0 36px;border:1px solid var(--pa-line);background:#fff;padding:22px}
+.pa-diagram-label{font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#837b8d;margin-bottom:16px}
+.pa-diagram-row{display:grid;grid-template-columns:1fr 34px 1.25fr 34px 1fr;align-items:stretch}
+.pa-diagram-node{border:1px solid #dcd5e2;padding:16px;background:#fbfafc;display:flex;flex-direction:column;justify-content:center;min-height:105px}
+.pa-diagram-node:nth-child(1){border-top:3px solid var(--pa-orange)}
+.pa-diagram-node:nth-child(3){border-top:3px solid var(--pa-purple)}
+.pa-diagram-node:nth-child(5){border-top:3px solid var(--pa-green)}
+.pa-diagram-node b{font-size:.89rem}
+.pa-diagram-node span{font-size:.73rem;color:#766f7e;margin-top:5px;line-height:1.4}
+.pa-arrow{display:flex;align-items:center;justify-content:center;color:#99919f}
+.pa-small-note{font-size:.75rem;color:#89818f;margin-top:13px;line-height:1.5}
 
-/* content */
-.pi-intro-grid{display:grid;grid-template-columns:.78fr 1.22fr;gap:70px;align-items:start}
-.pi-intro-grid h2,.pi-section-head h2{font-size:clamp(2rem,4vw,3.25rem);line-height:1.09}
-.pi-copy{display:grid;gap:18px}
-.pi-copy p{font-size:.98rem;line-height:1.75}
+.pa-terms{margin:26px 0 10px;border-top:1px solid var(--pa-line)}
+.pa-term{display:grid;grid-template-columns:130px 1fr;gap:22px;padding:18px 0;border-bottom:1px solid var(--pa-line)}
+.pa-term b{font-size:.87rem}
+.pa-term span{font-size:.84rem;color:var(--pa-muted);line-height:1.55}
 
-.pi-definition-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--pi-line);border:1px solid var(--pi-line);margin-top:40px}
-.pi-definition{background:#fff;padding:30px 28px;min-height:225px}
-.pi-definition b{display:block;font-family:'Be Vietnam Pro',Inter,sans-serif;font-size:1.12rem;margin-bottom:12px}
-.pi-definition p{font-size:.88rem;line-height:1.65}
-.pi-definition .n{display:block;margin-bottom:22px;color:var(--pi-purple);font-size:.72rem;font-weight:800;letter-spacing:.08em}
+.pa-partner-list{margin:24px 0 8px;border-top:1px solid var(--pa-line)}
+.pa-partner-row{display:grid;grid-template-columns:1fr 1.55fr;gap:26px;padding:16px 0;border-bottom:1px solid var(--pa-line)}
+.pa-partner-row b{font-size:.87rem}
+.pa-partner-row span{font-size:.83rem;color:var(--pa-muted);line-height:1.55}
 
-/* inline principle */
-.pi-principle{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--pi-line);background:#fff}
-.pi-principle-copy{padding:46px 44px}
-.pi-principle-copy h2{font-size:clamp(2rem,4vw,3.15rem);line-height:1.08}
-.pi-principle-copy p{margin-top:18px;font-size:.97rem;line-height:1.75}
-.pi-principle-list{background:#241c36;padding:42px 38px;color:#fff;display:grid;align-content:center;gap:0}
-.pi-rule{padding:18px 0;border-bottom:1px solid rgba(255,255,255,.14)}
-.pi-rule:last-child{border-bottom:0}
-.pi-rule strong{display:block;color:#fff;font-size:.93rem}
-.pi-rule span{display:block;color:#cfc7d9;font-size:.8rem;margin-top:5px;line-height:1.5}
+.pa-path-table{margin:26px 0 12px;border:1px solid var(--pa-line);overflow-x:auto}
+.pa-path-table table{width:100%;border-collapse:collapse;min-width:700px}
+.pa-path-table th,.pa-path-table td{padding:15px 16px;text-align:left;vertical-align:top;border-bottom:1px solid var(--pa-line);font-size:.78rem;line-height:1.5}
+.pa-path-table th{background:#f7f5f9;color:#5c5565;font-weight:800}
+.pa-path-table tr:last-child td{border-bottom:0}
+.pa-path-table td:first-child{width:86px;color:var(--pa-purple);font-weight:800}
+.pa-status-live{color:var(--pa-green);font-weight:800}
+.pa-status-plan{color:var(--pa-amber);font-weight:800}
+.pa-status-scope{color:#746d7a;font-weight:800}
 
-/* partner fit */
-.pi-fit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px}
-.pi-fit{border-top:3px solid #cfc7d9;border-left:1px solid var(--pi-line);border-right:1px solid var(--pi-line);border-bottom:1px solid var(--pi-line);padding:27px 25px;background:#fff;min-height:205px}
-.pi-fit:nth-child(2),.pi-fit:nth-child(5){border-top-color:var(--pi-purple)}
-.pi-fit:nth-child(3),.pi-fit:nth-child(6){border-top-color:var(--pi-orange)}
-.pi-fit h3{font-size:1.02rem;line-height:1.3}
-.pi-fit p{margin-top:11px;font-size:.84rem;line-height:1.6}
+.pa-techbox{margin:25px 0;border:1px solid var(--pa-line);background:#fbfafc;padding:22px}
+.pa-techbox h3{margin:0 0 10px}
+.pa-techbox ul{margin-bottom:0}
 
-/* pathways */
-.pi-pathways{margin-top:42px;border-top:1px solid var(--pi-line)}
-.pi-path{display:grid;grid-template-columns:120px minmax(0,1.02fr) minmax(0,.98fr);gap:28px;padding:29px 0;border-bottom:1px solid var(--pi-line);align-items:start}
-.pi-level{font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--pi-purple)}
-.pi-path h3{font-size:1.18rem;margin-bottom:8px}
-.pi-path p{font-size:.88rem;line-height:1.62}
-.pi-path-side{font-size:.8rem;color:#6d6575;line-height:1.58}
-.pi-status{display:block;margin-bottom:8px;font-size:.71rem;font-weight:800;color:var(--pi-green);text-transform:uppercase;letter-spacing:.06em}
-.pi-status.planned{color:#936414}
-.pi-status.scoped{color:#716779}
+.pa-process{counter-reset:step;margin:22px 0 8px;border-top:1px solid var(--pa-line)}
+.pa-process-item{counter-increment:step;display:grid;grid-template-columns:46px 1fr;gap:14px;padding:18px 0;border-bottom:1px solid var(--pa-line)}
+.pa-process-item:before{content:counter(step,decimal-leading-zero);font-family:'Be Vietnam Pro',Inter,sans-serif;font-weight:800;color:var(--pa-purple);font-size:.78rem}
+.pa-process-item b{display:block;font-size:.88rem;margin-bottom:3px}
+.pa-process-item span{font-size:.82rem;color:var(--pa-muted);line-height:1.55}
 
-/* LTI */
-.pi-lti-grid{display:grid;grid-template-columns:1fr 1fr;gap:42px;margin-top:40px}
-.pi-lti-panel{border:1px solid var(--pi-line);background:#fff;padding:32px}
-.pi-lti-panel h3{font-size:1.2rem;margin-bottom:13px}
-.pi-lti-panel p{font-size:.89rem;line-height:1.67}
-.pi-tech-list{margin:20px 0 0;padding:0;list-style:none}
-.pi-tech-list li{padding:11px 0;border-top:1px solid var(--pi-line);font-size:.82rem;color:#5f5768}
-.pi-tech-list strong{color:var(--pi-ink)}
+.pa-faq{margin-top:18px}
+.pa-faq details{border-top:1px solid var(--pa-line)}
+.pa-faq details:last-child{border-bottom:1px solid var(--pa-line)}
+.pa-faq summary{cursor:pointer;list-style:none;padding:18px 28px 18px 0;font-weight:750;font-size:.88rem;position:relative}
+.pa-faq summary::-webkit-details-marker{display:none}
+.pa-faq summary:after{content:'+';position:absolute;right:2px;color:var(--pa-purple);font-size:1.1rem}
+.pa-faq details[open] summary:after{content:'−'}
+.pa-faq details p{padding:0 24px 18px 0;font-size:.83rem}
 
-/* evaluation */
-.pi-eval{display:grid;grid-template-columns:.75fr 1.25fr;gap:65px;align-items:start}
-.pi-checks{border-top:1px solid var(--pi-line)}
-.pi-check{display:grid;grid-template-columns:34px 1fr;gap:14px;padding:17px 0;border-bottom:1px solid var(--pi-line)}
-.pi-check .num{font-family:'Be Vietnam Pro',Inter,sans-serif;color:var(--pi-purple);font-weight:800;font-size:.76rem;padding-top:2px}
-.pi-check strong{display:block;font-size:.9rem}
-.pi-check span{display:block;color:#6f6877;font-size:.8rem;margin-top:3px;line-height:1.5}
+.pa-bottom-cta{margin-top:54px;padding-top:30px;border-top:1px solid var(--pa-line)}
+.pa-bottom-cta h2{margin:0 0 10px}
+.pa-bottom-cta p{max-width:680px}
+.pa-bottom-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.pa-bottom-actions .pa-btn.alt{background:#fff;color:var(--pa-ink);border:1px solid #d9d2df}
 
-/* process */
-.pi-process{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--pi-line);margin-top:38px}
-.pi-step{padding:28px 24px;border-right:1px solid var(--pi-line);background:#fff;min-height:230px}
-.pi-step:last-child{border-right:0}
-.pi-step .stepno{color:var(--pi-purple);font-weight:800;font-size:.73rem;letter-spacing:.08em;margin-bottom:20px}
-.pi-step h3{font-size:1rem}
-.pi-step p{font-size:.82rem;line-height:1.58;margin-top:10px}
-
-/* FAQ */
-.pi-faq{max-width:900px;margin-top:35px}
-.pi-faq details{border-top:1px solid var(--pi-line)}
-.pi-faq details:last-child{border-bottom:1px solid var(--pi-line)}
-.pi-faq summary{cursor:pointer;list-style:none;padding:20px 0;font-weight:750;color:var(--pi-ink);position:relative;padding-right:30px}
-.pi-faq summary::-webkit-details-marker{display:none}
-.pi-faq summary:after{content:'+';position:absolute;right:3px;top:19px;color:var(--pi-purple);font-size:1.15rem}
-.pi-faq details[open] summary:after{content:'−'}
-.pi-faq details p{padding:0 38px 20px 0;font-size:.86rem;line-height:1.65}
-
-/* CTA */
-.pi-cta{padding:76px 0;background:#251c37;color:#fff}
-.pi-cta-grid{display:grid;grid-template-columns:1fr auto;gap:44px;align-items:center}
-.pi-cta h2{font-size:clamp(2rem,4vw,3.25rem);line-height:1.08;color:#fff;max-width:780px}
-.pi-cta p{color:#ccc4d6;margin-top:14px;max-width:760px;font-size:.94rem}
-.pi-cta .pi-btn.primary{background:#fff;color:#261c38}
-.pi-cta .pi-btn.secondary{background:transparent;border-color:#635872;color:#fff}
-
-@media(max-width:960px){
-  .pi-hero-grid,.pi-intro-grid,.pi-principle,.pi-eval,.pi-cta-grid{grid-template-columns:1fr}
-  .pi-hero-grid{gap:44px}
-  .pi-fit-grid{grid-template-columns:1fr 1fr}
-  .pi-definition-grid{grid-template-columns:1fr}
-  .pi-lti-grid{grid-template-columns:1fr}
-  .pi-process{grid-template-columns:1fr 1fr}
-  .pi-step:nth-child(2){border-right:0}
-  .pi-step:nth-child(-n+2){border-bottom:1px solid var(--pi-line)}
-  .pi-path{grid-template-columns:105px 1fr}
-  .pi-path-side{grid-column:2}
+@media(max-width:940px){
+  .pa-article-wrap{grid-template-columns:1fr;gap:34px}
+  .pa-aside{position:static;order:-1;border-left:0;border-bottom:1px solid var(--pa-line);padding:0 0 18px;display:flex;gap:16px;flex-wrap:wrap}
+  .pa-aside strong{width:100%;margin-bottom:0}
+  .pa-aside a{padding:0}
 }
 @media(max-width:720px){
-  .pi-container{width:min(calc(100% - 28px),var(--pi-max))}
-  .pi-section{padding:68px 0}
-  .pi-hero{padding:68px 0 60px}
-  .pi-launch-inner{align-items:flex-start;flex-direction:column;gap:13px;padding:16px 0}
-  .pi-launch-copy{gap:12px}
-  .pi-launch .pi-btn{width:100%}
-  .pi-flow-line{grid-template-columns:1fr}
-  .pi-arrow{min-height:28px;transform:rotate(90deg)}
-  .pi-fit-grid{grid-template-columns:1fr}
-  .pi-principle-copy,.pi-principle-list{padding:30px 24px}
-  .pi-path{grid-template-columns:1fr;gap:8px}
-  .pi-path-side{grid-column:auto}
-  .pi-process{grid-template-columns:1fr}
-  .pi-step{border-right:0;border-bottom:1px solid var(--pi-line)}
-  .pi-step:last-child{border-bottom:0}
-  .pi-cta{padding:60px 0}
+  .pa-container{width:min(calc(100% - 28px),var(--pa-max))}
+  .pa-article-head{padding:52px 0 38px}
+  .pa-article-wrap{padding:40px 0 68px}
+  .pa-notice{grid-template-columns:1fr}
+  .pa-notice .pa-btn{width:100%}
+  .pa-diagram-row{grid-template-columns:1fr}
+  .pa-arrow{min-height:26px;transform:rotate(90deg)}
+  .pa-term,.pa-partner-row{grid-template-columns:1fr;gap:6px}
 }
 </style>
 </head>
@@ -198,7 +144,6 @@ p{margin:0;color:var(--pi-muted)}
       <a href="/">Platform</a>
       <a href="/blocks-activities/">Blocks &amp; Activities</a>
       <a href="/organisations/">Organisations</a>
-      <a class="active" href="/partners/integrations/">Partners</a>
       <a href="/resources/">Resources</a>
       <a href="/contact/">Contact</a>
     </nav>
@@ -212,257 +157,191 @@ p{margin:0;color:var(--pi-muted)}
     <a href="/">Platform</a>
     <a href="/blocks-activities/">Blocks &amp; Activities</a>
     <a href="/organisations/">Organisations</a>
-    <a class="active" href="/partners/integrations/">Partners</a>
     <a href="/resources/">Resources</a>
     <a href="/contact/">Contact</a>
     <div class="ws-mobile-actions"><a class="ws-btn secondary" href="/contact/">Talk to us</a><a class="ws-btn primary" href="https://wistudi.com/sign-up">Start publishing</a></div>
   </div></div>
 </header>
 
-<div class="pi-launch">
-  <div class="pi-container pi-launch-inner">
-    <div class="pi-launch-copy">
-      <div class="pi-launch-date"><strong>15 October 2026</strong><span>Partner integration launch</span></div>
-      <div class="pi-launch-text">Early partner applications are now open. We are speaking with selected EdTech, content and learning-platform teams while we prepare the first partner integration release.</div>
-    </div>
-    <a class="pi-btn" href="/contact/#contact-form">Apply as an early partner</a>
-  </div>
+<main>
+<div class="pa-container">
+  <div class="pa-breadcrumbs"><a href="/">Wistudi</a> / Partners / Integration overview</div>
 </div>
 
-<main>
-<section class="pi-hero">
-  <div class="pi-container pi-hero-grid">
-    <div>
-      <span class="pi-kicker">Wistudi partner integrations</span>
-      <h1>Bring partner experiences into the learning flow.</h1>
-      <p class="pi-lead">Wistudi is building an integration model for learning tools, content providers and platforms that want to become part of a complete learning experience, not a separate destination learners have to keep leaving and returning to.</p>
-      <p class="pi-hero-note">Our preferred integrations keep the learner in context. Where technically possible, partner content should open and work directly inside a Wistudi Flow as an inline Block, with access, completion and results handled in the background.</p>
-      <div class="pi-actions">
-        <a class="pi-btn primary" href="#options">Explore integration options</a>
-        <a class="pi-btn secondary" href="/contact/#contact-form">Discuss a partnership</a>
+<article>
+  <header class="pa-article-head">
+    <div class="pa-container">
+      <span class="pa-kicker">Partner integration guide</span>
+      <h1>How partner integrations work in Wistudi</h1>
+      <p class="pa-deck">A practical overview for product, partnership and engineering teams exploring how an external learning tool, content platform or LMS can connect with Wistudi.</p>
+      <div class="pa-meta">
+        <span><strong>Audience:</strong> Product, partnership and engineering teams</span>
+        <span>Updated September 2026</span>
+        <span>Approx. 8 minute read</span>
+      </div>
+      <div class="pa-notice">
+        <div>
+          <strong>Early partner applications are open ahead of our 15 October 2026 integration launch.</strong>
+          <p>We are currently speaking with selected EdTech, content and learning-platform teams about first integrations and pilot opportunities.</p>
+        </div>
+        <a class="pa-btn" href="/contact/#contact-form">Apply as an early partner</a>
       </div>
     </div>
-    <div class="pi-architecture" aria-label="Illustration of an inline Wistudi partner integration">
-      <div class="pi-architecture-title">The experience we are designing for</div>
-      <div class="pi-flow-line">
-        <div class="pi-node partner"><strong>Partner experience</strong><span>Assessment, simulation, content, practice tool or learning application</span></div>
-        <div class="pi-arrow" aria-hidden="true">→</div>
-        <div class="pi-node flow"><strong>Inline Block in a Flow</strong><span>The partner experience sits alongside Wistudi content and activities without breaking lesson context</span></div>
-        <div class="pi-arrow" aria-hidden="true">→</div>
-        <div class="pi-node result"><strong>Completion or result</strong><span>Where supported, completion or score returns to Wistudi for the wider learning record</span></div>
-      </div>
-      <div class="pi-architecture-foot">Not every partner needs the full pathway. A useful integration can begin with a simple embedded experience and add connected access, results or creator workflows later.</div>
-    </div>
-  </div>
-</section>
+  </header>
 
-<section class="pi-section">
-  <div class="pi-container">
-    <div class="pi-intro-grid">
-      <div>
-        <span class="pi-kicker">Starting context</span>
-        <h2>What Wistudi is integrating into</h2>
-      </div>
-      <div class="pi-copy">
-        <p>Wistudi is a learning publishing and delivery platform built around <strong>Flows</strong>. A Flow is a structured learning experience that can combine explanation, media, interaction, assessment and partner content in one sequence.</p>
-        <p>Flows are made from <strong>Blocks</strong>. A Block is a focused piece of the experience, such as an activity, video, text resource, assessment, external tool or partner application. For integrations, the Block is the point where a partner experience can become part of the lesson itself.</p>
-        <p>Wistudi also connects interactive digital learning with printable resources. That matters for partners because a digital experience may sit inside the online Flow while the wider learning journey can also extend into worksheets and other printable material. Where it is useful, we can explore stable links or QR entry points back into partner experiences from print.</p>
-      </div>
-    </div>
-    <div class="pi-definition-grid">
-      <div class="pi-definition"><span class="n">01</span><b>Flow</b><p>The complete learning experience. It can be short or substantial and can contain Wistudi Blocks, partner content, assessment and supporting resources.</p></div>
-      <div class="pi-definition"><span class="n">02</span><b>Block</b><p>A focused activity or content unit within a Flow. Partner integrations are designed to appear as Blocks so they sit naturally within the surrounding lesson.</p></div>
-      <div class="pi-definition"><span class="n">03</span><b>Interactive + printable</b><p>Wistudi is designed for digital learning and printable output to coexist, so a partner integration can form one part of a wider online and offline publishing workflow.</p></div>
-    </div>
-  </div>
-</section>
+  <div class="pa-container pa-article-wrap">
+    <div class="pa-body">
+      <p>Wistudi is designed around complete learning experiences rather than isolated activities. That shapes how we think about integrations. The goal is not simply to place another product link inside Wistudi. Where the partner technology allows it, we want that experience to become part of the lesson itself.</p>
 
-<section class="pi-section soft">
-  <div class="pi-container">
-    <div class="pi-principle">
-      <div class="pi-principle-copy">
-        <span class="pi-kicker">A core integration principle</span>
-        <h2>Keep the learning experience together.</h2>
-        <p>A learner should not feel that the lesson stopped because another product opened. Our first question is therefore not only whether two systems can technically connect. It is whether the connection can become part of a coherent Flow.</p>
-        <p>Some partners will need a new-tab launch for security or product reasons, and we can support that where necessary. Our preference, however, is an embedded or otherwise closely connected experience that preserves context and reduces unnecessary login, navigation and result-handling steps.</p>
-      </div>
-      <div class="pi-principle-list">
-        <div class="pi-rule"><strong>Inline where possible</strong><span>The partner experience should run inside the Flow rather than sending the learner through a chain of separate pages.</span></div>
-        <div class="pi-rule"><strong>Low-friction access</strong><span>Connected integrations should avoid a second learner login when the partner's security model allows it.</span></div>
-        <div class="pi-rule"><strong>Results in context</strong><span>If an activity produces completion or a score, we want that result available to the surrounding Wistudi learning experience where supported.</span></div>
-        <div class="pi-rule"><strong>Creator-friendly setup</strong><span>Over time, creators should be able to select or create partner content without copying URLs between systems.</span></div>
-        <div class="pi-rule"><strong>Minimum necessary data</strong><span>Partner integrations should request only the learner, class or role information genuinely needed for the experience to work.</span></div>
-      </div>
-    </div>
-  </div>
-</section>
+      <p>In practice, that means a partner tool may appear directly inside a Wistudi Flow, sit alongside Wistudi activities and content, and return completion or results without forcing the learner through unnecessary logins or navigation steps.</p>
 
-<section class="pi-section">
-  <div class="pi-container">
-    <div class="pi-section-head">
-      <span class="pi-kicker">Who we want to work with</span>
-      <h2>Partners that add something meaningful to the Flow</h2>
-      <p class="pi-lead" style="margin-top:18px">We are especially interested in products that become more useful when they sit inside a wider lesson, course, curriculum or learning sequence.</p>
-    </div>
-    <div class="pi-fit-grid">
-      <div class="pi-fit"><h3>Interactive learning tools</h3><p>Simulations, practice environments, manipulatives, creative tools and specialist learning applications that learners actively use.</p></div>
-      <div class="pi-fit"><h3>Assessment and practice</h3><p>Quizzes, diagnostics, adaptive practice and specialist assessment products that can return completion or results.</p></div>
-      <div class="pi-fit"><h3>Content and publishers</h3><p>Reading, curriculum, media and educational content providers that want their resources to sit inside a guided learning experience.</p></div>
-      <div class="pi-fit"><h3>Subject-specific EdTech</h3><p>Tools for maths, STEM, languages, literacy, coding and other subject areas where specialist capability adds depth to a Flow.</p></div>
-      <div class="pi-fit"><h3>AI learning applications</h3><p>AI products with a clear learning use case, especially where the teacher or creator can place the experience intentionally inside a lesson.</p></div>
-      <div class="pi-fit"><h3>LMS and learning platforms</h3><p>Platforms that want to launch Wistudi content, exchange results, or explore a two-way content and learning workflow.</p></div>
-    </div>
-  </div>
-</section>
+      <div class="pa-pull">The question we ask first is not “Can these two systems connect?” It is “Can this partner experience become a coherent part of the learning Flow?”</div>
 
-<section class="pi-section soft" id="options">
-  <div class="pi-container">
-    <div class="pi-section-head">
-      <span class="pi-kicker">Integration options</span>
-      <h2>Start with the level that solves the real problem</h2>
-      <p class="pi-lead" style="margin-top:18px">Partners do not need to implement every level. Most can start with a simple experience and add access, results or content workflows only when they create clear value.</p>
-    </div>
-    <div class="pi-pathways">
-      <div class="pi-path">
-        <div class="pi-level">Level 1</div>
-        <div><h3>Simple embed</h3><p>Your activity or content is displayed inside a Wistudi lesson as an embedded page. This is the fastest route when the experience already works securely in an iframe and does not require connected login or result return.</p></div>
-        <div class="pi-path-side"><span class="pi-status">In development</span>No security handshake, learner identity transfer or result capture is required at this level.</div>
-      </div>
-      <div class="pi-path">
-        <div class="pi-level">Level 2</div>
-        <div><h3>Connected access and results</h3><p>Wistudi launches the partner experience with a signed, short-lived token so the learner can be recognised without a separate login. The partner can then return completion or score information to Wistudi.</p></div>
-        <div class="pi-path-side"><span class="pi-status">In development</span>Designed for pseudonymous learner access, signed launch validation and completion or score return.</div>
-      </div>
-      <div class="pi-path">
-        <div class="pi-level">Level 3</div>
-        <div><h3>Content workflow integration</h3><p>A Wistudi creator can select existing partner content, or potentially create and edit it, through a launcher hosted by the partner. The chosen activity is then stored directly against the relevant Block.</p></div>
-        <div class="pi-path-side"><span class="pi-status planned">Planned</span>The intended direction is a creator workflow that avoids copying links between products. Final implementation is confirmed with each partner.</div>
-      </div>
-      <div class="pi-path">
-        <div class="pi-level">Level 4</div>
-        <div><h3>Extended data sharing</h3><p>When an activity genuinely needs more than a pseudonymous learner ID, specific class, learner, group or role information can be considered as an add-on to the connected launch.</p></div>
-        <div class="pi-path-side"><span class="pi-status planned">Planned add-on</span>Additional information is considered case by case and should be limited to what the partner experience actually needs.</div>
-      </div>
-      <div class="pi-path">
-        <div class="pi-level">Level 5</div>
-        <div><h3>LTI 1.3, reverse launch and custom connections</h3><p>For platforms that want to launch Wistudi content from their own LMS or learning environment, the planned direction is standard LTI 1.3 with OIDC, JWKS, Deep Linking and Assignment and Grade Services where required. Non-standard API or webhook integrations can also be scoped for specific partner needs.</p></div>
-        <div class="pi-path-side"><span class="pi-status scoped">Scoped per partner</span>This pathway is intended for advanced or reverse-direction integrations and is not required for a normal inline partner Block.</div>
-      </div>
-    </div>
-  </div>
-</section>
+      <h2 id="context">Starting context: Flow, Blocks and printable learning</h2>
+      <p>A <strong>Flow</strong> is the complete learning experience in Wistudi. It can be short, such as a focused lesson, or substantial enough to represent a broader course, curriculum or learning sequence.</p>
+      <p>Flows are built from <strong>Blocks</strong>. A Block is a focused piece of the experience, such as explanatory content, an interactive activity, a video, an assessment, an external resource or a partner application.</p>
+      <p>For integrations, the Block is important because it is the point where an external product can become part of the wider lesson rather than sit beside it as a separate destination.</p>
 
-<section class="pi-section">
-  <div class="pi-container">
-    <div class="pi-section-head">
-      <span class="pi-kicker">LTI and interoperability</span>
-      <h2>Familiar standards, without making the page a technical manual</h2>
-      <p class="pi-lead" style="margin-top:18px">For executive and product teams, the important point is that Wistudi is being designed to work with established education interoperability patterns. Engineering details are confirmed during partner scoping.</p>
-    </div>
-    <div class="pi-lti-grid">
-      <div class="pi-lti-panel">
-        <h3>Partner content inside Wistudi</h3>
-        <p>The standard Wistudi partner path is built around an inline Block. Depending on the partner, that may begin as a simple embed or use a connected launch that handles learner access and returns completion or score data.</p>
-        <ul class="pi-tech-list">
-          <li><strong>Typical objective:</strong> keep the learner in the Flow</li>
-          <li><strong>Access:</strong> simple URL or signed connected launch</li>
-          <li><strong>Results:</strong> completion or score where supported</li>
-          <li><strong>Creator workflow:</strong> content picker or create/edit launcher as a later level</li>
+      <div class="pa-terms">
+        <div class="pa-term"><b>Flow</b><span>The complete learning experience that brings content, interaction, assessment, media and partner tools together in sequence.</span></div>
+        <div class="pa-term"><b>Block</b><span>A focused unit inside a Flow. Partner experiences are designed to appear as Blocks where the technical model supports it.</span></div>
+        <div class="pa-term"><b>Interactive + printable</b><span>Wistudi connects digital learning with printable output. A partner experience may remain digital while the wider Flow can also produce or reference printable learning material.</span></div>
+      </div>
+
+      <h2 id="inline">Why inline matters</h2>
+      <p>A learner should not feel that the lesson stopped because another application opened. That is why our preferred integrations keep the partner experience inside the Flow wherever technically possible.</p>
+
+      <div class="pa-diagram" aria-label="Wistudi inline partner integration example">
+        <div class="pa-diagram-label">Typical inline experience</div>
+        <div class="pa-diagram-row">
+          <div class="pa-diagram-node"><b>Partner application</b><span>Assessment, simulation, reading, practice or specialist learning tool</span></div>
+          <div class="pa-arrow">→</div>
+          <div class="pa-diagram-node"><b>Inline Block inside a Flow</b><span>The partner experience sits within the surrounding Wistudi lesson and learner journey</span></div>
+          <div class="pa-arrow">→</div>
+          <div class="pa-diagram-node"><b>Completion or result</b><span>Where supported, Wistudi can receive completion or score information</span></div>
+        </div>
+        <div class="pa-small-note">Not every partner needs all three stages. A useful integration can begin with a simple embedded experience and add connected access or result handling later.</div>
+      </div>
+
+      <p>There are cases where a partner needs to launch in a new tab because of browser security, authentication or product architecture. We can work with that. It is simply not our preferred learner experience when a stronger inline option is available.</p>
+
+      <p>The same principle applies to access and results. If a learner is already in Wistudi, we prefer not to ask for another login unless it is genuinely necessary. If an activity produces a meaningful completion state or score, we prefer that result to become available to the wider Wistudi learning experience where the partner supports it.</p>
+
+      <h2 id="partners">The types of partners we are interested in</h2>
+      <p>We are especially interested in products that become more useful when they sit inside a wider lesson, curriculum or guided learning sequence.</p>
+
+      <div class="pa-partner-list">
+        <div class="pa-partner-row"><b>Interactive learning tools</b><span>Simulations, manipulatives, creative tools, practice environments and specialist applications that learners actively use.</span></div>
+        <div class="pa-partner-row"><b>Assessment and practice</b><span>Quizzes, diagnostics, adaptive practice and specialist assessment systems that can return completion or results.</span></div>
+        <div class="pa-partner-row"><b>Content and publishers</b><span>Reading, media, curriculum and educational content providers that want their resources to appear inside a guided learning experience.</span></div>
+        <div class="pa-partner-row"><b>Subject-specific EdTech</b><span>Products for maths, STEM, literacy, languages, coding and other areas where specialist capability adds depth to a Flow.</span></div>
+        <div class="pa-partner-row"><b>AI learning applications</b><span>AI products with a clear learning purpose, particularly where a teacher or creator can place the experience intentionally inside a lesson.</span></div>
+        <div class="pa-partner-row"><b>LMS and learning platforms</b><span>Platforms that want to launch Wistudi content, exchange results or explore a two-way learning workflow.</span></div>
+      </div>
+
+      <h2 id="options">Integration options</h2>
+      <p>Partners do not need to implement every level. In many cases the right approach is to start with the smallest integration that creates real value and extend it only when there is a reason to do so.</p>
+
+      <div class="pa-path-table">
+        <table>
+          <thead>
+            <tr><th>Level</th><th>Integration</th><th>What it means</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td><strong>Simple Embed</strong></td><td>Your content or activity is shown inside Wistudi as an embedded page. No connected login or result return is required.</td><td class="pa-status-live">In development</td></tr>
+            <tr><td>2</td><td><strong>Connected Access &amp; Results</strong></td><td>Wistudi launches the experience using a signed, short-lived token so the learner can be recognised without a second login. Completion or score can return to Wistudi.</td><td class="pa-status-live">In development</td></tr>
+            <tr><td>3</td><td><strong>Content Workflow</strong></td><td>A creator can select, create or edit partner content through a launcher rather than copying URLs between systems.</td><td class="pa-status-plan">Planned</td></tr>
+            <tr><td>4</td><td><strong>Extended Data Sharing</strong></td><td>Specific class, learner, group or role information can be added when the partner experience genuinely requires it.</td><td class="pa-status-plan">Planned add-on</td></tr>
+            <tr><td>5</td><td><strong>Advanced / LTI 1.3 / Custom</strong></td><td>Reverse-direction launches, LTI 1.3 and custom API or webhook connections are scoped when a partner has a concrete need.</td><td class="pa-status-scope">Scoped per partner</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Level 1: Simple Embed</h3>
+      <p>This is the fastest path when a partner already has a page or activity that can be shown securely inside an iframe. Wistudi loads that experience directly in the lesson. There is no security handshake, no learner identity transfer and no result capture at this level.</p>
+
+      <h3>Level 2: Connected Access and Results</h3>
+      <p>This level adds trusted access and basic result handling. Wistudi creates a signed, short-lived launch token containing a pseudonymous learner identifier and the relevant Flow and step references. The partner verifies the token before granting access.</p>
+      <p>When the activity is finished, the partner can return completion or score information to Wistudi. The objective is a low-friction learner experience without requiring names, email addresses or other personal information by default.</p>
+
+      <h3>Level 3: Content Workflow Integration</h3>
+      <p>This is intended for partners where creators need to select or create content rather than simply paste a link. The partner hosts a selection or editing screen, Wistudi launches it, and the chosen activity reference is returned to the relevant Block.</p>
+      <p>The benefit is practical: the teacher or publisher does not need to move back and forth between two systems copying URLs.</p>
+
+      <h3>Level 4: Extended Data Sharing</h3>
+      <p>Some partner products genuinely need more context, such as role, class or group membership. In those cases we can consider additional fields, but only the specific information needed for the experience to work.</p>
+
+      <h3>Level 5: LTI 1.3 and custom integrations</h3>
+      <p>This covers more advanced cases, including the reverse direction where another LMS or learning platform wants to launch Wistudi content.</p>
+
+      <div class="pa-techbox">
+        <h3>LTI 1.3 direction</h3>
+        <ul>
+          <li><strong>Launch:</strong> standard LTI 1.3 with OIDC and JWKS-based signing.</li>
+          <li><strong>Content selection:</strong> Deep Linking for selecting a specific Wistudi Flow or XP Video.</li>
+          <li><strong>Grade return:</strong> Assignment and Grade Services where a Wistudi activity needs to report a grade back.</li>
+          <li><strong>Custom cases:</strong> dedicated APIs or webhooks can be scoped when the standard launch model does not fit the partner product.</li>
         </ul>
       </div>
-      <div class="pi-lti-panel">
-        <h3>Wistudi inside another platform</h3>
-        <p>Where an LMS or partner platform wants to launch Wistudi content, our advanced integration direction uses standard LTI 1.3. This is the model familiar to teams that already work with systems such as Canvas, Moodle or Brightspace.</p>
-        <ul class="pi-tech-list">
-          <li><strong>Launch:</strong> LTI 1.3 with OIDC and JWKS-based signing</li>
-          <li><strong>Content selection:</strong> Deep Linking for specific Wistudi content</li>
-          <li><strong>Grade return:</strong> Assignment and Grade Services where applicable</li>
-          <li><strong>Scope:</strong> planned and confirmed individually with partner engineering teams</li>
-        </ul>
+
+      <h2 id="readiness">What we look at before scoping an integration</h2>
+      <p>A more complicated integration is not automatically a better one. We start with the learner experience and the practical value created for both products.</p>
+
+      <div class="pa-process">
+        <div class="pa-process-item"><div><b>Can the experience work inside a Flow?</b><span>We look first at whether it can be embedded or launched while preserving lesson context.</span></div></div>
+        <div class="pa-process-item"><div><b>Does the learner need another login?</b><span>If so, we assess whether a connected launch, LTI or another trusted method can remove that friction.</span></div></div>
+        <div class="pa-process-item"><div><b>What should come back to Wistudi?</b><span>For some products, completion is enough. Others may need a score or another agreed result.</span></div></div>
+        <div class="pa-process-item"><div><b>How should a creator add the content?</b><span>We establish whether a normal URL is enough or whether a content picker, Deep Linking or creation workflow would materially improve the experience.</span></div></div>
+        <div class="pa-process-item"><div><b>What data is genuinely required?</b><span>We prefer pseudonymous access and only add learner or class information that the partner product actually needs.</span></div></div>
+      </div>
+
+      <h2 id="process">Early partner process</h2>
+      <p>The early partner programme is designed to identify the right integration level before either team commits to unnecessary build work.</p>
+      <div class="pa-process">
+        <div class="pa-process-item"><div><b>Fit conversation</b><span>We review the product, audience, intended learner experience and the reason an integration would be useful.</span></div></div>
+        <div class="pa-process-item"><div><b>Experience mapping</b><span>We map where the partner experience should sit inside the Flow and how a creator would add it.</span></div></div>
+        <div class="pa-process-item"><div><b>Technical scope</b><span>Engineering teams confirm launch method, security, result handling, data requirements and the most appropriate integration level.</span></div></div>
+        <div class="pa-process-item"><div><b>Pilot and review</b><span>Selected partners can move into a limited pilot before a wider rollout.</span></div></div>
+      </div>
+
+      <h2 id="faq">Common questions</h2>
+      <div class="pa-faq">
+        <details><summary>Do we need to support LTI 1.3 to become a Wistudi partner?</summary><p>No. LTI 1.3 is one advanced pathway, especially when another LMS or learning platform wants to launch Wistudi content. A partner experience inside Wistudi may begin with a simple embed or connected launch instead.</p></details>
+        <details><summary>Does our product have to run inside an iframe?</summary><p>No, but inline delivery is our preferred learner experience. If security or product architecture requires a separate launch, we can assess that during scoping.</p></details>
+        <details><summary>Do we have to return grades?</summary><p>No. Some partner experiences are useful without grading. An activity may return completion only, a score where one exists, or no result at the simplest integration level.</p></details>
+        <details><summary>Can teachers select partner content directly from Wistudi?</summary><p>That is the planned direction for Content Workflow Integration. The intended model is a partner-hosted selection or creation screen that returns the selected activity reference to Wistudi.</p></details>
+        <details><summary>Can Wistudi content launch inside our LMS?</summary><p>That is part of the advanced reverse-direction integration scope. The planned model uses standard LTI 1.3, including Deep Linking and grade return where required.</p></details>
+      </div>
+
+      <div class="pa-bottom-cta">
+        <h2>Interested in an early integration?</h2>
+        <p>Tell us what your product does, how learners currently access it, whether you support embedding or LTI, and what you would want the combined experience to achieve.</p>
+        <div class="pa-bottom-actions">
+          <a class="pa-btn" href="/contact/#contact-form">Apply as an early partner</a>
+          <a class="pa-btn alt" href="mailto:partnerships@wistudi.com">partnerships@wistudi.com</a>
+        </div>
       </div>
     </div>
-  </div>
-</section>
 
-<section class="pi-section soft">
-  <div class="pi-container pi-eval">
-    <div>
-      <span class="pi-kicker">Partner readiness</span>
-      <h2>What we look at first</h2>
-      <p class="pi-lead" style="margin-top:17px">A good integration is not automatically the most complicated one. We start with the learner experience and the value created for both products.</p>
-    </div>
-    <div class="pi-checks">
-      <div class="pi-check"><span class="num">01</span><div><strong>Can the experience work inside a Flow?</strong><span>We assess whether it can be embedded or launched in a way that preserves lesson context.</span></div></div>
-      <div class="pi-check"><span class="num">02</span><div><strong>Does the learner need another login?</strong><span>If so, we look at whether connected access, LTI or another trusted launch can reduce that friction.</span></div></div>
-      <div class="pi-check"><span class="num">03</span><div><strong>What should come back to Wistudi?</strong><span>For some tools, completion is enough. Others may need a score or another agreed result.</span></div></div>
-      <div class="pi-check"><span class="num">04</span><div><strong>How should a creator add the content?</strong><span>We establish whether a URL is enough or whether a content picker, Deep Linking or a creator workflow would materially improve the experience.</span></div></div>
-      <div class="pi-check"><span class="num">05</span><div><strong>What data is genuinely required?</strong><span>We prefer pseudonymous access and add only the specific learner or class information needed for the partner experience.</span></div></div>
-      <div class="pi-check"><span class="num">06</span><div><strong>Does the integration improve a wider learning journey?</strong><span>We prioritise partnerships where the combined experience is more useful than simply placing two products next to each other.</span></div></div>
-    </div>
+    <aside class="pa-aside" aria-label="Article sections">
+      <strong>On this page</strong>
+      <a href="#context">Flow, Blocks and printable learning</a>
+      <a href="#inline">Why inline matters</a>
+      <a href="#partners">Who we want to work with</a>
+      <a href="#options">Integration options</a>
+      <a href="#readiness">Partner readiness</a>
+      <a href="#process">Early partner process</a>
+      <a href="#faq">Common questions</a>
+    </aside>
   </div>
-</section>
-
-<section class="pi-section">
-  <div class="pi-container">
-    <div class="pi-section-head">
-      <span class="pi-kicker">Early partner process</span>
-      <h2>From first conversation to integration scope</h2>
-      <p class="pi-lead" style="margin-top:18px">The early partner programme is intended to identify the right integration level before either team commits to unnecessary build work.</p>
-    </div>
-    <div class="pi-process">
-      <div class="pi-step"><div class="stepno">STEP 01</div><h3>Fit conversation</h3><p>We review the partner product, intended learner experience, audience and the reason an integration would be useful.</p></div>
-      <div class="pi-step"><div class="stepno">STEP 02</div><h3>Experience mapping</h3><p>We map where the partner experience sits inside a Flow, how a creator adds it and what the learner should see.</p></div>
-      <div class="pi-step"><div class="stepno">STEP 03</div><h3>Technical scope</h3><p>Engineering teams confirm the appropriate level, security model, launch method, result handling and any required data fields.</p></div>
-      <div class="pi-step"><div class="stepno">STEP 04</div><h3>Pilot and review</h3><p>For selected partners, we move into a limited test or pilot and review the real learner and creator experience before expanding the integration.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="pi-section soft">
-  <div class="pi-container">
-    <span class="pi-kicker">Common questions</span>
-    <h2 style="font-size:clamp(2rem,4vw,3.1rem)">Before you contact us</h2>
-    <div class="pi-faq">
-      <details><summary>Do we need to support LTI 1.3 to become a Wistudi partner?</summary><p>No. LTI 1.3 is one advanced pathway, especially when another LMS or learning platform wants to launch Wistudi content. A partner experience inside a Wistudi Flow may begin with a simple embed or Wistudi's connected launch model instead.</p></details>
-      <details><summary>Does our product have to run inside an iframe?</summary><p>Not in every case, but inline delivery is our preferred learner experience. If security, browser policy or the product architecture requires a separate launch, we can assess that during scoping.</p></details>
-      <details><summary>Do we have to return grades?</summary><p>No. Some experiences are useful without grading. A partner activity may return completion only, a score where one exists, or no result at all at the simplest integration level.</p></details>
-      <details><summary>Can teachers choose partner content directly inside Wistudi?</summary><p>That is the planned Level 3 direction. The intended model is for a partner to host a selection or creation screen that Wistudi can launch and receive the selected activity reference from.</p></details>
-      <details><summary>Can Wistudi content launch inside our LMS?</summary><p>That is part of the advanced, reverse-direction integration scope. The planned model uses standard LTI 1.3, including Deep Linking and grade return where required.</p></details>
-      <details><summary>What is currently live?</summary><p>The partner programme is preparing for its 15 October 2026 launch. Simple Embed and Connected Access &amp; Results are currently in development. Content Workflow Integration and extended data sharing are planned, while advanced custom and reverse-direction integrations are scoped per partner.</p></details>
-    </div>
-  </div>
-</section>
-
-<section class="pi-cta">
-  <div class="pi-container pi-cta-grid">
-    <div>
-      <span class="pi-kicker" style="color:#c8b3f7">Early partner applications</span>
-      <h2>Have a product that should sit inside a Wistudi Flow?</h2>
-      <p>Tell us what your platform does, how learners currently access it, whether you support embedding or LTI, and what you would want the combined experience to achieve.</p>
-    </div>
-    <div class="pi-actions" style="margin-top:0">
-      <a class="pi-btn primary" href="/contact/#contact-form">Apply as an early partner</a>
-      <a class="pi-btn secondary" href="mailto:partnerships@wistudi.com">partnerships@wistudi.com</a>
-    </div>
-  </div>
-</section>
+</article>
 </main>
 
 <footer class="ws-site-footer">
   <div class="ws-container ws-footer-row">
     <a class="ws-brand" href="/"><img class="ws-footer-wordmark" src="/assets/images/wistudi-logo.png" alt="Wistudi"></a>
-    <div class="ws-footer-links">
-      <a href="/">Platform</a>
-      <a href="/blocks-activities/">Blocks &amp; Activities</a>
-      <a href="/organisations/">Organisations</a>
-      <a href="/partners/integrations/">Partners &amp; Integrations</a>
-      <a href="/resources/">Resources</a>
-      <a href="/contact/">Contact</a>
-    </div>
-    <div class="ws-footer-contact">
-      <span>Interactive learning, publishing and delivery in one connected platform.</span>
-      <a href="mailto:partnerships@wistudi.com">partnerships@wistudi.com</a>
-    </div>
+    <div class="ws-footer-links"><a href="/">Platform</a><a href="/blocks-activities/">Blocks &amp; Activities</a><a href="/organisations/">Organisations</a><a href="/resources/">Resources</a><a href="/contact/">Contact</a></div>
+    <div class="ws-footer-contact"><span>Interactive learning, publishing and delivery in one connected platform.</span><a href="mailto:partnerships@wistudi.com">partnerships@wistudi.com</a></div>
     <div class="ws-footer-copy">© 2026 Wistudi</div>
   </div>
 </footer>
