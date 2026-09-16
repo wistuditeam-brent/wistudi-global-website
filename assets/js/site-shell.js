@@ -175,10 +175,20 @@ const watchResourcesNav=()=>{
   document.querySelectorAll('.ws-nav-links,.ws-mobile-inner').forEach(nav=>{
     if(nav.dataset.wsResourcesWatched==='true')return;
     nav.dataset.wsResourcesWatched='true';
-    new MutationObserver(()=>queueMicrotask(ensureResourcesNav)).observe(nav,{childList:true});
+    new MutationObserver(()=>queueMicrotask(()=>{ensureResourcesNav();ensureOrganisationsMenu();})).observe(nav,{childList:true,subtree:false});
   });
 };
 watchResourcesNav();
+
+// Keep the Organisations dropdown present if a later shell/i18n pass rewrites nav links.
+const watchOrganisationsMenu=()=>{
+  document.querySelectorAll('.ws-nav-links,.ws-mobile-inner').forEach(nav=>{
+    if(nav.dataset.wsOrganisationsWatched==='true')return;
+    nav.dataset.wsOrganisationsWatched='true';
+    new MutationObserver(()=>queueMicrotask(ensureOrganisationsMenu)).observe(nav,{childList:true,subtree:false});
+  });
+};
+watchOrganisationsMenu();
 
 const load=(src,key)=>new Promise(resolve=>{
   const absolute=new URL(src,location.href).href;
@@ -273,6 +283,7 @@ const bootEvent=async()=>{
   ensureResourcesNav();
   ensureOrganisationsMenu();
   watchResourcesNav();
+  watchOrganisationsMenu();
   document.documentElement.dataset.wsEventRuntime='ready';
   document.documentElement.dataset.wsEventPresentation='canonical-highlight';
 };
@@ -283,6 +294,7 @@ const bootSite=async()=>{
   ensureResourcesNav();
   ensureOrganisationsMenu();
   watchResourcesNav();
+  watchOrganisationsMenu();
 
   // The temporary event takeover banner on the Platform homepage is intentionally off.
   // Keep the workshop promotion inside Resources until we explicitly choose to restore it.
