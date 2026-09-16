@@ -144,10 +144,11 @@
   const loadTranslations=async()=>{
     if(detected==='en'){revealTranslatedPage();return}
     try{
-      const [base,site,extra]=await Promise.all([fetchDictionary(`/assets/i18n/${detected}.json`),fetchDictionary(`/assets/i18n/${detected}-site.json`),fetchDictionary(`/assets/i18n/${detected}-extra.json`)]);
+      const routeFile=seoPath.startsWith('/partners/integrations/')?fetchDictionary(`/assets/i18n/${detected}-integrations.json`):Promise.resolve(null);
+      const [base,site,extra,route]=await Promise.all([fetchDictionary(`/assets/i18n/${detected}.json`),fetchDictionary(`/assets/i18n/${detected}-site.json`),fetchDictionary(`/assets/i18n/${detected}-extra.json`),routeFile]);
       if(!base)throw new Error('base translation unavailable');
-      const dict=Object.assign({},base.strings||base,site?.strings||site||{},extra?.strings||extra||{});
-      const titles=Object.assign({},base.titles||{},site?.titles||{},extra?.titles||{});
+      const dict=Object.assign({},base.strings||base,site?.strings||site||{},extra?.strings||extra||{},route?.strings||route||{});
+      const titles=Object.assign({},base.titles||{},site?.titles||{},extra?.titles||{},route?.titles||{});
       if(titles[seoPath])document.title=titles[seoPath];
       const meta=document.querySelector('meta[name="description"]');if(meta){const key=normalizeText(meta.content);if(dict[key])meta.content=dict[key]}
       translateNode(document.body,dict);
