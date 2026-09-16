@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" sizes="64x64" href="/assets/images/favicon-64.png">
 <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/css/site-shell.css?v=20260916-sharedheader1">
+<link rel="stylesheet" href="/assets/css/site-shell.css?v=20260916-responsive-doc1">
 <style>
 :root{
   --doc-bg:#f7f6f8;
@@ -27,14 +27,14 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:Inter,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:Inter,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 a{color:inherit}
 .doc-shell{width:min(calc(100% - 40px),var(--doc-width));margin:0 auto;padding:28px 0 72px}
 .doc-breadcrumbs{font-size:.76rem;color:#8a8390;margin:4px 0 18px}
 .doc-breadcrumbs a{text-decoration:none;color:#625b69}
 .doc-breadcrumbs a:hover{color:var(--doc-purple)}
 .doc-grid{display:grid;grid-template-columns:minmax(0,820px) 280px;gap:28px;align-items:start}
-.doc-article{background:var(--doc-panel);border:1px solid var(--doc-line);padding:42px 48px 52px}
+.doc-article{min-width:0;background:var(--doc-panel);border:1px solid var(--doc-line);padding:42px 48px 52px}
 .doc-title-row{border-bottom:1px solid var(--doc-line);padding-bottom:26px;margin-bottom:28px}
 .doc-type{display:block;margin-bottom:10px;color:var(--doc-purple);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .doc-title-row h1{margin:0;font-family:'Be Vietnam Pro',Inter,sans-serif;font-size:2.45rem;line-height:1.13;letter-spacing:-.035em;font-weight:700}
@@ -57,7 +57,7 @@ a{color:inherit}
 .doc-def{display:grid;grid-template-columns:145px 1fr;gap:18px;padding:13px 0;border-bottom:1px solid var(--doc-line)}
 .doc-def dt{font-weight:700;font-size:.84rem}
 .doc-def dd{margin:0;color:#675f6c;font-size:.84rem;line-height:1.55}
-.doc-table-wrap{margin:18px 0 10px;overflow-x:auto;border:1px solid var(--doc-line)}
+.doc-table-wrap{margin:18px 0 10px;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--doc-line);scrollbar-width:thin;overscroll-behavior-inline:contain}
 .doc-table{width:100%;border-collapse:collapse;min-width:650px}
 .doc-table th,.doc-table td{padding:12px 13px;text-align:left;vertical-align:top;border-bottom:1px solid var(--doc-line);font-size:.76rem;line-height:1.5}
 .doc-table th{background:#f7f6f8;color:#544d5b;font-weight:700}
@@ -65,7 +65,7 @@ a{color:inherit}
 .doc-table td:first-child{font-weight:700;color:var(--doc-purple)}
 .doc-flow-table td:first-child{width:165px;color:var(--doc-ink)}
 .doc-flow-table td:nth-child(2),.doc-flow-table td:nth-child(3){width:29%}
-.doc-codeish{margin:16px 0;padding:14px 16px;border:1px solid var(--doc-line);background:#faf9fb;font-size:.8rem;line-height:1.65;color:#5c5561}
+.doc-codeish{margin:16px 0;padding:14px 16px;border:1px solid var(--doc-line);background:#faf9fb;font-size:.8rem;line-height:1.65;color:#5c5561;overflow-wrap:anywhere;word-break:break-word}
 .doc-codeish b{display:block;margin-bottom:4px}
 .doc-note{margin:18px 0;padding:14px 16px;border:1px solid var(--doc-line);background:#fcfbfd;font-size:.82rem;line-height:1.62;color:#655e6a}
 .doc-note strong{display:block;margin-bottom:3px}
@@ -79,10 +79,10 @@ a{color:inherit}
 .doc-side{position:sticky;top:92px;display:grid;gap:16px}
 .doc-side-card{background:#fff;border:1px solid #e3dfe7;border-radius:12px;padding:18px;box-shadow:0 8px 26px rgba(37,28,52,.045)}
 .doc-side-card h2{margin:0 0 12px;font-family:'Be Vietnam Pro',Inter,sans-serif;font-size:.96rem;letter-spacing:-.015em}
-.doc-side-card p{margin:0 0 12px;font-size:.77rem;line-height:1.55;color:#746d79}
+.doc-side-card p{margin:0 0 12px;font-size:.77rem;line-height:1.55;color:#746d79;overflow-wrap:anywhere}
 .doc-side-card ul{list-style:none;margin:0;padding:0}
 .doc-side-card li{margin:2px 0}
-.doc-side-card a{position:relative;display:block;padding:9px 10px 9px 12px;border-radius:7px;text-decoration:none;color:#69626f;font-size:.78rem;line-height:1.38;transition:background .15s ease,color .15s ease}
+.doc-side-card a{position:relative;display:block;padding:9px 10px 9px 12px;border-radius:7px;text-decoration:none;color:#69626f;font-size:.78rem;line-height:1.38;overflow-wrap:anywhere;transition:background .15s ease,color .15s ease}
 .doc-side-card a:hover{background:#f8f6fa;color:#3d3545}
 .doc-side-card a.active{background:var(--doc-purple-soft);color:#4e269e;font-weight:650}
 .doc-side-card a.active:before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:2px;background:var(--doc-purple)}
@@ -92,16 +92,89 @@ a{color:inherit}
 .doc-contact-link{color:var(--doc-purple)!important;font-weight:700!important;padding-left:0!important}
 .doc-contact-link:hover{background:transparent!important;text-decoration:underline}
 
-@media(max-width:960px){
-  .doc-grid{grid-template-columns:1fr}
-  .doc-side{position:static;grid-template-columns:1fr 1fr}
+@media(max-width:1180px){
+  .doc-shell{width:min(calc(100% - 32px),var(--doc-width))}
+  .doc-grid{grid-template-columns:minmax(0,1fr) 250px;gap:22px}
+  .doc-article{padding:38px 40px 48px}
 }
-@media(max-width:700px){
-  .doc-shell{width:min(calc(100% - 24px),var(--doc-width));padding-top:18px}
-  .doc-article{padding:28px 22px 38px}
-  .doc-title-row h1{font-size:2rem}
-  .doc-def{grid-template-columns:1fr;gap:4px}
-  .doc-side{grid-template-columns:1fr}
+
+@media(max-width:960px){
+  .doc-shell{width:min(calc(100% - 28px),var(--doc-width));padding-top:22px}
+  .doc-grid{grid-template-columns:1fr;gap:22px}
+  .doc-article{padding:36px 34px 44px}
+  .doc-side{position:static;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .doc-side-card:first-child{grid-column:1/-1}
+  .doc-side-card:first-child ul{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+  .doc-side-card:first-child li{min-width:0}
+  .doc-side-card:first-child a{height:100%}
+}
+
+@media(max-width:760px){
+  .doc-shell{width:100%;padding:14px 0 48px}
+  .doc-breadcrumbs{padding:0 18px;margin:2px 0 14px;font-size:.7rem;white-space:nowrap;overflow-x:auto;scrollbar-width:none}
+  .doc-breadcrumbs::-webkit-scrollbar{display:none}
+  .doc-grid{gap:16px}
+  .doc-article{border-left:0;border-right:0;padding:28px 20px 38px}
+  .doc-title-row{padding-bottom:22px;margin-bottom:22px}
+  .doc-type{font-size:.66rem;line-height:1.45}
+  .doc-title-row h1{font-size:clamp(1.85rem,8.6vw,2.25rem);line-height:1.12;letter-spacing:-.03em}
+  .doc-summary{font-size:.94rem;line-height:1.62}
+  .doc-meta{font-size:.68rem;line-height:1.55}
+  .doc-alert{padding:14px 15px;margin-bottom:24px}
+  .doc-alert strong{font-size:.84rem;line-height:1.45}
+  .doc-alert p{font-size:.78rem}
+  .doc-alert a{font-size:.76rem;line-height:1.45}
+  .doc-content{font-size:.92rem;line-height:1.72}
+  .doc-content h2{margin-top:34px;font-size:1.34rem;scroll-margin-top:84px}
+  .doc-content h3{margin-top:24px;font-size:1rem;scroll-margin-top:84px}
+  .doc-content ul,.doc-content ol{padding-left:1.12rem}
+  .doc-content li{margin:.5rem 0}
+  .doc-info,.doc-note{padding:13px 14px;font-size:.8rem}
+  .doc-def{grid-template-columns:1fr;gap:4px;padding:12px 0}
+  .doc-def dt,.doc-def dd{font-size:.8rem}
+  .doc-table-wrap{margin-left:-20px;margin-right:-20px;border-left:0;border-right:0;border-radius:0}
+  .doc-table{min-width:620px}
+  .doc-table th,.doc-table td{padding:11px 12px;font-size:.73rem}
+  .doc-table-wrap:after{content:'Swipe to view table';position:sticky;left:12px;display:block;width:max-content;margin:7px 12px 9px;padding:0;color:#938b99;font-size:.64rem;font-weight:600;letter-spacing:.01em}
+  .doc-related-list a{padding:12px 0;font-size:.8rem}
+  .doc-side{grid-template-columns:1fr;margin:0 14px;gap:12px}
+  .doc-side-card{padding:16px;border-radius:10px;box-shadow:none}
+  .doc-side-card:first-child ul{grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}
+  .doc-side-card h2{font-size:.92rem}
+  .doc-side-card a{font-size:.76rem;padding:9px 9px 9px 11px}
+  .ws-site-footer .ws-footer-row{gap:18px}
+}
+
+@media(max-width:480px){
+  .doc-article{padding:24px 16px 34px}
+  .doc-title-row h1{font-size:clamp(1.72rem,9.8vw,2rem)}
+  .doc-summary{font-size:.9rem}
+  .doc-content{font-size:.9rem}
+  .doc-content h2{font-size:1.26rem}
+  .doc-content h3{font-size:.96rem}
+  .doc-table-wrap{margin-left:-16px;margin-right:-16px}
+  .doc-table{min-width:590px}
+  .doc-side{margin:0 10px}
+  .doc-side-card:first-child ul{grid-template-columns:1fr 1fr}
+  .doc-codeish{font-size:.74rem;padding:12px}
+}
+
+@media(max-width:390px){
+  .doc-article{padding-left:14px;padding-right:14px}
+  .doc-title-row h1{font-size:1.68rem}
+  .doc-alert{padding:13px}
+  .doc-table-wrap{margin-left:-14px;margin-right:-14px}
+  .doc-side-card:first-child ul{grid-template-columns:1fr}
+}
+
+@media(orientation:landscape) and (max-height:520px) and (max-width:960px){
+  .doc-shell{padding-top:10px}
+  .doc-title-row h1{font-size:1.8rem}
+  .doc-side{position:static}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
 }
 </style>
 <!-- live deployment refresh: organisations dropdown -->
@@ -483,7 +556,7 @@ a{color:inherit}
     <div class="ws-footer-copy">© 2026 Wistudi</div>
   </div>
 </footer>
-<script src="/assets/js/site-shell.js?v=20260916-sharedheader1"></script>
+<script src="/assets/js/site-shell.js?v=20260916-responsive-doc1"></script>
 <script>
 (function(){
   const links=[...document.querySelectorAll('.doc-scroll-nav a')];
