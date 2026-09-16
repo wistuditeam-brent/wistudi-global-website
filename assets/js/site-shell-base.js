@@ -13,6 +13,89 @@
     document.addEventListener('click',()=>document.querySelectorAll('.ws-lang.open').forEach(x=>{x.classList.remove('open');const t=x.querySelector('.ws-lang-toggle');if(t)t.setAttribute('aria-expanded','false');}));
     document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.ws-lang.open').forEach(x=>x.classList.remove('open'));if(mobile)mobile.classList.remove('open');if(menuBtn)menuBtn.setAttribute('aria-expanded','false');}});
 
+
+    // Canonical Organisations menu. This is the site-wide source of truth for the
+    // Organisations header item, so every page gets the same submenu and behaviour.
+    const ensureOrganisationsMenu=()=>{
+      const normalisePath=a=>{try{return new URL(a.getAttribute('href')||'',location.href).pathname.replace(/\/index\.html$/,'/')}catch(_){return''}};
+      const integrationPath='/partners/integrations/';
+      const currentPath=location.pathname.replace(/\/index\.html$/,'/');
+      const organisationsActive=currentPath.startsWith('/organisations/');
+      const integrationActive=currentPath.startsWith(integrationPath);
+
+      document.querySelectorAll('.ws-nav-links').forEach(nav=>{
+        let wrap=nav.querySelector('.ws-org-menu');
+        if(!wrap){
+          const orgLink=[...nav.querySelectorAll('a')].find(a=>normalisePath(a).startsWith('/organisations/'));
+          if(!orgLink)return;
+          wrap=document.createElement('div');
+          wrap.className='ws-org-menu';
+          orgLink.parentNode.insertBefore(wrap,orgLink);
+          const trigger=document.createElement('div');
+          trigger.className='ws-org-trigger';
+          wrap.appendChild(trigger);
+          trigger.appendChild(orgLink);
+          orgLink.classList.add('ws-org-main-link');
+
+          const toggle=document.createElement('button');
+          toggle.type='button';
+          toggle.className='ws-org-toggle';
+          toggle.setAttribute('aria-label','Open Organisations menu');
+          toggle.setAttribute('aria-expanded','false');
+          toggle.innerHTML='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5"/></svg>';
+          trigger.appendChild(toggle);
+
+          const menu=document.createElement('div');
+          menu.className='ws-org-dropdown';
+          menu.innerHTML=
+            '<div class="ws-org-dropdown-label">Organisations</div>'+
+            '<a class="ws-org-dropdown-item" href="/organisations/"><span class="ws-org-item-title">Organisation overview</span><span class="ws-org-item-copy">Plans, publishing and learning for schools, teams and organisations.</span></a>'+
+            '<a class="ws-org-dropdown-item" href="/partners/integrations/"><span class="ws-org-item-title">Integration Documentation</span><span class="ws-org-item-copy">Integration models, LTI 1.3, grading, data exchange and partner requirements.</span></a>';
+          wrap.appendChild(menu);
+
+          const setOpen=open=>{
+            wrap.classList.toggle('open',open);
+            toggle.setAttribute('aria-expanded',String(open));
+          };
+          toggle.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setOpen(!wrap.classList.contains('open'))});
+          wrap.addEventListener('mouseenter',()=>setOpen(true));
+          wrap.addEventListener('mouseleave',()=>setOpen(false));
+          wrap.addEventListener('focusin',()=>setOpen(true));
+          wrap.addEventListener('focusout',e=>{if(!wrap.contains(e.relatedTarget))setOpen(false)});
+        }
+
+        wrap.classList.toggle('active',organisationsActive||integrationActive);
+        const items=[...wrap.querySelectorAll('.ws-org-dropdown-item')];
+        items.forEach(a=>{
+          const path=normalisePath(a);
+          a.classList.toggle('active',(organisationsActive&&path.startsWith('/organisations/'))||(integrationActive&&path.startsWith(integrationPath)));
+        });
+      });
+
+      document.querySelectorAll('.ws-mobile-inner').forEach(nav=>{
+        if(nav.querySelector('.ws-mobile-org-menu'))return;
+        const orgLink=[...nav.querySelectorAll(':scope > a')].find(a=>normalisePath(a).startsWith('/organisations/'));
+        if(!orgLink)return;
+        const details=document.createElement('details');
+        details.className='ws-mobile-org-menu';
+        if(organisationsActive||integrationActive)details.classList.add('active');
+        const summary=document.createElement('summary');
+        summary.innerHTML='Organisations <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5"/></svg>';
+        const items=document.createElement('div');
+        items.className='ws-mobile-org-items';
+        items.innerHTML='<a href="/organisations/">Organisation overview</a><a href="/partners/integrations/">Integration Documentation</a>';
+        details.append(summary,items);
+        nav.insertBefore(details,orgLink);
+        orgLink.remove();
+      });
+
+      if(window.__WISTUDI_TRANSLATE_NODE__){
+        document.querySelectorAll('.ws-org-menu,.ws-mobile-org-menu').forEach(window.__WISTUDI_TRANSLATE_NODE__);
+      }
+    };
+    ensureOrganisationsMenu();
+    new MutationObserver(()=>queueMicrotask(ensureOrganisationsMenu)).observe(document.body,{childList:true,subtree:true});
+
     // All publishing CTAs go directly to the Wistudi sign-up page.
     const SIGNUP_URL='https://wistudi.com/sign-up';
     const syncPublishingLinks=()=>{
