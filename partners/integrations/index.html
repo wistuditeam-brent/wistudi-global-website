@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Partner Integration Overview | Wistudi</title>
-<meta name="description" content="Overview of Wistudi partner integration options, including inline Blocks, connected access and results, content workflow integration, LTI 1.3, Deep Linking, AGS and partner requirements.">
+<meta name="description" content="A practical reference for integrating learning tools, content platforms and LMS products with Wistudi, including inline Blocks, connected access, completion and scores, content workflows, LTI 1.3, Deep Linking, AGS and security requirements.">
 <link rel="canonical" href="https://global.wistudi.com/partners/integrations/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,17 +14,15 @@
 <link rel="stylesheet" href="/assets/css/site-shell.css">
 <style>
 :root{
-  --doc-bg:#f6f5f8;
-  --doc-panel:#ffffff;
+  --doc-bg:#f7f6f8;
+  --doc-panel:#fff;
   --doc-ink:#211c27;
   --doc-body:#514b58;
   --doc-muted:#7b7482;
-  --doc-line:#e4e1e7;
+  --doc-line:#e5e1e8;
   --doc-purple:#6d38dd;
-  --doc-purple-soft:#f4f0fb;
+  --doc-purple-soft:#f5f1fc;
   --doc-orange:#ef7a25;
-  --doc-green:#1d7d57;
-  --doc-amber:#8c6113;
   --doc-width:1180px;
 }
 *{box-sizing:border-box}
@@ -35,7 +33,7 @@ a{color:inherit}
 .doc-breadcrumbs{font-size:.76rem;color:#8a8390;margin:4px 0 18px}
 .doc-breadcrumbs a{text-decoration:none;color:#625b69}
 .doc-breadcrumbs a:hover{color:var(--doc-purple)}
-.doc-grid{display:grid;grid-template-columns:minmax(0,820px) 260px;gap:28px;align-items:start}
+.doc-grid{display:grid;grid-template-columns:minmax(0,820px) 280px;gap:28px;align-items:start}
 .doc-article{background:var(--doc-panel);border:1px solid var(--doc-line);padding:42px 48px 52px}
 .doc-title-row{border-bottom:1px solid var(--doc-line);padding-bottom:26px;margin-bottom:28px}
 .doc-type{display:block;margin-bottom:10px;color:var(--doc-purple);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
@@ -49,8 +47,8 @@ a{color:inherit}
 .doc-alert a:hover{text-decoration:underline}
 .doc-content{font-size:.95rem;line-height:1.78}
 .doc-content p{margin:0 0 1.2rem;color:var(--doc-body)}
-.doc-content h2{margin:38px 0 13px;font-family:'Be Vietnam Pro',Inter,sans-serif;font-size:1.55rem;line-height:1.25;letter-spacing:-.025em}
-.doc-content h3{margin:26px 0 8px;font-family:'Be Vietnam Pro',Inter,sans-serif;font-size:1.03rem;line-height:1.35;letter-spacing:-.015em}
+.doc-content h2{margin:40px 0 13px;font-family:'Be Vietnam Pro',Inter,sans-serif;font-size:1.55rem;line-height:1.25;letter-spacing:-.025em}
+.doc-content h3{margin:27px 0 8px;font-family:'Be Vietnam Pro',Inter,sans-serif;font-size:1.03rem;line-height:1.35;letter-spacing:-.015em}
 .doc-content ul,.doc-content ol{margin:0 0 1.3rem;padding-left:1.25rem}
 .doc-content li{margin:.42rem 0;color:var(--doc-body)}
 .doc-content strong{color:var(--doc-ink)}
@@ -59,31 +57,41 @@ a{color:inherit}
 .doc-def{display:grid;grid-template-columns:145px 1fr;gap:18px;padding:13px 0;border-bottom:1px solid var(--doc-line)}
 .doc-def dt{font-weight:700;font-size:.84rem}
 .doc-def dd{margin:0;color:#675f6c;font-size:.84rem;line-height:1.55}
-.doc-table-wrap{margin:18px 0 8px;overflow-x:auto;border:1px solid var(--doc-line)}
-.doc-table{width:100%;border-collapse:collapse;min-width:680px}
+.doc-table-wrap{margin:18px 0 10px;overflow-x:auto;border:1px solid var(--doc-line)}
+.doc-table{width:100%;border-collapse:collapse;min-width:650px}
 .doc-table th,.doc-table td{padding:12px 13px;text-align:left;vertical-align:top;border-bottom:1px solid var(--doc-line);font-size:.76rem;line-height:1.5}
 .doc-table th{background:#f7f6f8;color:#544d5b;font-weight:700}
 .doc-table tr:last-child td{border-bottom:0}
-.doc-table td:first-child{width:58px;font-weight:700;color:var(--doc-purple)}
-.status-dev{color:var(--doc-green);font-weight:700}
-.status-plan{color:var(--doc-amber);font-weight:700}
-.status-scope{color:#756e7a;font-weight:700}
+.doc-table td:first-child{font-weight:700;color:var(--doc-purple)}
+.doc-flow-table td:first-child{width:165px;color:var(--doc-ink)}
+.doc-flow-table td:nth-child(2),.doc-flow-table td:nth-child(3){width:29%}
 .doc-codeish{margin:16px 0;padding:14px 16px;border:1px solid var(--doc-line);background:#faf9fb;font-size:.8rem;line-height:1.65;color:#5c5561}
 .doc-codeish b{display:block;margin-bottom:4px}
+.doc-note{margin:18px 0;padding:14px 16px;border:1px solid var(--doc-line);background:#fcfbfd;font-size:.82rem;line-height:1.62;color:#655e6a}
+.doc-note strong{display:block;margin-bottom:3px}
 .doc-rule{margin:24px 0;border:0;border-top:1px solid var(--doc-line)}
 .doc-related-list{margin:0;padding:0;list-style:none;border-top:1px solid var(--doc-line)}
 .doc-related-list li{border-bottom:1px solid var(--doc-line)}
 .doc-related-list a{display:block;padding:11px 0;text-decoration:none;color:var(--doc-purple);font-size:.83rem;font-weight:600}
 .doc-related-list a:hover{text-decoration:underline}
-.doc-side{position:sticky;top:92px;display:grid;gap:18px}
-.doc-side-card{background:#fff;border:1px solid var(--doc-line);padding:20px}
-.doc-side-card h2{margin:0 0 12px;font-family:'Be Vietnam Pro',Inter,sans-serif;font-size:1rem;letter-spacing:-.015em}
-.doc-side-card p{margin:0 0 12px;font-size:.79rem;line-height:1.55;color:#716a76}
+
+/* Modern documentation sidebar */
+.doc-side{position:sticky;top:92px;display:grid;gap:16px}
+.doc-side-card{background:#fff;border:1px solid #e3dfe7;border-radius:12px;padding:18px;box-shadow:0 8px 26px rgba(37,28,52,.045)}
+.doc-side-card h2{margin:0 0 12px;font-family:'Be Vietnam Pro',Inter,sans-serif;font-size:.96rem;letter-spacing:-.015em}
+.doc-side-card p{margin:0 0 12px;font-size:.77rem;line-height:1.55;color:#746d79}
 .doc-side-card ul{list-style:none;margin:0;padding:0}
-.doc-side-card li{border-top:1px solid var(--doc-line)}
-.doc-side-card a{display:block;padding:10px 0;text-decoration:none;color:#5f5865;font-size:.79rem;line-height:1.4}
-.doc-side-card a:hover{color:var(--doc-purple)}
-.doc-contact-link{color:var(--doc-purple)!important;font-weight:700}
+.doc-side-card li{margin:2px 0}
+.doc-side-card a{position:relative;display:block;padding:9px 10px 9px 12px;border-radius:7px;text-decoration:none;color:#69626f;font-size:.78rem;line-height:1.38;transition:background .15s ease,color .15s ease}
+.doc-side-card a:hover{background:#f8f6fa;color:#3d3545}
+.doc-side-card a.active{background:var(--doc-purple-soft);color:#4e269e;font-weight:650}
+.doc-side-card a.active:before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:2px;background:var(--doc-purple)}
+.doc-side-label{margin:16px 0 7px;padding:0 10px;color:#99919e;font-size:.65rem;font-weight:700;letter-spacing:.075em;text-transform:uppercase}
+.doc-side-card.related a{padding-right:24px}
+.doc-side-card.related a:after{content:'›';position:absolute;right:9px;top:7px;color:#a096a7;font-size:1rem}
+.doc-contact-link{color:var(--doc-purple)!important;font-weight:700!important;padding-left:0!important}
+.doc-contact-link:hover{background:transparent!important;text-decoration:underline}
+
 @media(max-width:960px){
   .doc-grid{grid-template-columns:1fr}
   .doc-side{position:static;grid-template-columns:1fr 1fr}
@@ -128,167 +136,274 @@ a{color:inherit}
       <header class="doc-title-row">
         <span class="doc-type">Partner integration overview</span>
         <h1>Integrating with Wistudi</h1>
-        <p class="doc-summary">This article explains the main ways an external learning tool, content provider or LMS can integrate with Wistudi, what each integration level is intended to support, and what partner teams should consider before technical scoping begins.</p>
-        <div class="doc-meta">Audience: product, partnership and engineering teams &nbsp;•&nbsp; Updated September 2026</div>
+        <p class="doc-summary">A practical reference for product, partnership and engineering teams evaluating how an external learning tool, content platform or LMS can connect with Wistudi.</p>
+        <div class="doc-meta">Updated September 2026 &nbsp;•&nbsp; Product and technical overview</div>
       </header>
 
       <div class="doc-alert">
-        <strong>Early partner applications are open for the 15 October 2026 launch.</strong>
-        <p>Wistudi is currently preparing its first partner integrations and is speaking with selected EdTech platforms, publishers and specialist learning tools.</p>
+        <strong>Early partner applications are open for the 15 October 2026 integration launch.</strong>
+        <p>Wistudi is speaking with selected EdTech platforms, publishers and specialist learning tools about early integrations and pilot use cases.</p>
         <a href="/contact/#contact-form">Apply to become an early integration partner →</a>
       </div>
 
       <div class="doc-content">
         <h2 id="overview">Overview</h2>
         <p>Wistudi is a learning publishing and delivery platform built around <strong>Flows</strong>. A Flow is a complete learning experience that can combine explanation, media, interactive activities, assessment, partner content and supporting resources in one sequence.</p>
-        <p>Flows are made from <strong>Blocks</strong>. A Block is a focused unit inside the Flow. It can contain Wistudi content or activity types, or, where an integration supports it, an external partner experience.</p>
-        <p>Our integration model is designed around one central principle: when a partner tool is part of a lesson, the learner should remain in context wherever possible. We therefore prefer integrations that can open and work directly inside the Flow rather than repeatedly sending the learner to a separate product and back again.</p>
+        <p>Flows are made from <strong>Blocks</strong>. A Block is a focused unit inside the Flow. It can contain a Wistudi activity or resource, or, where an integration supports it, an external partner experience.</p>
+        <p>For partner integrations, Wistudi is designed around a simple principle: the learner should remain in the learning context wherever possible. When the partner product allows it, the external experience should open directly inside the Flow, use a low-friction launch, and return completion or score information when that information is useful.</p>
 
-        <div class="doc-info"><strong>Preferred learner experience:</strong> partner content appears as an inline Block in the Flow, learner access is handled with as little friction as possible, and completion or score information can return to Wistudi when the partner product supports it.</div>
+        <div class="doc-info"><strong>Preferred experience:</strong> partner content appears as an inline Block in the Flow. Wistudi handles the surrounding lesson and learning sequence, while the partner provides the specialist experience inside that Block.</div>
+
+        <h2 id="directions">Two integration directions</h2>
+        <p>Before discussing protocols, it is important to separate two different integration directions. They solve different problems and use different mechanisms.</p>
+
+        <div class="doc-table-wrap">
+          <table class="doc-table doc-flow-table">
+            <thead><tr><th>Direction</th><th>Typical use</th><th>How results move</th></tr></thead>
+            <tbody>
+              <tr><td>Partner inside Wistudi</td><td>A partner activity, content item or application appears inside a Wistudi Flow as a Block.</td><td>The partner can return completion or score information to Wistudi when Connected Access &amp; Results is used.</td></tr>
+              <tr><td>Wistudi inside another platform</td><td>An LMS or learning platform launches a specific Wistudi Flow or XP Video from its own course or interface.</td><td>Where applicable, Wistudi can return a grade to the external platform through LTI Assignment and Grade Services.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>These directions should not be treated as the same integration. A partner can support one direction without supporting the other.</p>
 
         <h2 id="terms">Key Wistudi terms</h2>
         <dl class="doc-defs">
-          <div class="doc-def"><dt>Flow</dt><dd>The complete learning experience. A Flow may be a lesson, activity sequence, larger program or curriculum experience.</dd></div>
-          <div class="doc-def"><dt>Block</dt><dd>A focused unit inside a Flow, such as content, video, an activity, assessment, external application or partner experience.</dd></div>
-          <div class="doc-def"><dt>Inline integration</dt><dd>A partner experience that opens and remains inside the Flow rather than launching the learner into a separate destination.</dd></div>
-          <div class="doc-def"><dt>Interactive + printable</dt><dd>Wistudi supports digital learning and printable output in the same publishing workflow. A partner experience may remain digital while the surrounding Flow can also support worksheets and printable resources.</dd></div>
+          <div class="doc-def"><dt>Flow</dt><dd>The complete learning experience. A Flow can be a focused lesson or a larger sequence containing content, interaction, assessment and partner experiences.</dd></div>
+          <div class="doc-def"><dt>Block</dt><dd>A focused unit inside a Flow, such as text, video, an activity, assessment, resource or partner application.</dd></div>
+          <div class="doc-def"><dt>Inline integration</dt><dd>A partner experience that opens and runs inside the Flow rather than sending the learner to a separate destination.</dd></div>
+          <div class="doc-def"><dt>Creator</dt><dd>The teacher, publisher, trainer or other authorised user building the Flow and selecting the learning experiences it contains.</dd></div>
+          <div class="doc-def"><dt>Interactive + printable</dt><dd>Wistudi supports digital learning and printable output in the same publishing workflow. A partner activity can remain digital while the wider Flow can also support worksheets and printable resources.</dd></div>
         </dl>
 
         <h2 id="partner-fit">Partners Wistudi is looking to work with</h2>
-        <p>We are particularly interested in products that add specialist capability to a broader learning experience and are more useful when they can be placed intentionally inside a lesson or curriculum.</p>
+        <p>We are especially interested in specialist products that become more useful when they can be placed intentionally inside a broader lesson, curriculum or learning sequence.</p>
         <ul>
           <li><strong>Interactive learning tools</strong>, including simulations, manipulatives, creative tools and practice environments.</li>
           <li><strong>Assessment and practice platforms</strong>, including quizzes, diagnostics, adaptive practice and specialist assessment.</li>
           <li><strong>Content providers and publishers</strong>, including reading platforms, curriculum providers, educational media and digital libraries.</li>
-          <li><strong>Subject-specific EdTech</strong> for areas such as mathematics, STEM, literacy, languages and coding.</li>
-          <li><strong>AI learning applications</strong> with a clear educational purpose and a useful teacher-guided or learner-facing experience.</li>
-          <li><strong>LMS and learning platforms</strong> that want to launch Wistudi content, exchange results or explore a two-way workflow.</li>
+          <li><strong>Subject-specific EdTech</strong> for mathematics, STEM, literacy, languages, coding and other specialist areas.</li>
+          <li><strong>AI learning applications</strong> with a clear educational use case and a learner or teacher-guided experience.</li>
+          <li><strong>LMS and learning platforms</strong> that want to launch Wistudi content or exchange results through an established interoperability model.</li>
         </ul>
 
-        <h2 id="models">Integration models</h2>
-        <p>Wistudi supports several integration levels. Partners do not need to implement every level. In most cases, the right approach is to begin with the smallest integration that solves the use case and add capability later if it is useful.</p>
+        <h2 id="models">Integration options at a glance</h2>
+        <p>Partners do not need to implement every level. Most integrations should start with the simplest model that solves the use case and add capability only when it creates a clear improvement.</p>
 
         <div class="doc-table-wrap">
           <table class="doc-table">
-            <thead>
-              <tr><th>Level</th><th>Integration</th><th>Purpose</th><th>Status</th></tr>
-            </thead>
+            <thead><tr><th>Level</th><th>Integration</th><th>Purpose</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td><strong>Simple Embed</strong></td><td>Show a partner activity or page directly inside a Flow with no connected login or result capture.</td><td class="status-dev">In development</td></tr>
-              <tr><td>2</td><td><strong>Connected Access &amp; Results</strong></td><td>Recognise the learner through a trusted launch and return completion or score information to Wistudi.</td><td class="status-dev">In development</td></tr>
-              <tr><td>3</td><td><strong>Content Workflow Integration</strong></td><td>Let creators select, create or edit partner content without copying links between systems.</td><td class="status-plan">Planned</td></tr>
-              <tr><td>4</td><td><strong>Extended Data Sharing</strong></td><td>Add specific learner, class, group or role information when the partner experience genuinely requires it.</td><td class="status-plan">Planned as needed</td></tr>
-              <tr><td>5</td><td><strong>Advanced / LTI / Custom</strong></td><td>Support reverse-direction launches, LTI 1.3 or custom API and webhook integrations for defined partner requirements.</td><td class="status-scope">Scoped per partner</td></tr>
+              <tr><td>1</td><td><strong>Simple Embed</strong></td><td>Show a self-contained partner page or activity directly inside a Flow.</td></tr>
+              <tr><td>2</td><td><strong>Connected Access &amp; Results</strong></td><td>Recognise the learner through a trusted launch and return completion or score information to Wistudi.</td></tr>
+              <tr><td>3</td><td><strong>Content Workflow Integration</strong></td><td>Let creators select, create or edit partner content without copying URLs between systems.</td></tr>
+              <tr><td>4</td><td><strong>Extended Data Sharing</strong></td><td>Add only the specific learner, class, group or role information a partner experience genuinely needs.</td></tr>
+              <tr><td>5</td><td><strong>Advanced, LTI 1.3 or Custom</strong></td><td>Support reverse-direction launches or a custom API/webhook integration when the standard Wistudi launch model is not the right fit.</td></tr>
             </tbody>
           </table>
         </div>
 
-        <h3 id="level-1">Level 1: Simple Embed</h3>
-        <p>Simple Embed is intended for a partner activity or content page that can already run securely inside an embedded browser view. The partner provides a content URL and Wistudi loads that URL inside the Flow when the learner reaches the relevant Block.</p>
-        <p>There is no login handshake, identity transfer, callback or result capture at this level. The partner experience is expected to work as a self-contained page.</p>
-        <p><strong>Typical partner requirement:</strong> the page must permit embedding and must not block Wistudi through frame restrictions or incompatible content-security settings.</p>
+        <h2 id="send-receive">What Wistudi sends and receives</h2>
+        <p>The table below is the quickest way to understand the data flow for each integration model.</p>
 
-        <h3 id="level-2">Level 2: Connected Access and Results</h3>
-        <p>Connected Access adds a trusted launch so the partner can recognise the learner without asking for a separate login. Wistudi generates a signed, short-lived launch token containing a pseudonymous learner identifier together with Flow and step references.</p>
-        <p>The partner validates the signature and expiry before granting access. Wistudi does not need to send a learner name or email address for the normal connected launch.</p>
-        <p>When the learner completes the activity, the partner can return a completion event and, where applicable, a score. Wistudi validates the origin of the returned message before accepting it.</p>
-
-        <div class="doc-codeish">
-          <b>Typical Level 2 exchange</b>
-          Launch: pseudonymous learner ID + Flow reference + Block/step reference + short expiry<br>
-          Return: completion only, or score + maximum score when the activity is graded
+        <div class="doc-table-wrap">
+          <table class="doc-table">
+            <thead><tr><th>Integration</th><th>Wistudi sends</th><th>Wistudi receives</th><th>Separate learner login?</th></tr></thead>
+            <tbody>
+              <tr><td>Simple Embed</td><td>Partner content URL only.</td><td>No completion, score or learner data.</td><td>Depends on the partner page. Wistudi does not provide connected sign-in at this level.</td></tr>
+              <tr><td>Connected Access &amp; Results</td><td>Signed short-lived token containing a pseudonymous learner ID, Flow reference, step reference and expiry.</td><td>Completion, or score plus maximum score, returned from the embedded partner page.</td><td>Normally no. The partner validates the signed launch and grants access.</td></tr>
+              <tr><td>Content Workflow</td><td>Trusted creator launch using the connected-access mechanism.</td><td>The selected, created or edited partner activity reference.</td><td>Creator access depends on the agreed partner workflow.</td></tr>
+              <tr><td>Extended Data Sharing</td><td>Only additional fields agreed for the use case, added to the connected launch.</td><td>The same completion or score result as the connected model, where required.</td><td>Normally no for the learner launch.</td></tr>
+              <tr><td>Wistudi via LTI 1.3</td><td>Wistudi content and, where applicable, grade information back to the external LMS through AGS.</td><td>A standards-based LTI 1.3 launch from the LMS, including the context required for the launch.</td><td>No additional Wistudi login should normally be required after a valid LTI launch.</td></tr>
+            </tbody>
+          </table>
         </div>
 
-        <h3 id="level-3">Level 3: Content Workflow Integration</h3>
-        <p>Content Workflow Integration is designed for partners whose content should be selected or created from inside Wistudi rather than added by pasting a URL.</p>
-        <p>The intended model is a partner-hosted launcher. Wistudi opens the launcher using a trusted launch. The creator selects an existing activity or creates/edits one, and the partner returns the resulting content reference to Wistudi so it can be saved against the relevant Block.</p>
-        <p>This level is especially relevant to publishers, assessment platforms and specialist EdTech applications with large content libraries or authoring tools.</p>
+        <h2 id="level-1">Level 1: Simple Embed</h2>
+        <p>Simple Embed is the minimum integration. The partner provides a content URL and Wistudi loads that page in an embedded view when the learner reaches the relevant Block.</p>
+        <p>There is no Wistudi security handshake, connected identity, callback, completion event or score return at this level. The page is expected to function as a self-contained experience.</p>
 
-        <h3 id="level-4">Level 4: Extended Data Sharing</h3>
-        <p>Some partner experiences need more than a pseudonymous learner ID. Examples may include a role, group reference or class reference. These fields are not included by default.</p>
-        <p>Additional data is scoped case by case and should be limited to the minimum information required for the partner experience to function.</p>
-
-        <h3 id="level-5">Level 5: LTI 1.3 and custom integrations</h3>
-        <p>Advanced integration covers cases that do not fit the standard inline launch model and the reverse direction, where another LMS or platform wants to launch Wistudi content.</p>
-        <p>For reverse-direction LMS integrations, Wistudi's planned standard is LTI 1.3. A platform registers Wistudi as an LTI 1.3 tool and launches Wistudi content using the normal LTI security and launch flow.</p>
-
-        <h2 id="lti">LTI 1.3 overview</h2>
-        <p>LTI 1.3 is relevant when Wistudi content is launched from another LMS or learning platform, and in partner cases where standard LTI interoperability is the appropriate connection model.</p>
-
-        <h3>Wistudi as an LTI Tool</h3>
-        <p>When another platform launches Wistudi, that platform acts as the LTI Platform and Wistudi acts as the LTI Tool. Registration is expected to include the client ID, deployment ID, Wistudi login and redirect URLs, and the Wistudi public JWKS endpoint.</p>
-
-        <h3>OIDC launch and JWKS</h3>
-        <p>LTI 1.3 launches use the standard OpenID Connect third-party login flow. Signed launch messages are verified using public keys published through JWKS. This replaces the shared-secret model associated with older LTI versions.</p>
-
-        <h3>Deep Linking</h3>
-        <p>Deep Linking allows a creator or administrator in the external platform to select a specific Wistudi learning experience, such as a Flow or XP Video, rather than linking only to Wistudi generally.</p>
-
-        <h3>Assignment and Grade Services (AGS)</h3>
-        <p>Where the launched Wistudi experience is graded, AGS can be used to report a grade back to the external platform's gradebook. The exact score and completion behaviour is confirmed during the integration scope.</p>
-
-        <h3>Names and Roles Provisioning Services (NRPS)</h3>
-        <p>Roster or role information is not required for every integration. Where a partner use case depends on course membership, roles or roster data, NRPS or another agreed data mechanism can be considered as part of the scope.</p>
-
-        <h2 id="learner-experience">Learner experience and launch behaviour</h2>
-        <p>For partner content inside Wistudi, our preferred experience is inline. The partner activity should remain inside the Flow so the learner retains the lesson context before and after the partner interaction.</p>
-        <p>A separate tab or window may still be appropriate when the partner product requires it for authentication, security or technical reasons. The required launch behaviour should therefore be confirmed during scoping rather than assumed from LTI support alone.</p>
-
-        <h2 id="results">Completion, scores and grading</h2>
-        <p>Not every partner activity needs to return a grade. Wistudi integrations can support different result patterns depending on what the activity actually produces.</p>
+        <h3>Partner requirements</h3>
         <ul>
-          <li><strong>No result:</strong> suitable for content or tools that do not need completion tracking.</li>
-          <li><strong>Completion only:</strong> suitable when Wistudi only needs to know that the learner finished the partner activity.</li>
-          <li><strong>Score:</strong> suitable when the partner activity produces a numeric result that should be captured by Wistudi.</li>
-          <li><strong>LTI grade return:</strong> applicable when Wistudi content is launched in another platform and a grade needs to be passed back through AGS.</li>
+          <li>Provide a stable HTTPS content URL.</li>
+          <li>Allow the page to be displayed in an embedded view.</li>
+          <li>Avoid frame or content-security restrictions that prevent the Wistudi origin from loading the page.</li>
+          <li>Ensure the activity works correctly at the dimensions available inside a Flow and on supported learner devices.</li>
         </ul>
 
-        <h2 id="security">Security and data handling</h2>
-        <p>The integration level determines the security mechanism. Simple Embed does not include a launch handshake. Connected Access uses a signed launch token and domain/origin validation. LTI 1.3 uses OIDC and JWKS-based signing.</p>
-        <p>Wistudi's default approach is to minimise personal data exchanged with partner systems. A pseudonymous learner identifier is sufficient for the normal connected launch. Additional learner, class or role data is considered only where the partner can explain why it is required.</p>
+        <div class="doc-note"><strong>Use Simple Embed when:</strong> the partner experience is useful inside the lesson but does not need Wistudi to identify the learner or record a result.</div>
 
-        <h2 id="requirements">Information we ask partners to confirm</h2>
-        <p>Before technical work begins, Wistudi normally needs the partner team to confirm the points below.</p>
+        <h2 id="level-2">Level 2: Connected Access and Results</h2>
+        <p>Connected Access is used when the learner should enter the partner experience without a second login and Wistudi needs to know when the activity has been completed or what score it produced.</p>
+
+        <h3>Launch from Wistudi to the partner</h3>
+        <p>Before loading the partner content, Wistudi generates a signed launch token and appends it to the launch URL. The current model uses HMAC signing with a secret shared during partner setup.</p>
+        <p>The launch contains a pseudonymous learner identifier, Flow reference, step reference and a short expiry. The current default expiry is five minutes. The partner reads the token, verifies the signature, checks the expiry, and rejects invalid or expired launches.</p>
+
+        <div class="doc-codeish">
+          <b>Launch data</b>
+          pseudonymous studentId + flowId + stepId + exp
+        </div>
+
+        <p>No learner name, email address or other personal information is included in the standard connected launch.</p>
+
+        <h3>Completion and score returned to Wistudi</h3>
+        <p>When the learner finishes, the embedded page sends a browser message back to the Wistudi window that opened it. Wistudi validates the message origin against the partner domain registered during setup before accepting the event.</p>
+
+        <div class="doc-codeish">
+          <b>Scored activity</b>
+          event: complete + score + maxScore<br><br>
+          <b>Completion-only activity</b>
+          completed: true
+        </div>
+
+        <p>A score is not required for every activity. If the activity is ungraded, completion alone is enough. If it is graded, the partner should return both the achieved score and maximum score so Wistudi can interpret the result consistently.</p>
+
+        <h3>Shared setup for Level 2</h3>
         <ul>
-          <li>Can the learner experience be embedded in an iframe or another inline view?</li>
+          <li>Partner launch URL.</li>
+          <li>Registered partner domain used for origin validation.</li>
+          <li>Shared signing secret.</li>
+          <li>Agreement on whether the partner returns completion only or a numeric score.</li>
+        </ul>
+
+        <h2 id="grading">Grading and result handling</h2>
+        <p>There are two distinct grading directions in Wistudi integrations. This distinction is important because they use different mechanisms.</p>
+
+        <div class="doc-table-wrap">
+          <table class="doc-table doc-flow-table">
+            <thead><tr><th>Scenario</th><th>Who sends the result?</th><th>How it is returned</th></tr></thead>
+            <tbody>
+              <tr><td>Partner activity inside Wistudi</td><td>The partner sends completion or score information to Wistudi.</td><td>Level 2 completion event from the embedded partner page. A scored activity returns score and maxScore.</td></tr>
+              <tr><td>Wistudi content inside another LMS</td><td>Wistudi sends the applicable grade to the external platform.</td><td>LTI 1.3 Assignment and Grade Services (AGS), where grading is part of the agreed integration.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>These mechanisms should not be confused. AGS is used for standards-based grade return when Wistudi is launched as an LTI Tool. It is not the mechanism described for a normal Level 2 partner activity embedded inside a Wistudi Flow.</p>
+
+        <h3>Result patterns</h3>
+        <ul>
+          <li><strong>No tracked result:</strong> appropriate for a Level 1 content experience.</li>
+          <li><strong>Completion only:</strong> Wistudi records that the learner finished the partner activity.</li>
+          <li><strong>Numeric score:</strong> the partner returns score and maximum score to Wistudi.</li>
+          <li><strong>Grade returned to an LMS:</strong> Wistudi uses AGS when Wistudi itself is the LTI Tool and grade return is part of the integration.</li>
+        </ul>
+
+        <h2 id="level-3">Level 3: Content Workflow Integration</h2>
+        <p>Content Workflow Integration is designed for partners whose activities should be selected or created from inside the Wistudi creator experience rather than added by pasting a URL.</p>
+
+        <h3>Content picker</h3>
+        <p>The partner hosts a selection screen, or launcher, that Wistudi opens using the same signed-launch approach as Connected Access. The creator selects an existing activity and the launcher returns the activity reference to Wistudi through an agreed browser message or redirect callback.</p>
+
+        <h3>Create or edit in place</h3>
+        <p>The same pattern can open the partner's creation or editing screen. After saving, the partner returns the new or updated activity reference so Wistudi can attach it to the relevant Block.</p>
+
+        <h3>Important relationship to learner launch</h3>
+        <p>Level 3 controls how a creator chooses or creates the content. It does not replace the learner runtime integration. If the selected activity also needs connected learner access or result return, the learner-facing experience should use the Connected Access &amp; Results model as well.</p>
+
+        <h3>Partner requirements</h3>
+        <ul>
+          <li>Host the selection and/or creation interface.</li>
+          <li>Accept the trusted creator launch agreed with Wistudi.</li>
+          <li>Return a stable activity reference that Wistudi can store.</li>
+          <li>Confirm the return method, either browser message or redirect callback, during implementation.</li>
+          <li>Define whether existing content can be edited after it has been attached to a Flow.</li>
+        </ul>
+
+        <h2 id="level-4">Level 4: Extended Data Sharing</h2>
+        <p>Extended Data Sharing is an optional add-on to a connected integration. It is not a required step after Levels 2 or 3.</p>
+        <p>If the partner activity genuinely needs additional context, Wistudi can add specific fields to the Level 2 signed launch. Examples may include a role or group identifier. Additional fields are agreed case by case rather than included by default.</p>
+
+        <div class="doc-info"><strong>Data-minimisation rule:</strong> request only the information the partner experience needs to function. The standard connected launch remains pseudonymous and does not include a learner name or email address.</div>
+
+        <h2 id="level-5">Level 5: Advanced and custom integrations</h2>
+        <p>Advanced integrations cover partner systems that do not fit the normal launch-token model and the reverse direction, where Wistudi content is launched from another LMS or learning platform.</p>
+
+        <h3>Custom API or webhook connection</h3>
+        <p>Where a partner exposes a different integration model, Wistudi can scope a dedicated API or webhook contract. Because these integrations depend on the partner's product and available interfaces, the data contract, authentication method, events and responsibilities are defined during technical scoping rather than assumed in this overview.</p>
+
+        <h2 id="lti">Wistudi inside another platform: LTI 1.3</h2>
+        <p>When an LMS or learning platform wants to launch Wistudi content from inside its own course environment, the intended standards-based direction is LTI 1.3. In this model, the external system is the <strong>LTI Platform</strong> and Wistudi is the <strong>LTI Tool</strong>.</p>
+
+        <h3>Tool registration</h3>
+        <p>The platform registers Wistudi as an LTI 1.3 Tool using the normal registration information for the deployment. This includes a client ID, deployment ID, Wistudi login and redirect URLs, and the Wistudi public JWKS URL.</p>
+
+        <h3>OIDC launch and JWKS validation</h3>
+        <p>Launches use the standard OpenID Connect third-party login flow. Signed messages are verified using the public keys exposed through JWKS rather than the shared-secret approach used by the Wistudi Level 2 integration.</p>
+
+        <h3>Deep Linking</h3>
+        <p>Deep Linking allows authorised staff in the external platform to choose specific Wistudi content, such as a Flow or XP Video, and place that content into a course or assignment rather than linking only to Wistudi generally.</p>
+
+        <h3>Assignment and Grade Services (AGS)</h3>
+        <p>Where the Wistudi experience is graded and grade return is enabled for the integration, AGS allows Wistudi to send the resulting grade back to the external platform's gradebook.</p>
+
+        <h3>Roster and role information</h3>
+        <p>Roster information is not part of the base integration described in the Wistudi partner guide. If a partner use case requires roster, course membership or additional role data, that requirement should be identified during scoping and agreed separately rather than assumed.</p>
+
+        <h2 id="security">Security and data handling</h2>
+        <p>The security mechanism depends on the integration model.</p>
+        <div class="doc-table-wrap">
+          <table class="doc-table">
+            <thead><tr><th>Integration</th><th>Security mechanism</th><th>Partner responsibility</th></tr></thead>
+            <tbody>
+              <tr><td>Simple Embed</td><td>No Wistudi launch handshake.</td><td>Allow secure embedding of the activity/page.</td></tr>
+              <tr><td>Connected Access &amp; Results</td><td>HMAC-signed short-lived token, shared secret and registered domain.</td><td>Verify signature and expiry, reject invalid launches, and send completion/score to the Wistudi origin.</td></tr>
+              <tr><td>Content Workflow</td><td>Connected launch plus an agreed content-reference return path.</td><td>Host the launcher and return the selected or created activity reference.</td></tr>
+              <tr><td>Extended Data Sharing</td><td>Additional agreed fields inside the same signed launch.</td><td>Request and use only the fields required for the partner experience.</td></tr>
+              <tr><td>LTI 1.3</td><td>OIDC launch with JWKS-based signing.</td><td>Complete the standard LTI Tool registration and support the agreed LTI services.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="requirements">Partner readiness checklist</h2>
+        <p>Before implementation, the partner and Wistudi teams should be able to answer the following questions clearly.</p>
+        <ul>
+          <li>What learner or creator problem is the integration solving?</li>
+          <li>Is the experience being launched <strong>inside Wistudi</strong>, or is Wistudi being launched <strong>inside the partner platform</strong>?</li>
+          <li>Can the learner experience run inside an iframe or other embedded view?</li>
           <li>If not, what launch behaviour is required?</li>
           <li>Does the learner need a separate account or login?</li>
-          <li>Does the activity produce completion, a score or another result?</li>
-          <li>Can the partner return that result to Wistudi?</li>
-          <li>Does the creator need to browse or create partner content from inside Wistudi?</li>
-          <li>What learner, role, class or group data is actually required?</li>
-          <li>Does the partner currently support LTI 1.3, Deep Linking, AGS or NRPS?</li>
-          <li>Are there iframe, CSP, cookie or browser restrictions that affect embedded use?</li>
-          <li>What test or sandbox environment is available for integration work?</li>
+          <li>Does the activity produce no result, completion only, or a numeric score?</li>
+          <li>Which system is responsible for grading?</li>
+          <li>Which system needs to receive the grade or completion record?</li>
+          <li>Does the creator need to browse, create or edit partner content from Wistudi?</li>
+          <li>What learner, class, group or role information is strictly required?</li>
+          <li>Are there iframe, CSP, cookie or browser restrictions that affect the learner experience?</li>
+          <li>If LTI is involved, which LTI 1.3 capabilities are already supported by the partner platform?</li>
+          <li>What sandbox, test content or non-production environment is available?</li>
+          <li>Who will be the technical contact on each side during implementation and testing?</li>
+        </ul>
+
+        <h2 id="testing">Recommended integration testing</h2>
+        <p>The exact test plan depends on the integration, but the following checks cover the essential Wistudi behaviours.</p>
+        <ul>
+          <li><strong>Embed:</strong> activity loads correctly inside the Flow and remains usable on expected learner devices.</li>
+          <li><strong>Connected launch:</strong> valid tokens are accepted; invalid and expired tokens are rejected.</li>
+          <li><strong>Login:</strong> learner is not unexpectedly asked to authenticate again when connected access is intended.</li>
+          <li><strong>Completion:</strong> an ungraded activity can return completion without a score.</li>
+          <li><strong>Scoring:</strong> a graded activity returns both score and maximum score correctly.</li>
+          <li><strong>Origin validation:</strong> result messages from an unregistered origin are not accepted.</li>
+          <li><strong>Content picker:</strong> selected or created content returns a stable reference that can be reopened from the Flow.</li>
+          <li><strong>Deep Linking:</strong> the external platform can select the intended Wistudi content when LTI Deep Linking is in scope.</li>
+          <li><strong>Grade return:</strong> Wistudi grade information reaches the external gradebook correctly when AGS is in scope.</li>
         </ul>
 
         <h2 id="process">Partner integration process</h2>
         <ol>
-          <li><strong>Product and use-case review.</strong> We establish what the partner product contributes to the Flow and what the learner and creator experience should be.</li>
-          <li><strong>Integration model selection.</strong> We determine whether Simple Embed, Connected Access, Content Workflow, LTI 1.3 or a custom connection is the right fit.</li>
-          <li><strong>Technical scoping.</strong> Both engineering teams confirm endpoints, launch behaviour, security, data fields, result handling and test requirements.</li>
-          <li><strong>Sandbox or pilot test.</strong> The integration is tested with a limited use case before wider rollout.</li>
-          <li><strong>Experience review.</strong> We review not only whether the integration works technically, but whether it behaves well as part of a real Wistudi Flow.</li>
+          <li><strong>Use-case review.</strong> Define what the partner product contributes to the Flow and the intended learner and creator experience.</li>
+          <li><strong>Choose the integration direction and model.</strong> Confirm whether this is partner content inside Wistudi, Wistudi inside another platform, or both.</li>
+          <li><strong>Define data and result flow.</strong> Agree what Wistudi sends, what the partner sends back, whether grading applies, and which system owns the final record.</li>
+          <li><strong>Technical setup.</strong> Exchange the required URLs, domains, signing details, LTI registration information or custom contract.</li>
+          <li><strong>Sandbox or pilot testing.</strong> Test authentication, embedding, completion, scoring, content selection and grade return as applicable.</li>
+          <li><strong>Experience review.</strong> Confirm that the integration works as part of a real Flow and does not introduce unnecessary login or navigation friction.</li>
         </ol>
-
-        <h2 id="status">Current status</h2>
-        <p>The partner integration programme is currently preparing for its first release. The table below reflects the present Wistudi roadmap and should not be read as a commitment that every level is already available in production.</p>
-        <div class="doc-table-wrap">
-          <table class="doc-table">
-            <thead><tr><th>Area</th><th>Current status</th></tr></thead>
-            <tbody>
-              <tr><td>1</td><td><strong>Simple Embed:</strong> in development.</td></tr>
-              <tr><td>2</td><td><strong>Connected Access &amp; Results:</strong> in development.</td></tr>
-              <tr><td>3</td><td><strong>Content Workflow Integration:</strong> planned, not yet built.</td></tr>
-              <tr><td>4</td><td><strong>Extended Data Sharing:</strong> planned as an add-on when a partner requires it.</td></tr>
-              <tr><td>5</td><td><strong>Advanced / custom / reverse-direction LTI:</strong> scoped individually per partner.</td></tr>
-            </tbody>
-          </table>
-        </div>
 
         <h2 id="apply">Becoming an early integration partner</h2>
         <p>Wistudi is accepting early partner applications while preparing for the 15 October 2026 integration launch. We are looking for partners with a clear learning use case and a product that can add meaningful capability inside a Flow or connect Wistudi into an existing learning environment.</p>
-        <p>When contacting us, include a short description of the product, the learner or creator workflow you would like to support, current integration capabilities, and whether your team already supports embedding or LTI 1.3.</p>
+        <p>When contacting us, include a short description of the product, the learner or creator workflow you want to support, current integration capabilities, whether your product supports embedding or LTI 1.3, and what completion or grading information you need to send or receive.</p>
         <p><a href="/contact/#contact-form" style="color:var(--doc-purple);font-weight:700;text-decoration:none">Apply through the Wistudi contact form →</a></p>
 
         <hr class="doc-rule">
@@ -297,10 +412,11 @@ a{color:inherit}
         <ul class="doc-related-list">
           <li><a href="#level-1">Simple Embed requirements</a></li>
           <li><a href="#level-2">Connected Access and Results</a></li>
+          <li><a href="#grading">Completion, scoring and grade direction</a></li>
           <li><a href="#level-3">Content selection and creation workflows</a></li>
-          <li><a href="#lti">LTI 1.3 overview</a></li>
-          <li><a href="#results">Completion, scores and AGS grade return</a></li>
+          <li><a href="#lti">LTI 1.3, Deep Linking and AGS</a></li>
           <li><a href="#security">Security and data handling</a></li>
+          <li><a href="#testing">Integration testing checklist</a></li>
         </ul>
       </div>
     </article>
@@ -308,35 +424,37 @@ a{color:inherit}
     <aside class="doc-side" aria-label="Article navigation and related topics">
       <section class="doc-side-card">
         <h2>In this article</h2>
-        <ul>
+        <ul class="doc-scroll-nav">
           <li><a href="#overview">Overview</a></li>
+          <li><a href="#directions">Integration directions</a></li>
           <li><a href="#terms">Key Wistudi terms</a></li>
           <li><a href="#partner-fit">Partner types</a></li>
-          <li><a href="#models">Integration models</a></li>
+          <li><a href="#models">Integration options</a></li>
+          <li><a href="#send-receive">What Wistudi sends &amp; receives</a></li>
+          <li><a href="#grading">Grading &amp; result handling</a></li>
           <li><a href="#lti">LTI 1.3 overview</a></li>
-          <li><a href="#learner-experience">Learner experience</a></li>
-          <li><a href="#results">Completion and grading</a></li>
-          <li><a href="#security">Security and data</a></li>
-          <li><a href="#requirements">Partner requirements</a></li>
+          <li><a href="#security">Security &amp; data</a></li>
+          <li><a href="#requirements">Partner readiness</a></li>
+          <li><a href="#testing">Testing</a></li>
           <li><a href="#process">Integration process</a></li>
-          <li><a href="#status">Current status</a></li>
         </ul>
       </section>
 
-      <section class="doc-side-card">
-        <h2>Related articles</h2>
-        <p>Additional integration documentation will be added as the partner programme develops.</p>
+      <section class="doc-side-card related">
+        <h2>Integration reference</h2>
         <ul>
           <li><a href="#level-1">Simple Embed</a></li>
           <li><a href="#level-2">Connected Access &amp; Results</a></li>
-          <li><a href="#level-3">Content Workflow Integration</a></li>
+          <li><a href="#level-3">Content Workflow</a></li>
+          <li><a href="#level-4">Extended Data Sharing</a></li>
+          <li><a href="#level-5">Advanced &amp; Custom</a></li>
           <li><a href="#lti">LTI 1.3, Deep Linking &amp; AGS</a></li>
         </ul>
       </section>
 
       <section class="doc-side-card">
-        <h2>Need to discuss an integration?</h2>
-        <p>Contact Wistudi with your product and use case before beginning implementation.</p>
+        <h2>Discuss an integration</h2>
+        <p>Contact Wistudi with your product, intended workflow, current integration capabilities and grading requirements.</p>
         <a class="doc-contact-link" href="/contact/#contact-form">Contact Wistudi →</a>
       </section>
     </aside>
@@ -352,5 +470,21 @@ a{color:inherit}
   </div>
 </footer>
 <script src="/assets/js/site-shell.js"></script>
+<script>
+(function(){
+  const links=[...document.querySelectorAll('.doc-scroll-nav a')];
+  const targets=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  if(!targets.length) return;
+  const setActive=(id)=>{
+    links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+id));
+  };
+  const observer=new IntersectionObserver((entries)=>{
+    const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio);
+    if(visible[0]) setActive(visible[0].target.id);
+  },{rootMargin:'-18% 0px -68% 0px',threshold:[0,.1,.5]});
+  targets.forEach(t=>observer.observe(t));
+  if(targets[0]) setActive(targets[0].id);
+})();
+</script>
 </body>
 </html>
