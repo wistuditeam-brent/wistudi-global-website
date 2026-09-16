@@ -57,7 +57,6 @@
     "Manage people, learning, content, assessment, results and reporting.": "管理人员、学习、内容、评估、结果和报告。",
     "Deploy branded experiences and connect Wistudi into wider learning ecosystems.": "部署品牌化体验，并将 Wistudi 连接到更广泛的学习生态。",
     "Start with a lesson. Build a course. Publish a curriculum. Create an interactive learning world around what you know.": "从一节课开始，构建课程，发布课程体系，并围绕你的知识创建互动学习世界。",
-
     "Explore Wistudi's modular blocks and activities for Flows, XP Video, live teaching and printable-connected learning.": "探索 Wistudi 面向 Flows、XP Video、实时教学和可打印连接学习的模块化区块与活动。",
     "Flows + XP Video": "Flows + XP Video",
     "Turn the stack into lessons, training, courses, curricula and blended learning experiences.": "将区块组合成课程、培训、课件、课程体系和混合学习体验。",
@@ -131,7 +130,6 @@
     "Build sentence, vocabulary and comprehension practice.": "构建句子、词汇和理解练习。",
     "Guided Reflection": "引导式反思",
     "Encourage meaning-making and thoughtful response.": "鼓励学习者建构意义并进行深入回应。",
-
     "Use Wistudi as your learning and publishing platform, connect it with systems you already rely on, or expand it with specialist technology — without fragmenting the learner experience.": "将 Wistudi 用作学习和发布平台，与现有系统连接，或通过专业技术进行扩展，同时保持学习者体验完整。",
     "Diagram showing Wistudi at the centre of an organisation learning ecosystem, connected to existing systems, publishing, teams and scalable deployment": "展示 Wistudi 位于组织学习生态中心并连接现有系统、发布、团队和可扩展部署的示意图",
     "The core platform remains connected, while your people, brand, content, permissions, reporting and integrations can be organised around your own model.": "核心平台保持连接，同时人员、品牌、内容、权限、报告和集成都可以围绕你的组织模式进行配置。",
@@ -258,6 +256,11 @@
     "Use Wistudi independently, shape it around your people and content, connect it to existing systems, or expand it through specialist partner technology.": "可独立使用 Wistudi，围绕人员和内容进行配置，与现有系统连接，或通过专业合作伙伴技术进行扩展。",
     "Technology or distribution partner? Discuss a partnership →": "技术或分发合作伙伴？讨论合作 →",
     "Close image": "关闭图片",
-    "Expanded Wistudi event image": "放大的 Wistudi 活动图片"
+    "Expanded Wistudi event image": "放大的 Wistudi 活动图片",
+    "Organisation overview": "机构概览",
+    "Plans, publishing and learning for schools, teams and organisations.": "面向学校、团队和机构的方案、出版与学习。",
+    "Integration Documentation": "集成文档",
+    "Integration models, LTI 1.3, grading, data exchange and partner requirements.": "集成模式、LTI 1.3、评分、数据交换和合作伙伴要求。",
+    "Open Organisations menu": "打开机构菜单"
   }
 }
