@@ -87,7 +87,86 @@ function ensureResourcesNav(){
   });
 }
 
+function ensureOrganisationsMenu(){
+  const integrationHref='/partners/integrations/';
+  const integrationActive=normalized.startsWith('/partners/integrations/');
+  const organisationsActive=normalized.startsWith('/organisations/');
+
+  document.querySelectorAll('.ws-nav-links').forEach(nav=>{
+    if(nav.querySelector('.ws-org-menu'))return;
+    const orgLink=[...nav.querySelectorAll(':scope > a')].find(a=>internalPath(a).startsWith('/organisations'));
+    if(!orgLink)return;
+
+    const wrap=document.createElement('div');
+    wrap.className='ws-org-menu';
+    if(organisationsActive||integrationActive)wrap.classList.add('active');
+
+    const trigger=document.createElement('div');
+    trigger.className='ws-org-trigger';
+    orgLink.parentNode.insertBefore(wrap,orgLink);
+    wrap.appendChild(trigger);
+    trigger.appendChild(orgLink);
+    orgLink.classList.add('ws-org-main-link');
+
+    const toggle=document.createElement('button');
+    toggle.type='button';
+    toggle.className='ws-org-toggle';
+    toggle.setAttribute('aria-label','Open Organisations menu');
+    toggle.setAttribute('aria-expanded','false');
+    toggle.innerHTML='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5"/></svg>';
+    trigger.appendChild(toggle);
+
+    const menu=document.createElement('div');
+    menu.className='ws-org-dropdown';
+    menu.innerHTML=`
+      <div class="ws-org-dropdown-label">Organisations</div>
+      <a class="ws-org-dropdown-item ${organisationsActive?'active':''}" href="/organisations/">
+        <span class="ws-org-item-title">Organisation overview</span>
+        <span class="ws-org-item-copy">Plans, publishing and learning for schools, teams and organisations.</span>
+      </a>
+      <a class="ws-org-dropdown-item ${integrationActive?'active':''}" href="${integrationHref}">
+        <span class="ws-org-item-title">Integration Documentation</span>
+        <span class="ws-org-item-copy">Integration models, LTI 1.3, grading, data exchange and partner requirements.</span>
+      </a>`;
+    wrap.appendChild(menu);
+
+    const setOpen=open=>{
+      wrap.classList.toggle('open',open);
+      toggle.setAttribute('aria-expanded',String(open));
+    };
+    toggle.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setOpen(!wrap.classList.contains('open'))});
+    wrap.addEventListener('mouseenter',()=>setOpen(true));
+    wrap.addEventListener('mouseleave',()=>setOpen(false));
+    wrap.addEventListener('focusin',()=>setOpen(true));
+    wrap.addEventListener('focusout',e=>{if(!wrap.contains(e.relatedTarget))setOpen(false)});
+    document.addEventListener('click',e=>{if(!wrap.contains(e.target))setOpen(false)});
+  });
+
+  document.querySelectorAll('.ws-mobile-inner').forEach(nav=>{
+    if(nav.querySelector('.ws-mobile-org-menu'))return;
+    const orgLink=[...nav.children].find(el=>el.tagName==='A'&&internalPath(el).startsWith('/organisations'));
+    if(!orgLink)return;
+
+    const details=document.createElement('details');
+    details.className='ws-mobile-org-menu';
+    if(organisationsActive||integrationActive)details.classList.add('active');
+    const summary=document.createElement('summary');
+    summary.innerHTML='Organisations <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5"/></svg>';
+    details.appendChild(summary);
+
+    const items=document.createElement('div');
+    items.className='ws-mobile-org-items';
+    items.innerHTML=`
+      <a class="${organisationsActive?'active':''}" href="/organisations/">Organisation overview</a>
+      <a class="${integrationActive?'active':''}" href="${integrationHref}">Integration Documentation</a>`;
+    details.appendChild(items);
+    nav.insertBefore(details,orgLink);
+    orgLink.remove();
+  });
+}
+
 ensureResourcesNav();
+ensureOrganisationsMenu();
 
 // site-shell-core loads resources-global asynchronously. Its legacy nav helper only
 // recognises href="/resources/" and can otherwise insert a second English Resources link
@@ -96,10 +175,20 @@ const watchResourcesNav=()=>{
   document.querySelectorAll('.ws-nav-links,.ws-mobile-inner').forEach(nav=>{
     if(nav.dataset.wsResourcesWatched==='true')return;
     nav.dataset.wsResourcesWatched='true';
-    new MutationObserver(()=>queueMicrotask(ensureResourcesNav)).observe(nav,{childList:true});
+    new MutationObserver(()=>queueMicrotask(()=>{ensureResourcesNav();ensureOrganisationsMenu();})).observe(nav,{childList:true,subtree:false});
   });
 };
 watchResourcesNav();
+
+// Keep the Organisations dropdown present if a later shell/i18n pass rewrites nav links.
+const watchOrganisationsMenu=()=>{
+  document.querySelectorAll('.ws-nav-links,.ws-mobile-inner').forEach(nav=>{
+    if(nav.dataset.wsOrganisationsWatched==='true')return;
+    nav.dataset.wsOrganisationsWatched='true';
+    new MutationObserver(()=>queueMicrotask(ensureOrganisationsMenu)).observe(nav,{childList:true,subtree:false});
+  });
+};
+watchOrganisationsMenu();
 
 const load=(src,key)=>new Promise(resolve=>{
   const absolute=new URL(src,location.href).href;
@@ -192,7 +281,9 @@ const bootEvent=async()=>{
   await loadWithMutationGuard('/assets/js/event-i18n-content.js','wsEventI18nContent');
 
   ensureResourcesNav();
+  ensureOrganisationsMenu();
   watchResourcesNav();
+  watchOrganisationsMenu();
   document.documentElement.dataset.wsEventRuntime='ready';
   document.documentElement.dataset.wsEventPresentation='canonical-highlight';
 };
@@ -201,7 +292,9 @@ const bootSite=async()=>{
   await load('/assets/js/site-shell-core.js','wsCore');
   await load('/assets/js/i18n.js','wsI18n');
   ensureResourcesNav();
+  ensureOrganisationsMenu();
   watchResourcesNav();
+  watchOrganisationsMenu();
 
   // The temporary event takeover banner on the Platform homepage is intentionally off.
   // Keep the workshop promotion inside Resources until we explicitly choose to restore it.
