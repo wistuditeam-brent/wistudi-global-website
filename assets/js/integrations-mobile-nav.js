@@ -2,7 +2,21 @@
 'use strict';
 
 const side=document.querySelector('.doc-side');
-if(!side||side.dataset.wsMobileNavReady==='true')return;
+const content=document.querySelector('.doc-content');
+if(!side||!content||side.dataset.wsMobileNavReady==='true')return;
+
+const media=window.matchMedia('(max-width:920px)');
+const originalParent=side.parentNode;
+const placeholder=document.createComment('wistudi-integration-nav');
+originalParent.insertBefore(placeholder,side);
+
+const placeNavigation=()=>{
+  if(media.matches){
+    if(side.parentNode!==content)content.insertBefore(side,content.firstChild);
+  }else if(side.parentNode!==originalParent){
+    originalParent.insertBefore(side,placeholder.nextSibling);
+  }
+};
 
 const groups=[...side.querySelectorAll('.doc-side-card')].slice(0,2);
 if(!groups.length)return;
@@ -43,15 +57,19 @@ groups.forEach((group,index)=>{
 
   list.querySelectorAll('a').forEach(link=>{
     link.addEventListener('click',()=>{
-      if(window.matchMedia('(max-width:920px)').matches)closeAll();
+      if(media.matches)closeAll();
     });
   });
 });
 
 side.dataset.wsMobileNavReady='true';
+placeNavigation();
+
+if(typeof media.addEventListener==='function')media.addEventListener('change',placeNavigation);
+else if(typeof media.addListener==='function')media.addListener(placeNavigation);
 
 document.addEventListener('click',event=>{
-  if(window.matchMedia('(max-width:920px)').matches&&!side.contains(event.target))closeAll();
+  if(media.matches&&!side.contains(event.target))closeAll();
 });
 
 document.addEventListener('keydown',event=>{
