@@ -296,6 +296,10 @@ const bootSite=async()=>{
   watchResourcesNav();
   watchOrganisationsMenu();
 
+  if(normalized.startsWith('/partners/integrations/')){
+    await load('/assets/js/integrations-mobile-nav.js','wsIntegrationsMobileNav');
+  }
+
   // The temporary event takeover banner on the Platform homepage is intentionally off.
   // Keep the workshop promotion inside Resources until we explicitly choose to restore it.
   if(normalized==='/resources/'||normalized==='/resources'){
