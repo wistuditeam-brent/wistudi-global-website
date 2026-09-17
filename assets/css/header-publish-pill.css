@@ -5,7 +5,7 @@
 .ws-site-header .ws-nav-actions .ws-btn.primary{
   min-height:58px!important;
   height:58px!important;
-  padding:0 32px!important;
+  padding:0 28px!important;
   border-radius:9999px!important;
   border:0!important;
   background:linear-gradient(135deg,#6b30e3 0%,#8340ef 48%,#954ef4 100%)!important;
@@ -41,12 +41,13 @@
   transform:translateX(3px)!important;
 }
 
-/* Give the larger CTA comfortable vertical space in the desktop header. */
+/* Give the CTA a little more breathing room from the right edge. */
 @media(min-width:901px){
   :root{--ws-header-height:84px}
   .ws-nav{height:84px!important}
   .ws-org-menu{height:84px!important}
   .res-archive-controls{top:84px!important}
+  .ws-site-header .ws-nav-actions{padding-right:8px}
 }
 
 /* The same pill language is carried into the mobile drawer. */
@@ -77,9 +78,10 @@
   .ws-site-header .ws-nav-actions .ws-btn.primary{
     min-height:56px!important;
     height:56px!important;
-    padding:0 26px!important;
+    padding:0 23px!important;
     font-size:.91rem!important;
   }
+  .ws-site-header .ws-nav-actions{padding-right:6px}
 }
 
 @media(prefers-reduced-motion:reduce){
