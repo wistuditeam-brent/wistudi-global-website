@@ -22,6 +22,7 @@
     overscroll-behavior:contain;
     scrollbar-width:thin;
   }
+  body .doc-content > .doc-side{margin:0 0 28px}
 
   body .doc-side-card{
     margin:0;
@@ -117,16 +118,15 @@
 }
 
 @media(max-width:700px){
-  body .doc-side{
-    margin:0 16px 24px;
-    border-radius:13px;
-  }
+  body .doc-side{margin:0 16px 24px;border-radius:13px}
+  body .doc-content > .doc-side{margin:0 0 24px}
   body .doc-mobile-nav-toggle{min-height:44px;font-size:.72rem}
   body .doc-side-card a{font-size:.75rem;padding:9px}
 }
 
 @media(max-width:390px){
   body .doc-side{margin-left:14px;margin-right:14px}
+  body .doc-content > .doc-side{margin-left:0;margin-right:0}
 }
 
 @media(prefers-reduced-motion:reduce){
