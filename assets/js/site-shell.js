@@ -33,6 +33,84 @@ const stripLocale=pathname=>{
 const normalized=stripLocale((window.__WS_PREVIEW_PATH||location.pathname).replace(/\/index\.html$/,'/'));
 const isEvent=normalized.includes(EVENT_PATH);
 
+/* Sitewide compact header: brand + language + contact message icon + Start Publishing. */
+const installCompactHeader=()=>{
+  if(document.getElementById('ws-compact-header-style')) return;
+
+  const style=document.createElement('style');
+  style.id='ws-compact-header-style';
+  style.textContent=`
+    .ws-site-header .ws-nav-links{display:none!important}
+    .ws-site-header .ws-nav-actions>.ws-btn.secondary{display:none!important}
+    .ws-site-header .ws-menu-toggle,
+    .ws-site-header .ws-mobile-menu{display:none!important}
+
+    .ws-site-header .ws-nav{justify-content:space-between}
+    .ws-site-header .ws-nav-actions{gap:10px;margin-left:auto}
+    .ws-site-header .ws-contact-message{
+      width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;
+      flex:0 0 auto;text-decoration:none;border-radius:50%;
+      transition:transform .18s ease,opacity .18s ease;
+    }
+    .ws-site-header .ws-contact-message:hover{transform:translateY(-1px);opacity:.9}
+    .ws-site-header .ws-contact-message img{display:block;width:34px;height:34px;object-fit:contain}
+    .ws-site-header .ws-nav-actions>.ws-btn.primary{display:inline-flex!important}
+
+    @media(max-width:900px){
+      .ws-site-header .ws-container{width:min(calc(100% - 22px),1180px)}
+      .ws-site-header .ws-nav{height:64px;gap:10px}
+      .ws-site-header .ws-brand img{width:106px}
+      .ws-site-header .ws-nav-actions{gap:7px}
+      .ws-site-header .ws-lang-toggle{height:40px;min-width:58px;padding:0 9px}
+      .ws-site-header .ws-contact-message{width:40px;height:40px}
+      .ws-site-header .ws-contact-message img{width:32px;height:32px}
+      .ws-site-header .ws-nav-actions>.ws-btn.primary{
+        min-height:40px;padding:0 13px;border-radius:13px;font-size:.72rem;white-space:nowrap
+      }
+    }
+    @media(max-width:390px){
+      .ws-site-header .ws-container{width:min(calc(100% - 16px),1180px)}
+      .ws-site-header .ws-nav{gap:7px}
+      .ws-site-header .ws-brand img{width:88px}
+      .ws-site-header .ws-nav-actions{gap:5px}
+      .ws-site-header .ws-lang-toggle{min-width:50px;height:38px;padding:0 6px;font-size:.69rem}
+      .ws-site-header .ws-lang-toggle .ws-lang-flag svg{width:21px;height:14px}
+      .ws-site-header .ws-contact-message{width:38px;height:38px}
+      .ws-site-header .ws-contact-message img{width:30px;height:30px}
+      .ws-site-header .ws-nav-actions>.ws-btn.primary{
+        min-height:38px;padding:0 9px;font-size:.65rem;border-radius:12px
+      }
+    }
+    @media(prefers-reduced-motion:reduce){
+      .ws-site-header .ws-contact-message{transition:none!important}
+    }
+  `;
+  document.head.appendChild(style);
+
+  const apply=()=>{
+    document.querySelectorAll('.ws-nav-actions').forEach(actions=>{
+      let link=actions.querySelector('.ws-contact-message');
+      if(!link){
+        link=document.createElement('a');
+        link.className='ws-contact-message';
+        link.href='/contact/';
+        link.setAttribute('aria-label','Contact Wistudi');
+        link.title='Contact Wistudi';
+        link.innerHTML='<img src="/assets/media/contact-message.svg" alt="" aria-hidden="true">';
+        const primary=actions.querySelector('.ws-btn.primary');
+        primary?actions.insertBefore(link,primary):actions.appendChild(link);
+      }
+    });
+  };
+
+  apply();
+  new MutationObserver(()=>queueMicrotask(apply)).observe(document.documentElement,{childList:true,subtree:true});
+};
+
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',installCompactHeader,{once:true});
+else installCompactHeader();
+
+
 const internalPath=a=>{
   try{return stripLocale(new URL(a.getAttribute('href')||'',location.href).pathname)}catch(_){return''}
 };
