@@ -241,3 +241,6 @@ body.page-organisations main section[id]{scroll-margin-top:calc(var(--ws-header-
   .ws-site-header .ws-mobile-actions>.ws-btn.secondary{display:none!important}
 }
 /* === End header layout stability fix === */
+
+/* Reserve Organisations dropdown-toggle width before JS enhancement to prevent nav shift. */
+@media(min-width:901px){.ws-nav-links > a[href*="organisations"]{padding-right:25px}}
