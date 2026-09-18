@@ -1,0 +1,410 @@
+/* Friendly global header refresh — 2026-09-18
+   Shared across the public Wistudi site through site-shell.css.
+   Keeps the existing Wistudi wordmark and information architecture, while
+   softening the navigation, removing the language control wrapper and making
+   Start publishing the clear pill-shaped primary action. */
+
+:root{
+  --ws-header-height:80px;
+}
+
+.ws-site-header{
+  background:rgba(255,255,255,.96);
+  border-bottom:1px solid rgba(48,36,67,.07);
+  box-shadow:0 5px 22px rgba(34,24,64,.035);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+
+.ws-site-header>.ws-container{
+  width:min(calc(100% - 48px),1280px);
+}
+
+.ws-nav{
+  height:80px;
+  gap:28px;
+}
+
+.ws-brand img{
+  width:142px;
+}
+
+.ws-nav-links{
+  gap:28px;
+  font-size:.86rem;
+  font-weight:600;
+  color:#5d5667;
+}
+
+.ws-nav-links>a,
+.ws-org-main-link{
+  padding-top:29px!important;
+  padding-bottom:29px!important;
+  transition:color .18s ease;
+}
+
+.ws-nav-links a:hover,
+.ws-nav-links a.active,
+.ws-org-menu:hover .ws-org-main-link,
+.ws-org-menu:focus-within .ws-org-main-link{
+  color:#2f2938;
+}
+
+/* Keep active navigation understated: a short soft marker, not another pill. */
+.ws-nav-links>a.active:after{
+  left:50%;
+  right:auto;
+  bottom:8px;
+  width:20px;
+  height:3px;
+  transform:translateX(-50%);
+  background:linear-gradient(90deg,#f97316,#7c3aed);
+}
+
+.ws-org-menu{
+  height:80px;
+}
+
+.ws-org-menu.active:after{
+  left:50%;
+  right:auto;
+  bottom:8px;
+  width:20px;
+  height:3px;
+  transform:translateX(-50%);
+}
+
+.ws-org-main-link{
+  padding-right:2px!important;
+}
+
+.ws-org-toggle{
+  width:24px;
+  height:40px;
+  color:#817889;
+}
+
+.ws-org-dropdown{
+  width:340px;
+  padding:11px;
+  border-color:#ece6f1;
+  border-radius:18px;
+  box-shadow:0 20px 54px rgba(34,24,64,.13);
+}
+
+.ws-org-dropdown-item{
+  padding:12px 13px!important;
+  border-radius:12px;
+}
+
+.ws-org-dropdown-item:hover,
+.ws-org-dropdown-item.active{
+  background:#f8f5fc!important;
+}
+
+.ws-nav-actions{
+  gap:13px;
+}
+
+.ws-btn{
+  min-height:44px;
+  border-radius:999px;
+  font-size:.82rem;
+  font-weight:650;
+}
+
+/* Secondary action becomes a quiet text action instead of another boxed control. */
+.ws-site-header .ws-btn.secondary{
+  min-height:42px;
+  padding:0 8px;
+  border:0;
+  background:transparent;
+  box-shadow:none;
+  color:#5f5868;
+}
+
+.ws-site-header .ws-btn.secondary:hover{
+  transform:none;
+  border-color:transparent;
+  box-shadow:none;
+  color:#6d32d9;
+}
+
+/* Primary publishing action: large, friendly, true pill. */
+.ws-site-header .ws-btn.primary{
+  min-height:48px;
+  padding:0 24px;
+  gap:10px;
+  border-radius:999px;
+  background:linear-gradient(135deg,#7137e7 0%,#8b47f1 58%,#934ff4 100%);
+  color:#fff;
+  font-size:.86rem;
+  font-weight:700;
+  letter-spacing:-.01em;
+  box-shadow:0 11px 25px rgba(111,55,231,.25);
+  transition:transform .18s ease,box-shadow .18s ease,filter .18s ease;
+}
+
+.ws-site-header .ws-btn.primary:after{
+  content:'→';
+  display:inline-block;
+  font-size:1.12rem;
+  line-height:1;
+  font-weight:500;
+  transform:translateX(0);
+  transition:transform .18s ease;
+}
+
+.ws-site-header .ws-btn.primary:hover{
+  transform:translateY(-1px);
+  box-shadow:0 14px 30px rgba(111,55,231,.30);
+  filter:saturate(1.04);
+}
+
+.ws-site-header .ws-btn.primary:hover:after{
+  transform:translateX(3px);
+}
+
+/* Language selector: flag + locale + chevron only. No visible wrapper. */
+.ws-lang-toggle{
+  height:44px;
+  min-width:0;
+  padding:0 3px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:#625a6a;
+  font-size:.8rem;
+  font-weight:600;
+  gap:7px;
+}
+
+.ws-lang-toggle:hover{
+  color:#6d32d9;
+}
+
+.ws-lang-toggle:focus-visible{
+  outline:2px solid rgba(124,58,237,.32);
+  outline-offset:5px;
+  border-radius:8px;
+}
+
+.ws-lang-toggle .ws-lang-flag,
+.ws-lang-flag{
+  border-radius:2px;
+  box-shadow:0 0 0 1px rgba(24,21,35,.09);
+}
+
+.ws-lang-menu{
+  top:calc(100% + 12px);
+  width:204px;
+  padding:8px;
+  border-color:#ece6f1;
+  border-radius:17px;
+  box-shadow:0 20px 50px rgba(34,24,64,.13);
+}
+
+.ws-lang-option{
+  padding:11px 12px;
+  border-radius:11px;
+  font-size:.79rem;
+  font-weight:600;
+}
+
+.ws-lang-option.current{
+  background:#f6f1ff;
+}
+
+/* Friendlier mobile trigger. */
+.ws-menu-toggle{
+  width:44px;
+  height:44px;
+  border:0;
+  border-radius:999px;
+  background:#f7f3fc;
+  color:#302939;
+  transition:background .18s ease,color .18s ease;
+}
+
+.ws-menu-toggle:hover{
+  background:#f1eafd;
+  color:#6d32d9;
+}
+
+.ws-menu-toggle:focus-visible{
+  outline:2px solid rgba(124,58,237,.32);
+  outline-offset:3px;
+}
+
+/* Mobile menu reads as a clean continuation of the header, not a control panel. */
+.ws-mobile-menu{
+  border-top:1px solid rgba(48,36,67,.06);
+  background:rgba(255,255,255,.985);
+}
+
+.ws-mobile-menu.open{
+  box-shadow:0 18px 34px rgba(34,24,64,.08);
+}
+
+.ws-mobile-inner{
+  padding:10px 0 20px;
+  gap:0;
+}
+
+.ws-mobile-inner>a,
+.ws-mobile-org-menu>summary{
+  min-height:50px;
+  padding:14px 3px;
+  border-bottom:1px solid rgba(233,230,239,.78);
+  color:#504957;
+  font-size:.94rem;
+  font-weight:600;
+  line-height:1.35;
+}
+
+.ws-mobile-inner>a:hover,
+.ws-mobile-inner>a.active,
+.ws-mobile-org-menu.active>summary{
+  color:#6d32d9;
+}
+
+.ws-mobile-org-menu>summary{
+  border-radius:0;
+}
+
+.ws-mobile-org-items{
+  margin:0;
+  padding:7px 0 9px 12px;
+  border-left:0;
+  border-bottom:1px solid rgba(233,230,239,.78);
+  gap:2px;
+}
+
+.ws-mobile-org-items a{
+  padding:10px 9px;
+  border-radius:10px;
+  font-size:.84rem;
+}
+
+.ws-mobile-actions{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+  padding-top:16px;
+}
+
+.ws-mobile-actions .ws-btn{
+  width:100%;
+  flex:none;
+}
+
+.ws-mobile-actions .ws-btn.secondary{
+  min-height:42px;
+  padding:0 12px;
+  border:0;
+  background:transparent;
+  color:#615969;
+  box-shadow:none;
+}
+
+.ws-mobile-actions .ws-btn.primary{
+  min-height:50px;
+  padding:0 22px;
+  border-radius:999px;
+  font-size:.9rem;
+}
+
+/* Preserve sticky offsets when the friendlier header is taller. */
+.res-archive-controls{
+  top:80px;
+}
+
+@media(max-width:1180px){
+  .ws-site-header>.ws-container{
+    width:min(calc(100% - 34px),1280px);
+  }
+  .ws-nav{
+    gap:20px;
+  }
+  .ws-nav-links{
+    gap:19px;
+    font-size:.82rem;
+  }
+  .ws-nav-actions{
+    gap:9px;
+  }
+  .ws-site-header .ws-btn.primary{
+    padding-inline:20px;
+  }
+}
+
+@media(max-width:1060px){
+  .ws-nav-actions>.ws-btn.secondary{
+    display:none;
+  }
+}
+
+@media(max-width:900px){
+  :root{
+    --ws-header-height:68px;
+  }
+  .ws-site-header>.ws-container,
+  .ws-mobile-menu>.ws-container{
+    width:min(calc(100% - 28px),1180px);
+  }
+  .ws-nav{
+    height:68px;
+    gap:12px;
+  }
+  .ws-brand img{
+    width:122px;
+  }
+  .ws-nav-actions{
+    gap:8px;
+  }
+  .ws-nav-actions>.ws-btn{
+    display:none;
+  }
+  .ws-lang-toggle{
+    height:42px;
+  }
+  .ws-menu-toggle{
+    display:block;
+  }
+  .res-archive-controls{
+    top:68px;
+  }
+}
+
+@media(max-width:420px){
+  .ws-site-header>.ws-container,
+  .ws-mobile-menu>.ws-container{
+    width:min(calc(100% - 24px),1180px);
+  }
+  .ws-brand img{
+    width:116px;
+  }
+  .ws-lang-toggle{
+    gap:6px;
+    font-size:.76rem;
+  }
+  .ws-lang-toggle .ws-lang-flag,
+  .ws-lang-flag{
+    width:22px;
+    height:15px;
+    flex-basis:22px;
+  }
+  .ws-lang-toggle .ws-lang-flag svg,
+  .ws-lang-flag svg{
+    width:22px!important;
+    height:15px!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .ws-site-header .ws-btn.primary,
+  .ws-site-header .ws-btn.primary:after,
+  .ws-menu-toggle{
+    transition:none!important;
+  }
+}
