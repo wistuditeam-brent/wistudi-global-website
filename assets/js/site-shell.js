@@ -33,54 +33,68 @@ const stripLocale=pathname=>{
 const normalized=stripLocale((window.__WS_PREVIEW_PATH||location.pathname).replace(/\/index\.html$/,'/'));
 const isEvent=normalized.includes(EVENT_PATH);
 
-/* Sitewide compact header: brand + language + contact message icon + Start Publishing. */
+/* Sitewide header standard: primary menus + language + contact message icon + Start Publishing. */
 const installCompactHeader=()=>{
   if(document.getElementById('ws-compact-header-style')) return;
 
   const style=document.createElement('style');
   style.id='ws-compact-header-style';
   style.textContent=`
-    .ws-site-header .ws-nav-links{display:none!important}
+    .ws-site-header{position:sticky!important;top:0!important;left:0;right:0;width:100%;z-index:240}
     .ws-site-header .ws-nav-actions>.ws-btn.secondary{display:none!important}
-    .ws-site-header .ws-menu-toggle,
-    .ws-site-header .ws-mobile-menu{display:none!important}
+    .ws-site-header .ws-nav-links a[href*="contact"]{display:none!important}
+    .ws-site-header .ws-mobile-inner>a[href*="contact"]{display:none!important}
+    .ws-site-header .ws-mobile-actions>.ws-btn.secondary{display:none!important}
 
     .ws-site-header .ws-nav{justify-content:space-between}
     .ws-site-header .ws-nav-actions{gap:10px;margin-left:auto}
     .ws-site-header .ws-contact-message{
-      width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;
+      width:50px;height:50px;display:inline-flex;align-items:center;justify-content:center;
       flex:0 0 auto;text-decoration:none;border-radius:50%;
+      margin-left:2px;margin-right:10px;
       transition:transform .18s ease,opacity .18s ease;
     }
     .ws-site-header .ws-contact-message:hover{transform:translateY(-1px);opacity:.9}
-    .ws-site-header .ws-contact-message img{display:block;width:34px;height:34px;object-fit:contain}
+    .ws-site-header .ws-contact-message img{display:block;width:42px;height:42px;object-fit:contain}
     .ws-site-header .ws-nav-actions>.ws-btn.primary{display:inline-flex!important}
 
+    @media(min-width:901px){
+      .ws-site-header .ws-nav-links{display:flex!important}
+      .ws-site-header .ws-menu-toggle{display:none!important}
+    }
+
     @media(max-width:900px){
+      .ws-site-header .ws-nav-links{display:none!important}
+      .ws-site-header .ws-menu-toggle{display:block!important}
       .ws-site-header .ws-container{width:min(calc(100% - 22px),1180px)}
-      .ws-site-header .ws-nav{height:64px;gap:10px}
-      .ws-site-header .ws-brand img{width:106px}
-      .ws-site-header .ws-nav-actions{gap:7px}
-      .ws-site-header .ws-lang-toggle{height:40px;min-width:58px;padding:0 9px}
-      .ws-site-header .ws-contact-message{width:40px;height:40px}
-      .ws-site-header .ws-contact-message img{width:32px;height:32px}
+      .ws-site-header .ws-nav{height:64px;gap:9px}
+      .ws-site-header .ws-brand img{width:104px}
+      .ws-site-header .ws-nav-actions{gap:6px}
+      .ws-site-header .ws-lang-toggle{height:40px;min-width:56px;padding:0 8px}
+      .ws-site-header .ws-contact-message{width:44px;height:44px;margin-left:1px;margin-right:7px}
+      .ws-site-header .ws-contact-message img{width:37px;height:37px}
       .ws-site-header .ws-nav-actions>.ws-btn.primary{
-        min-height:40px;padding:0 13px;border-radius:13px;font-size:.72rem;white-space:nowrap
+        min-height:40px;padding:0 12px;border-radius:13px;font-size:.7rem;white-space:nowrap
       }
     }
-    @media(max-width:390px){
+
+    @media(max-width:520px){
       .ws-site-header .ws-container{width:min(calc(100% - 16px),1180px)}
-      .ws-site-header .ws-nav{gap:7px}
-      .ws-site-header .ws-brand img{width:88px}
-      .ws-site-header .ws-nav-actions{gap:5px}
-      .ws-site-header .ws-lang-toggle{min-width:50px;height:38px;padding:0 6px;font-size:.69rem}
-      .ws-site-header .ws-lang-toggle .ws-lang-flag svg{width:21px;height:14px}
-      .ws-site-header .ws-contact-message{width:38px;height:38px}
-      .ws-site-header .ws-contact-message img{width:30px;height:30px}
-      .ws-site-header .ws-nav-actions>.ws-btn.primary{
-        min-height:38px;padding:0 9px;font-size:.65rem;border-radius:12px
-      }
+      .ws-site-header .ws-brand img{width:90px}
+      .ws-site-header .ws-nav-actions>.ws-btn.primary{padding:0 9px;font-size:.64rem}
+      .ws-site-header .ws-contact-message{width:42px;height:42px;margin-right:5px}
+      .ws-site-header .ws-contact-message img{width:35px;height:35px}
     }
+
+    @media(max-width:390px){
+      .ws-site-header .ws-brand img{width:82px}
+      .ws-site-header .ws-nav-actions{gap:4px}
+      .ws-site-header .ws-lang-toggle{min-width:48px;height:38px;padding:0 5px;font-size:.67rem}
+      .ws-site-header .ws-contact-message{width:40px;height:40px;margin-right:3px}
+      .ws-site-header .ws-contact-message img{width:33px;height:33px}
+      .ws-site-header .ws-nav-actions>.ws-btn.primary{min-height:38px;padding:0 7px;font-size:.6rem;border-radius:11px}
+    }
+
     @media(prefers-reduced-motion:reduce){
       .ws-site-header .ws-contact-message{transition:none!important}
     }
