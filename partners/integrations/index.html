@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" sizes="64x64" href="/assets/images/favicon-64.png">
 <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/css/site-shell.css?v=20260918-sticky-sidebar1">
+<link rel="stylesheet" href="/assets/css/site-shell.css?v=20260918-sticky-sidebar2">
 <style>
 :root{
   --doc-bg:#f7f6f8;
@@ -27,13 +27,13 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:Inter,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:Inter,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip}
 a{color:inherit}
-.doc-shell{width:min(calc(100% - 40px),var(--doc-width));margin:0 auto;padding:28px 0 72px}
+.doc-shell{width:min(calc(100% - 40px),var(--doc-width));margin:0 auto;padding:28px 0 72px;overflow:visible!important}
 .doc-breadcrumbs{font-size:.76rem;color:#8a8390;margin:4px 0 18px}
 .doc-breadcrumbs a{text-decoration:none;color:#625b69}
 .doc-breadcrumbs a:hover{color:var(--doc-purple)}
-.doc-grid{display:grid;grid-template-columns:minmax(0,820px) 280px;gap:28px;align-items:start}
+.doc-grid{display:grid;grid-template-columns:minmax(0,820px) 280px;gap:28px;align-items:start;overflow:visible!important}
 .doc-article{min-width:0;background:var(--doc-panel);border:1px solid var(--doc-line);padding:42px 48px 52px}
 .doc-title-row{border-bottom:1px solid var(--doc-line);padding-bottom:26px;margin-bottom:28px}
 .doc-type{display:block;margin-bottom:10px;color:var(--doc-purple);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
@@ -76,7 +76,7 @@ a{color:inherit}
 .doc-related-list a:hover{text-decoration:underline}
 
 /* Modern documentation sidebar */
-.doc-side{position:sticky;top:calc(var(--ws-header-height,72px) + 18px);align-self:start;display:grid;gap:16px;max-height:calc(100vh - var(--ws-header-height,72px) - 36px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:2px}
+.doc-side{position:-webkit-sticky;position:sticky;top:calc(var(--ws-header-height,72px) + 18px);align-self:start;display:grid;gap:16px;max-height:calc(100vh - var(--ws-header-height,72px) - 36px);overflow-y:auto;overflow-x:visible;overscroll-behavior:contain;scrollbar-width:thin;padding-right:2px;z-index:20}
 .doc-side::-webkit-scrollbar{width:6px}.doc-side::-webkit-scrollbar-thumb{background:#d9d2df;border-radius:999px}.doc-side::-webkit-scrollbar-track{background:transparent}
 .doc-side-card{background:#fff;border:1px solid #e3dfe7;border-radius:12px;padding:18px;box-shadow:0 8px 26px rgba(37,28,52,.045)}
 .doc-side-card h2{margin:0 0 12px;font-family:'Be Vietnam Pro',Inter,sans-serif;font-size:.96rem;letter-spacing:-.015em}
@@ -557,7 +557,7 @@ a{color:inherit}
     <div class="ws-footer-copy">© 2026 Wistudi</div>
   </div>
 </footer>
-<script src="/assets/js/site-shell.js?v=20260918-sticky-sidebar1"></script>
+<script src="/assets/js/site-shell.js?v=20260918-sticky-sidebar2"></script>
 <script>
 (function(){
   const links=[...document.querySelectorAll('.doc-scroll-nav a')];
