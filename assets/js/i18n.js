@@ -144,7 +144,8 @@
   const loadTranslations=async()=>{
     if(detected==='en'){revealTranslatedPage();return}
     try{
-      const routeFile=seoPath.startsWith('/partners/integrations/')?fetchDictionary(`/assets/i18n/${detected}-integrations.json`):Promise.resolve(null);
+      const isLegal=['/terms-and-conditions/','/credit-usage-policy/','/template-publishing-remix-terms/'].some(path=>seoPath.startsWith(path));
+      const routeFile=seoPath.startsWith('/partners/integrations/')?fetchDictionary(`/assets/i18n/${detected}-integrations.json`):(isLegal?fetchDictionary(`/assets/i18n/${detected}-legal.json`):Promise.resolve(null));
       const [base,site,extra,route]=await Promise.all([fetchDictionary(`/assets/i18n/${detected}.json`),fetchDictionary(`/assets/i18n/${detected}-site.json`),fetchDictionary(`/assets/i18n/${detected}-extra.json`),routeFile]);
       if(!base)throw new Error('base translation unavailable');
       const dict=Object.assign({},base.strings||base,site?.strings||site||{},extra?.strings||extra||{},route?.strings||route||{});
