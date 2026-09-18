@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" sizes="64x64" href="/assets/images/favicon-64.png">
 <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/css/site-shell.css?v=20260918-latest-integration-doc">
+<link rel="stylesheet" href="/assets/css/site-shell.css?v=20260918-sticky-sidebar1">
 <style>
 :root{
   --doc-bg:#f7f6f8;
@@ -76,7 +76,8 @@ a{color:inherit}
 .doc-related-list a:hover{text-decoration:underline}
 
 /* Modern documentation sidebar */
-.doc-side{position:sticky;top:92px;display:grid;gap:16px}
+.doc-side{position:sticky;top:calc(var(--ws-header-height,72px) + 18px);align-self:start;display:grid;gap:16px;max-height:calc(100vh - var(--ws-header-height,72px) - 36px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:2px}
+.doc-side::-webkit-scrollbar{width:6px}.doc-side::-webkit-scrollbar-thumb{background:#d9d2df;border-radius:999px}.doc-side::-webkit-scrollbar-track{background:transparent}
 .doc-side-card{background:#fff;border:1px solid #e3dfe7;border-radius:12px;padding:18px;box-shadow:0 8px 26px rgba(37,28,52,.045)}
 .doc-side-card h2{margin:0 0 12px;font-family:'Be Vietnam Pro',Inter,sans-serif;font-size:.96rem;letter-spacing:-.015em}
 .doc-side-card p{margin:0 0 12px;font-size:.77rem;line-height:1.55;color:#746d79;overflow-wrap:anywhere}
@@ -102,7 +103,7 @@ a{color:inherit}
   .doc-shell{width:min(calc(100% - 28px),var(--doc-width));padding-top:22px}
   .doc-grid{grid-template-columns:1fr;gap:22px}
   .doc-article{padding:36px 34px 44px}
-  .doc-side{position:static;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .doc-side{position:static;max-height:none;overflow:visible;padding-right:0;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
   .doc-side-card:first-child{grid-column:1/-1}
   .doc-side-card:first-child ul{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
   .doc-side-card:first-child li{min-width:0}
@@ -556,7 +557,7 @@ a{color:inherit}
     <div class="ws-footer-copy">© 2026 Wistudi</div>
   </div>
 </footer>
-<script src="/assets/js/site-shell.js?v=20260918-latest-integration-doc"></script>
+<script src="/assets/js/site-shell.js?v=20260918-sticky-sidebar1"></script>
 <script>
 (function(){
   const links=[...document.querySelectorAll('.doc-scroll-nav a')];
