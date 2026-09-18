@@ -4,6 +4,9 @@
 /assets/images/*
   Cache-Control: public, max-age=31536000, immutable
 
+/assets/js/site-shell.js
+  Cache-Control: no-store, max-age=0
+
 /assets/js/*
   Cache-Control: public, max-age=0, must-revalidate
 

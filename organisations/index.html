@@ -1156,7 +1156,7 @@ body.page-organisations .section-head.in .eyebrow::before{
 </footer>
 <div aria-hidden="true" class="lightbox" id="lightbox"><div class="lightbox-inner"><button aria-label="Close image" class="lightbox-close" id="lightboxClose">×</button><img alt="Expanded Wistudi event image" id="lightboxImg"/></div></div>
 <script>
-// Unified Wistudi header navigation is handled by assets/js/site-shell.js; legacy header handlers removed.
+// Unified Wistudi header navigation is handled by assets/js/site-shell.js?v=20260918-header2; legacy header handlers removed.
 const reveals=document.querySelectorAll('.reveal:not(.in)');if('IntersectionObserver'in window){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.07,rootMargin:'0px 0px -6% 0px'});reveals.forEach(el=>io.observe(el))}else reveals.forEach(el=>el.classList.add('in'));
 
 // smooth section-by-section reveal on desktop and mobile
@@ -1251,5 +1251,5 @@ const lb=document.getElementById('lightbox'),lbImg=document.getElementById('ligh
   captionObserver.observe(dTitle,{childList:true,characterData:true,subtree:true});
   captionObserver.observe(dDesc,{childList:true,characterData:true,subtree:true});
 })();
-</script><script src="../assets/js/site-shell.js"></script>
+</script><script src="../assets/js/site-shell.js?v=20260918-header2"></script>
 </body></html>
