@@ -2,30 +2,32 @@
   'use strict';
   const DISCORD_URL='https://discord.gg/ehnSMW6cD';
   const FACEBOOK_URL='https://www.facebook.com/profile.php?id=61590336100890';
-  const FOOTER=`<div class="ws-container ws-footer-row">
-    <a class="ws-brand" href="/" aria-label="Wistudi — Platform home"><img class="ws-footer-wordmark" src="/assets/images/wistudi-logo.png" alt="Wistudi"></a>
-    <div class="ws-footer-links">
-      <a href="/">Platform</a><a href="/blocks-activities/">Blocks &amp; Activities</a><a href="/organisations/">Organisations</a><a href="/resources/">Resources</a><a href="/contact/">Contact</a>
-      <a href="/terms-and-conditions/">Terms and Conditions</a><a href="/credit-usage-policy/">Credit Usage Policy</a>
-    </div>
-    <div class="ws-footer-contact">
-      <a href="mailto:support@wistudi.com">support@wistudi.com</a>
-      <a href="mailto:partnerships@wistudi.com">partnerships@wistudi.com</a>
-      <a href="tel:+84879876624">+84 879 876 624</a>
-      <span>Operating out of Vietnam</span>
-      <a href="https://find-and-update.company-information.service.gov.uk/company/17458982" target="_blank" rel="noopener noreferrer">Wistudi Publishing LTD</a>
-      <a href="https://find-and-update.company-information.service.gov.uk/company/17458982" target="_blank" rel="noopener noreferrer">Company Number 17458982</a>
-      <a href="https://find-and-update.company-information.service.gov.uk/company/17458982" target="_blank" rel="noopener noreferrer">128 City Road, London, United Kingdom, EC1V 2NX</a>
-    </div>
-    <div class="ws-footer-copy">© 2026 Wistudi</div>
-  </div>`;
 
   function normalizeFooter(){
-    document.querySelectorAll('footer').forEach(footer=>{
-      footer.classList.add('ws-site-footer');
-      footer.innerHTML=FOOTER;
+    document.querySelectorAll('footer.ws-site-footer').forEach(footer=>{
+      footer.innerHTML=`<div class="ws-container ws-footer-row">
+        <a class="ws-brand" href="/" aria-label="Wistudi — Platform home"><img class="ws-footer-wordmark" src="/assets/images/wistudi-logo.png" alt="Wistudi"></a>
+        <div class="ws-footer-links">
+          <a href="/">Platform</a>
+          <a href="/blocks-activities/">Blocks &amp; Activities</a>
+          <a href="/organisations/">Organisations</a>
+          <a href="/resources/">Resources</a>
+          <a href="/contact/">Contact</a>
+          <a href="/terms-and-conditions/">Terms and Conditions</a>
+          <a href="/credit-usage-policy/">Credit Usage Policy</a>
+        </div>
+        <div class="ws-footer-contact">
+          <a href="mailto:support@wistudi.com">support@wistudi.com</a>
+          <a href="mailto:partnerships@wistudi.com">partnerships@wistudi.com</a>
+          <a href="tel:+84879876624">+84 879 876 624</a>
+          <span>Operating out of Vietnam</span>
+          <a href="https://find-and-update.company-information.service.gov.uk/company/17458982" target="_blank" rel="noopener noreferrer">Wistudi Publishing LTD</a>
+          <a href="https://find-and-update.company-information.service.gov.uk/company/17458982" target="_blank" rel="noopener noreferrer">Company Number 17458982</a>
+          <a href="https://find-and-update.company-information.service.gov.uk/company/17458982" target="_blank" rel="noopener noreferrer">128 City Road, London, United Kingdom, EC1V 2NX</a>
+        </div>
+        <div class="ws-footer-copy">© 2026 Wistudi</div>
+      </div>`;
     });
-    if(window.__WISTUDI_TRANSLATE_NODE__) document.querySelectorAll('footer.ws-site-footer').forEach(window.__WISTUDI_TRANSLATE_NODE__);
   }
 
   function fixSocialLinks(){
@@ -40,7 +42,8 @@
   }
 
   function init(){
-    normalizeFooter();fixSocialLinks();
+    normalizeFooter();
+    fixSocialLinks();
     const observer=new MutationObserver(()=>fixSocialLinks());
     observer.observe(document.documentElement,{childList:true,subtree:true});
     setTimeout(()=>observer.disconnect(),5000);
