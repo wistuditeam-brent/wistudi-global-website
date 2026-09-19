@@ -1,3 +1,15 @@
+## 2026-09-19 / Closed Preview Gate Fallback
+
+### Changed
+
+- Treat a missing request URL as a non-preview host, so middleware checks without a
+  request fail closed instead of throwing.
+
+### Why
+
+- The repository's automatic gate check invokes middleware with an environment
+  binding but no Request object. Cloudflare requests still use their exact hostname.
+
 ## 2026-09-19 / Hosted Feature Preview Access
 
 ### Changed

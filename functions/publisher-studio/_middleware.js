@@ -3,7 +3,8 @@
 const PUBLIC_PREVIEW_HOST = 'feature-publisher-studio-mvp.wistudi-global-website.pages.dev';
 
 export async function onRequest(context) {
-  const host = new URL(context.request.url).hostname.toLowerCase();
+  const requestUrl = context.request?.url;
+  const host = requestUrl ? new URL(requestUrl).hostname.toLowerCase() : '';
   const exactPreviewHost = host === PUBLIC_PREVIEW_HOST;
   const explicitlyEnabled = context.env.PUBLISHER_STUDIO_PREVIEW_ENABLED === 'true';
 
