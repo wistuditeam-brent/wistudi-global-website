@@ -1,7 +1,7 @@
 # Wistudi Publisher Studio Architecture
 
-Phase: Architecture
-Status: Draft for `feature/publisher-studio-mvp`
+Phase: Architecture and first development prototype
+Status: Implemented prototype on `feature/publisher-studio-mvp`; not production-ready
 Last updated: 2026-09-19
 
 ## Purpose
@@ -47,13 +47,20 @@ Recommended initial routes:
 | `/publisher-studio/submissions/[id]` | Shared participant creation detail | Public or registered, depending on moderation |
 | `/publisher-studio/admin` | Trainer and Wistudi team controls | Restricted |
 
-If the website uses feature flags, Publisher Studio should remain hidden until approved:
+The existing site uses static HTML and Cloudflare Pages Functions, not Next.js.
+The implemented release switch is a server-side environment value:
 
 ```text
-NEXT_PUBLIC_ENABLE_PUBLISHER_STUDIO=false
+PUBLISHER_STUDIO_PREVIEW_ENABLED=false
 ```
 
-If no feature flag system exists, the routes may exist but should not be linked from public navigation until launch.
+The Studio middleware returns 404 unless the value is exactly `true`. Leave it
+unset in production. Public navigation and the sitemap remain unchanged. Noindex
+and unlisted paths are not authentication or private preview access controls.
+
+The access column above describes the target system. The current prototype uses
+demo participation only, without login. See `development.md` for implemented
+routes, the integration audit and the boundary between local state and real identity.
 
 ## Main Experience Areas
 
@@ -123,7 +130,8 @@ Recommended user states:
 | Trainer or moderator | Highlight, answer, pin, hide, approve and manage content |
 | Connected Wistudi user | Future state: remix, save to workspace, publish and connect contributions |
 
-Registration should use email as the unique identity key.
+Use an immutable internal user ID. A verified email is a private lookup and
+deduplication attribute, not a public ID or sufficient proof for account linking.
 
 Avoid anonymous posting. It creates moderation problems and makes later migration to Wistudi harder.
 
@@ -462,7 +470,9 @@ The page can still display Nadia or another real trainer when assigned to a spec
 
 ## Initial Build Scope
 
-Phase 1 should create architecture, routes and static shell only.
+The first development milestone implements the routes and local-data interactions
+described in `development.md`. This extends the static shell for usability testing
+without introducing live services.
 
 Included:
 
@@ -488,10 +498,8 @@ Not included:
 
 ## Open Questions
 
-- Which repository and framework is the website currently using?
-- Is registration currently handled through Google Forms, custom API routes or a third-party form tool?
-- Does the current website already have auth or user sessions?
-- Is there an existing database provider connected to the global website?
-- Should the first Studio prototype use mock data only or connect to the existing registration source?
-- Should event registration automatically opt users into Studio participation, or should this be a visible checkbox?
+- Confirm the production database and participant authentication provider before Phase 3.
+- Confirm ownership of the existing Google Apps Script / Sheets registration integration.
+- Agree the retention, account-linking and moderation policies for real Studio data.
+- Review the visible, default-unchecked Studio membership opt-in used in the prototype.
 - What moderation level is acceptable for first public launch?

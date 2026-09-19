@@ -1,7 +1,7 @@
 # Publisher Studio Implementation Plan
 
-Phase: Architecture
-Status: Draft for `feature/publisher-studio-mvp`
+Phase: First development milestone (Phase 2 prototype)
+Status: Implemented on `feature/publisher-studio-mvp`; not launched
 Last updated: 2026-09-19
 
 ## Recommended Git Workflow
@@ -36,6 +36,8 @@ feat: add mock build challenge UI
 
 ## Phase 1: Architecture
 
+Status: complete as an implementation foundation; product decisions remain reviewable.
+
 Goal: create the implementation foundation before UI build-out.
 
 Deliverables:
@@ -57,6 +59,10 @@ Acceptance criteria:
 - The project has a trackable decision log.
 
 ## Phase 2: Static Prototype
+
+Status: implemented with local-data interactions for usability review. See
+`development.md` for exact boundaries and repeatable tests. All real services remain
+deferred. Review responsive screenshots and device keyboard behavior before approval.
 
 Goal: create the first visible page shells using mock data.
 

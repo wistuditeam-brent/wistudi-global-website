@@ -2,6 +2,44 @@
 
 This file records product, UX and technical decisions for Publisher Studio so future edits build on prior choices.
 
+## First Development Milestone / 2026-09-19
+
+### Preserve Existing Integrations
+
+Source inspection confirmed static HTML and Cloudflare Pages Functions, with the
+event API using Google Apps Script / Sheets and Resend. Keep those files unchanged.
+Add isolated native JavaScript modules and CSS; do not introduce a second framework.
+
+### Explicit Demo Boundary
+
+Use fixtures and versioned browser-tab storage for the prototype. Display a persistent
+preview label, label sample dates and trainer answers, and never call production APIs.
+Do not collect persistent email addresses or imply that a booking or login occurred.
+
+### Membership Consent
+
+Provide a visible, unchecked Studio-profile opt-in in the registration preview.
+Declining it still allows read-only-style demo exploration. Live participation will
+require verified identity; demo participation is not an authentication implementation.
+
+### Default-Off Release Gate
+
+Add a scoped Cloudflare middleware switch, disabled unless explicitly enabled in a
+preview environment. No navigation, sitemap, hosting settings or production branch
+changes. Noindex is indexing guidance, not a privacy boundary.
+
+### Durable Identity Boundary
+
+Use immutable IDs for people and content, with verified email as a private attribute.
+Account linking needs proof from both identities. Never merge accounts solely because
+unverified email strings match. Avatar seeds must not expose email addresses.
+
+### Repeatable Review
+
+Add separate Studio model tests and responsive workflow QA with screenshot artifacts.
+Keep scope, integration findings and remaining work in `development.md`. Continue
+iterating on the same feature branch without rewriting its shared history.
+
 ## 2026-09-19
 
 ### Build Location
