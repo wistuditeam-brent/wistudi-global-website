@@ -42,9 +42,9 @@ Recommended initial routes:
 | --- | --- | --- |
 | `/publisher-studio` | Studio home and current weekly overview | Public |
 | `/publisher-studio/events/[slug]` | Event detail and registration | Public |
-| `/publisher-studio/studio` | Participant Studio app shell | Registered participant |
-| `/publisher-studio/studio/week/[weekSlug]` | Current or archived weekly Studio space | Registered participant |
-| `/publisher-studio/submissions/[id]` | Shared participant creation detail | Public or registered, depending on moderation |
+| `/publisher-studio/studio` | Participant Studio app shell | Public overview; verified Studio membership to read discussions or contribute |
+| `/publisher-studio/studio/week/[weekSlug]` | Current or archived weekly Studio space | Public event/kit summary; verified Studio membership for discussions and contributions |
+| `/publisher-studio/submissions/[id]` | Shared participant creation detail | Author/moderator until approved for the public showcase |
 | `/publisher-studio/admin` | Trainer and Wistudi team controls | Restricted |
 
 The existing site uses static HTML and Cloudflare Pages Functions, not Next.js.
@@ -125,13 +125,20 @@ Recommended user states:
 
 | State | Capabilities |
 | --- | --- |
-| Visitor | View public Studio pages, event details and approved public resources |
-| Registered participant | Ask questions, vote, comment, join challenges, submit creations |
-| Trainer or moderator | Highlight, answer, pin, hide, approve and manage content |
-| Connected Wistudi user | Future state: remix, save to workspace, publish and connect contributions |
+| Visitor | View public Studio pages, event details, approved resources and curated showcase |
+| Workshop registrant | Attend their workshop; registration alone does not unlock discussion |
+| Enrollment pending | Complete email verification; no member actions yet |
+| Verified Studio member | Read member discussions; ask, vote, reply, join challenges and submit creations |
+| Trainer or moderator | Perform actions only within assigned Studio/workshop scopes |
+| Member linked to Wistudi | Future state: remix, save to workspace and publish through a verified account connection |
 
-Use an immutable internal user ID. A verified email is a private lookup and
-deduplication attribute, not a public ID or sufficient proof for account linking.
+Use an immutable internal user ID. A verified email is private login/contact data,
+not a public ID or sufficient proof for account linking. Keep workshop booking,
+Studio membership consent, email verification and workshop attendance as distinct
+records. A booking does not automatically create an active Studio membership.
+
+See [`identity-and-storage.md`](identity-and-storage.md) for the proposed data model,
+enrollment flow, provider decision gate, authorization boundaries and migration plan.
 
 Avoid anonymous posting. It creates moderation problems and makes later migration to Wistudi harder.
 
@@ -139,14 +146,18 @@ Avoid anonymous posting. It creates moderation problems and makes later migratio
 
 Recommended flow:
 
-1. User registers for a workshop.
-2. Registration creates or updates a `StudioUser`.
-3. User receives a confirmation email or magic link.
-4. Magic link opens the Studio space.
-5. The user can ask, vote, discuss or submit without creating a full Wistudi account.
-6. Later, the Studio identity can be connected to a Wistudi account.
+1. User registers for a workshop through the existing event flow.
+2. The user may separately opt in to a Studio profile; this choice is unchecked by default.
+3. The booking remains valid whether Studio is declined or temporarily unavailable.
+4. An opted-in user receives a single-use email verification/sign-in link. Booking
+   confirmation alone does not prove mailbox ownership.
+5. Successful verification activates a lightweight Studio identity and membership.
+   Repeated workshop registrations attach to the same identity after proof.
+6. Later, the user can explicitly connect the Studio identity to a Wistudi account.
 
-If the existing website already uses Google Forms, embedded forms or external registration tools, the first version can continue using them. However, a sync or import path should be planned so registration data can become Studio identity data.
+The repository's current event path uses Google Apps Script / Sheets and Resend.
+Keep it unchanged until a durable, idempotent Studio handoff and retry policy are
+implemented. A registration ID is a correlation reference, never an access token.
 
 ## Avatar Model
 
@@ -163,32 +174,23 @@ Avoid AI-generated faces or fictional people. The editorial standards prohibit i
 Store:
 
 ```text
-avatar_seed
+private_server_avatar_seed
 avatar_style
 display_name
 ```
 
-The avatar can be regenerated from the stored seed, so image files do not need to be stored.
+The avatar can be regenerated from the stored random seed, so image files do not need
+to be stored. Never derive the seed from a name, email or registration ID, or expose
+the seed through the public profile API.
 
 ## Core Data Objects
 
 ### StudioUser
 
-Represents a lightweight participant identity.
-
-Suggested fields:
-
-```text
-id
-email
-display_name
-avatar_seed
-avatar_style
-role
-created_at
-last_seen_at
-wistudi_user_id
-```
+Represents a lightweight participant profile. Keep email in a private verified
+identity record, staff roles in scoped role assignments, and future Wistudi identity
+in a provider mapping. Suggested fields are `id`, `display_name`, `avatar_seed`,
+`avatar_style`, `status`, `created_at`, `updated_at`, and `deleted_at`.
 
 ### Workshop
 
@@ -204,14 +206,16 @@ summary
 subject
 topic
 level
-trainer_id
 starts_at
 ends_at
 status
-recording_url
 created_at
 updated_at
 ```
+
+Assign trainers with a separate scoped workshop-staff relation. Keep restricted
+meeting credentials out of public workshop/resource records. Recording access follows
+the workshop's visibility rules.
 
 Workshop status:
 
@@ -222,21 +226,25 @@ post_session
 archived
 ```
 
-### Registration
+### Workshop Registration
 
-Connects a user to a workshop.
+Represents an event booking in the existing registration system. Studio should keep
+an opaque source reference and event ID. Link it to a Studio user only after that
+person verifies the email/identity; store consent evidence separately. Booking and
+membership remain valid independently of each other.
 
-Suggested fields:
+### AuthIdentity and VerifiedEmail
 
-```text
-id
-studio_user_id
-workshop_id
-source
-status
-registered_at
-consent_to_studio
-```
+Keep provider subject IDs in `AuthIdentity` mappings and private verified email
+addresses in a separate identity record. Neither belongs on the public profile. A
+future Wistudi account link must prove control of both signed-in identities.
+
+### StudioMembership and Consent
+
+Membership is a separate relation between a profile and a Studio. Consent records
+the purpose, exact policy version, grant/withdraw action, timestamp and source.
+Marketing consent remains separate. Role assignments are scoped to the Studio or a
+workshop rather than stored as one global user role.
 
 ### PublisherKit
 
@@ -285,21 +293,19 @@ guide
 external_link
 ```
 
-### Question
+### Question (thread kind)
 
-Used for trainer Q&A.
+Questions are a kind of contextual thread, not a duplicate post table. Question-only
+fields such as answer status and assigned/answering trainer can extend that thread.
 
 Suggested fields:
 
 ```text
 id
-workshop_id
-studio_user_id
-context_type
 context_id
+created_by
 body
 status
-answer
 answered_by
 answered_at
 recording_timestamp
@@ -319,14 +325,15 @@ hidden
 ### Vote
 
 Used for "I want this answered too" and purposeful voting.
+Store a unique participant vote per target/type; compute counts server-side rather
+than accepting counts from the browser.
 
 Suggested fields:
 
 ```text
 id
 studio_user_id
-target_type
-target_id
+target_thread_id
 vote_type
 created_at
 ```
@@ -339,7 +346,7 @@ Suggested fields:
 
 ```text
 id
-workshop_id
+context_id
 title
 description
 prompt
@@ -356,7 +363,7 @@ Suggested fields:
 
 ```text
 id
-challenge_id
+challenge_context_id
 studio_user_id
 title
 description
@@ -377,9 +384,7 @@ Suggested fields:
 
 ```text
 id
-context_type
 context_id
-workshop_id
 title
 thread_type
 created_by
@@ -388,7 +393,7 @@ created_at
 updated_at
 ```
 
-Thread types:
+Contribution types:
 
 ```text
 discuss
@@ -400,7 +405,7 @@ can_help
 made_something
 ```
 
-### Comment
+### ThreadReply
 
 Represents replies within a contextual thread.
 
@@ -409,7 +414,7 @@ Suggested fields:
 ```text
 id
 thread_id
-studio_user_id
+author_id
 body
 moderation_status
 created_at
@@ -418,13 +423,17 @@ updated_at
 
 ## Context Metadata
 
-All questions, threads, comments and submissions should retain context.
+All questions, threads, replies and submissions should retain context through a
+stable `StudioContext` foreign key. The browser's context type/ID pair is only a
+prototype representation. Question and discussion records share the thread model;
+the challenge is also a context object.
 
 Example:
 
 ```text
 context_type: template
-context_id: communicative-esl-flow
+context_id: immutable-studio-context-uuid
+origin_id: wistudi-template-or-studio-resource-id
 workshop_id: publisher-studio-week-01
 subject: English
 topic: Speaking
@@ -498,8 +507,9 @@ Not included:
 
 ## Open Questions
 
-- Confirm the production database and participant authentication provider before Phase 3.
+- Confirm the Wistudi platform's canonical identity provider and user ID before Phase 3.
+- Confirm the Studio database provider, owner, backups and preview/production separation.
 - Confirm ownership of the existing Google Apps Script / Sheets registration integration.
-- Agree the retention, account-linking and moderation policies for real Studio data.
-- Review the visible, default-unchecked Studio membership opt-in used in the prototype.
+- Agree membership consent, retention, deletion, account recovery and moderation policies.
+- Decide whether approved discussions can be read without membership.
 - What moderation level is acceptable for first public launch?

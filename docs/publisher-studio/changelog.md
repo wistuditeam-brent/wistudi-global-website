@@ -1,5 +1,33 @@
 # Publisher Studio Changelog
 
+## 2026-09-19 / Identity and Storage Architecture
+
+### Added
+
+- Identity and storage design covering enrollment, verification, membership,
+  contextual data, moderation, access control and future Wistudi linking.
+- A logical relational model with stable context foreign keys and scoped staff roles.
+- A provider decision gate that distinguishes findings from the website source audit
+  from uninspected Wistudi platform and Cloudflare account configuration.
+- Explicit cross-system retry requirements for the existing Sheets/Resend event flow.
+
+### Why
+
+- Make the next implementation step concrete while preserving the live booking path.
+- Avoid treating workshop registration, Studio membership consent and verified login
+  as one event or reusing a registration ID as authentication.
+- Keep identity/content portable for a future Wistudi account connection.
+
+### Still Open
+
+- Wistudi's current auth provider and canonical user ID.
+- Owned Studio database/auth provider and production/preview operations.
+- Approved consent wording, retention, deletion/recovery, moderation and public-read
+  policies.
+- A durable retry adapter between the existing event registration system and Studio.
+- A decision on the existing Sheets check-then-append duplicate race and manual
+  storage-fallback process before using it as the basis for opt-in provisioning.
+
 ## 2026-09-19 / First Development Milestone
 
 ### Added

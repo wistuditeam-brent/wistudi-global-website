@@ -101,6 +101,12 @@ Inspected source, not production configuration:
 - The site is static HTML/CSS/JavaScript with Cloudflare Pages Functions.
 - `functions/api/event-register.js` accepts registration data, writes through a
   Google Apps Script / Sheets webhook and uses Resend for confirmation emails.
+- The production event endpoint accepts booking privacy and marketing consent; it
+  does not accept Studio membership consent or verify email ownership.
+- The Sheets webhook checks existing rows before appending without an explicit
+  lock/unique constraint. Concurrent duplicate requests can race; the fallback email
+  is a manual recovery path, not a durable retry queue. This phase documents the gap
+  but does not alter the live registration flow.
 - The current endpoint uses an event allowlist. Studio fixture IDs must never be
   posted to it or added just to make a demo appear connected.
 - `assets/js/event-registration-component.js` and the live bridge belong to the
@@ -117,24 +123,28 @@ evidence that production email delivery failed. Track that separately.
 
 ## Next Development Gate: Identity and Storage
 
+The reviewable design baseline is in [`identity-and-storage.md`](identity-and-storage.md).
+The provider choice remains open until the Wistudi platform's canonical account
+provider and the deployed site's bindings are confirmed.
+
 1. Confirm a database and authentication provider compatible with existing hosting.
 2. Use immutable Studio user IDs, private verified-email records and explicit
    identities mapping `(provider, provider_subject)` for future Wistudi accounts.
-3. Reuse the existing registration integration through an idempotent adapter/outbox.
-   Make workshop registration and Studio membership separate records. Repeated
-   registrations must not create new members, avatars or duplicate emails.
-4. Keep Studio membership opt-in visible and unchecked by default. Keep marketing
-   consent separate. Record consent version/time and provide withdrawal/deletion.
+3. Keep workshop registration, Studio membership and verified sign-in separate.
+   Repeated registrations must not create new members, avatars or duplicate emails.
+4. Keep Studio opt-in visible and unchecked by default. Keep booking privacy and
+   marketing consent separate. Record consent version/time and define withdrawal
+   and deletion behavior.
 5. Verify email before interactive access. Use expiring, single-use hashed tokens,
    secure HttpOnly sessions, server-side membership checks, CSRF protection, rate
    limits and recovery for expired links. Never grant access from a registration
    ID, a URL email or browser storage.
 6. Add unique vote constraints, relational context integrity, server timestamps,
-   pagination, retry handling, moderation roles, reporting and an audit trail.
+   pagination, retry handling, scoped moderation roles, reporting and an audit trail.
 7. Define upload limits, safe file processing, copyright/remix permissions and
-   rules against sharing identifiable learner work without permission.
-8. Test the failure paths: registration stored but email fails; webhook retry;
-   returning attendee; declined Studio consent; account linking collision;
+   rules against sharing identifiable learner work before enabling uploads.
+8. Cover failure paths before release: registration stored but email fails; webhook
+   retry; returning attendee; declined Studio consent; account-link collision;
    removed member; deleted parent content; unavailable live session.
 
 Remix, avatars and discussion records must use opaque IDs, not email-derived public

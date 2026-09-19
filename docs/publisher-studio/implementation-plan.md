@@ -1,7 +1,7 @@
 # Publisher Studio Implementation Plan
 
-Phase: First development milestone (Phase 2 prototype)
-Status: Implemented on `feature/publisher-studio-mvp`; not launched
+Phase: Identity and storage architecture (next implementation gate)
+Status: Prototype is implemented; provider and live identity remain unselected
 Last updated: 2026-09-19
 
 ## Recommended Git Workflow
@@ -84,27 +84,55 @@ Acceptance criteria:
 - No real database or auth is required yet.
 - The Studio route is hidden from navigation until approved.
 
-## Phase 3: Registration and Studio Identity
+## Phase 3: Identity and Storage Architecture
 
-Goal: connect workshop registration to lightweight Studio participation.
+Status: design baseline documented in `identity-and-storage.md`; provider decision
+is blocked on confirming the Wistudi platform's existing account and data stack.
+
+Goal: settle the records, trust boundaries and operational owner before real
+authentication or participant data is introduced.
 
 Deliverables:
 
-- Registration source audit
-- Studio user creation/update logic
-- Email as identity key
-- Generated avatar seed
-- Consent field for Studio participation
-- Magic-link or equivalent access approach
+- Confirmed source of truth for Wistudi account IDs and supported account linking.
+- Chosen, owned relational store and preview/production separation.
+- Logical migrations for Studio users, verified identities, memberships, consent,
+  enrollment intents, contexts, discussions, votes, submissions and moderation.
+- Idempotent event-registration handoff with retry/reconciliation behavior.
+- Email verification, session, recovery, retention and deletion decisions.
 
 Acceptance criteria:
 
-- A registered participant can be identified without creating a full Wistudi account.
-- Duplicate identities are reduced by using email as the unique key.
-- Public email addresses are never displayed.
-- Studio identity can later map to a Wistudi account.
+- Booking can succeed independently from optional Studio enrollment.
+- Only explicit Studio opt-in plus successful identity verification activates membership.
+- Stable Studio IDs do not depend on email, display name or provider IDs.
+- Existing Sheets/Resend registration flow has a reviewed, retryable integration plan.
+- Roles and permissions are checked server-side and scoped to a Studio/workshop.
+- Contextual content has referential integrity and portable external ID mappings.
+- Preview data and credentials are isolated from production.
 
-## Phase 4: Contextual Discussion
+## Phase 4: Live Identity and Registration Bridge
+
+Goal: allow an opted-in participant to verify access and return to the Studio without
+creating a full Wistudi account.
+
+Deliverables:
+
+- Enrollment intent and single-use email verification/sign-in flow.
+- Secure server-side sessions and account recovery.
+- Studio membership and consent evidence.
+- Existing registration adapter with idempotency, retries and observable failures.
+- Automatically generated initials/abstract avatar from a random private seed.
+
+Acceptance criteria:
+
+- A Sheets row ID, URL email or browser storage never grants access.
+- Repeated registration/retry does not duplicate members, avatars, consent or email.
+- Public APIs never return private email addresses or raw auth tokens.
+- Studio errors do not silently invalidate a confirmed event booking.
+- A user can withdraw membership and request account/data removal.
+
+## Phase 5: Contextual Discussion
 
 Goal: implement the core discussion model around Studio objects.
 
@@ -124,7 +152,7 @@ Acceptance criteria:
 - Trainer answers can be marked as answered.
 - Threads can be filtered by workshop, template, challenge or resource.
 
-## Phase 5: Build Challenge
+## Phase 6: Build Challenge
 
 Goal: turn workshop attendance into creation.
 
@@ -144,7 +172,7 @@ Acceptance criteria:
 - Submissions can be moderated before public showcase.
 - Each submission keeps challenge and workshop context.
 
-## Phase 6: Admin and Moderation
+## Phase 7: Admin and Moderation
 
 Goal: give the trainer and Wistudi team enough control to run the Studio.
 
@@ -163,7 +191,7 @@ Acceptance criteria:
 - The Wistudi team can keep public areas clean.
 - No public showcase item appears without approval.
 
-## Phase 7: Wistudi Platform Connection
+## Phase 8: Wistudi Platform Connection
 
 Goal: connect the Studio to Wistudi account and publishing actions.
 

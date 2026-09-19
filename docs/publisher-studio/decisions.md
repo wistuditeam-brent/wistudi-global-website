@@ -2,6 +2,106 @@
 
 This file records product, UX and technical decisions for Publisher Studio so future edits build on prior choices.
 
+## Identity and Storage Architecture / 2026-09-19
+
+### Separate Booking, Membership and Sign-in
+
+Decision: treat event booking, Studio membership consent and verified sign-in as
+separate records and steps. Studio membership is optional, unchecked by default,
+and becomes active only after identity verification.
+
+Reason:
+
+- Booking confirmation does not prove control of the attendee's email inbox.
+- A participant can attend a workshop without joining ongoing discussions.
+- Membership needs its own consent, access checks, retention and deletion behavior.
+
+The live event endpoint currently does not collect Studio opt-in. Do not represent
+the prototype checkbox as a connected production feature until the handoff is
+implemented.
+
+### Keep Existing Registration as a Separate System
+
+Decision: preserve the current Google Apps Script / Sheets and Resend booking flow
+while designing a durable, idempotent handoff to Studio.
+
+Reason:
+
+- The event path already supports booking and confirmations.
+- Studio setup or storage failure must not silently cancel a valid booking.
+- Cross-system writes need an outbox/queue or reconciliation process because Sheets
+  and a future Studio database cannot share one transaction.
+- The inspected Sheets webhook's duplicate scan and append are not guarded by a lock
+  or database uniqueness constraint; its storage-fallback email is manual recovery,
+  not a durable retry queue.
+
+The opaque event registration reference is for correlation only; it is not a login
+credential and must not grant access.
+
+### Provider Choice Remains Open
+
+Decision: do not select a database or auth vendor until the Wistudi platform's
+canonical account provider/user ID and current Cloudflare bindings are confirmed.
+
+Reason:
+
+- The global website source audit found no Studio database or reusable participant
+  login, but it did not inspect platform repositories, deployed account settings or
+  external provider accounts.
+- Reusing an existing, documented Wistudi identity flow should take priority if one
+  is available; otherwise the Studio needs an owned relational store and identity
+  provider with a clear operator.
+- Cloudflare D1 is a candidate for the current Pages Functions host, but it does not
+  provide the complete identity, recovery and consent lifecycle by itself.
+
+### Stable IDs and Relational Context
+
+Decision: create opaque Studio IDs independent of email/provider IDs. Keep provider
+subjects in an identity mapping, place roles in scoped assignments, and make
+discussions reference a stable context row with a foreign key.
+
+Reason:
+
+- Email can change and is private; it must not become a public ID or author key.
+- Trainer permissions differ by Studio/workshop and should not be a global profile
+  flag.
+- Context foreign keys make the future Wistudi conversation layer migratable and
+  prevent orphaned discussions when an object is renamed.
+
+### HTTP First for Discussions
+
+Decision: use persistent contextual threads over ordinary authenticated HTTP for
+the first live backend. Add only short polling for an active live Q&A if needed;
+defer WebSockets until usage demonstrates a need.
+
+Reason:
+
+- Mobile should feel like a focused conversation/workbench, while content remains
+  attached to workshops, templates, resources and challenges.
+- Persistent threads, pagination, moderation and context filters matter before
+  instant delivery.
+
+### Discussion Visibility (Proposed Baseline)
+
+Recommendation: member discussions are private to verified Studio members by
+default. Only resources and creations explicitly approved for the public showcase
+are visible without membership.
+
+Reason:
+
+- Educators should know whether their questions and works in progress are public.
+- A separate showcase approval/publishing action gives creators control over wider
+  visibility.
+- Visitors can still evaluate the Studio through public event information, the kit
+  and curated examples.
+
+This visibility rule needs product approval before the first live community data is
+collected.
+
+Retention durations, public read access, consent wording, deletion treatment of
+authored content, and live-session refresh behavior remain open and must be approved
+before collecting real Studio data.
+
 ## First Development Milestone / 2026-09-19
 
 ### Preserve Existing Integrations
