@@ -50,16 +50,21 @@ The static server tests UI only. It does not execute Cloudflare middleware.
 
 ## Preview Isolation
 
-`functions/publisher-studio/_middleware.js` returns 404 unless
-`PUBLISHER_STUDIO_PREVIEW_ENABLED` is exactly `true`. Leave it unset in production.
-Only set it in the approved Cloudflare preview environment when a hosted review
-is explicitly wanted. No hosting settings were changed for this milestone.
+`functions/publisher-studio/_middleware.js` allows the exact feature-branch Pages
+alias `feature-publisher-studio-mvp.wistudi-global-website.pages.dev` so the hosted
+prototype can be reviewed. Other hostnames, including production, return 404 unless
+`PUBLISHER_STUDIO_PREVIEW_ENABLED` is exactly `true`. Leave that variable unset
+in production. Setting it in Cloudflare's Preview environment can open the routes
+on other preview deployments too; the exact-host exception avoids requiring that
+project-wide switch for this branch.
 
-The gate adds no-store and noindex headers to enabled routes. It is a release
-switch, not a login system. Neither an unlisted route, noindex nor a feature branch
-is private access control. If previews must be private, configure deployment access
-protection before exposing them. Assets and source are public in this public repo;
-never put credentials, personal data or private meeting links in fixture files.
+The feature alias is public to anyone with the URL. It contains demonstration
+fixtures only: no real account data, registration processing or shared database.
+The gate adds no-store and noindex headers, but neither an unlisted route, noindex
+nor a feature branch is private access control. If previews must be private,
+configure Cloudflare Access before exposing them. Assets and source are public in
+this public repo; never put credentials, personal data or private meeting links
+in fixture files. No Cloudflare dashboard settings were changed.
 
 ## File Boundaries
 

@@ -1,3 +1,23 @@
+## 2026-09-19 / Hosted Feature Preview Access
+
+### Changed
+
+- Allow the exact `feature-publisher-studio-mvp.wistudi-global-website.pages.dev`
+  alias through the Publisher Studio middleware.
+- Keep production and every other hostname default-off unless the explicit
+  `PUBLISHER_STUDIO_PREVIEW_ENABLED=true` override is configured.
+
+### Why
+
+- The Cloudflare deployment completed, but the intentional default-off middleware
+  returned 404 on the branch alias. The exact-host exception makes this one hosted
+  demo reviewable without enabling the route across all preview deployments.
+
+### Access
+
+- The branch preview is public to anyone with its URL and contains fixture data
+  only. Keep private information out of its pages and assets.
+
 # Publisher Studio Changelog
 
 ## 2026-09-19 / Identity and Storage Architecture
