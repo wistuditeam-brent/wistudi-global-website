@@ -1,7 +1,7 @@
 # Publisher Studio Implementation Plan
 
-Phase: Identity and storage architecture (next implementation gate)
-Status: Prototype is implemented; provider and live identity remain unselected
+Phase: Event-system architecture and expanded static prototype
+Status: Event catalogue, sample event pages/rooms, sharing and Event Builder preview implemented; live service providers remain unselected
 Last updated: 2026-09-19
 
 ## Recommended Git Workflow
@@ -48,6 +48,7 @@ Deliverables:
 - Changelog
 - Route map
 - Data object definitions
+- Event-system architecture, event lifecycle, scoped builder roles, share/Zoom boundaries
 - Initial open questions
 
 Acceptance criteria:
@@ -60,7 +61,8 @@ Acceptance criteria:
 
 ## Phase 2: Static Prototype
 
-Status: implemented with local-data interactions for usability review. See
+Status: expanded with event-catalogue, share and Event Builder previews using
+local-only data. See
 `development.md` for exact boundaries and repeatable tests. All real services remain
 deferred. Review responsive screenshots and device keyboard behavior before approval.
 
@@ -70,7 +72,9 @@ Deliverables:
 
 - `/publisher-studio` page shell
 - `/publisher-studio/events/[slug]` page shell
-- `/publisher-studio/studio` mobile-first shell
+- `/publisher-studio/events/[slug]/room` mobile-first event room
+- `/publisher-studio/manage/events` guided Event Builder preview
+- Event listing cards with local-time display and event share modal
 - Mock Publisher Kit
 - Mock Questions tab
 - Mock Challenge tab
@@ -83,6 +87,7 @@ Acceptance criteria:
 - Mobile Studio area feels like a focused app or chat workspace.
 - No real database or auth is required yet.
 - The Studio route is hidden from navigation until approved.
+- Builder drafts, registration and rooms remain explicitly marked as local preview interactions.
 
 ## Phase 3: Identity and Storage Architecture
 

@@ -2,6 +2,87 @@
 
 This file records product, UX and technical decisions for Publisher Studio so future edits build on prior choices.
 
+## Event System and Builder / 2026-09-19
+
+### One Canonical Event, Multiple Views
+
+Decision: model one event record and render it in the Publisher Studio catalogue,
+public event page, registered room, registration handoff, share preview and relevant
+Resources Events listing.
+
+Reason:
+
+- A second manually maintained listing or static copy of event information will
+  drift in title, schedule, registration URL and status.
+- The room, kit, discussion, challenge and final content all need a durable event ID.
+- The broader Resources Events directory can remain general-purpose while Studio
+  displays events configured for the creator/workshop experience.
+
+### One Room Per Event
+
+Decision: each event has one protected participant room. A recurring series can
+group several event instances, but each instance keeps its own event ID, bookings,
+staff assignments, room discussion and challenge/project.
+
+Reason:
+
+- Participants need the event's own schedule, resources and follow-up task.
+- Staff access and attendee access must be scoped to the relevant event.
+- This prevents a generic public chatroom and supports later contextual discussions
+  inside Wistudi.
+
+### Public Event Link Versus Room/Meeting Access
+
+Decision: share the public event details URL. It leads recipients to registration;
+it does not grant room or Zoom access. Zoom participant links are served only to
+authorized registrants and assigned staff from the protected room.
+
+Reason:
+
+- Colleagues can be invited without transferring another person's access.
+- Public metadata and link previews cannot expose a private meeting link.
+- Event and meeting credentials need distinct permissions and revocation rules.
+
+### Event Builder Permissions
+
+Decision: keep creator, trainer/moderator and administrator capabilities as scoped
+role assignments. Start with review-before-publish for invited event builders.
+Builder invitations are named, expiring and revocable after verified acceptance.
+
+Reason:
+
+- Different trainers can run different rooms without global admin access.
+- A transferable builder URL would grant broad control to whoever receives it.
+- Staff changes need an audit trail and an accountable owner.
+
+### Event Builder and Zoom Scope
+
+Decision: first live builder supports an assigned manual participant join link,
+stored privately; automated Zoom meeting creation is a later integration. Do not
+embed Zoom merely because a meeting URL exists.
+
+Reason:
+
+- Booking, event publication, room access and meeting management are separate
+  capabilities.
+- Automated meeting creation requires a Wistudi-controlled OAuth connection,
+  host assignment, credential storage, scope management and synchronization.
+- The event room remains the durable learning/workbench experience regardless of
+  which video meeting provider is used.
+
+### Event Lifecycle and Creator Journey
+
+Decision: display `Discover → Learn → Build → Share → Publish` as a lightweight
+participant guide. Store event lifecycle separately as `Draft → Review → Scheduled
+→ Live → Completed → Archived`. Wistudi publication remains optional.
+
+Reason:
+
+- Event operations and participant progress are separate facts.
+- A participant may miss the live workshop but still complete a project from the
+  recording/resources.
+- Sharing a work-in-progress inside a room does not equal public Wistudi publishing.
+
 ## Identity and Storage Architecture / 2026-09-19
 
 ### Separate Booking, Membership and Sign-in

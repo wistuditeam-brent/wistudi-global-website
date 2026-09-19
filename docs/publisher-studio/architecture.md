@@ -10,11 +10,13 @@ Wistudi Publisher Studio is a recurring learning, creation and discussion space 
 
 The first implementation should live inside the existing Wistudi global website. It should not be built as a separate repository or disconnected community product.
 
-The architecture should support three immediate needs:
+The architecture should support:
 
-- A public event and registration experience.
-- A mobile-first Studio space where participants engage around the weekly topic.
-- A data model that can later connect to the main Wistudi platform.
+- A public catalogue of Publisher Studio events and shareable event pages.
+- A standardized, role-scoped Event Builder.
+- A protected, mobile-first room for each event.
+- A clear journey from registration through workshop, project, discussion and optional Wistudi publishing.
+- A portable event/content data model that can later connect to the main Wistudi platform.
 
 ## Product Boundary
 
@@ -40,46 +42,45 @@ Recommended initial routes:
 
 | Route | Purpose | Access |
 | --- | --- | --- |
-| `/publisher-studio` | Studio home and current weekly overview | Public |
-| `/publisher-studio/events/[slug]` | Event detail and registration | Public |
-| `/publisher-studio/studio` | Participant Studio app shell | Public overview; verified Studio membership to read discussions or contribute |
-| `/publisher-studio/studio/week/[weekSlug]` | Current or archived weekly Studio space | Public event/kit summary; verified Studio membership for discussions and contributions |
+| `/publisher-studio/` | Publisher Studio event catalogue, journey overview and selected showcase | Public |
+| `/publisher-studio/events/[slug]/` | Canonical public event details, registration, share metadata and Publisher Kit | Public |
+| `/publisher-studio/events/[slug]/room/` | Chat-shaped room for the event's registered participants | Verified event registration and Studio membership; staff access is scoped |
+| `/publisher-studio/manage/events/` | Guided event creation, scheduling, media, room and project setup | Assigned event builder or Studio admin |
 | `/publisher-studio/submissions/[id]` | Shared participant creation detail | Author/moderator until approved for the public showcase |
-| `/publisher-studio/admin` | Trainer and Wistudi team controls | Restricted |
+| `/publisher-studio/admin/` | Event assignments, approvals and moderation controls | Studio admin or scoped moderator |
 
 The existing site uses static HTML and Cloudflare Pages Functions, not Next.js.
-The implemented release switch is a server-side environment value:
-
-```text
-PUBLISHER_STUDIO_PREVIEW_ENABLED=false
-```
-
-The Studio middleware returns 404 unless the value is exactly `true`. Leave it
-unset in production. Public navigation and the sitemap remain unchanged. Noindex
-and unlisted paths are not authentication or private preview access controls.
+The exact feature-branch Pages alias is open for public prototype review. Other
+hosts, including production, stay closed unless the server-side override
+`PUBLISHER_STUDIO_PREVIEW_ENABLED=true` is configured. The branch alias is public
+and contains fixture data only. Noindex and unlisted paths are not authentication
+or private preview access controls.
 
 The access column above describes the target system. The current prototype uses
-demo participation only, without login. See `development.md` for implemented
+demo participation only, without login. The room URLs do not enforce registration
+in the preview and must not be treated as private access. See `development.md` for implemented
 routes, the integration audit and the boundary between local state and real identity.
 
 ## Main Experience Areas
 
-### Public Studio Home
+### Events Catalogue
 
-The Studio home introduces the concept and points users toward the current weekly Studio.
+The Studio landing page is the front door for Studio workshops. The existing
+`/resources/events/` page remains the wider Wistudi event directory. Both views must
+read one canonical event record, rather than maintaining competing event lists.
+Publisher Studio displays events flagged for the Studio experience and leads into
+their own rooms and projects.
 
 Primary content:
 
-- Current weekly topic
-- Next event
-- Trainer
-- Featured Publisher Kit
-- Workshop registration
-- Recent Studio activity
-- Made in the Studio showcase
-- Past Studio sessions
+- Upcoming and archived event cards with subject, trainer, audience and local time.
+- A concrete “you'll make” output on every event card.
+- A direct share action and public event detail link.
+- A short progress model: Discover → Learn → Build → Share → Publish.
+- Published participant examples only when separately approved.
 
-This page can feel like a website page, but it should still be practical and resource-led rather than sales-heavy.
+The landing page describes the output and follow-on project. A live room, questions,
+submissions and meeting link require event access.
 
 ### Event Page
 
@@ -91,17 +92,23 @@ Primary content:
 - Date and time
 - Trainer
 - What participants will create or learn
-- Registration form
+- Registration form or an adapter to the existing event booking flow
 - Publisher Kit preview
 - Pre-session question prompt
 - Related template or worksheet
 - Add-to-calendar action, if supported
+- Share hub with copy, native sharing, direct channels and event-specific preview metadata
 
-Registration should create or update a lightweight Studio identity.
+Event page and registration remain public. Booking, optional Studio membership and
+verified sign-in are separate records and permissions. Booking must continue to work
+if the optional Studio identity service is unavailable.
 
-### Studio Space
+### Event Room
 
-The Studio space is the participant-facing engagement area.
+Every event has one connected participant room. Recurring sessions may share a
+series ID, but each date/event has its own stable event ID, registration, room
+permissions, Publisher Kit, conversations and challenge. The room is the working
+space after registration, not another event landing page.
 
 On mobile, this should feel closer to a focused chat/workbench app than a landing page.
 
@@ -109,13 +116,63 @@ Recommended bottom navigation:
 
 | Tab | Purpose |
 | --- | --- |
-| This Week | Current topic, pinned resources, join link, recording |
+| Room | Current event stage, pinned resources, meeting/recording when eligible |
 | Questions | Ask the trainer, vote, view answers |
-| Challenge | Join or submit the weekly build task |
+| Build | Join or submit the event's project/challenge |
 | Workbench | Ideas, help requests and shared creations |
-| Resources | Templates, worksheets, tools and recordings |
+| Kit | Templates, worksheets, tools and recordings |
 
 The Studio space should use sticky context headers, threaded content, fixed reply or submit actions and simple interaction states.
+
+### Event Builder
+
+The builder is a role-gated management tool within Publisher Studio, not a public
+content form. It standardizes public event pages and room configuration while
+allowing each creator to provide the event's subject-specific materials.
+
+- Event basics, audience, topic, outcomes, level and expected participant output.
+- Start/end time, explicit IANA timezone, trainer and approved online meeting link.
+- Thumbnail, accessible image text, optional video preview and Publisher Kit.
+- Event-specific discussion prompt, project/build challenge and Wistudi content links.
+- Assigned event builders and trainers/moderators with event-scoped permissions.
+- Save draft, preview desktop/mobile, submit for review, schedule, publish, update and archive.
+
+Use one stable event record as the source for catalogue cards, event details, event
+room, registration payload, confirmation messaging and structured data. Do not
+copy event title/time/Zoom values manually into separate code or email templates.
+The global Resources Events directory may render Studio events from this same
+source while retaining its broader event types.
+
+### Event Sharing and Zoom
+
+The public event URL is the share/invitation link. A recipient lands on event details
+and registers for their own access. A room URL or meeting join URL is never an
+invitation credential.
+
+Event-specific server-rendered metadata should supply `og:title`, `og:description`,
+`og:image`, `og:url` and canonical URL so social link previews identify the event.
+The native Studio share modal provides copy, browser-native sharing, email and
+selected social channels. A Studio link resolver separately renders a native card
+for Wistudi Flow URLs; it must use an approved Wistudi metadata/share endpoint rather
+than trusting a client-supplied title or fetching arbitrary URLs from the browser.
+
+At first, an assigned builder may enter a meeting URL stored as a restricted event
+field. It becomes visible only to eligible registrants and assigned staff. A later
+Zoom connection can create/update meetings server-side. Never expose the host's
+`start_url` in public event metadata. The event builder can exist without an embedded
+Zoom player; participants can join through a protected room button.
+
+### Event lifecycle and participant progress
+
+Keep event operations separate from a participant's learning progress.
+
+| Event lifecycle | Participant journey |
+| --- | --- |
+| Draft → Review → Scheduled → Live → Completed → Archived | Discover → Learn → Build → Share → Publish (optional) |
+
+An event being completed does not imply every participant has finished the
+challenge. Publish in Wistudi is a separate creator action, not a prerequisite for
+sharing a work-in-progress with the event room.
 
 ## Identity Model
 
@@ -158,6 +215,9 @@ Recommended flow:
 The repository's current event path uses Google Apps Script / Sheets and Resend.
 Keep it unchanged until a durable, idempotent Studio handoff and retry policy are
 implemented. A registration ID is a correlation reference, never an access token.
+
+See [`event-system.md`](event-system.md) for the full event record, Event Builder,
+scoped team invitations, Zoom, sharing and event-to-project architecture.
 
 ## Avatar Model
 

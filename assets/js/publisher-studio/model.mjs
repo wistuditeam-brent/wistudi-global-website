@@ -1,12 +1,12 @@
-import { workshop, challenge, initialQuestions, initialThreads, contextFor, contributionKinds } from './data.mjs';
+import { events, challenges, workshop, challenge, initialQuestions, initialThreads, contextFor, contributionKinds } from './data.mjs';
 
 export const STORAGE_KEY = 'wistudi.publisher-studio.prototype.v1';
-export const VERSION = 1;
+export const VERSION = 2;
 const copy = value => JSON.parse(JSON.stringify(value));
 const id = () => globalThis.crypto.randomUUID();
 
 export function createState() {
-  return { version: VERSION, phase: 'upcoming', profile: null, joined: false,
+  return { version: VERSION, phaseByEvent: {}, profile: null, joinedChallenges: [],
     questions: copy(initialQuestions), threads: copy(initialThreads), votes: [], submissions: [], resourceReplies: {} };
 }
 
@@ -34,7 +34,10 @@ export function avatar(name, seed = name) {
 }
 
 export function registerDemo(state, name, consent) {
-  state.profile = consent ? { id: id(), displayName: textValue(name, 60), avatarSeed: id(), consentToStudio: true } : null;
+  if (!consent) { state.profile = null; return null; }
+  const displayName = textValue(name, 60);
+  if (state.profile) state.profile.displayName = displayName;
+  else state.profile = { id: id(), displayName, avatarSeed: id(), consentToStudio: true };
   return state.profile;
 }
 
@@ -76,14 +79,16 @@ export function addReply(state, targetId, body) {
   return reply;
 }
 
-export function submitBuild(state, { title, description, url, help }) {
+export function submitBuild(state, { title, description, url, help }, challengeId = challenge.id) {
   const link = safeLink(url);
   if (!link) throw new Error('Use a complete https:// link without a username or password.');
-  const submission = { id: id(), author: author(state), challengeId: challenge.id, context: contextFor(challenge.id),
+  const selectedChallenge = challenges.find(item => item.id === challengeId);
+  if (!selectedChallenge) throw new Error('Choose a valid Studio challenge.');
+  const submission = { id: id(), author: author(state), challengeId: selectedChallenge.id, context: contextFor(selectedChallenge.id),
     title: textValue(title, 120), description: textValue(description), url: link,
     help: String(help || '').trim().slice(0, 1000), moderationStatus: 'pending', createdAt: new Date().toISOString() };
   state.submissions.unshift(submission);
-  state.joined = true;
+  if (!state.joinedChallenges.includes(selectedChallenge.id)) state.joinedChallenges.push(selectedChallenge.id);
   return submission;
 }
 
@@ -95,12 +100,14 @@ export function loadState(storage) {
     const string = item => typeof item === 'string';
     const context = item => { try { contextFor(item); return true; } catch { return false; } };
     const reply = item => item && string(item.id) && string(item.author) && string(item.body);
-    if (value.version !== VERSION || !['upcoming', 'live', 'post_session'].includes(value.phase) || typeof value.joined !== 'boolean'
+    if (value.version !== VERSION || !value.phaseByEvent || typeof value.phaseByEvent !== 'object' || Array.isArray(value.phaseByEvent)
+      || !Object.entries(value.phaseByEvent).every(([eventId, phase]) => events.some(item => item.id === eventId) && ['upcoming', 'live', 'post_session'].includes(phase))
+      || !Array.isArray(value.joinedChallenges) || !value.joinedChallenges.every(challengeId => challenges.some(challengeItem => challengeItem.id === challengeId)) || new Set(value.joinedChallenges).size !== value.joinedChallenges.length
       || !(value.profile === null || (string(value.profile?.id) && string(value.profile?.displayName) && string(value.profile?.avatarSeed) && value.profile?.consentToStudio === true))
       || !Array.isArray(value.questions) || !value.questions.every(item => reply(item) && context(item.contextId) && Number.isInteger(item.votes) && item.votes >= 0 && string(item.createdAt) && (item.answer === null || string(item.answer)))
       || !Array.isArray(value.threads) || !value.threads.every(item => reply(item) && string(item.title) && Object.hasOwn(contributionKinds, item.kind) && context(item.contextId) && Array.isArray(item.replies) && item.replies.every(reply))
       || !Array.isArray(value.votes) || !value.votes.every(item => string(item) && value.questions.some(question => question.id === item)) || new Set(value.votes).size !== value.votes.length
-      || !Array.isArray(value.submissions) || !value.submissions.every(item => item && string(item.id) && string(item.author) && string(item.title) && string(item.description) && string(item.help) && safeLink(item.url) && item.challengeId === challenge.id && item.moderationStatus === 'pending')
+      || !Array.isArray(value.submissions) || !value.submissions.every(item => item && string(item.id) && string(item.author) && string(item.title) && string(item.description) && string(item.help) && safeLink(item.url) && challenges.some(challengeItem => challengeItem.id === item.challengeId) && item.moderationStatus === 'pending')
       || !value.resourceReplies || typeof value.resourceReplies !== 'object' || Array.isArray(value.resourceReplies)
       || !Object.entries(value.resourceReplies).every(([key, replies]) => context(key) && Array.isArray(replies) && replies.every(reply))) throw new Error('Invalid demo state');
     return { state: value, warning: '' };

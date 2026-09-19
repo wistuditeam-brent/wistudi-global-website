@@ -1,12 +1,16 @@
 # Publisher Studio Development
 
-Status: first development milestone, interactive local-data prototype.
+Status: expanded local-data prototype for multi-event discovery, sharing and Event Builder review.
 Branch: `feature/publisher-studio-mvp`.
 
 ## What Works
 
-- Studio overview, sample event/registration and separate participant workspace.
-- Before, live and after-workshop preview states.
+- Multi-event catalogue with three clearly marked sample event records.
+- Separate public event pages with share actions and social metadata fixtures.
+- Event-specific room URLs using one mobile-first room shell.
+- Before, live and after-workshop preview state per event.
+- Event Builder with guided sections, local draft save, event preview and local image preview.
+- A simple event-to-room-to-build-to-share/publish journey indicator.
 - Five mobile navigation destinations and full-height contextual conversations.
 - Questions, reversible votes, answered filters and resource-specific context.
 - Four Workbench contribution types, replies and filtering.
@@ -16,24 +20,33 @@ Branch: `feature/publisher-studio-mvp`.
 - Browser-tab persistence, corruption recovery, draft preservation during navigation and demo reset.
 
 These are prototype interactions, not live services. There is no real registration,
-login, verified identity, multi-user chat, trainer notification, upload, moderation
-queue, meeting, recording or Wistudi account connection. Demo participant labels,
-answers, vote counts and workshop dates are fixtures. Draft fields stay in memory;
-submitted demo records use versioned `sessionStorage`, not a database. Tab storage
-is not authorization and may be copied when a browser duplicates a tab.
+login, verified identity, room authorization, multi-user chat, role invitation,
+trainer notification, secure media upload, moderation queue, Zoom connection,
+recording or Wistudi account/content connection. Demo event names, participant
+labels, answers, vote counts and schedules are fixtures. Event-builder drafts and
+submitted demo records use `sessionStorage`, not a database. Tab storage is not
+authorization and may be copied when a browser duplicates a tab. Do not enter real
+attendee information or private Zoom links in the public-repository preview.
 
 ## Routes
 
 | Path | Current implementation |
 | --- | --- |
-| `/publisher-studio/` | Permanent Studio overview preview |
-| `/publisher-studio/events/communicative-esl/` | Sample workshop and registration preview |
-| `/publisher-studio/studio/` | Mobile-first workspace |
+| `/publisher-studio/` | Studio event catalogue and journey overview |
+| `/publisher-studio/events/communicative-esl/` | Sample event details, registration and sharing preview |
+| `/publisher-studio/events/worksheet-to-flow/` | Second event details and sharing preview |
+| `/publisher-studio/events/interactive-video/` | Third event details and sharing preview |
+| `/publisher-studio/events/{slug}/room/` | Event-specific mobile-first room shell |
+| `/publisher-studio/manage/events/` | Local-only Event Builder preview |
+| `/publisher-studio/studio/` | Generic room-shell fallback for prototype review |
 | `#week`, `#questions`, `#challenge`, `#workbench`, `#resources` | Bookmarkable workspace views |
 
-Weekly archive, submission detail and admin routes remain planned. There are no
-placeholder links to nonexistent routes. Every implemented HTML route is noindex;
-global navigation, live event pages and the sitemap are unchanged.
+Weekly archive, submission detail and live admin functions remain planned. Every
+implemented HTML route is noindex. The exact feature-branch alias is allowed for
+public prototype review; other hosts stay closed unless the preview environment
+override is enabled. Event room routes do not authenticate or authorize participants
+in this prototype.
+Global navigation, live Resources Events pages and the sitemap are unchanged.
 
 ## Local Preview
 
@@ -70,11 +83,11 @@ in fixture files. No Cloudflare dashboard settings were changed.
 
 | Location | Responsibility |
 | --- | --- |
-| `publisher-studio/` | Three entry pages and no-JavaScript fallback |
+| `publisher-studio/` | Catalogue, sample event pages/rooms and Event Builder page |
 | `assets/css/publisher-studio.css` | Isolated responsive Studio styles |
-| `assets/js/publisher-studio/data.mjs` | Sample records and context resolution |
+| `assets/js/publisher-studio/data.mjs` | Sample event catalogue, resources, challenges and contexts |
 | `assets/js/publisher-studio/model.mjs` | Validation, local state and mutations |
-| `assets/js/publisher-studio/app.mjs` | Rendering, navigation and form interactions |
+| `assets/js/publisher-studio/app.mjs` | Rendering, sharing, builder preview, navigation and local interactions |
 | `functions/publisher-studio/_middleware.js` | Default-off release gate |
 | `scripts/publisher_studio_test.mjs` | Model, escaping, persistence and gate tests |
 | `scripts/publisher_studio_browser_qa.mjs` | Responsive and workflow regression tests |
@@ -114,6 +127,9 @@ Inspected source, not production configuration:
   but does not alter the live registration flow.
 - The current endpoint uses an event allowlist. Studio fixture IDs must never be
   posted to it or added just to make a demo appear connected.
+- The registration API currently does not provide a general event-builder data
+  store or per-event room permissions. Do not treat the new sample event pages as
+  booked events. A reviewed event registry and adapter are required before launch.
 - `assets/js/event-registration-component.js` and the live bridge belong to the
   existing event experience; this prototype does not load or edit them.
 - This audit did not establish a reusable participant authentication service or

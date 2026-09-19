@@ -1,3 +1,5 @@
+# Publisher Studio Changelog
+
 ## 2026-09-19 / Closed Preview Gate Fallback
 
 ### Changed
@@ -30,7 +32,41 @@
 - The branch preview is public to anyone with its URL and contains fixture data
   only. Keep private information out of its pages and assets.
 
-# Publisher Studio Changelog
+## 2026-09-19 / Event System Architecture and Experience Revamp
+
+### Added
+
+- Event-system architecture covering a canonical event record, catalogue, public
+  event page, event-specific room, project contexts and optional Wistudi publishing.
+- Three sample event detail pages and event-specific mobile room routes.
+- Event cards with output-led summaries, local time, room preview and a share hub
+  offering copy, native sharing, email, WhatsApp, LinkedIn and Facebook.
+- Event-specific Open Graph metadata fixtures for share preview review.
+- Guided Event Builder preview with date/timezone, trainer, test Zoom field,
+  thumbnail selection, video URL, Publisher Kit, project challenge, team roles,
+  local draft saving and public-page preview.
+- Separate event operation state and participant journey language.
+- Documentation for reusable event IDs, scoped builder invitations, registration
+  boundaries, meeting-link protection, media storage and Wistudi Flow previews.
+
+### Why
+
+- Make Publisher Studio an event-to-creation ecosystem rather than a single-event
+  landing page with a detached discussion area.
+- Standardize event structure for multiple event creators without duplicating the
+  broader Resources Events directory.
+- Give event owners a repeatable workflow while keeping the public share URL
+  separate from private room and Zoom access.
+
+### Still Open
+
+- Real event registry, database/auth provider and platform identity.
+- Multi-event registration adapter that preserves the existing Sheets/Resend booking path.
+- Role assignment/invitation service, moderation backend and participant room authorization.
+- Zoom OAuth/meeting creation, private credential storage and join-button release rules.
+- Managed asset/video storage, Wistudi link metadata resolver and generated event HTML.
+- Final product approval of catalogue ownership: Publisher Studio's workshop view
+  versus the broader `/resources/events/` directory.
 
 ## 2026-09-19 / Identity and Storage Architecture
 
