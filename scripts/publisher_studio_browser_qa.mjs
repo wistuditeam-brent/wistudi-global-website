@@ -30,7 +30,7 @@ async function noOverflow(page) {
 
 try {
   browser = await chromium.launch({ headless: true });
-  for (const width of [320, 390, 768, 1440]) {
+  for (const width of [390, 1440, 320, 768]) {
     const context = await browser.newContext({ viewport: { width, height: 900 } });
     const page = await context.newPage();
     page.setDefaultTimeout(7000);
@@ -92,7 +92,7 @@ try {
     await nav.getByRole('link', { name: 'Workbench' }).click();
     await page.getByRole('button', { name: 'Contribute', exact: true }).click();
     await page.getByLabel('Contribution type').selectOption('made_something');
-    await page.locator('#thread-form select[name="contextId"]').selectOption('demo-challenge-01');
+    await page.getByRole('dialog').getByLabel('About', { exact: true }).selectOption('demo-challenge-01');
     await page.getByLabel('Title', { exact: true }).fill('My adapted lesson');
     await page.getByLabel('Your contribution').fill('I added partner roles.');
     await page.getByRole('button', { name: 'Post demo contribution' }).click();
@@ -101,7 +101,7 @@ try {
     await page.getByRole('button', { name: 'Send demo reply' }).click();
     await visible(page.getByText('A follow-up idea.', { exact: true }));
     await page.getByRole('button', { name: 'Close', exact: true }).click();
-    await page.getByLabel('Show', { exact: true }).selectOption('made_something');
+    await page.locator('#thread-filter').selectOption('made_something');
     assert.equal(await page.locator('.thread-card').count(), 1); await noOverflow(page);
 
     await nav.getByRole('link', { name: 'Challenge', exact: true }).click();
@@ -137,4 +137,3 @@ try {
   await browser?.close();
   await new Promise(resolve => server.close(resolve));
 }
-
