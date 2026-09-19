@@ -1,0 +1,237 @@
+# Publisher Studio Implementation Plan
+
+Phase: Event-system architecture and expanded static prototype
+Status: Event catalogue, sample event pages/rooms, sharing and Event Builder preview implemented; live service providers remain unselected
+Last updated: 2026-09-19
+
+## Recommended Git Workflow
+
+Use the existing Wistudi global website repository.
+
+Create a long-running feature branch:
+
+```text
+feature/publisher-studio-mvp
+```
+
+Open a draft pull request early. The PR should act as the working record for screenshots, questions, review notes and remaining tasks.
+
+Do not merge into the live branch until the experience is hidden, reviewed and ready.
+
+## Commit Pattern
+
+Use small commits that describe each layer of work.
+
+Examples:
+
+```text
+docs: add Publisher Studio architecture
+docs: add Publisher Studio implementation plan
+feat: add Publisher Studio route shells
+feat: add static event page
+feat: add mobile Studio shell
+feat: add mock trainer questions UI
+feat: add mock build challenge UI
+```
+
+## Phase 1: Architecture
+
+Status: complete as an implementation foundation; product decisions remain reviewable.
+
+Goal: create the implementation foundation before UI build-out.
+
+Deliverables:
+
+- Architecture document
+- Implementation plan
+- Decision log
+- Changelog
+- Route map
+- Data object definitions
+- Event-system architecture, event lifecycle, scoped builder roles, share/Zoom boundaries
+- Initial open questions
+
+Acceptance criteria:
+
+- Team agrees Publisher Studio will live in the existing website repository.
+- The first routes are confirmed.
+- Naming avoids hard-coding a single trainer.
+- The identity model is lightweight but not anonymous.
+- The project has a trackable decision log.
+
+## Phase 2: Static Prototype
+
+Status: expanded with event-catalogue, share and Event Builder previews using
+local-only data. See
+`development.md` for exact boundaries and repeatable tests. All real services remain
+deferred. Review responsive screenshots and device keyboard behavior before approval.
+
+Goal: create the first visible page shells using mock data.
+
+Deliverables:
+
+- `/publisher-studio` page shell
+- `/publisher-studio/events/[slug]` page shell
+- `/publisher-studio/events/[slug]/room` mobile-first event room
+- `/publisher-studio/manage/events` guided Event Builder preview
+- Event listing cards with local-time display and event share modal
+- Mock Publisher Kit
+- Mock Questions tab
+- Mock Challenge tab
+- Mock Workbench tab
+- Mock Resources tab
+
+Acceptance criteria:
+
+- Desktop public pages feel like Wistudi website pages.
+- Mobile Studio area feels like a focused app or chat workspace.
+- No real database or auth is required yet.
+- The Studio route is hidden from navigation until approved.
+- Builder drafts, registration and rooms remain explicitly marked as local preview interactions.
+
+## Phase 3: Identity and Storage Architecture
+
+Status: design baseline documented in `identity-and-storage.md`; provider decision
+is blocked on confirming the Wistudi platform's existing account and data stack.
+
+Goal: settle the records, trust boundaries and operational owner before real
+authentication or participant data is introduced.
+
+Deliverables:
+
+- Confirmed source of truth for Wistudi account IDs and supported account linking.
+- Chosen, owned relational store and preview/production separation.
+- Logical migrations for Studio users, verified identities, memberships, consent,
+  enrollment intents, contexts, discussions, votes, submissions and moderation.
+- Idempotent event-registration handoff with retry/reconciliation behavior.
+- Email verification, session, recovery, retention and deletion decisions.
+
+Acceptance criteria:
+
+- Booking can succeed independently from optional Studio enrollment.
+- Only explicit Studio opt-in plus successful identity verification activates membership.
+- Stable Studio IDs do not depend on email, display name or provider IDs.
+- Existing Sheets/Resend registration flow has a reviewed, retryable integration plan.
+- Roles and permissions are checked server-side and scoped to a Studio/workshop.
+- Contextual content has referential integrity and portable external ID mappings.
+- Preview data and credentials are isolated from production.
+
+## Phase 4: Live Identity and Registration Bridge
+
+Goal: allow an opted-in participant to verify access and return to the Studio without
+creating a full Wistudi account.
+
+Deliverables:
+
+- Enrollment intent and single-use email verification/sign-in flow.
+- Secure server-side sessions and account recovery.
+- Studio membership and consent evidence.
+- Existing registration adapter with idempotency, retries and observable failures.
+- Automatically generated initials/abstract avatar from a random private seed.
+
+Acceptance criteria:
+
+- A Sheets row ID, URL email or browser storage never grants access.
+- Repeated registration/retry does not duplicate members, avatars, consent or email.
+- Public APIs never return private email addresses or raw auth tokens.
+- Studio errors do not silently invalidate a confirmed event booking.
+- A user can withdraw membership and request account/data removal.
+
+## Phase 5: Contextual Discussion
+
+Goal: implement the core discussion model around Studio objects.
+
+Deliverables:
+
+- Contextual thread model
+- Questions model
+- Voting model
+- Comments model
+- Trainer answer state
+- Pinned or highlighted trainer responses
+
+Acceptance criteria:
+
+- Users post under a known context.
+- Questions can be voted up through "I want this answered too."
+- Trainer answers can be marked as answered.
+- Threads can be filtered by workshop, template, challenge or resource.
+
+## Phase 6: Build Challenge
+
+Goal: turn workshop attendance into creation.
+
+Deliverables:
+
+- Challenge detail area
+- Join challenge action
+- Submission form
+- Screenshot/link fields
+- Help-needed state
+- Moderation status
+- Public approved showcase cards
+
+Acceptance criteria:
+
+- Participants can submit something they made.
+- Submissions can be moderated before public showcase.
+- Each submission keeps challenge and workshop context.
+
+## Phase 7: Admin and Moderation
+
+Goal: give the trainer and Wistudi team enough control to run the Studio.
+
+Deliverables:
+
+- View questions by votes and status
+- Mark questions answered
+- Hide inappropriate content
+- Approve or reject submissions
+- Pin resources
+- Highlight Trainer Picks
+
+Acceptance criteria:
+
+- Trainers can prepare before the workshop.
+- The Wistudi team can keep public areas clean.
+- No public showcase item appears without approval.
+
+## Phase 8: Wistudi Platform Connection
+
+Goal: connect the Studio to Wistudi account and publishing actions.
+
+Future deliverables:
+
+- Connect Studio identity to Wistudi account
+- Remix template in Wistudi
+- Save to workspace
+- Publish version
+- Link Studio submission to real Wistudi Flow or template
+
+Acceptance criteria:
+
+- Studio participation becomes a bridge into Wistudi creation.
+- Existing Studio data can migrate or map into the main platform.
+
+## Tracking Rules
+
+Every meaningful product decision should be added to `decisions.md`.
+
+Every implementation milestone should be added to `changelog.md`.
+
+Every visual or UX change round should include:
+
+- What changed
+- Why it changed
+- What is still open
+
+## Risks
+
+| Risk | Mitigation |
+| --- | --- |
+| Feature becomes a generic social feed | Keep all discussion contextual |
+| Trainer workload becomes too high | Use voting, filters and answered states |
+| Anonymous posts create moderation problems | Require lightweight Studio identity |
+| Prototype cannot migrate later | Use stable IDs and context metadata |
+| Separate repo duplicates integrations | Build inside existing website repo |
+| Mobile feels like a landing page | Use app-style Studio shell with bottom nav |
