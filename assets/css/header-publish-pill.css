@@ -90,3 +90,53 @@
     transition:none!important;
   }
 }
+
+
+/* Mobile header regression fix — 2026-09-20
+   The publish CTA must never override the mobile shell. On phones/tablets the
+   compact header is wordmark + language + hamburger; publishing stays inside
+   the drawer. */
+@media(max-width:900px){
+  :root{--ws-header-height:68px}
+  .ws-site-header .ws-nav{
+    height:68px!important;
+    min-width:0!important;
+    gap:10px!important;
+  }
+  .ws-site-header .ws-brand{
+    min-width:0!important;
+    flex:0 1 auto!important;
+  }
+  .ws-site-header .ws-brand img{
+    width:122px!important;
+    max-width:100%!important;
+  }
+  .ws-site-header .ws-nav-links{
+    display:none!important;
+  }
+  .ws-site-header .ws-nav-actions{
+    min-width:0!important;
+    margin-left:auto!important;
+    padding-right:0!important;
+    gap:8px!important;
+    flex:0 0 auto!important;
+  }
+  .ws-site-header .ws-nav-actions>.ws-btn,
+  .ws-site-header .ws-nav-actions>.ws-btn.primary,
+  .ws-site-header .ws-nav-actions>.ws-btn.secondary{
+    display:none!important;
+  }
+  .ws-site-header .ws-menu-toggle{
+    display:block!important;
+    flex:0 0 44px!important;
+  }
+  .ws-site-header .ws-lang{
+    flex:0 0 auto!important;
+  }
+  .ws-site-header .ws-mobile-actions .ws-btn.primary{
+    display:inline-flex!important;
+  }
+}
+@media(max-width:420px){
+  .ws-site-header .ws-brand img{width:116px!important}
+}
