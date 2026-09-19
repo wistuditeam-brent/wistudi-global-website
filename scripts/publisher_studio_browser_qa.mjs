@@ -92,7 +92,7 @@ try {
     await nav.getByRole('link', { name: 'Workbench' }).click();
     await page.getByRole('button', { name: 'Contribute', exact: true }).click();
     await page.getByLabel('Contribution type').selectOption('made_something');
-    await page.getByRole('dialog').getByLabel('About', { exact: true }).selectOption('demo-challenge-01');
+    await page.locator('#thread-form select[name="contextId"]').selectOption('demo-challenge-01');
     await page.getByLabel('Title', { exact: true }).fill('My adapted lesson');
     await page.getByLabel('Your contribution').fill('I added partner roles.');
     await page.getByRole('button', { name: 'Post demo contribution' }).click();
@@ -137,3 +137,4 @@ try {
   await browser?.close();
   await new Promise(resolve => server.close(resolve));
 }
+
