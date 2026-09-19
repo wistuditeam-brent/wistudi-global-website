@@ -1,5 +1,30 @@
 # Publisher Studio Changelog
 
+## 2026-09-20 / Mobile Navigation and Event Browsing
+
+### Changed
+
+- Keep the event-room bar visible while scrolling, with direct links back to all
+  events and to the current event details.
+- Keep all five room areas in the bottom navigation while using shorter visible
+  labels on mobile and retaining the full accessible names.
+- Make mobile event cards easier to scan, with one primary details action and an
+  icon share action. Room preview remains available from the event details page.
+- Add brief same-room and route transitions, disabled for reduced-motion settings.
+
+### Why
+
+- People should never lose their route back to the event catalogue after entering
+  a room. A persistent event bar and thumb-reachable section navigation make the
+  Studio feel more like one connected mobile experience.
+- The event card should help someone choose quickly; the event page can carry the
+  fuller description, outcome and registration details.
+
+### Follow-up
+
+- Confirm the layout at narrow phone widths and with screen readers during human
+  review. This prototype still has no live registration, accounts or room data.
+
 ## 2026-09-19 / Closed Preview Gate Fallback
 
 ### Changed

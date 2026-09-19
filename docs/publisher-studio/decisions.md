@@ -294,9 +294,17 @@ Reason:
 
 ### Mobile Experience
 
-Decision: The Studio participation area should feel like a focused app or chat workspace on mobile.
+Decision: Keep event rooms route-based, with a persistent room bar linking to the event
+catalogue and event details, plus thumb-reachable bottom navigation for Room, Questions,
+Build, Workbench and Kit. Use brief route and section transitions only when reduced
+motion is not requested.
 
 Reason:
 
 - Participants should not feel like they are interacting with a landing page.
 - Mobile should prioritize current context, discussion, questions, resources and submission actions.
+- A clear route back to the event catalogue must remain available after entering a room.
+- Short mobile labels make the five section controls easier to scan while accessible
+  names retain their full meaning.
+- Event cards should show enough information to choose an event; full descriptions and
+  registration belong on its event page.
