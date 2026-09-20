@@ -30,7 +30,7 @@ function syncRouteState(url = new URL(location.href)) {
     try { routeEvent = decodeURIComponent(eventRoute[1]); } catch { routeEvent = eventRoute[1]; }
   } else page = document.body.dataset.page || 'home';
 
-  studioView = ['home', 'discover', 'my-events', 'calendar'].includes(requestedView) ? requestedView : 'home';
+  studioView = ['home', 'discover', 'my-events'].includes(requestedView) ? requestedView : 'home';
   const requestedEvent = routeEvent || url.searchParams.get('event') || '';
   selectedEvent = events.find(item => item.slug === requestedEvent || item.id === requestedEvent) || workshop;
   selectedChallenge = challengeFor(selectedEvent.id);
@@ -116,6 +116,18 @@ function applyRemoteSnapshot(snapshot) {
   state.submissions = [...remoteSubmissions, ...demoSubmissions];
   state.votes = remoteQuestions.filter(item => item.votedByUser).map(item => item.id);
   state.threadHearts = remoteThreads.filter(item => item.heartedByUser).map(item => item.id);
+  if (snapshot.event && snapshot.event.id) {
+    state.eventControls[snapshot.event.id] = {
+      roomOpen: Boolean(snapshot.event.roomOpen),
+      registrationOpen: Boolean(snapshot.event.registrationOpen),
+      features: {
+        questions: snapshot.event.features?.questions !== false,
+        chat: snapshot.event.features?.chat !== false,
+        build: snapshot.event.features?.build !== false,
+        resources: snapshot.event.features?.resources !== false,
+      },
+    };
+  }
   persist();
 }
 
@@ -155,7 +167,6 @@ function globalNavigation(view = studioView, mobile = false) {
     ['home', 'Home', `${base}?view=home`, 'home'],
     ['discover', 'Discover events', `${base}?view=discover`, 'discover'],
     ['my-events', 'My events', `${base}?view=my-events`, 'events'],
-    ['calendar', 'Calendar', `${base}?view=calendar`, 'calendar'],
   ];
   const active = page === 'builder' ? '' : page === 'event' ? (view === 'my-events' ? 'my-events' : 'discover') : page === 'studio' ? 'my-events' : view;
   const links = items.map(([key, label, href, glyph]) => `<a href="${href}" ${active === key ? 'aria-current="page"' : ''}>${icon(glyph)}<span>${label}</span></a>`).join('');
@@ -568,7 +579,7 @@ function setTheme(value) {
 }
 
 function renderStudio() {
-  const contextRail = `<div class="eyebrow">Event context</div><div class="tags">${tag(selectedEvent.subject)}${tag(selectedEvent.topic)}${tag(selectedEvent.level)}</div><div class="person-line">${person(selectedEvent.trainer)}<div><strong>${e(selectedEvent.trainer)}</strong><span class="muted small">Assigned trainer</span></div></div><hr>${phaseControl()}<hr><p class="muted small">Prototype conversations are stored only in this browser tab. Files, reactions and messages are demo data for this browser.</p>`;
+  const contextRail = `<div class="eyebrow">Event context</div><div class="tags">${tag(selectedEvent.subject)}${tag(selectedEvent.topic)}${tag(selectedEvent.level)}</div><div class="person-line">${person(selectedEvent.trainer)}<div><strong>${e(selectedEvent.trainer)}</strong><span class="muted small">Assigned trainer</span></div></div><hr>${phaseControl()}<hr><p class="muted small">Shared posts sync after verified sign-in. Sample items remain local; file uploads and external link previews are not connected yet.</p>`;
   return appShell({ view: 'my-events', eventContext: selectedEvent, content: `<div id="panel">${renderPanel()}</div>`, contextRail, mainClass: 'room-main' });
 }
 
@@ -592,7 +603,8 @@ function renderPanel() {
       return `${panelHeading('The build challenge', 'A small, useful step from learning to creating.')}<section class="challenge-brief"><span class="challenge-number">01</span><div>${tag('Build', 'teal')}<h2>${e(selectedChallenge.title)}</h2><p>${e(selectedChallenge.description)}</p><p class="muted">${e(selectedEvent.output)}</p>${button(joined ? `${icon('check')} Taking part (demo)` : `${icon('plus')} I'll take part`, 'join-challenge', `aria-pressed="${joined}"`, 'button primary')}</div></section><section class="section-block"><h2>Share your version</h2><p class="muted">For this preview, submit a Wistudi Flow or other secure HTTPS link. File uploads, link metadata previews and public publishing are not connected.</p><form id="submission-form" class="stack-form"><label>Creation title<input name="title" maxlength="120" placeholder="Give your activity a name" required></label><label>What did you create?<textarea name="description" maxlength="2000" rows="3" required></textarea></label><label>Wistudi content or creation link<input type="text" inputmode="url" name="url" placeholder="https://..." required></label><label>What would you like help with? <span class="muted">(optional)</span><textarea name="help" maxlength="1000" rows="2"></textarea></label><p class="form-error" role="alert" hidden></p><div class="actions"><button class="button primary" type="submit">Submit demo creation ${icon('arrow')}</button><span class="muted small">Saved in this browser only</span></div></form></section><section class="section-block"><h2>Your work in this room</h2>${submissions.length ? submissions.map(item => `<article class="submission-card" id="submission-${e(item.id)}">${tag('Pending review (demo)')}<h3>${e(item.title)}</h3><p>${e(item.description)}</p>${item.help ? `<p class="muted">Feedback requested: ${e(item.help)}</p>` : ''}<a class="text-link" href="${e(item.url)}" target="_blank" rel="noopener noreferrer nofollow">Open submitted link ${icon('arrow')}</a></article>`).join('') : '<div class="empty-state"><p>Share a work-in-progress for feedback. Public showcase approval is a separate step.</p></div>'}</section>`;
     case 'workbench': {
       const threads = state.threads.filter(item => contextFor(item.contextId).workshopId === selectedEvent.id).filter(item => threadFilter === 'all' || item.kind === threadFilter);
-      return `${panelHeading('Event chat', 'Talk about the work in this room. Every conversation stays connected to its event, challenge or resource.')}<div class="chat-room-status"><span><i></i> Room open</span><span>${threads.length} conversations</span><span>After the event, the room stays available until its owner closes it.</span></div><label class="filter-select">Show<select id="thread-filter"><option value="all">All conversations</option>${Object.entries(contributionKinds).map(([key, label]) => `<option value="${key}" ${threadFilter === key ? 'selected' : ''}>${e(label)}</option>`).join('')}</select></label><div class="thread-list chat-timeline">${threads.map(threadCard).join('') || '<div class="empty-state"><h2>Start the conversation</h2><p>Share a teaching idea, ask for help or show what you are making.</p></div>'}</div>${chatComposer('thread-form')}`;
+      const roomControls = state.eventControls[selectedEvent.id] || { roomOpen: true, features: { chat: true } };
+      return `${panelHeading('Event chat', 'Talk about the work in this room. Every conversation stays connected to its event, challenge or resource.')}<div class="chat-room-status"><span><i></i> ${roomControls.roomOpen ? 'Room open' : 'Room closed · read-only'}</span><span>${threads.length} conversations</span><span>After the event, the room stays available until its owner closes it.</span></div><label class="filter-select">Show<select id="thread-filter"><option value="all">All conversations</option>${Object.entries(contributionKinds).map(([key, label]) => `<option value="${key}" ${threadFilter === key ? 'selected' : ''}>${e(label)}</option>`).join('')}</select></label><div class="thread-list chat-timeline">${threads.map(threadCard).join('') || '<div class="empty-state"><h2>Start the conversation</h2><p>Share a teaching idea, ask for help or show what you are making.</p></div>'}</div>${roomControls.roomOpen && roomControls.features?.chat !== false ? chatComposer('thread-form') : '<div class="notice">The event team has made this room read-only or turned chat off.</div>'}`;
     }
     case 'resources':
       return `${panelHeading('Event resources', 'Files, links and instructions selected for this event. Availability follows the event schedule.')}<label class="search-label">Search event resources<input type="search" id="resource-search" placeholder="Search event resources" value="${e(resourceFilter)}"></label><div id="resource-results">${filteredResources()}</div><p class="notice">These are sample resources. File uploads, link previews and Wistudi remixing are not connected yet.</p>`;
@@ -1156,6 +1168,7 @@ initIdentity({ onIdentity: function(user) {
   state.profile = user ? { id: user.id, displayName: user.displayName, avatarSeed: user.id, consentToStudio: Boolean(user.studioMember) } : null;
   persist();
   render(false);
+  syncRemoteState();
 } });
 syncRemoteState();
 if (loaded.warning) notify(loaded.warning);
