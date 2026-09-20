@@ -432,3 +432,83 @@ These are product/operations sign-offs, not reasons to block the prototype:
    approval if Wistudi's staffing model supports it.
 
 When approved, record changes in `decisions.md` before adding live RBAC behavior.
+
+
+---
+
+## 2026-09-21 UX/role addendum — role-aware Questions, Build and QA
+
+This addendum records product decisions approved during the Studio redesign. Where an earlier sentence implies broader capability, these more specific rules win.
+
+### Development/QA role switcher
+
+During development, provide a temporary role switcher so the team can inspect each presentation without requiring live identity infrastructure.
+
+Required preview roles:
+
+- Visitor
+- Participant
+- Event Moderator
+- Event Co-trainer
+- Event Lead
+- Event Builder
+- Studio Admin
+- Platform Super Admin
+
+The switcher is a QA presentation tool only. It must not be used as production authorization, must not be represented as impersonation, and should call the same centralized capability helpers that a future authenticated backend will feed.
+
+### Questions capability boundary
+
+Questions are structured host/trainer-facing Q&A.
+
+- Participant: can ask a Question and upvote/retract an upvote.
+- Participant: cannot answer another participant's trainer Question.
+- Event Lead: can answer.
+- Event Co-trainer: can answer.
+- Event Moderator: can moderate within scope, but cannot answer solely by virtue of being a Moderator.
+- Studio Admin / Platform Super Admin: may moderate globally; answering should be tied to an explicit event facilitation/answering capability rather than assumed simply because the user is an administrator.
+
+The current prototype's helper that treats moderation as sufficient to answer must be tightened before production.
+
+### Build challenge capability boundary
+
+Challenge authoring is no longer part of the general Event Builder workflow after the event exists.
+
+- Event Lead: create/edit/schedule/release challenges for own event.
+- Event Co-trainer: may create/edit challenges only when explicitly granted that event capability.
+- Event Moderator: no challenge authoring by default; moderation only.
+- Participant: view eligible challenges, join, build and submit.
+- Event Builder: creates/edits the event draft, but challenge authoring is not an automatic ongoing right once the event is published/running.
+- Studio Admin / Platform Super Admin: may manage challenges within their authorized scope.
+
+Use the same Build route with role-aware presentation rather than separate trainer/learner navigation entries.
+
+### Challenge submissions and public visibility
+
+Submitting a challenge creation is not the same as public publishing.
+
+Default participant submission visibility is **Event only**. A participant may explicitly opt to make eligible work **Public in Studio**. The underlying Flow/XP Video remains governed by the Wistudi platform's own visibility/share state.
+
+Do not require a separate trainer-only submission room as the default workflow. Eligible event members should see event-visible community creations in the challenge itself. Moderation/reporting remains available for exceptions.
+
+### Trainer/host identity
+
+Do not hard-code “Wistudi Trainer” as a role label for every host. External trainers may run events.
+
+Until a reusable host/profile system is implemented, display:
+
+- assigned person's display name;
+- event role label such as Event host / Co-trainer.
+
+A future profile may add avatar/photo, short bio, organisation, role/title, expertise, links and hosted events. Event records should reference that profile rather than copying biography text into each event.
+
+### Room activity/public preview controls
+
+Event Lead may control:
+
+- when the room opens;
+- when Questions, Chat and Build become available;
+- whether the room remains open after event end;
+- whether public visitors may see read-only Questions/Chat activity preview.
+
+These controls never bypass resource-specific release timing or protected room authorization.
