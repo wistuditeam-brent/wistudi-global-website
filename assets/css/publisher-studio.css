@@ -849,3 +849,21 @@ body[data-studio-theme="dark"] .identity-dialog select { background: #201d27; co
   .identity-dialog { width: calc(100% - 16px); max-height: calc(100dvh - 20px); }
   .identity-dialog .dialog-content { padding: 16px; }
 }
+
+
+/* Shared event drafts in the Event Builder. */
+.builder-saved-drafts.builder-section { gap: 13px; margin: 0 0 25px; padding: 17px 18px; border: 1px solid var(--line); border-radius: 8px; background: var(--canvas); }
+.builder-saved-drafts .builder-section-heading { margin: 0; }
+.builder-draft-list { display: grid; gap: 8px; }
+.builder-draft-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 7px; background: var(--white); }
+.builder-draft-copy { display: grid; gap: 3px; min-width: 0; }
+.builder-draft-copy strong { overflow-wrap: anywhere; }
+.builder-draft-copy span, .builder-draft-copy small { color: var(--muted); font-size: 14px; }
+.builder-draft-row .button { flex: 0 0 auto; }
+body[data-studio-theme="dark"] .builder-saved-drafts { background: #191720; border-color: #383440; }
+body[data-studio-theme="dark"] .builder-draft-row { background: #201d27; border-color: #383440; }
+@media (max-width: 560px) {
+  .builder-saved-drafts.builder-section { padding: 14px; }
+  .builder-draft-row { align-items: stretch; flex-direction: column; gap: 10px; }
+  .builder-draft-row .button { width: 100%; }
+}
