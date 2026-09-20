@@ -5,13 +5,15 @@ Branch: `feature/publisher-studio-mvp`.
 
 ## What Works
 
-- Multi-event catalogue with three clearly marked sample event records.
-- Separate public event pages with share actions and social metadata fixtures.
-- Event-specific room URLs using one mobile-first room shell.
+- Three distinct Studio views (Home, Discover events, My events) inside a shared app shell.
+- One persistent Studio navigation model across event overviews, rooms and the Event Builder.
+- Selected-event navigation for Overview, Room, Questions, Build, Chat and optional Event resources.
+- Event-specific room URLs using the same global shell and compact mobile event-section navigation.
 - Before, live and after-workshop preview state per event.
 - Event Builder with guided sections, local draft save, event preview and local image preview.
 - A simple event-to-room-to-build-to-share/publish journey indicator.
-- Five mobile navigation destinations, desktop room directory and inline contextual conversations.
+- Fixed mobile navigation for Home, Discover, My events and Create; event sections remain in a horizontal row.
+- Local preview registrations appear in My events so the end-to-end shell can be reviewed without a database.
 - Questions, reversible votes, answered filters and resource-specific context.
 - Four contextual contribution types, two-reply preview/expand, hearts and inline replies.
 - Drag/drop local media/file previews, emoji picker, trainer mention suggestions and related-context prompts.
@@ -34,7 +36,9 @@ attendee information or private Zoom links in the public-repository preview.
 
 | Path | Current implementation |
 | --- | --- |
-| `/publisher-studio/` | Studio event catalogue and journey overview |
+| `/publisher-studio/` | Studio Home |
+| `/publisher-studio/?view=discover` | Discover events in the shared Studio shell |
+| `/publisher-studio/?view=my-events` | Preview registrations in My events in the shared Studio shell |
 | `/publisher-studio/events/communicative-esl/` | Sample event details, registration and sharing preview |
 | `/publisher-studio/events/worksheet-to-flow/` | Second event details and sharing preview |
 | `/publisher-studio/events/interactive-video/` | Third event details and sharing preview |
@@ -48,7 +52,7 @@ implemented HTML route is noindex. The exact feature-branch alias is allowed for
 public prototype review; other hosts stay closed unless the preview environment
 override is enabled. Event room routes do not authenticate or authorize participants
 in this prototype.
-Global navigation, live Resources Events pages and the sitemap are unchanged.
+The wider Wistudi website navigation, live Resources Events pages and sitemap are unchanged. Publisher Studio uses its own persistent in-shell navigation across all of its views.
 
 ## Local Preview
 

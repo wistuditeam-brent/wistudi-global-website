@@ -2,6 +2,36 @@
 
 This file records product, UX and technical decisions for Publisher Studio so future edits build on prior choices.
 
+## Unified Studio Shell / 2026-09-20
+
+Decision: Home, Discover events, My events, event Overview, the event's room
+sections and the Event Builder are views inside one Publisher Studio application.
+Keep the Studio navigation persistent across those views. The desktop left panel
+contains Home, Discover events, My events and Build an event; selecting an event
+adds its Overview, Room, Questions, Build, Chat and optional Event resources below.
+On phones, keep global actions fixed and show the selected event's sections in a
+compact horizontal row.
+
+Reason:
+
+- The supplied reference screens show event browsing, details, room and building
+  work staying in one interface with a stable left navigation.
+- Participants need a predictable way back to discovery and My events from every
+  event page or room section.
+- Event creation is a Studio action and should be reachable from the same panel.
+- The app shell gives Wistudi one consistent place to add account, notification,
+  role and contextual discussion features later.
+
+Content/visual constraint: the supplied editorial publishing standard informs the
+quality and accuracy of event descriptions and resources, but it is not a UI layout
+spec. Content should be useful without a product CTA; imagery and product claims
+must be authentic. The supplied PNG is a Wistudi brand mark, not a screen mockup.
+
+Prototype boundary: static route changes reuse the shell, and preview registrations
+can appear in My events within the current browser tab. This does not provide live
+identity, registration, event permissions or shared data. Production My events must
+be derived from verified registrations/memberships server-side.
+
 ## Event System and Builder / 2026-09-19
 
 ### One Canonical Event, Multiple Views
@@ -292,22 +322,24 @@ Reason:
 - Threads should belong to workshops, templates, worksheets, tools, resources, challenges or submissions.
 - This structure can later become part of the Wistudi platform knowledge layer.
 
-### Mobile Experience
+### Mobile Experience and Unified Navigation
 
-Decision: Keep event rooms route-based, with a persistent room bar linking to the event
-catalogue and event details, plus thumb-reachable bottom navigation for Room, Questions,
-Build, Chat and Event resources. Use brief route and section transitions only when reduced
-motion is not requested.
+Decision: Keep one Studio shell across Home, Discover events, My events, event Overview,
+event room sections and the Event Builder. On desktop, the persistent left panel contains
+global destinations and Build an event, followed by the selected event's sections. On
+phones, keep Home, Discover, My events and Create in fixed bottom navigation; place the
+selected event's section navigation in a compact horizontal row below its event bar.
+Use brief route/section transitions only when reduced motion is not requested.
 
 Reason:
 
-- Participants should not feel like they are interacting with a landing page.
-- Mobile should prioritize current context, discussion, questions, resources and submission actions.
-- A clear route back to the event catalogue must remain available after entering a room.
-- Short mobile labels make the five section controls easier to scan while accessible
-  names retain their full meaning.
+- Participants should not feel that they are leaving Publisher Studio when switching
+  between discovery, event details, creation and discussion.
+- The event list, My events and event sections need to stay accessible from each view.
+- A full-width desktop sidebar would crowd phone content, so mobile keeps the global
+  actions fixed and the event sections close to the current event header.
 - Event cards should show enough information to choose an event; full descriptions and
-  registration belong on its event page.
+  registration belong on its in-shell Overview.
 
 ## Event Resources and Promotion Media / 2026-09-20
 

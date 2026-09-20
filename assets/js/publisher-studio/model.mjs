@@ -1,12 +1,12 @@
 import { events, challenges, workshop, challenge, initialQuestions, initialThreads, contextFor, contributionKinds } from './data.mjs';
 
 export const STORAGE_KEY = 'wistudi.publisher-studio.prototype.v1';
-export const VERSION = 4;
+export const VERSION = 5;
 const copy = value => JSON.parse(JSON.stringify(value));
 const id = () => globalThis.crypto.randomUUID();
 
 export function createState() {
-  return { version: VERSION, phaseByEvent: {}, profile: null, joinedChallenges: [],
+  return { version: VERSION, phaseByEvent: {}, profile: null, previewEventIds: [], joinedChallenges: [],
     questions: copy(initialQuestions), threads: copy(initialThreads).map(thread => ({ ...thread, attachments: [], relatedContextIds: [], relatedItems: [], hearts: thread.id === 'demo-thread-01' ? 3 : 1 })),
     threadHearts: [], votes: [], submissions: [], resourceReplies: {} };
 }
@@ -34,8 +34,9 @@ export function avatar(name, seed = name) {
   return { initials: String(name).trim().split(/\s+/u).slice(0, 2).map(word => [...word][0] || '').join('').toUpperCase(), color: hash % 5 };
 }
 
-export function registerDemo(state, name, consent) {
-  if (!consent) { state.profile = null; return null; }
+export function registerDemo(state, name, consent, eventId) {
+  if (events.some(item => item.id === eventId) && !state.previewEventIds.includes(eventId)) state.previewEventIds.push(eventId);
+  if (!consent) return null;
   const displayName = textValue(name, 60);
   if (state.profile) state.profile.displayName = displayName;
   else state.profile = { id: id(), displayName, avatarSeed: id(), consentToStudio: true };
@@ -112,6 +113,7 @@ export function loadState(storage) {
     const reply = item => item && string(item.id) && string(item.author) && string(item.body);
     if (value.version !== VERSION || !value.phaseByEvent || typeof value.phaseByEvent !== 'object' || Array.isArray(value.phaseByEvent)
       || !Object.entries(value.phaseByEvent).every(([eventId, phase]) => events.some(item => item.id === eventId) && ['upcoming', 'live', 'post_session'].includes(phase))
+      || !Array.isArray(value.previewEventIds) || !value.previewEventIds.every(eventId => events.some(item => item.id === eventId)) || new Set(value.previewEventIds).size !== value.previewEventIds.length
       || !Array.isArray(value.joinedChallenges) || !value.joinedChallenges.every(challengeId => challenges.some(challengeItem => challengeItem.id === challengeId)) || new Set(value.joinedChallenges).size !== value.joinedChallenges.length
       || !(value.profile === null || (string(value.profile?.id) && string(value.profile?.displayName) && string(value.profile?.avatarSeed) && value.profile?.consentToStudio === true))
       || !Array.isArray(value.questions) || !value.questions.every(item => reply(item) && context(item.contextId) && Number.isInteger(item.votes) && item.votes >= 0 && string(item.createdAt) && (item.answer === null || string(item.answer)))

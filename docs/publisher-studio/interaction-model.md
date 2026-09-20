@@ -5,21 +5,25 @@ Updated: 2026-09-20
 
 ## Product shape
 
-The Studio catalogue is the entry point. Each event has a public detail page and a
-participant room. The room is a focused work area whose conversations stay attached
-to the event, challenge, resource, participant creation or Wistudi object.
+Home, Discover events, My events, public event overviews, event rooms and the Event
+Builder all live inside one Publisher Studio application shell. The desktop left
+panel stays present as people move between these areas. It always contains the
+global destinations and **Build an event**; when an event is selected, its own
+sections appear below them. This is the navigation hierarchy shown in the corrected
+reference screens.
 
-On wide screens, the room uses a persistent event-room list at the left, the current
-conversation/work area in the middle and event context at the right. On phones, a
-compact horizontal room switcher replaces the left list; the section navigation
-stays thumb-reachable at the bottom. The event bar always links back to the event
-catalogue and event details.
+On phones, the global destinations and Create action remain fixed at the bottom;
+the selected event's sections remain reachable in a compact horizontal row under
+the event bar. This keeps navigation visible without forcing a desktop-width panel
+into the content area. Event discovery, details, discussion and creation should not
+send people to a separate Studio microsite. Public sharing intentionally opens the
+same event overview URL from outside the Studio.
 
-The room list is not a set of unmoderated chat channels. Each row represents a
-separate event room and shows its topic, scheduled stage, open/closed discussion
-state and activity count. Topic filters (Speaking, Worksheets, Video, etc.) can be
-added later as views over contextual conversations without creating a second,
-unscoped chat system.
+Event room sections are not unmoderated chat channels. Each section is scoped to a
+specific event and its learning objects. A participant's My events view should list
+only events associated with their booking or valid event membership; a future server
+must enforce this. Topic filters (Speaking, Worksheets, Video, etc.) can be added as
+views over contextual conversations without creating a second, unscoped chat system.
 
 ## Participant path
 

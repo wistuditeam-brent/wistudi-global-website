@@ -1,5 +1,40 @@
 # Publisher Studio Changelog
 
+## 2026-09-20 / Unified Studio Navigation and App Shell
+
+### Changed
+
+- Added the persistent Studio destinations Home, Discover events, My events and
+  Build an event to the left panel across Studio views.
+- Moved event Overview, Room, Questions, Build, Chat and optional Event resources
+  into the same event-aware navigation. Event context remains visible while
+  participants move between those sections.
+- Reworked the Studio Home into an orientation and continue-learning view; moved
+  the full catalogue to Discover events and added a My events view.
+- Added local preview-registration records so the My events screen can be reviewed
+  without presenting the registration form as a live booking.
+- Applied the same shell to public event overview and the Event Builder. Removed
+  the detached “All Wistudi Events” exit link from the Studio views.
+- Kept global Studio actions fixed on phones and placed event sections in a
+  horizontal row beneath the event bar.
+- Updated architecture, interaction and event-system documentation to match the
+  corrected reference screens.
+
+### Why
+
+- The corrected references show one application shell, with global destinations
+  and selected-event sections always available from the left panel.
+- Participants should be able to return to Discover or My events from the Overview,
+  room, chat or builder without losing the Studio context.
+
+### Prototype boundary
+
+- Local preview registrations are stored in `sessionStorage` only. There is no
+  account, durable database, booking handoff or server-side room authorization.
+- Studio views use the same shell but remain static HTML routes with view transitions
+  where the browser supports them; production login and real-time presence are not
+  part of this change.
+
 ## 2026-09-20 / Desktop Width and Type Scale Revision
 
 ### Changed

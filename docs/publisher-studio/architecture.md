@@ -36,16 +36,44 @@ The core object model is contextual:
 
 Conversation should happen around these objects, not as a loose public feed.
 
+## Unified Studio Application Shell
+
+Home, event discovery, My Events, event overview, event room sections and event
+creation are destinations inside one Publisher Studio application. They share the
+same Wistudi header and persistent navigation. Moving between these destinations
+must not feel like leaving the Studio for a separate landing page or microsite.
+
+On desktop, the left rail contains the Studio's global destinations (**Home**,
+**Discover events**, **My events**) and the **Build an event** action. When an event
+is selected, its local navigation appears below those global actions: **Overview**,
+**Room**, **Questions**, **Build**, **Chat** and **Event resources** when resources
+exist. The selected event remains visible while moving among its sections. The
+optional right rail is contextual and must not repeat the event title, full resource
+list or journey already shown in the main workspace.
+
+On phones, keep Studio navigation fixed and thumb-reachable, and keep event sections
+available in a compact horizontal row below the event bar. This preserves the same
+information hierarchy without squeezing a desktop-width sidebar into the reading
+area. A browser back or direct share link should return to a meaningful Studio view.
+
+The supplied layout references establish this information architecture. The
+separately supplied PNG is the Wistudi brand mark, not a page layout. The editorial
+standards are content guidance rather than a UI specification: event descriptions
+and resources should be worth using on their own, Wistudi calls to action should be
+relevant, and imagery or product claims must accurately represent Wistudi.
+
 ## Route Architecture
 
-Recommended initial routes:
+Recommended initial routes and in-shell views:
 
 | Route | Purpose | Access |
 | --- | --- | --- |
-| `/publisher-studio/` | Publisher Studio event catalogue, journey overview and selected showcase | Public |
-| `/publisher-studio/events/[slug]/` | Canonical public event details, registration, share metadata and optional event resources | Public |
-| `/publisher-studio/events/[slug]/room/` | Chat-shaped room for the event's registered participants | Verified event registration and Studio membership; staff access is scoped |
-| `/publisher-studio/manage/events/` | Guided event creation, scheduling, media, room and project setup | Assigned event builder or Studio admin |
+| `/publisher-studio/?view=home` | Studio Home, recent work and next steps in the shared shell | Public |
+| `/publisher-studio/?view=discover` | Event discovery and catalogue in the shared shell | Public |
+| `/publisher-studio/?view=my-events` | The user's registered events in the shared shell | Public shell; event details/actions follow access state |
+| `/publisher-studio/events/[slug]/` | Event Overview and registration in the shared shell | Public |
+| `/publisher-studio/events/[slug]/room/` | Room, Questions, Build, Chat and Event resources inside the same shell | Verified event registration and Studio membership; staff access is scoped |
+| `/publisher-studio/manage/events/` | Event Builder inside the shared shell, opened from the persistent left navigation | Assigned event builder or Studio admin |
 | `/publisher-studio/submissions/[id]` | Shared participant creation detail | Author/moderator until approved for the public showcase |
 | `/publisher-studio/admin/` | Event assignments, approvals and moderation controls | Studio admin or scoped moderator |
 
@@ -56,20 +84,25 @@ hosts, including production, stay closed unless the server-side override
 and contains fixture data only. Noindex and unlisted paths are not authentication
 or private preview access controls.
 
-The access column above describes the target system. The current prototype uses
-demo participation only, without login. The room URLs do not enforce registration
-in the preview and must not be treated as private access. See `development.md` for implemented
-routes, the integration audit and the boundary between local state and real identity.
+The paths represent app views, not separate products. The access column describes
+the target system. The current prototype uses demo participation only, without
+login. The room URLs do not enforce registration in the preview and must not be
+treated as private access. See `development.md` for implemented routes, the
+integration audit and the boundary between local state and real identity.
 
 ## Main Experience Areas
 
-### Events Catalogue
+### Home, Discover Events and My Events
 
-The Studio landing page is the front door for Studio workshops. The existing
-`/resources/events/` page remains the wider Wistudi event directory. Both views must
-read one canonical event record, rather than maintaining competing event lists.
-Publisher Studio displays events flagged for the Studio experience and leads into
-their own rooms and projects.
+These are distinct destinations within the same shell. Home orients the participant
+and gives a clear next step. Discover Events is the browseable workshop catalogue.
+My Events returns a participant to workshops they have registered for, with a direct
+path to each event's Overview and room. Its empty state leads to Discover Events.
+
+The existing `/resources/events/` page remains the wider Wistudi event directory.
+Both the general directory and Publisher Studio must read one canonical event
+record, rather than maintaining competing event lists. Studio displays events
+configured for the interactive workshop and creation experience.
 
 Primary content:
 
@@ -79,12 +112,14 @@ Primary content:
 - A short progress model: Discover → Learn → Build → Share → Publish.
 - Published participant examples only when separately approved.
 
-The landing page describes the output and follow-on project. A live room, questions,
+The event overview describes the output and follow-on project. A live room, questions,
 submissions and meeting link require event access.
 
-### Event Page
+### Event Overview
 
-The event page is the main conversion point before each workshop.
+The event overview is the main conversion point before each workshop. It remains a
+destination inside the Publisher Studio shell, with Overview selected in the event
+section of the persistent navigation. Sharing opens this same canonical public URL.
 
 Primary content:
 
@@ -110,10 +145,11 @@ series ID, but each date/event has its own stable event ID, registration, room
 permissions, event resources, conversations and challenge. The room is the working
 space after registration, not another event landing page.
 
-On wide screens, show an event-room directory at the left, the active room in the
-centre and concise event context at the right. On mobile, turn the room directory
-into a horizontal room switcher and keep section navigation thumb-reachable. The
-event bar remains visible and returns to the catalogue.
+On wide screens, keep the Studio global actions and selected event sections in the
+left rail, the active workspace in the centre and concise event context at the
+right. The event bar identifies the selected event and provides a clear route back
+to event discovery. On mobile, keep the global destinations in fixed navigation and
+put the event sections in a horizontal, thumb-reachable row beneath the event bar.
 
 Recommended bottom navigation:
 
@@ -140,9 +176,10 @@ limits, external-sharing rules, notifications and scoped role/invitation matrix.
 
 ### Event Builder
 
-The builder is a role-gated management tool within Publisher Studio, not a public
-content form. It standardizes public event pages and room configuration while
-allowing each creator to provide the event's subject-specific materials.
+The builder is a role-gated management tool within Publisher Studio, reached from
+the persistent left navigation, not a separate product or public content form. It
+standardizes public event pages and room configuration while allowing each creator
+to provide the event's subject-specific materials.
 
 - Event basics, audience, topic, level and expected participant output.
 - Start/end time, explicit IANA timezone, trainer and approved online meeting link.

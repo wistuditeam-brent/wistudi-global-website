@@ -7,12 +7,19 @@ fixtures and does not create or publish live events.
 
 Publisher Studio is the workshop and creation experience. It contains:
 
-1. **Events catalogue** at `/publisher-studio/`: browse upcoming and archived Studio events.
-2. **Public event page** at `/publisher-studio/events/{slug}/`: event details, learning outcomes, registration, share action and optional public Event resources.
-3. **Event room** at `/publisher-studio/events/{slug}/room/`: a mobile-first, access-controlled space for that event.
+1. **Home, Discover events and My events**: three distinct destinations in the persistent Publisher Studio shell.
+2. **Event Overview** at `/publisher-studio/events/{slug}/`: event details, learning outcomes, registration, share action and optional public Event resources, still inside that shell.
+3. **Event room** at `/publisher-studio/events/{slug}/room/`: Room, Questions, Build, Chat and optional Event resources in the same shell.
 4. **Inline event chat and project** inside the room: questions, discussions, resources, challenge and participant submissions attached to stable contexts.
 5. **Wistudi content link**: a Flow, template or XP Video that can be viewed, adapted or remixed in the Wistudi platform when identity integration is available.
-6. **Event Builder** at `/publisher-studio/manage/events/`: staff interface for drafts, assignment, review, scheduling and publication.
+6. **Event Builder** at `/publisher-studio/manage/events/`: staff interface for drafts, assignment, review, scheduling and publication, opened from the persistent left navigation.
+
+These are views in one application, even where a direct URL changes. Keep the
+Wistudi header and Studio navigation consistent across them. On desktop, global
+Studio navigation and event-specific sections share the left panel. On phones, the
+global actions remain fixed and the active event sections sit directly below the
+event bar. The selected event stays visible as the participant moves among its
+overview, room and creation work.
 
 The global `/resources/events/` directory remains the wider Wistudi events index.
 Studio events should be a filtered presentation of the same canonical event records,
@@ -233,22 +240,28 @@ in `identity-and-storage.md`.
 Room contribution state is separate from event schedule. Reaching the scheduled end
 never closes a room. Authorized event staff close it explicitly; eligible
 participants retain read-only access until it is reopened or archived under a
-documented retention policy. Use the desktop room directory and mobile room switcher
-to navigate between events.
+documented retention policy. Use the persistent Studio global navigation and the
+participant's My events view to move between event workspaces.
 
 ## Prototype versus live service
 
 The current preview implements:
 
-- Multi-event catalogue with sample event cards, local date rendering, share modal and static per-event share metadata.
-- Public event page and one event-specific room URL per sample event.
-- Event Builder form with local draft save, preview and local image preview.
+- One shared Studio shell for Home, Discover events, My events, event overviews,
+  event rooms and the Event Builder.
+- Sample event discovery cards, local date rendering, share modal and static
+  per-event share metadata.
+- Public event overview and one event-specific room URL per sample event.
+- A local-only preview registration appears in My events and can reopen its event room.
+- Event Builder form with local draft save, preview and local image preview,
+  reached from the persistent Studio navigation.
 - Event-specific sample resources, challenges, questions, discussions and submissions.
 - Inline replies, reactions, emoji, local link/file previews, contextual suggestions
   and event-room navigation fixtures.
 - Event Builder drag/drop local image/video/resource-file previews.
 - Light/dark theme toggle and sample trainer notifications.
-- Mobile room layout and a simple journey indicator.
+- Fixed mobile global navigation, compact selected-event sections and a simple
+  journey indicator.
 
 It does not implement:
 

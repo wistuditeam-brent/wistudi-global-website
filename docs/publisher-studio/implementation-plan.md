@@ -61,8 +61,8 @@ Acceptance criteria:
 
 ## Phase 2: Static Prototype
 
-Status: expanded with event-catalogue, share and Event Builder previews using
-local-only data. See
+Status: expanded with the unified app shell, Home/Discover/My events, event overviews,
+room sections and Event Builder previews using local-only data. See
 `development.md` for exact boundaries and repeatable tests. All real services remain
 deferred. Review responsive screenshots and device keyboard behavior before approval.
 
@@ -80,7 +80,10 @@ Deliverables:
 - Mock Challenge tab
 - Inline chat, two-reply expansion, hearts, emoji, trainer-mention affordance and contextual suggestions
 - Local drag/drop image, video and document previews in the Event Builder and room composer
-- Light/dark theme toggle, trainer-notification sample and event-room directory
+- Light/dark theme toggle, sample trainer notifications and optional event context rail
+- Persistent Studio navigation across Home, Discover, My events, event views and Builder
+- Fixed mobile Home/Discover/My events/Create navigation with event tabs below the event bar
+- Local preview registration state displayed on the My events page
 - A readable responsive layout with non-main-heading text calibrated to 2 points above the original scale
 
 Prototype constraints:
@@ -95,6 +98,8 @@ Prototype constraints:
 Acceptance criteria:
 
 - Desktop public pages feel like Wistudi website pages.
+- The Publisher Studio sidebar and selected-event navigation stay consistent across all Studio routes.
+- Event creation is reachable from the persistent Studio navigation.
 - Mobile Studio area feels like a focused app or chat workspace.
 - No real database or auth is required yet.
 - The Studio route is hidden from navigation until approved.
