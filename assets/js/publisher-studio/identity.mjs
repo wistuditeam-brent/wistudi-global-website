@@ -15,6 +15,20 @@ let noticeTimer;
 const escape = value => String(value == null ? '' : value).replace(/[&<>"']/g, function(char) {
   return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char];
 });
+function normalizeUser(user) {
+  if (!user) return null;
+  return Object.assign({}, user, {
+    roles: (user.roles || []).map(function(role) {
+      return {
+        id: role.id, role: role.role,
+        scopeType: role.scopeType || role.scope_type,
+        scopeId: role.scopeId || role.scope_id,
+        expiresAt: role.expiresAt || role.expires_at || null,
+      };
+    }),
+  });
+}
+
 const roleNames = {
   platform_super_admin: 'Wistudi Super Admin',
   studio_admin: 'Studio Admin',
@@ -240,7 +254,7 @@ async function acceptInviteIfPresent() {
     toast('Invitation accepted. Your ' + (roleNames[result.role] || result.role) + ' access is active.');
   } catch (error) {
     toast(error.message);
-    if (error.status === 403) showAuth('sign_in');
+    if (error.status === 403) { authMode = 'sign_in'; renderAuth('Use the email address that received this invitation.'); }
   }
 }
 
@@ -272,7 +286,7 @@ async function handleSubmit(event) {
       const result = await api(authUrl, 'POST', {
         action: 'verify_code', email: challengeEmail, challengeId: challengeId, code: data.code,
       });
-      currentUser = result.user;
+      currentUser = normalizeUser(result.user);
       challengeId = '';
       initialJoin = { displayName: '', email: '' };
       dispatchIdentity();
