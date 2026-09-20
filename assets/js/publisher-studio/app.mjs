@@ -1,5 +1,6 @@
 import { events, workshop, challenge, challenges, allResources, contributionKinds, contextFor, challengeFor, resourcesFor } from './data.mjs';
 import { STORAGE_KEY, createState, loadState, saveState, escapeHtml as e, avatar, registerDemo, askQuestion, toggleVote, voteCount, addThread, addReply, toggleThreadHeart, submitBuild } from './model.mjs';
+import { loadRemoteEvent, sendRemoteAction } from './remote.mjs';
 import { renderCalendarApp, handleCalendarClick, handleCalendarChange, handleCalendarSubmit } from './calendar.mjs';
 
 const root = document.querySelector('#app');
@@ -100,6 +101,43 @@ function notify(message) {
 
 function persist() {
   if (!saveState(storage, state)) notify('Browser storage is unavailable. Changes last only until you reload this page.');
+}
+
+function applyRemoteSnapshot(snapshot) {
+  const demoQuestions = state.questions.filter(item => String(item.id).startsWith('demo-'));
+  const demoThreads = state.threads.filter(item => String(item.id).startsWith('demo-'));
+  const demoSubmissions = state.submissions.filter(item => String(item.id).startsWith('demo-'));
+  const remoteQuestions = (snapshot.questions || []).map(item => ({ ...item, context: contextFor(item.contextId) }));
+  const remoteThreads = (snapshot.threads || []).map(item => ({ ...item, context: contextFor(item.contextId) }));
+  const remoteSubmissions = (snapshot.submissions || []).map(item => ({ ...item, context: contextFor(item.challengeId) }));
+  state.questions = [...remoteQuestions, ...demoQuestions];
+  state.threads = [...remoteThreads, ...demoThreads];
+  state.submissions = [...remoteSubmissions, ...demoSubmissions];
+  state.votes = remoteQuestions.filter(item => item.votedByUser).map(item => item.id);
+  state.threadHearts = remoteThreads.filter(item => item.heartedByUser).map(item => item.id);
+  persist();
+}
+
+async function syncRemoteState({ quiet = true } = {}) {
+  try {
+    const snapshot = await loadRemoteEvent(selectedEvent.id, state.profile);
+    applyRemoteSnapshot(snapshot);
+    render(false);
+    return true;
+  } catch (error) {
+    if (!quiet) notify(`Shared Studio data is temporarily unavailable. ${error.message}`);
+    return false;
+  }
+}
+
+function mirrorRemote(action, payload = {}, successMessage = '') {
+  sendRemoteAction(selectedEvent.id, state.profile, action, payload)
+    .then(snapshot => {
+      applyRemoteSnapshot(snapshot);
+      render(false);
+      if (successMessage) notify(successMessage);
+    })
+    .catch(error => notify(`Saved in this browser, but not to shared Studio yet. ${error.message}`));
 }
 
 function prototypeBar() {
@@ -805,6 +843,7 @@ document.addEventListener('click', event => {
   }
   if (action === 'heart') {
     toggleThreadHeart(state, id); persist(); render();
+    if (!String(id).startsWith('demo-')) mirrorRemote('thread.heart', { threadId: id });
     document.querySelector(`[data-action="heart"][data-id="${CSS.escape(id)}"]`)?.focus({ preventScroll: true });
   }
   if (action === 'share-thread') {
@@ -861,6 +900,7 @@ document.addEventListener('click', event => {
   if (action === 'preview-builder') previewBuilder();
   if (action === 'vote') {
     toggleVote(state, id); persist(); render();
+    if (!String(id).startsWith('demo-')) mirrorRemote('question.vote', { questionId: id });
     document.querySelector(`[data-action="vote"][data-id="${CSS.escape(id)}"]`)?.focus({ preventScroll: true });
   }
   if (action === 'question-filter') {
@@ -1003,18 +1043,23 @@ document.addEventListener('submit', event => {
     if (form.id === 'registration-form') {
       const optedIntoStudio = data.studioConsent === 'on';
       registerDemo(state, data.displayName, optedIntoStudio, selectedEvent.id); persist(); drafts.delete(form.id);
+      if (optedIntoStudio && state.profile) mirrorRemote('profile.upsert');
       document.querySelector('#registration-panel').innerHTML = `<div class="registration-success">${icon('check')}<h2 tabindex="-1">Preview registration complete</h2><p>This is a local preview only. No booking was made and no confirmation email was sent.</p>${optedIntoStudio && state.profile ? `<div class="person-line">${person(state.profile.displayName, state.profile.avatarSeed)}<strong>${e(state.profile.displayName)}</strong></div><p>Your sample Studio profile is available in this browser tab.</p>` : '<p>You did not opt into a Studio profile. The preview event is listed in My events for this browser tab only.</p>'}<a class="button primary" href="${eventUrl(selectedEvent)}room/">Enter this event room ${icon('arrow')}</a><a class="text-link" href="${base}?view=my-events">View My events ${icon('arrow')}</a></div>`;
       document.querySelector('.registration-success h2').focus();
     } else if (form.id === 'question-form') {
       askQuestion(state, data.body, data.contextId); questionFilter = 'all'; drafts.delete(form.id); persist(); render();
+      mirrorRemote('question.create', { text: data.body, contextId: data.contextId });
       document.querySelector('#question-body').focus({ preventScroll: true }); notify('Demo question added. It has not been sent to a trainer.');
     } else if (form.id === 'submission-form') {
-      submitBuild(state, data, selectedChallenge.id); drafts.delete(form.id); persist(); render(); notify('Demo creation saved locally with pending-review status.');
+      submitBuild(state, data, selectedChallenge.id); drafts.delete(form.id); persist(); render();
+      mirrorRemote('submission.create', { challengeId: selectedChallenge.id, title: data.title, description: data.description, url: data.url, help: data.help });
+      notify('Creation saved. Shared Studio sync is running.');
       document.querySelector('.submission-card').scrollIntoView({ block: 'center', behavior: 'instant' });
     } else if (form.dataset.chatForm === 'new') {
       const attachments = storeChatAttachments(form.id);
       const relatedItems = relatedByComposer.get(form.id) || [];
       const thread = addThread(state, { ...data, attachments, relatedItems });
+      mirrorRemote('thread.create', { title: data.title, text: data.body, kind: data.kind, contextId: data.contextId, attachments, relatedItems, relatedContextIds: thread.relatedContextIds });
       nextChatContext = thread.contextId; relatedByComposer.delete(form.id); threadFilter = 'all'; drafts.delete(form.id); persist(); render();
       document.querySelector(`#thread-${CSS.escape(thread.id)}`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       document.querySelector('#thread-form-body')?.focus({ preventScroll: true });
@@ -1023,6 +1068,7 @@ document.addEventListener('submit', event => {
       const attachments = storeChatAttachments(form.id);
       const targetId = form.dataset.replyTo;
       const reply = addReply(state, targetId, data.body, attachments);
+      if (!String(targetId).startsWith('demo-')) mirrorRemote('thread.reply', { threadId: targetId, text: data.body, attachments });
       openReplyForms.delete(targetId); expandedThreads.add(targetId); drafts.delete(form.id); persist(); render();
       document.querySelector(`#thread-${CSS.escape(targetId)} .chat-replies`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       notify('Demo reply added in this browser.');
@@ -1106,4 +1152,5 @@ window.addEventListener('hashchange', () => {
 });
 render();
 renderedHref = location.href;
+syncRemoteState();
 if (loaded.warning) notify(loaded.warning);
