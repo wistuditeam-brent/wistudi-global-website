@@ -107,6 +107,13 @@ function canModerateEvent(eventId = selectedEvent.id) {
 function canAnswerEvent(eventId = selectedEvent.id) {
   return canModerateEvent(eventId) || scopedRole('event_co_trainer', eventId);
 }
+function canBuildStudioEvents() {
+  return (serverIdentity?.roles || []).some(item =>
+    (item.role === 'platform_super_admin' && item.scopeType === 'platform' && item.scopeId === 'wistudi')
+    || (item.role === 'studio_admin' && item.scopeType === 'studio' && item.scopeId === 'publisher-studio')
+    || (item.role === 'event_builder' && item.scopeType === 'studio' && item.scopeId === 'publisher-studio')
+  );
+}
 const resourceIsAvailable = item => (phaseOrder[selectedPhase()] ?? 0) >= (phaseOrder[resourcePhase(item)] ?? 0);
 
 function notify(message) {
@@ -186,7 +193,7 @@ function globalNavigation(view = studioView, mobile = false) {
   const active = page === 'builder' ? '' : page === 'event' ? (view === 'my-events' ? 'my-events' : 'discover') : page === 'studio' ? 'my-events' : view;
   const links = items.map(([key, label, href, glyph]) => `<a href="${href}" ${active === key ? 'aria-current="page"' : ''}>${icon(glyph)}<span>${label}</span></a>`).join('');
   if (!mobile) return `<nav class="global-navigation" aria-label="Publisher Studio">${links}</nav>`;
-  return `<nav class="global-mobile-navigation" aria-label="Publisher Studio">${items.map(([key, label, href, glyph]) => `<a href="${href}" ${active === key ? 'aria-current="page"' : ''}>${icon(glyph)}<span>${label === 'Discover events' ? 'Discover' : label}</span></a>`).join('')}<a href="${base}manage/events/" ${page === 'builder' ? 'aria-current="page"' : ''}>${icon('plus')}<span>Create</span></a></nav>`;
+  return `<nav class="global-mobile-navigation" aria-label="Publisher Studio">${items.map(([key, label, href, glyph]) => `<a href="${href}" ${active === key ? 'aria-current="page"' : ''}>${icon(glyph)}<span>${label === 'Discover events' ? 'Discover' : label}</span></a>`).join('')}${canBuildStudioEvents() ? `<a href="${base}manage/events/" ${page === 'builder' ? 'aria-current="page"' : ''}>${icon('plus')}<span>Create</span></a>` : ''}</nav>`;
 }
 
 function renderNav() {
@@ -207,7 +214,7 @@ function renderNav() {
 
 function appSidebar(view = studioView, eventContext = null) {
   const eventNav = eventContext ? `<section class="sidebar-event-context"><div class="sidebar-section-label">Selected event</div><a class="sidebar-event-title" href="${eventUrl(eventContext)}">${e(eventContext.title)}</a><p class="muted small">${e(eventContext.subject)} · ${e(eventContext.topic)}</p>${renderNav()}</section>` : '';
-  return `<aside class="workspace-sidebar app-sidebar"><a class="sidebar-studio-name" href="${base}">Publisher Studio</a>${globalNavigation(view)}<a class="sidebar-create-event ${page === 'builder' ? 'is-current' : ''}" href="${base}manage/events/">${icon('plus')}<span>Build an event</span></a>${eventNav}<div class="sidebar-bottom"><span class="muted small">${page === 'builder' ? 'Event setup' : eventContext ? 'This event room' : 'Learning and creation'}</span><span class="muted small">${page === 'builder' ? 'Draft preview' : eventContext ? 'Room access is a preview' : 'Publisher Studio'}</span></div></aside>`;
+  return `<aside class="workspace-sidebar app-sidebar"><a class="sidebar-studio-name" href="${base}">Publisher Studio</a>${globalNavigation(view)}${canBuildStudioEvents() ? `<a class="sidebar-create-event ${page === 'builder' ? 'is-current' : ''}" href="${base}manage/events/">${icon('plus')}<span>Build an event</span></a>` : ''}${eventNav}<div class="sidebar-bottom"><span class="muted small">${page === 'builder' ? 'Event setup' : eventContext ? 'This event room' : 'Learning and creation'}</span><span class="muted small">${page === 'builder' ? 'Draft preview' : eventContext ? 'Room access is a preview' : 'Publisher Studio'}</span></div></aside>`;
 }
 
 function appShell({ view = studioView, eventContext = null, content = '', contextRail = '', mainClass = '', crumb = '' }) {
@@ -783,8 +790,16 @@ function restoreDrafts(container = document) {
   });
 }
 
+function renderBuilderDenied() {
+  return appShell({
+    view: 'home',
+    crumb: 'Event builder',
+    content: '<section class="access-required"><div class="eyebrow">Event builder</div><h1>Event builder access is assigned by Wistudi</h1><p class="lead">Sign in with the email address assigned as a Wistudi Super Admin, Studio Admin or Event Builder. Event creation access is scoped to those roles.</p><p class="notice">This preview builder currently stores drafts in this browser. Shared event publishing is a later backend step.</p></section>',
+  });
+}
+
 function render(focus = false) {
-  root.innerHTML = page === 'studio' ? renderStudio() : page === 'event' ? renderEvent() : page === 'builder' ? renderBuilder() : studioView === 'calendar' ? renderCalendar() : renderHome();
+  root.innerHTML = page === 'studio' ? renderStudio() : page === 'event' ? renderEvent() : page === 'builder' ? (canBuildStudioEvents() ? renderBuilder() : renderBuilderDenied()) : studioView === 'calendar' ? renderCalendar() : renderHome();
   document.title = page === 'event'
     ? `${selectedEvent.title} | Wistudi Publisher Studio`
     : page === 'builder'
@@ -856,10 +871,10 @@ document.addEventListener('click', event => {
     if (calendarResult.message) notify(calendarResult.message);
     return;
   }
-  if (action === 'moderate-question') mirrorRemote('question.hide', { questionId: id });
-  if (action === 'moderate-thread') mirrorRemote('thread.hide', { threadId: id });
-  if (action === 'moderate-reply') mirrorRemote('reply.hide', { replyId: id });
-  if (action === 'review-submission') mirrorRemote('submission.review', { submissionId: id, status: target.dataset.status, note: '' });
+  if (action === 'moderate-question') mirrorRemote('question.hide', { questionId: id }, 'Question hidden from this event room.');
+  if (action === 'moderate-thread') mirrorRemote('thread.hide', { threadId: id }, 'Conversation hidden from this event room.');
+  if (action === 'moderate-reply') mirrorRemote('reply.hide', { replyId: id }, 'Reply hidden from this event room.');
+  if (action === 'review-submission') mirrorRemote('submission.review', { submissionId: id, status: target.dataset.status, note: '' }, target.dataset.status === 'approved' ? 'Creation approved for this event.' : 'Changes requested for this creation.');
   if (action === 'resource') openResource(id);
   if (action === 'public-resource') openPublicResource(id);
   if (action === 'new-thread') document.querySelector('#thread-form-body')?.focus({ preventScroll: false });
