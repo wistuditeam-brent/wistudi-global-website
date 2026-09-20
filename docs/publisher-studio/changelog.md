@@ -1,5 +1,24 @@
 # Publisher Studio Changelog
 
+## 2026-09-20 / Desktop Width and Type Scale Revision
+
+### Changed
+
+- Expanded the desktop workspace to the available browser width and widened the
+  public event catalogue and event overview canvas.
+- Kept the active workspace panel at a readable maximum width on very wide screens.
+- Reduced the previous non-main-heading increase from 4 points to 2 points; main
+  `h1` sizes remain unchanged.
+- Removed the repeated event title and duplicate resource links from the context
+  rail. The Event Resources area remains the complete resource list.
+- Improved text contrast in the dark-theme event focus card.
+
+### Why
+
+- Desktop review showed excess outer margins, oversized supporting text and repeated
+  event context. The updated layout follows the brief's full-width app-shell rule
+  while keeping individual reading areas comfortable.
+
 ## 2026-09-20 / Inline Chat, Room Navigation and Readability
 
 ### Changed

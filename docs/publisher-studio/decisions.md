@@ -446,14 +446,19 @@ Reason:
 - The supplied Wistudi Flow share page exposed only generic platform Open Graph
   metadata on 2026-09-20. Accurate per-Flow cards require Wistudi page/API support.
 
-### Larger Interface Typography
+### Desktop Workspace and Revised Type Scale / 2026-09-20
 
-Decision: increase Publisher Studio text declarations by 5.34 CSS pixels (4 points)
-and preserve all main `h1` sizes. Reflow smaller controls for touch and phone layouts.
+Decision: use the full available desktop width for the Studio shell, with flexible
+main content, clear side rails and a 1280px reading limit inside the active panel.
+Public event pages may use a wider centered canvas. The latest type scale adds
+2.67 CSS pixels (2 points) to non-main-heading text and preserves main `h1` sizes.
+This supersedes the first-pass 4-point increase.
 
 Reason:
 
-- The existing interface and user-supplied screenshots made supporting text and
-  controls too small to read comfortably, especially on mobile.
-- Keeping the main page heading size stable preserves hierarchy while the rest of
-  the interface gains legibility.
+- The first pass improved phone readability but made the 1920px desktop view feel
+  oversized and crowded inside a narrow centered shell.
+- The unified-platform brief calls for a full-width application shell while
+  keeping text inside individual panels readable.
+- Removing repeated event titles and the duplicate resource list from the context
+  rail keeps the room focused; Event Resources remains the full source of truth.

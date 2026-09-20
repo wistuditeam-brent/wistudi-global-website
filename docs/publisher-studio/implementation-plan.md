@@ -81,7 +81,7 @@ Deliverables:
 - Inline chat, two-reply expansion, hearts, emoji, trainer-mention affordance and contextual suggestions
 - Local drag/drop image, video and document previews in the Event Builder and room composer
 - Light/dark theme toggle, trainer-notification sample and event-room directory
-- A readable mobile layout with all non-main-heading text increased by at least 4 points
+- A readable responsive layout with non-main-heading text calibrated to 2 points above the original scale
 
 Prototype constraints:
 
