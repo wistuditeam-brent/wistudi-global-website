@@ -387,7 +387,7 @@ function openShare(slug) {
 }
 
 function renderBuilder() {
-  const content = `<div class="builder-page"><div class="builder-heading"><div><div class="eyebrow">Event Builder / Shared drafts</div><h1>Create a Studio event</h1><p class="lead">Use the same structure for every event. Each event gets a public page, a participant room and a connected build project.</p></div><span class="tag">Shared draft workspace</span></div><div class="builder-flow" aria-label="Event publishing process"><span class="current">1. Details</span><span>2. Schedule</span><span>3. Room and team</span><span>4. Review and publish</span></div><div class="builder-warning"><strong>Shared draft workspace.</strong> Event details save to the Publisher Studio database. Sign-in and Event Builder permissions are required. Uploaded files still preview only in this browser; use a secure external link for shared media previews.</div><section class="builder-saved-drafts builder-section"><div class="builder-section-heading"><span>↻</span><div><h2>Continue a shared draft</h2><p>Open a draft saved to your Publisher Studio account.</p></div></div><div id="builder-saved-drafts" aria-live="polite"><p class="muted small">Loading shared drafts…</p></div></section>
+  const content = `<div class="builder-page"><div class="builder-heading"><div><div class="eyebrow">Event Builder / Shared drafts</div><h1>Create a Studio event</h1><p class="lead">Use the same structure for every event. Each event gets a public page, a participant room and a connected build project.</p></div><span class="tag">Shared draft workspace</span></div><div class="builder-flow" aria-label="Event publishing process"><span class="current">1. Details</span><span>2. Schedule</span><span>3. Room and team</span><span>4. Review and publish</span></div><div class="builder-warning"><strong>Shared draft workspace.</strong> Event details save to the Publisher Studio database. Sign-in and Event Builder permissions are required. Uploaded files still preview only in this browser; use a secure external link for shared media previews.</div><section class="builder-saved-drafts builder-section"><div class="builder-section-heading"><span>↻</span><div><h2>Continue a shared draft</h2><p>Open a draft saved to your Publisher Studio account.</p></div><button type="button" class="button secondary" data-action="new-builder-draft">Start new draft</button></div><div id="builder-saved-drafts" aria-live="polite"><p class="muted small">Loading shared drafts…</p></div></section>
     <form id="event-builder-form" class="event-builder-form"><input type="hidden" name="eventId" value=""><div class="builder-columns"><div class="builder-fields">
       <section class="builder-section"><div class="builder-section-heading"><span>01</span><div><h2>Event details</h2><p>Tell people who this is for, what they will learn and what they will make.</p></div></div><label>Event title<input name="title" maxlength="100" placeholder="e.g. Build an interactive speaking lesson" required></label><label>Short description<textarea name="summary" rows="3" maxlength="320" placeholder="Explain the teaching problem or skill this workshop addresses." required></textarea></label><div class="builder-grid"><label>Subject<input name="subject" maxlength="40" placeholder="English" required></label><label>Topic<input name="topic" maxlength="50" placeholder="Speaking" required></label><label>Level<input name="level" maxlength="32" placeholder="B1" required></label><label>Audience<input name="audience" maxlength="100" placeholder="English teachers and tutors" required></label></div><label>Learning outcomes <span class="muted">(one outcome per line)</span><textarea name="learningOutcomes" rows="4" maxlength="800" placeholder="Adapt a speaking task into a clear lesson sequence\nDesign one purposeful learner activity\nPlan how learners will reflect on their progress" required></textarea></label><label>What will participants make?<textarea name="output" rows="2" maxlength="220" placeholder="One concrete outcome from the session" required></textarea></label></section>
       <section class="builder-section"><div class="builder-section-heading"><span>02</span><div><h2>Schedule and online session</h2><p>Dates are stored with an explicit timezone and displayed in each participant's local time.</p></div></div><div class="builder-grid"><label>Start date and time<input name="startsAt" type="datetime-local" required></label><label>Event timezone<select name="timezone"><option value="Asia/Ho_Chi_Minh">Asia / Ho Chi Minh</option><option value="UTC">UTC</option><option value="Europe/London">Europe / London</option><option value="America/New_York">America / New York</option></select></label><label>Duration<select name="duration"><option>60</option><option>75</option><option>90</option><option>120</option></select></label><label>Trainer name<input name="trainer" maxlength="60" placeholder="Assigned Wistudi trainer" required></label></div><div class="integration-card"><div><span class="eyebrow">Zoom</span><strong>Manual meeting link in this preview</strong><p>For the live system, show the participant join link only inside their registered event room.</p></div><span class="integration-state">Not connected</span><label>Test meeting link<input name="zoomUrl" type="url" placeholder="https://zoom.us/j/..." autocomplete="off"></label><button class="button secondary" type="button" disabled>Connect Zoom account</button></div></section>
@@ -1113,6 +1113,25 @@ document.addEventListener('click', async event => {
   if (action === 'load-builder-draft') {
     const item = serverDrafts.find(draft => draft.id === id);
     if (item) { populateSharedDraft(item); notify('Shared event draft opened.'); }
+  }
+  if (action === 'new-builder-draft') {
+    const form = document.querySelector('#event-builder-form');
+    if (form) {
+      form.reset();
+      for (const url of localPreviewUrls.values()) URL.revokeObjectURL(url);
+      localPreviewUrls.clear();
+      form.querySelectorAll('[data-media-file]').forEach(input => {
+        input.value = '';
+        const name = input.closest('[data-dropzone]')?.querySelector('[data-file-name]');
+        if (name) name.textContent = 'Choose a file or drop it here';
+      });
+      renderKitEditor([]);
+      renderBuilderMediaPreview();
+      try { storage?.removeItem(BUILDER_DRAFT_KEY); } catch { /* A fresh shared draft can still be started. */ }
+      const status = document.querySelector('#builder-save-status');
+      if (status) status.textContent = 'New event draft. Save it to create a shared draft.';
+      form.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
   }
   if (action === 'copy-share') {
     const url = target.dataset.url;
