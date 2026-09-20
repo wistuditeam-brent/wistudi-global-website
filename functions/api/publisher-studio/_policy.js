@@ -31,7 +31,8 @@ const CAPABILITIES = Object.freeze({
 export function hasCapability(assignments, capability, scopeType = '', scopeId = '') {
   return assignments.some(assignment => {
     const inScope = assignment.scopeType === 'platform'
-      || (assignment.scopeType === 'studio' && (!scopeType || scopeType === 'studio' || scopeType === 'event'))
+      || (assignment.scopeType === 'studio' && assignment.scopeId === STUDIO_SCOPE_ID
+        && (!scopeType || scopeType === 'studio' || scopeType === 'event'))
       || (assignment.scopeType === scopeType && assignment.scopeId === scopeId);
     const grants = CAPABILITIES[assignment.role];
     return inScope && Boolean(grants) && (grants.has('*') || grants.has(capability));
@@ -67,7 +68,7 @@ export async function canGrantRole(db, actorId, role, scopeType, scopeId) {
 export async function eventCapabilities(db, userId, eventId) {
   const assignments = await assignmentsFor(db, userId);
   const scoped = assignments.filter(item =>
-    item.scopeType === 'platform'
+    (item.scopeType === 'platform' && item.scopeId === PLATFORM_SCOPE_ID)
     || (item.scopeType === 'studio' && item.scopeId === STUDIO_SCOPE_ID)
     || (item.scopeType === 'event' && item.scopeId === eventId)
   );
@@ -75,6 +76,7 @@ export async function eventCapabilities(db, userId, eventId) {
     assignments: scoped,
     canRead: hasCapability(scoped, 'event.read', 'event', eventId),
     canWrite: hasCapability(scoped, 'event.write', 'event', eventId),
+    canAnswer: hasCapability(scoped, 'event.questions.answer', 'event', eventId),
     canModerate: hasCapability(scoped, 'event.moderate', 'event', eventId),
     canManage: hasCapability(scoped, 'event.manage', 'event', eventId),
     canManageTeam: hasCapability(scoped, 'studio.roles.manage', 'event', eventId)
