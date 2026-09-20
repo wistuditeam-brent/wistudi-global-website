@@ -296,7 +296,7 @@ Reason:
 
 Decision: Keep event rooms route-based, with a persistent room bar linking to the event
 catalogue and event details, plus thumb-reachable bottom navigation for Room, Questions,
-Build, Workbench and Kit. Use brief route and section transitions only when reduced
+Build, Chat and Event resources. Use brief route and section transitions only when reduced
 motion is not requested.
 
 Reason:
@@ -375,3 +375,85 @@ Reason:
 - Cloudflare documents temporary presigned R2 access and direct Stream creator
   uploads, but the Wistudi account's bindings, ownership and operating requirements
   still need confirmation before a production provider is selected.
+
+## Inline Chat, Rooms and Scoped Roles / 2026-09-20
+
+### Inline Discussion and Reply Preview
+
+Decision: keep event conversations inline in the room. A message may have threaded
+replies; show two replies first and let a reader expand the thread in place.
+
+Reason:
+
+- Mobile conversation should feel like an app screen rather than a landing page that
+  opens separate discussion dialogs.
+- The context and parent message stay visible while participants reply.
+- The thread remains a stable, searchable object for later Wistudi conversations.
+
+### Event Room Directory and Manual Closure
+
+Decision: show event rooms in a left directory on desktop and a horizontal room
+switcher on mobile. Event schedule stage is separate from room open/closed state.
+Events ending do not close rooms automatically; an assigned owner/trainer/admin
+must explicitly close or reopen. Closed rooms remain read-only for eligible members.
+
+Reason:
+
+- Participants need a clear way to return to other events while inside a room.
+- Projects and follow-up discussion continue after a live meeting ends.
+- Automatic closure at the scheduled end can cut off asynchronous creation and
+  review. A manual, audited decision makes room availability predictable.
+
+### Scoped Role Assignments and Invitations
+
+Decision: distinguish Wistudi super admin, Studio admin, event owner/builder,
+trainer, moderator and participant. Each assignment is scoped to the Studio, event,
+room or content it governs. Trainers may invite event-scoped moderators only within
+their delegated moderation capabilities.
+
+Reason:
+
+- A trainer should manage their event without receiving global Wistudi powers.
+- A moderator needs tools for assigned discussions without event publishing or role
+  assignment authority.
+- Email-bound, expiring, revocable invitations with server-side verification prevent
+  a forwarded URL from becoming an untracked privileged account.
+
+### External Sharing Requires an Explicit Public Boundary
+
+Decision: public event shares invite people to the canonical event page. Room and
+unapproved creation shares do not expose the underlying content. A participant
+creation receives an external public preview only after its creator opts in and a
+moderator approves the public permalink.
+
+Reason:
+
+- A room URL should not grant access or leak private discussion in social previews.
+- Creators need control over whether work is public and how it is attributed.
+- Approved share pages can provide correct Open Graph metadata without exposing
+  registration data or meeting links.
+
+### Link Preview Provider Boundary
+
+Decision: do not fetch arbitrary Open Graph URLs from the browser. Use allowlisted
+video embeds and an approved server-side metadata service for Wistudi/social previews.
+When object metadata is missing, show a generic fallback and say what is missing.
+
+Reason:
+
+- Browser CORS blocks reliable cross-origin metadata reads; proxying arbitrary URLs
+  from a server creates SSRF and redirect risks.
+- The supplied Wistudi Flow share page exposed only generic platform Open Graph
+  metadata on 2026-09-20. Accurate per-Flow cards require Wistudi page/API support.
+
+### Larger Interface Typography
+
+Decision: increase Publisher Studio text declarations by 5.34 CSS pixels (4 points)
+and preserve all main `h1` sizes. Reflow smaller controls for touch and phone layouts.
+
+Reason:
+
+- The existing interface and user-supplied screenshots made supporting text and
+  controls too small to read comfortably, especially on mobile.
+- Keeping the main page heading size stable preserves hierarchy while the rest of
+  the interface gains legibility.

@@ -1,6 +1,6 @@
 # Publisher Studio Development
 
-Status: expanded local-data prototype for multi-event discovery, sharing and Event Builder review.
+Status: local-data prototype for multi-event discovery, inline event chat and Event Builder review.
 Branch: `feature/publisher-studio-mvp`.
 
 ## What Works
@@ -11,17 +11,19 @@ Branch: `feature/publisher-studio-mvp`.
 - Before, live and after-workshop preview state per event.
 - Event Builder with guided sections, local draft save, event preview and local image preview.
 - A simple event-to-room-to-build-to-share/publish journey indicator.
-- Five mobile navigation destinations and full-height contextual conversations.
+- Five mobile navigation destinations, desktop room directory and inline contextual conversations.
 - Questions, reversible votes, answered filters and resource-specific context.
-- Four Workbench contribution types, replies and filtering.
+- Four contextual contribution types, two-reply preview/expand, hearts and inline replies.
+- Drag/drop local media/file previews, emoji picker, trainer mention suggestions and related-context prompts.
+- Light/dark theme toggle and sample trainer-notification menu.
 - Challenge participation, link submissions and pending-review display.
 - Optional demo profile with a stable initials avatar; no email persistence.
 - Resource outlines, search, contextual replies and explicit unavailable remix actions.
 - Browser-tab persistence, corruption recovery, draft preservation during navigation and demo reset.
 
 These are prototype interactions, not live services. There is no real registration,
-login, verified identity, room authorization, multi-user chat, role invitation,
-trainer notification, secure media upload, moderation queue, Zoom connection,
+login, verified identity, room authorization, shared multi-user chat, role invitation,
+live trainer notification, secure media upload, moderation queue, Zoom connection,
 recording or Wistudi account/content connection. Demo event names, participant
 labels, answers, vote counts and schedules are fixtures. Event-builder drafts and
 submitted demo records use `sessionStorage`, not a database. Tab storage is not
@@ -111,6 +113,10 @@ Playwright module; `QA_ARTIFACT_DIR` may select a separate output directory.
 
 The `Publisher Studio QA` workflow runs on relevant branch pushes and pull
 requests. Screenshot artifacts expire after 14 days. It does not deploy anything.
+
+The test Wistudi Flow card uses generic page metadata because the supplied share URL
+does not currently expose per-Flow Open Graph tags. Other URLs use a safe host/link
+card; no arbitrary Open Graph fetch runs from the browser.
 
 ## Integration Audit
 

@@ -10,7 +10,7 @@ Publisher Studio is the workshop and creation experience. It contains:
 1. **Events catalogue** at `/publisher-studio/`: browse upcoming and archived Studio events.
 2. **Public event page** at `/publisher-studio/events/{slug}/`: event details, learning outcomes, registration, share action and optional public Event resources.
 3. **Event room** at `/publisher-studio/events/{slug}/room/`: a mobile-first, access-controlled space for that event.
-4. **Project/workbench** inside the room: questions, discussion, resources, challenge and participant submissions attached to stable contexts.
+4. **Inline event chat and project** inside the room: questions, discussions, resources, challenge and participant submissions attached to stable contexts.
 5. **Wistudi content link**: a Flow, template or XP Video that can be viewed, adapted or remixed in the Wistudi platform when identity integration is available.
 6. **Event Builder** at `/publisher-studio/manage/events/`: staff interface for drafts, assignment, review, scheduling and publication.
 
@@ -118,11 +118,13 @@ promotion video separate from instructional videos attached as Event resources.
 
 | Role | Scope and capabilities |
 | --- | --- |
-| Studio admin | Assign staff, set templates, review/publish, manage all Studio events and moderation |
-| Event builder | Create/edit assigned event drafts, kit, schedule and project; submit changes for review |
-| Trainer/moderator | Host assigned rooms; pin materials, answer questions and moderate assigned content |
-| Participant | Enter rooms for registered events, discuss, vote, build and submit |
-| Public visitor | Browse event cards/details and approved public examples; register |
+| Wistudi super admin | Global governance, staff assignments, escalations and audit access |
+| Studio admin | Manage Studio events, publish/review, assign event staff and moderate across the Studio |
+| Event owner/builder | Create/edit assigned event, resources, schedule, project and team; publish only when granted |
+| Trainer | Host assigned event, answer questions, pin resources, manage its room state and invite scoped moderators |
+| Moderator | Moderate reports/content only in explicitly assigned event/room/content scope |
+| Participant | Enter eligible rooms, discuss, react, build, submit and report content |
+| Public visitor | Browse public event details and approved creations; register |
 
 One person may hold both builder and trainer assignments. Keep capabilities as
 separate scoped assignments, not a global `user.role` string. New event builders
@@ -134,6 +136,13 @@ specific event, expiring, single-use or safely reissuable, revocable, and accept
 after sign-in/email verification. Store the invitation token hashed. Do not use an
 open, transferable link that grants general builder powers. Record who invited,
 accepted, revoked and changed roles.
+
+Trainer-created invitations can grant only event-scoped moderator capabilities the
+trainer is allowed to delegate. They cannot grant builder, Studio admin or super
+admin access. Wistudi issues trainer invitations; an accepted link does not grant
+access until the named email is verified and the assignment is rechecked
+server-side. See [`interaction-model.md`](interaction-model.md) for exact role
+boundaries, room closure, notification scope and external-sharing rules.
 
 ## Registration and room access
 
@@ -221,6 +230,12 @@ ID) should be inherited from the object, not trusted from client-entered labels.
 Use the `StudioContext` foreign key and stable external object mappings described
 in `identity-and-storage.md`.
 
+Room contribution state is separate from event schedule. Reaching the scheduled end
+never closes a room. Authorized event staff close it explicitly; eligible
+participants retain read-only access until it is reopened or archived under a
+documented retention policy. Use the desktop room directory and mobile room switcher
+to navigate between events.
+
 ## Prototype versus live service
 
 The current preview implements:
@@ -229,6 +244,10 @@ The current preview implements:
 - Public event page and one event-specific room URL per sample event.
 - Event Builder form with local draft save, preview and local image preview.
 - Event-specific sample resources, challenges, questions, discussions and submissions.
+- Inline replies, reactions, emoji, local link/file previews, contextual suggestions
+  and event-room navigation fixtures.
+- Event Builder drag/drop local image/video/resource-file previews.
+- Light/dark theme toggle and sample trainer notifications.
 - Mobile room layout and a simple journey indicator.
 
 It does not implement:
@@ -236,7 +255,8 @@ It does not implement:
 - Live event creation/storage, role assignment/invitations, event publishing or event-record-driven rendering.
 - Live booking adapter, login/email verification, room authorization or shared messages.
 - Zoom OAuth/meeting management, actual meeting link storage, direct video upload or video processing.
-- Wistudi Flow metadata resolver/remix, attendance synchronization, notifications or public showcase moderation.
+- Wistudi Flow metadata resolver/remix, attendance synchronization, live notifications,
+  invitation/RBAC service, room lifecycle enforcement or public showcase moderation.
 
 See `identity-and-storage.md` for the identity/database provider gate and
 `development.md` for existing integrations and preview deployment constraints.

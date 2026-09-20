@@ -1,8 +1,8 @@
 # Wistudi Publisher Studio Architecture
 
 Phase: Architecture and first development prototype
-Status: Implemented prototype on `feature/publisher-studio-mvp`; not production-ready
-Last updated: 2026-09-19
+Status: Implemented interaction prototype on `feature/publisher-studio-mvp`; not production-ready
+Last updated: 2026-09-20
 
 ## Purpose
 
@@ -110,7 +110,10 @@ series ID, but each date/event has its own stable event ID, registration, room
 permissions, event resources, conversations and challenge. The room is the working
 space after registration, not another event landing page.
 
-On mobile, this should feel closer to a focused chat/workbench app than a landing page.
+On wide screens, show an event-room directory at the left, the active room in the
+centre and concise event context at the right. On mobile, turn the room directory
+into a horizontal room switcher and keep section navigation thumb-reachable. The
+event bar remains visible and returns to the catalogue.
 
 Recommended bottom navigation:
 
@@ -119,10 +122,21 @@ Recommended bottom navigation:
 | Room | Current event stage, pinned resources, meeting/recording when eligible |
 | Questions | Ask the trainer, vote, view answers |
 | Build | Join or submit the event's project/challenge |
-| Workbench | Ideas, help requests and shared creations |
+| Chat | Inline conversations, replies and contextual links |
 | Event resources | Files, links, instructions and recordings for this event |
 
-The Studio space should use sticky context headers, threaded content, fixed reply or submit actions and simple interaction states.
+Keep conversations inline. Show two replies under a message by default, with an
+inline control to read more. The composer supports safe link previews, attachments,
+emoji, trainer mentions, reactions and optional related-context suggestions. A
+suggestion across rooms never copies private content or grants room access.
+
+Rooms have a schedule stage (upcoming/live/ended) and a separate manually controlled
+discussion state (open/closed). An event ending does not close its room. Closed
+rooms remain readable to eligible members but become read-only until an authorized
+owner, trainer or administrator reopens them.
+
+See [`interaction-model.md`](interaction-model.md) for the room UI, link/Flow preview
+limits, external-sharing rules, notifications and scoped role/invitation matrix.
 
 ### Event Builder
 
@@ -153,10 +167,18 @@ invitation credential.
 
 Event-specific server-rendered metadata should supply `og:title`, `og:description`,
 `og:image`, `og:url` and canonical URL so social link previews identify the event.
-The native Studio share modal provides copy, browser-native sharing, email and
-selected social channels. A Studio link resolver separately renders a native card
-for Wistudi Flow URLs; it must use an approved Wistudi metadata/share endpoint rather
-than trusting a client-supplied title or fetching arbitrary URLs from the browser.
+The native Studio share surface provides copy, browser-native sharing, email and
+selected social channels. Room invitations resolve to the public event page; they
+do not grant room or Zoom access. Participant messages and activities require an
+explicit public-share request and approval before they receive an external permalink.
+A Studio link resolver renders native cards for Wistudi Flow URLs using an approved
+Wistudi metadata/share endpoint, never client-supplied titles or arbitrary browser
+fetches.
+
+The supplied Flow URL was inspected on 2026-09-20 and returned only generic Wistudi
+Open Graph title, description and image. The current source page does not expose the
+individual Flow title/description; Wistudi needs per-Flow server-rendered metadata or
+an approved resolver endpoint for accurate object previews.
 
 At first, an assigned builder may enter a meeting URL stored as a restricted event
 field. It becomes visible only to eligible registrants and assigned staff. A later
@@ -542,17 +564,19 @@ The first development milestone implements the routes and local-data interaction
 described in `development.md`. This extends the static shell for usability testing
 without introducing live services.
 
-Included:
+Included in the current local-data prototype:
 
-- Architecture docs
-- Route plan
-- Mock data model
-- Static Studio home shell
-- Static event page shell
-- Static mobile-first Studio shell
-- Mock event resources
-- Mock Questions tab
-- Mock Challenge tab
+- Architecture docs, route plan and mock data model
+- Multi-event catalogue and public event detail/registration previews
+- Event-specific mobile room with inline contextual chat, threaded replies and hearts
+- Event resources and build challenge previews
+- Drag/drop local image, video and document previews in the builder and chat
+- Link/embed cards, related-context suggestions and room-to-room navigation
+- Light/dark theme control, trainer mention and notification samples
+- A five-step learning-to-publishing progress indicator and larger non-main-heading type
+
+All interactions above are local previews. See `development.md` for data, identity,
+upload, permissions and integration boundaries.
 
 Not included:
 

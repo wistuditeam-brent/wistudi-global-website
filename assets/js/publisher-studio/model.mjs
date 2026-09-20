@@ -1,13 +1,14 @@
 import { events, challenges, workshop, challenge, initialQuestions, initialThreads, contextFor, contributionKinds } from './data.mjs';
 
 export const STORAGE_KEY = 'wistudi.publisher-studio.prototype.v1';
-export const VERSION = 2;
+export const VERSION = 4;
 const copy = value => JSON.parse(JSON.stringify(value));
 const id = () => globalThis.crypto.randomUUID();
 
 export function createState() {
   return { version: VERSION, phaseByEvent: {}, profile: null, joinedChallenges: [],
-    questions: copy(initialQuestions), threads: copy(initialThreads), votes: [], submissions: [], resourceReplies: {} };
+    questions: copy(initialQuestions), threads: copy(initialThreads).map(thread => ({ ...thread, attachments: [], relatedContextIds: [], relatedItems: [], hearts: thread.id === 'demo-thread-01' ? 3 : 1 })),
+    threadHearts: [], votes: [], submissions: [], resourceReplies: {} };
 }
 
 export function textValue(value, max = 2000) {
@@ -58,17 +59,19 @@ export function toggleVote(state, questionId) {
 
 export const voteCount = (state, question) => question.votes + Number(state.votes.includes(question.id));
 
-export function addThread(state, { title, body, kind, contextId }) {
+export function addThread(state, { title, body, kind, contextId, attachments = [], relatedContextIds = [], relatedItems = [] }) {
   if (!Object.hasOwn(contributionKinds, kind)) throw new Error('Choose a contribution type.');
   const context = contextFor(contextId);
-  const thread = { id: id(), author: author(state), title: textValue(title, 120), body: textValue(body), kind,
-    contextId, context, replies: [] };
+  const messageBody = textValue(body);
+  const thread = { id: id(), author: author(state), title: String(title || '').trim().slice(0, 120), body: messageBody, kind,
+    contextId, context, replies: [], attachments: copy(attachments), relatedContextIds: [...new Set(relatedContextIds)].filter(value => value !== contextId && contextFor(value)),
+    relatedItems: relatedItems.filter(item => item && ['thread', 'question', 'submission'].includes(item.type) && typeof item.id === 'string'), hearts: 0 };
   state.threads.unshift(thread);
   return thread;
 }
 
-export function addReply(state, targetId, body) {
-  const reply = { id: id(), author: author(state), body: textValue(body) };
+export function addReply(state, targetId, body, attachments = []) {
+  const reply = { id: id(), author: author(state), body: textValue(body), attachments: copy(attachments) };
   const thread = state.threads.find(item => item.id === targetId);
   if (thread) thread.replies.push(reply);
   else {
@@ -77,6 +80,13 @@ export function addReply(state, targetId, body) {
     (state.resourceReplies[targetId] ||= []).push(reply);
   }
   return reply;
+}
+
+export function toggleThreadHeart(state, threadId) {
+  if (!state.threads.some(thread => thread.id === threadId)) throw new Error('Conversation not found.');
+  state.threadHearts = state.threadHearts.includes(threadId)
+    ? state.threadHearts.filter(id => id !== threadId)
+    : [...state.threadHearts, threadId];
 }
 
 export function submitBuild(state, { title, description, url, help }, challengeId = challenge.id) {
@@ -105,7 +115,12 @@ export function loadState(storage) {
       || !Array.isArray(value.joinedChallenges) || !value.joinedChallenges.every(challengeId => challenges.some(challengeItem => challengeItem.id === challengeId)) || new Set(value.joinedChallenges).size !== value.joinedChallenges.length
       || !(value.profile === null || (string(value.profile?.id) && string(value.profile?.displayName) && string(value.profile?.avatarSeed) && value.profile?.consentToStudio === true))
       || !Array.isArray(value.questions) || !value.questions.every(item => reply(item) && context(item.contextId) && Number.isInteger(item.votes) && item.votes >= 0 && string(item.createdAt) && (item.answer === null || string(item.answer)))
-      || !Array.isArray(value.threads) || !value.threads.every(item => reply(item) && string(item.title) && Object.hasOwn(contributionKinds, item.kind) && context(item.contextId) && Array.isArray(item.replies) && item.replies.every(reply))
+      || !Array.isArray(value.threads) || !value.threads.every(item => reply(item) && string(item.title) && Object.hasOwn(contributionKinds, item.kind) && context(item.contextId) && Array.isArray(item.replies) && item.replies.every(reply)
+        && Array.isArray(item.attachments) && item.attachments.every(file => file && string(file.id) && string(file.name) && string(file.type) && Number.isFinite(file.size) && file.size >= 0)
+        && Array.isArray(item.relatedContextIds) && item.relatedContextIds.every(context) && Array.isArray(item.relatedItems) && item.relatedItems.every(link => link && ['thread', 'question', 'submission'].includes(link.type) && string(link.id)
+          && (link.type === 'thread' ? value.threads.some(target => target.id === link.id) : link.type === 'question' ? value.questions.some(target => target.id === link.id) : value.submissions.some(target => target.id === link.id)))
+        && Number.isInteger(item.hearts) && item.hearts >= 0)
+      || !Array.isArray(value.threadHearts) || !value.threadHearts.every(item => string(item) && value.threads.some(thread => thread.id === item)) || new Set(value.threadHearts).size !== value.threadHearts.length
       || !Array.isArray(value.votes) || !value.votes.every(item => string(item) && value.questions.some(question => question.id === item)) || new Set(value.votes).size !== value.votes.length
       || !Array.isArray(value.submissions) || !value.submissions.every(item => item && string(item.id) && string(item.author) && string(item.title) && string(item.description) && string(item.help) && safeLink(item.url) && challenges.some(challengeItem => challengeItem.id === item.challengeId) && item.moderationStatus === 'pending')
       || !value.resourceReplies || typeof value.resourceReplies !== 'object' || Array.isArray(value.resourceReplies)

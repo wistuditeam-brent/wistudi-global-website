@@ -1,5 +1,46 @@
 # Publisher Studio Changelog
 
+## 2026-09-20 / Inline Chat, Room Navigation and Readability
+
+### Changed
+
+- Replaced the modal Workbench conversation with an inline event chat timeline. Each
+  message stays attached to its event/resource/challenge context; replies are
+  threaded, two are visible by default, and more expand in place.
+- Added message hearts, inline reply forms, trainer mention suggestions and accepted
+  related links to events/resources, existing discussions, questions and creations.
+  The suggestions use transparent title/body word matching and never link themselves.
+- Added local file drops/previews and safe link/video cards.
+- Added the test Wistudi Flow link to the sample conversation. Its card uses the
+  generic Wistudi metadata currently exposed by the share page and clearly says the
+  Flow-specific title is unavailable.
+- Added an event-room directory on desktop and a horizontal room switcher on phones,
+  room activity counts, open-state messaging and a room list for all sample events.
+- Added a Studio light/dark toggle, sample trainer notifications, drag/drop media
+  previews in the Event Builder and local theme persistence.
+- Increased non-main-heading text declarations by 5.34 pixels (4 points), including
+  the added room/chat/upload interface text. Main `h1` declarations remain unchanged.
+- Added the scoped role, manual room closure, safe sharing, notification and
+  metadata-provider decisions to the architecture documentation.
+
+### Why
+
+- People should be able to discuss, share files and follow replies without leaving
+  the event room or encountering a chat modal.
+- Event rooms need a clear route back to other events on both desktop and mobile.
+- Larger interface text improves reading and tapping on phones.
+- Public event invitations must not expose room messages, registrations or Zoom
+  credentials. Participant work needs explicit consent and approval before public
+  sharing.
+
+### Prototype boundary
+
+- Accounts, database sync, server-side room authorization, uploads, live mentions,
+  notifications, role invitations and external object-share pages are not connected.
+- The supplied Flow page currently exposes only generic Wistudi Open Graph metadata;
+  individual Flow previews need a Wistudi metadata endpoint or server-rendered tags.
+- Attachment bytes remain local to the browser and are not visible to other users.
+
 ## 2026-09-20 / Mobile Navigation and Event Browsing
 
 ### Changed

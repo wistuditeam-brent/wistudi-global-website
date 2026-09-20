@@ -91,7 +91,11 @@ export const initialQuestions = [
 ];
 
 export const initialThreads = [
-  { id: 'demo-thread-01', author: 'Studio example', kind: 'idea', contextId: 'demo-template-01', title: 'Let learners choose the destination', body: 'I would give each pair a different town map so the final conversations have different outcomes.', replies: [{ id: 'demo-reply-01', author: 'Wistudi Trainer', body: 'What information would each partner need that the other does not have?' }] },
+  { id: 'demo-thread-01', author: 'Studio example', kind: 'idea', contextId: 'demo-template-01', title: 'Let learners choose the destination', body: 'I would give each pair a different town map so the final conversations have different outcomes.\n\nFlow example: https://wistudi.tgndigital.vn/share/flow/4tcj7WscphXpR-mthJ8ThA', replies: [
+    { id: 'demo-reply-01', author: 'Wistudi Trainer', body: 'What information would each partner need that the other does not have?' },
+    { id: 'demo-reply-02', author: 'Studio example', body: 'I would give each partner a different budget and a short list of places.' },
+    { id: 'demo-reply-03', author: 'Wistudi Trainer', body: 'That gives learners a real reason to ask questions before they agree.' },
+  ] },
   { id: 'demo-thread-02', author: 'Studio example', kind: 'need_help', contextId: 'demo-challenge-02', title: 'Adapting a worksheet for mobile', body: 'I am looking at a matching task. What could learners do that would make the digital version useful on a phone?', replies: [] },
   { id: 'demo-thread-03', author: 'Studio example', kind: 'can_help', contextId: 'demo-template-03', title: 'A checkpoint question for short videos', body: 'I can share some examples of prediction prompts that work well before a video reveal.', replies: [] },
 ];

@@ -1,5 +1,5 @@
-import { events, workshop, challenge, challenges, contributionKinds, contextFor, challengeFor, resourcesFor } from './data.mjs';
-import { STORAGE_KEY, createState, loadState, saveState, escapeHtml as e, avatar, registerDemo, askQuestion, toggleVote, voteCount, addThread, addReply, submitBuild } from './model.mjs';
+import { events, workshop, challenge, challenges, allResources, contributionKinds, contextFor, challengeFor, resourcesFor } from './data.mjs';
+import { STORAGE_KEY, createState, loadState, saveState, escapeHtml as e, avatar, registerDemo, askQuestion, toggleVote, voteCount, addThread, addReply, toggleThreadHeart, submitBuild } from './model.mjs';
 
 const root = document.querySelector('#app');
 const dialog = document.querySelector('#studio-dialog');
@@ -20,13 +20,25 @@ let resourceFilter = '';
 let dialogTarget = null;
 let dialogMode = null;
 let toastTimer;
+let theme = 'light';
+const themeKey = 'wistudi.publisher-studio.theme';
 const drafts = new Map();
 const localPreviewUrls = new Map();
+const chatObjectUrls = new Map();
+const pendingUploads = new Map();
+const relatedByComposer = new Map();
+const expandedThreads = new Set();
+const openReplyForms = new Set();
+let emojiModulePromise;
+let nextChatContext = selectedEvent.id;
+try { theme = localStorage.getItem(themeKey) === 'dark' ? 'dark' : 'light'; } catch { /* The light theme remains the default. */ }
 const resourceTypes = { flow: 'Wistudi Flow or template', worksheet: 'Worksheet or document', video: 'Video', link: 'External link', instructions: 'Step-by-step instructions', other: 'Other resource' };
-const tabs = [ ['week', 'Room', 'Room', 'calendar'], ['questions', 'Questions', 'Ask', 'question'], ['challenge', 'Build', 'Build', 'build'], ['workbench', 'Workbench', 'Discuss', 'chat', 'Community Workbench'], ...(selectedResources.length ? [['resources', 'Event resources', 'Resources', 'book', 'Event resources']] : []) ];
+const tabs = [ ['week', 'Room', 'Room', 'calendar'], ['questions', 'Questions', 'Ask', 'question'], ['challenge', 'Build', 'Build', 'build'], ['workbench', 'Chat', 'Chat', 'chat', 'Event chat'], ...(selectedResources.length ? [['resources', 'Resources', 'Files', 'book', 'Event resources']] : []) ];
 const paths = {
   calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/>',
   question: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 .5c0 2-2.5 2-2.5 4M12 17h.01"/>',
+  bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>',
+  heart: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/>',
   build: '<path d="m12 3 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 16l9 5 9-5"/>',
   chat: '<path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l-2 2V11.5A8.5 8.5 0 0 1 10.5 3h2a8.5 8.5 0 0 1 8.5 8.5Z"/>',
   book: '<path d="M12 5v16M3 3h5a4 4 0 0 1 4 2 4 4 0 0 1 4-2h5v16h-5a4 4 0 0 0-4 2 4 4 0 0 0-4-2H3V3Z"/>',
@@ -62,11 +74,14 @@ function prototypeBar() {
 }
 
 function header() {
+  const themeButton = `<button class="button secondary theme-toggle" type="button" data-action="theme" aria-label="Switch to ${theme === 'dark' ? 'light' : 'dark'} mode">${theme === 'dark' ? '☀' : '◐'}<span>${theme === 'dark' ? 'Light' : 'Dark'}</span></button>`;
   const action = page === 'studio'
-    ? `${person(state.profile?.displayName || 'Demo visitor', state.profile?.avatarSeed || 'visitor')}`
+    ? `${themeButton}<details class="trainer-notifications"><summary aria-label="Trainer notifications, 3 sample items">${icon('bell')}<span>3</span></summary><div class="notification-popover"><strong>Trainer notifications <span class="muted">/ sample</span></strong><a href="#questions">2 open participant questions</a><a href="#challenge">1 creation needs review</a><a href="#workbench">A new participant joined this event</a><small>This preview does not send notifications.</small></div></details>${person(state.profile?.displayName || 'Demo visitor', state.profile?.avatarSeed || 'visitor')}`
     : page === 'builder'
-      ? `<a class="text-link" href="${base}">Events</a>`
-      : `<a class="button primary header-builder" href="${base}manage/events/"><span class="desktop-label">Build an event</span><span class="mobile-label">Create event</span>${icon('arrow')}</a>`;
+      ? `${themeButton}<a class="text-link" href="${base}">Back to events</a>`
+      : page === 'event'
+        ? themeButton
+        : `<a class="button primary header-builder" href="${base}manage/events/"><span class="desktop-label">Build an event</span><span class="mobile-label">Create event</span>${icon('arrow')}</a>`;
   return `<header class="studio-header"><a class="brand" href="${base}" aria-label="Publisher Studio home"><img src="/assets/images/wistudi-logo.png" alt="Wistudi" width="120" height="40"></a><span class="header-divider"></span><a class="studio-wordmark" href="${base}">Publisher Studio</a><div class="header-actions">${action}</div></header>`;
 }
 
@@ -146,7 +161,7 @@ function kitResourceRow(item = {}) {
   const publicPreview = availableFrom === 'upcoming' && Boolean(item.publicPreview);
   const types = Object.entries(resourceTypes).map(([value, label]) => `<option value="${value}" ${item.type === value ? 'selected' : ''}>${e(label)}</option>`).join('');
   const fileStatus = item.fileName ? `<p class="kit-file-note" role="status">${e(item.fileName)} / ${localPreviewUrls.has(`resource:${key}`) ? 'local preview ready' : 'reselect the file after reloading this draft'}</p>` : '';
-  return `<article class="kit-editor-row" data-resource-key="${e(key)}"><div class="kit-editor-row-top"><strong>Event resource</strong>${button('Remove', 'remove-kit-resource', `data-key="${e(key)}"`, 'text-button')}</div><div class="builder-grid kit-fields"><label>Resource type<select data-kit-field="type">${types}</select></label><label>Title<input data-kit-field="title" value="${e(item.title || '')}" maxlength="100" placeholder="e.g. Speaking lesson template"></label></div><label>Short description <span class="muted">(optional)</span><input data-kit-field="description" value="${e(item.description || '')}" maxlength="220" placeholder="What this resource contains or helps participants do"></label><label>Link <span class="muted">(optional; use for a Flow, Google Drive, YouTube, Vimeo or other page)</span><input data-kit-field="url" type="url" inputmode="url" value="${e(item.url || '')}" placeholder="https://..."></label><label>Or attach a file <span class="muted">(PDF, Word, image, audio or video)</span><input data-kit-file type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.mp4,.webm,audio/*" aria-label="Attach a file to this event resource"></label><input data-kit-field="fileName" type="hidden" value="${e(item.fileName || '')}" data-saved-name="${e(item.fileName || '')}">${fileStatus}<label>Instructions <span class="muted">(optional; one step per line)</span><textarea data-kit-field="instructions" rows="3" maxlength="1000" placeholder="1. Open the worksheet\n2. Choose one task\n3. Adapt it for your learners">${e(item.instructions || '')}</textarea></label><div class="builder-grid kit-release"><label>Available from<select data-kit-field="availableFrom"><option value="upcoming" ${availableFrom === 'upcoming' ? 'selected' : ''}>Before the event</option><option value="live" ${availableFrom === 'live' ? 'selected' : ''}>During the live event</option><option value="post_session" ${availableFrom === 'post_session' ? 'selected' : ''}>After the live event</option></select></label><label class="checkbox-row kit-public-toggle"><input type="checkbox" data-kit-field="publicPreview" ${publicPreview ? 'checked' : ''} ${availableFrom === 'upcoming' ? '' : 'disabled'}><span>Show on the public event page before registration</span></label></div></article>`;
+  return `<article class="kit-editor-row" data-resource-key="${e(key)}"><div class="kit-editor-row-top"><strong>Event resource</strong>${button('Remove', 'remove-kit-resource', `data-key="${e(key)}"`, 'text-button')}</div><div class="builder-grid kit-fields"><label>Resource type<select data-kit-field="type">${types}</select></label><label>Title<input data-kit-field="title" value="${e(item.title || '')}" maxlength="100" placeholder="e.g. Speaking lesson template"></label></div><label>Short description <span class="muted">(optional)</span><input data-kit-field="description" value="${e(item.description || '')}" maxlength="220" placeholder="What this resource contains or helps participants do"></label><label>Link <span class="muted">(optional; use for a Flow, Google Drive, YouTube, Vimeo or other page)</span><input data-kit-field="url" type="url" inputmode="url" value="${e(item.url || '')}" placeholder="https://..."></label><div class="kit-file-field"><span class="field-label">Or attach a file <span class="muted">(PDF, Word, image, audio or video)</span></span>${fileDropzone({ title: 'Drop a resource file here', detail: 'PDF, Word, image, audio or video · up to 30 MB', accept: '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.mp4,.webm,audio/*', inputAttributes: 'data-kit-file aria-label="Attach a file to this event resource"' })}</div><input data-kit-field="fileName" type="hidden" value="${e(item.fileName || '')}" data-saved-name="${e(item.fileName || '')}">${fileStatus}<label>Instructions <span class="muted">(optional; one step per line)</span><textarea data-kit-field="instructions" rows="3" maxlength="1000" placeholder="1. Open the worksheet\n2. Choose one task\n3. Adapt it for your learners">${e(item.instructions || '')}</textarea></label><div class="builder-grid kit-release"><label>Available from<select data-kit-field="availableFrom"><option value="upcoming" ${availableFrom === 'upcoming' ? 'selected' : ''}>Before the event</option><option value="live" ${availableFrom === 'live' ? 'selected' : ''}>During the live event</option><option value="post_session" ${availableFrom === 'post_session' ? 'selected' : ''}>After the live event</option></select></label><label class="checkbox-row kit-public-toggle"><input type="checkbox" data-kit-field="publicPreview" ${publicPreview ? 'checked' : ''} ${availableFrom === 'upcoming' ? '' : 'disabled'}><span>Show on the public event page before registration</span></label></div></article>`;
 }
 
 function renderKitEditor(items = []) {
@@ -172,6 +187,10 @@ function renderBuilderMediaPreview() {
   else if (videoLink) parts.push(videoEmbed(videoLink, 'Event promotion video') || `<p class="kit-file-note">Video link saved for the event preview. This URL is not from a supported embeddable provider.</p>`);
   preview.innerHTML = parts.join('');
   preview.hidden = !parts.length;
+}
+
+function fileDropzone({ title, detail, accept, inputAttributes = '', inputName = '' }) {
+  return `<label class="file-dropzone" data-dropzone><input class="file-dropzone-input" type="file" ${inputName ? `name="${e(inputName)}"` : ''} accept="${e(accept)}" ${inputAttributes}><span class="file-dropzone-icon" aria-hidden="true">＋</span><span class="file-dropzone-copy"><strong>${e(title)}</strong><small>${e(detail)}</small><span class="file-dropzone-meta" data-file-name>Choose a file or drop it here</span></span><span class="file-dropzone-button">Browse</span></label>`;
 }
 
 function eventCard(item) {
@@ -217,19 +236,224 @@ function renderBuilder() {
     <form id="event-builder-form" class="event-builder-form"><div class="builder-columns"><div class="builder-fields">
       <section class="builder-section"><div class="builder-section-heading"><span>01</span><div><h2>Event details</h2><p>Tell people who this is for, what they will learn and what they will make.</p></div></div><label>Event title<input name="title" maxlength="100" placeholder="e.g. Build an interactive speaking lesson" required></label><label>Short description<textarea name="summary" rows="3" maxlength="320" placeholder="Explain the teaching problem or skill this workshop addresses." required></textarea></label><div class="builder-grid"><label>Subject<input name="subject" maxlength="40" placeholder="English" required></label><label>Topic<input name="topic" maxlength="50" placeholder="Speaking" required></label><label>Level<input name="level" maxlength="32" placeholder="B1" required></label><label>Audience<input name="audience" maxlength="100" placeholder="English teachers and tutors" required></label></div><label>Learning outcomes <span class="muted">(one outcome per line)</span><textarea name="learningOutcomes" rows="4" maxlength="800" placeholder="Adapt a speaking task into a clear lesson sequence\nDesign one purposeful learner activity\nPlan how learners will reflect on their progress" required></textarea></label><label>What will participants make?<textarea name="output" rows="2" maxlength="220" placeholder="One concrete outcome from the session" required></textarea></label></section>
       <section class="builder-section"><div class="builder-section-heading"><span>02</span><div><h2>Schedule and online session</h2><p>Dates are stored with an explicit timezone and displayed in each participant's local time.</p></div></div><div class="builder-grid"><label>Start date and time<input name="startsAt" type="datetime-local" required></label><label>Event timezone<select name="timezone"><option value="Asia/Ho_Chi_Minh">Asia / Ho Chi Minh</option><option value="UTC">UTC</option><option value="Europe/London">Europe / London</option><option value="America/New_York">America / New York</option></select></label><label>Duration<select name="duration"><option>60</option><option>75</option><option>90</option><option>120</option></select></label><label>Trainer name<input name="trainer" maxlength="60" placeholder="Assigned Wistudi trainer" required></label></div><div class="integration-card"><div><span class="eyebrow">Zoom</span><strong>Manual meeting link in this preview</strong><p>For the live system, show the participant join link only inside their registered event room.</p></div><span class="integration-state">Not connected</span><label>Test meeting link<input name="zoomUrl" type="url" placeholder="https://zoom.us/j/..." autocomplete="off"></label><button class="button secondary" type="button" disabled>Connect Zoom account</button></div></section>
-      <section class="builder-section"><div class="builder-section-heading"><span>03</span><div><h2>Event artwork and promotion</h2><p>Use a wide image for the event page and separate artwork for the event listing.</p></div></div><label>Event page banner image<input name="bannerImage" type="file" accept="image/png,image/jpeg,image/webp" data-media-file="bannerImage"></label><label>Event listing image<input name="cardImage" type="file" accept="image/png,image/jpeg,image/webp" data-media-file="cardImage"></label><label>Optional mobile listing crop<input name="mobileCardImage" type="file" accept="image/png,image/jpeg,image/webp" data-media-file="mobileCardImage"></label><div class="upload-note">Use a 16:9 banner; it crops to 4:3 on phones. Event cards stay horizontal on mobile: a narrow image sits on the left beside the event details. The mobile image crop is portrait 2:3. If you do not supply one, the desktop card image is center-cropped. Keep important faces and text near the center. Files preview in this browser only.</div><label>Event promotion video link<input name="promoVideoUrl" type="url" placeholder="YouTube or Vimeo link" autocomplete="off"></label><label>Or choose a short video file<input name="promoVideoFile" type="file" accept="video/mp4,video/webm" data-media-file="promoVideoFile"></label><label>Media description for screen readers<input name="imageAlt" maxlength="150" placeholder="Describe the key information in the artwork"></label><div id="builder-media-preview" class="builder-media-preview" hidden></div><div class="upload-note">YouTube and Vimeo links can be embedded when supported. Direct video files preview locally only; live upload and video delivery need managed media storage.</div></section>
+      <section class="builder-section"><div class="builder-section-heading"><span>03</span><div><h2>Event artwork and promotion</h2><p>Use a wide image for the event page and separate artwork for the event listing.</p></div></div>${fileDropzone({ title: 'Event page banner image', detail: 'Wide 16:9 · JPG, PNG or WebP · up to 8 MB', accept: 'image/png,image/jpeg,image/webp', inputName: 'bannerImage', inputAttributes: 'data-media-file="bannerImage"' })}${fileDropzone({ title: 'Event listing image', detail: 'Card artwork · JPG, PNG or WebP · up to 8 MB', accept: 'image/png,image/jpeg,image/webp', inputName: 'cardImage', inputAttributes: 'data-media-file="cardImage"' })}${fileDropzone({ title: 'Optional mobile listing crop', detail: 'Portrait 2:3 crop · JPG, PNG or WebP · up to 8 MB', accept: 'image/png,image/jpeg,image/webp', inputName: 'mobileCardImage', inputAttributes: 'data-media-file="mobileCardImage"' })}<div class="upload-note">Use a 16:9 banner; it crops to 4:3 on phones. Event cards stay horizontal on mobile: a narrow image sits on the left beside the event details. The mobile image crop is portrait 2:3. If you do not supply one, the desktop card image is center-cropped. Keep important faces and text near the center. Files preview in this browser only.</div><label>Event promotion video link<input name="promoVideoUrl" type="url" placeholder="YouTube or Vimeo link" autocomplete="off"></label>${fileDropzone({ title: 'Or drop a short video here', detail: 'MP4 or WebM · up to 50 MB for this local preview', accept: 'video/mp4,video/webm', inputName: 'promoVideoFile', inputAttributes: 'data-media-file="promoVideoFile"' })}<label>Media description for screen readers<input name="imageAlt" maxlength="150" placeholder="Describe the key information in the artwork"></label><div id="builder-media-preview" class="builder-media-preview" hidden></div><div class="upload-note">YouTube and Vimeo links can be embedded when supported. Direct video files preview locally only; live upload and video delivery need managed media storage.</div></section>
       <section class="builder-section"><div class="builder-section-heading"><span>04</span><div><h2>Event resources and project</h2><p>Add only the materials this event needs. Each can be shown before registration or released in the participant room later.</p></div></div><div class="resource-editor-intro"><strong>Event resources</strong><p>Examples include a Flow, PDF or Word worksheet, a video, a Drive link or step-by-step instructions. Each item can have its own description and release time.</p></div><input type="hidden" name="resourcesJson" value="[]"><div id="builder-resource-list" class="kit-editor-list"><p class="muted small">No event resources added. Add this section's materials only when the event needs them.</p></div><button class="button secondary builder-add-resource" type="button" data-action="add-kit-resource">${icon('plus')} Add an event resource</button><div class="upload-note">Files are selectable for this preview, but are not stored or uploaded. Production attachments need approved storage and permission checks.</div><label>Discussion prompt<input name="discussionPrompt" maxlength="180" placeholder="What question should participants consider before the event?"></label><label>Build challenge title<input name="challengeTitle" maxlength="100" placeholder="The practical creation task" required></label><label>Build challenge brief<textarea name="challengeBrief" rows="3" maxlength="400" placeholder="Describe what to make, share and ask for feedback on." required></textarea></label><label>Wistudi creation link<input name="wistudiLink" type="url" placeholder="Link to a Flow or template, when available" autocomplete="off"></label></section>
       <section class="builder-section"><div class="builder-section-heading"><span>05</span><div><h2>Team and permissions</h2><p>Assign people to specific events and rooms.</p></div></div><div class="permission-preview"><div><strong>Event builder</strong><span>Creates and edits this event</span></div><div><strong>Trainer / moderator</strong><span>Hosts the session and manages this room</span></div><p>Role invitations must be email-bound, time-limited and revocable. Invitation links are shown as a future service; no permissions are granted by this prototype.</p><button class="button secondary" type="button" disabled>Invite event team</button></div></section>
     </div><aside class="builder-aside"><div class="builder-sticky"><div class="eyebrow">Event publishing checklist</div><h2>One event, one connected journey</h2><ol class="builder-checklist"><li>Public event page and share link</li><li>Registration and confirmation</li><li>Private participant room</li><li>Optional event resources</li><li>Build challenge and submission</li><li>Optional Wistudi publish step</li></ol><hr><p class="muted small">Only resources marked for public preview appear before registration. Zoom links and room-only resources stay in the participant room.</p><div class="actions builder-controls"><button type="button" class="button secondary" data-action="save-builder">Save draft in this tab</button><button type="button" class="button primary" data-action="preview-builder">Preview event</button><button type="button" class="button" disabled title="Publishing requires authenticated roles and a database">Publish event</button></div><p id="builder-save-status" class="muted small" role="status"></p></div></aside></div></form></main><footer class="public-footer"><a href="${base}">Publisher Studio events</a><span>Team invites, Zoom connection, direct uploads and publishing require live services.</span></footer>`;
 }
 
 function renderNav() {
-  return `<nav class="workspace-nav" aria-label="Studio sections">${tabs.map(([key, label, mobileLabel, glyph, accessibleLabel = label]) => `<a href="#${key}" aria-label="${accessibleLabel}" title="${label}" ${activeTab() === key ? 'aria-current="page"' : ''}>${icon(glyph)}<span class="nav-full">${label}</span><span class="nav-short" aria-hidden="true">${mobileLabel}</span>${key === 'questions' ? `<span class="nav-count">${state.questions.filter(item => contextFor(item.contextId).workshopId === selectedEvent.id && !item.answer).length}</span>` : ''}</a>`).join('')}</nav>`;
+  return `<nav class="workspace-nav" style="--tab-count:${tabs.length}" aria-label="Studio sections">${tabs.map(([key, label, mobileLabel, glyph, accessibleLabel = label]) => `<a href="#${key}" aria-label="${accessibleLabel}" title="${label}" ${activeTab() === key ? 'aria-current="page"' : ''}>${icon(glyph)}<span class="nav-full">${label}</span><span class="nav-short" aria-hidden="true">${mobileLabel}</span>${key === 'questions' ? `<span class="nav-count">${state.questions.filter(item => contextFor(item.contextId).workshopId === selectedEvent.id && !item.answer).length}</span>` : ''}</a>`).join('')}</nav>`;
+}
+
+function roomTiming(item) {
+  const start = new Date(item.startsAt);
+  const end = new Date(start.getTime() + item.duration * 60000);
+  if (Date.now() < start) return `Starts ${new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(start)}`;
+  if (Date.now() <= end) return 'Live now';
+  return 'Event ended';
+}
+
+function roomDirectory(className = 'room-directory') {
+  return `<section class="${className}" aria-label="Event rooms"><div class="room-directory-heading"><strong>Event rooms</strong><span>${events.length}</span></div>${events.map(item => {
+    const count = state.threads.filter(thread => contextFor(thread.contextId).workshopId === item.id).length + state.questions.filter(question => contextFor(question.contextId).workshopId === item.id).length;
+    const current = item.id === selectedEvent.id;
+    return `<a class="room-directory-item ${current ? 'is-current' : ''}" href="${eventUrl(item)}room/#workbench" ${current ? 'aria-current="page"' : ''}><span class="room-live-dot" aria-hidden="true"></span><span class="room-directory-copy"><strong>${e(item.topic)}</strong><small>${e(roomTiming(item))} · room open</small></span><span class="room-activity-count" aria-label="${count} discussions">${count}</span></a>`;
+  }).join('')}<p>Rooms stay open after an event until its owner or Wistudi closes them.</p></section>`;
+}
+
+function messageLinkPreview(body) {
+  const match = body.match(/https:\/\/[^\s<>"']+/i);
+  if (!match) return { bodyHtml: e(body), preview: '' };
+  const raw = match[0].replace(/[),.!?;:]+$/g, '');
+  const url = safeHttpsUrl(raw);
+  if (!url) return { bodyHtml: e(body), preview: '' };
+  const cleanBody = body.replace(raw, '').trim();
+  const host = new URL(url).hostname.replace(/^www\./, '');
+  const isFlow = host === 'wistudi.tgndigital.vn' && new URL(url).pathname.startsWith('/share/flow/');
+  const video = videoEmbed(url, 'Shared video');
+  const flowImage = 'https://wistudi.tgndigital.vn/images/og-share.jpg';
+  const flowDescription = 'Wistudi is a modular, interactive platform for creating, delivering, and sharing engaging experiences across learning, training, events, and communities.';
+  const preview = video || `<a class="chat-link-preview ${isFlow ? 'wistudi-flow-preview' : ''}" href="${e(url)}" target="_blank" rel="noopener noreferrer"><span class="chat-preview-art">${isFlow ? `<img src="${flowImage}" alt="">` : icon('arrow')}</span><span class="chat-preview-copy"><strong>${isFlow ? 'Wistudi Flow' : e(host)}</strong><span>${isFlow ? flowDescription : e(url)}</span><small>${isFlow ? 'Wistudi share page preview · Flow-specific title is not exposed' : `${e(host)} · Open link`} ${icon('arrow')}</small></span></a>`;
+  const safeBody = e(cleanBody).replaceAll(e(`@${selectedEvent.trainer}`), `<span class="trainer-mention">${e(`@${selectedEvent.trainer}`)}</span>`);
+  return { bodyHtml: cleanBody ? safeBody : '', preview };
+}
+
+function renderAttachments(item) {
+  const attachments = item?.attachments || [];
+  if (!attachments.length) return '';
+  return `<div class="chat-attachments">${attachments.map(file => {
+    const src = chatObjectUrls.get(file.id);
+    if (src && file.type.startsWith('image/')) return `<a href="${e(src)}" target="_blank" rel="noopener noreferrer"><img src="${e(src)}" alt="${e(file.name)}"></a>`;
+    if (src && file.type.startsWith('video/')) return `<video controls playsinline preload="metadata" src="${e(src)}"></video>`;
+    if (src && file.type.startsWith('audio/')) return `<audio controls preload="metadata" src="${e(src)}">${e(file.name)}</audio>`;
+    if (src && file.type === 'application/pdf') return `<a class="chat-file-card" href="${e(src)}" target="_blank" rel="noopener noreferrer">${icon('book')}<span><strong>${e(file.name)}</strong><small>PDF · open preview</small></span>${icon('arrow')}</a>`;
+    if (src) return `<a class="chat-file-card" href="${e(src)}" download="${e(file.name)}">${icon('book')}<span><strong>${e(file.name)}</strong><small>${Math.ceil(file.size / 1024)} KB · local file preview</small></span>${icon('arrow')}</a>`;
+    return `<div class="chat-file-card">${icon('book')}<span><strong>${e(file.name)}</strong><small>${src ? `${Math.ceil(file.size / 1024)} KB · local preview` : 'Local file is not stored in this preview'}</small></span></div>`;
+  }).join('')}</div>`;
+}
+
+function relatedItemInfo(item) {
+  if (item.type === 'context') {
+    const context = contextFor(item.id);
+    const owner = events.find(event => event.id === context.workshopId);
+    return { title: context.title, owner, href: `${eventUrl(owner)}room/?context=${encodeURIComponent(item.id)}#workbench` };
+  }
+  if (item.type === 'thread') {
+    const target = state.threads.find(thread => thread.id === item.id);
+    if (!target) return null;
+    const ownerId = contextFor(target.contextId).workshopId;
+    const owner = events.find(event => event.id === ownerId);
+    return { title: `Discussion: ${target.title || target.body.slice(0, 70)}`, owner, href: `${eventUrl(owner)}room/?thread=${encodeURIComponent(target.id)}#workbench` };
+  }
+  if (item.type === 'question') {
+    const target = state.questions.find(question => question.id === item.id);
+    if (!target) return null;
+    const ownerId = contextFor(target.contextId).workshopId;
+    const owner = events.find(event => event.id === ownerId);
+    return { title: `Question: ${target.body.slice(0, 70)}`, owner, href: `${eventUrl(owner)}room/?question=${encodeURIComponent(target.id)}#questions` };
+  }
+  if (item.type === 'submission') {
+    const target = state.submissions.find(submission => submission.id === item.id);
+    if (!target) return null;
+    const ownerId = challengeFor(target.challengeId).workshopId;
+    const owner = events.find(event => event.id === ownerId);
+    return { title: `Creation: ${target.title}`, owner, href: `${eventUrl(owner)}room/?submission=${encodeURIComponent(target.id)}#challenge` };
+  }
+  return null;
+}
+
+function relatedContextLinks(thread) {
+  const refs = [...(thread.relatedContextIds || []).map(id => ({ type: 'context', id })), ...(thread.relatedItems || [])];
+  const items = refs.map(relatedItemInfo).filter(Boolean);
+  if (!items.length) return '';
+  return `<div class="related-context-links"><span>Related</span>${items.map(item => `<a href="${e(item.href)}">${e(item.title)}${item.owner.id !== selectedEvent.id ? ' · another room' : ''}</a>`).join('')}</div>`;
+}
+
+function chatMessage(item, { rootMessage = false } = {}) {
+  const rendered = messageLinkPreview(item.body);
+  return `<article class="chat-message ${rootMessage ? 'chat-message-root' : ''}"><div class="person-line">${person(item.author)}<div><strong>${e(item.author)}</strong><span class="muted small">${rootMessage ? e(contributionKinds[item.kind] || 'Message') : 'Reply'}</span></div>${rootMessage ? tag('Contextual', 'teal') : ''}</div>${rootMessage && item.title ? `<h2 class="chat-message-title">${e(item.title)}</h2>` : ''}${rendered.bodyHtml ? `<p class="chat-message-body">${rendered.bodyHtml}</p>` : ''}${rendered.preview}${renderAttachments(item)}</article>`;
+}
+
+function chatComposer(formId, { replyTo = '', contextId = selectedEvent.id } = {}) {
+  const replyThread = replyTo ? state.threads.find(thread => thread.id === replyTo) : null;
+  const related = (relatedByComposer.get(formId) || []).map(item => `<span>${e(relatedItemInfo(item)?.title || item.id)}<button type="button" data-action="remove-related" data-form="${e(formId)}" data-related-type="${e(item.type)}" data-id="${e(item.id)}" aria-label="Remove related topic">×</button></span>`).join('');
+  const files = (pendingUploads.get(formId) || []).map((file, index) => `<span>${e(file.name)}<button type="button" data-action="remove-upload" data-form="${e(formId)}" data-index="${index}" aria-label="Remove ${e(file.name)}">×</button></span>`).join('');
+  return `<form id="${e(formId)}" class="chat-composer composer ${replyTo ? 'chat-reply-composer' : ''}" data-chat-form="${replyTo ? 'reply' : 'new'}" ${replyTo ? `data-reply-to="${e(replyTo)}"` : ''} data-dropzone><label class="sr-only" for="${e(formId)}-body">${replyTo ? 'Write a reply' : 'Write a message'}</label><div class="chat-composer-context"><span>${replyTo ? `Replying in ${e(replyThread?.title || 'this conversation')}` : 'Post to this event room'}</span>${!replyTo ? `<label class="chat-kind-select"><span class="sr-only">Message type</span><select name="kind">${Object.entries(contributionKinds).map(([key, label]) => `<option value="${key}">${e(label)}</option>`).join('')}</select></label><label class="chat-kind-select"><span class="sr-only">Message context</span><select name="contextId">${contextOptions().replace(`value="${contextId}"`, `value="${contextId}" selected`)}</select></label>` : ''}<button class="icon-button chat-emoji-button" type="button" data-action="emoji" data-form="${e(formId)}" aria-label="Choose emoji" title="Choose emoji">☺</button><label class="icon-button chat-file-button" title="Attach files">＋<span class="sr-only">Attach files</span><input type="file" data-chat-files="${e(formId)}" accept="image/*,video/mp4,video/webm,application/pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,audio/*" multiple></label></div><div class="chat-drop-hint">Drop a file here, or use ＋ to attach documents, images and videos</div><div class="chat-pending-files" data-pending-files="${e(formId)}" ${files ? '' : 'hidden'}>${files}</div><div class="chat-related-suggestion" data-related-suggestion="${e(formId)}" hidden></div><div class="chat-mention-suggestion" data-mention-suggestion="${e(formId)}" hidden></div><div class="chat-related-chips" data-related-chips="${e(formId)}">${related}</div><div class="chat-emoji-picker" data-emoji-picker="${e(formId)}" hidden></div><div class="composer-row"><textarea id="${e(formId)}-body" name="body" rows="2" maxlength="2000" required placeholder="${replyTo ? 'Write a reply… use @ to tag the trainer' : 'Share an idea, ask for help or post what you made…'}"></textarea><button class="icon-button primary" type="submit" title="Send message" aria-label="Send message">${icon('send')}</button></div><p class="form-error" role="alert" hidden></p><span class="muted small">Prototype only · messages stay in this browser</span></form>`;
+}
+
+function threadCard(thread) {
+  const expanded = expandedThreads.has(thread.id);
+  const replies = thread.replies || [];
+  const visibleReplies = expanded ? replies : replies.slice(0, 2);
+  const isLiked = state.threadHearts.includes(thread.id);
+  const heartCount = (thread.hearts || 0) + Number(isLiked);
+  return `<article class="thread-card" id="thread-${e(thread.id)}" data-thread-id="${e(thread.id)}">${chatMessage(thread, { rootMessage: true })}${relatedContextLinks(thread)}<div class="thread-footer"><button class="heart-button ${isLiked ? 'is-liked' : ''}" data-action="heart" data-id="${e(thread.id)}" aria-pressed="${isLiked}" aria-label="${isLiked ? 'Remove heart' : 'Heart'} this message, ${heartCount} hearts">${icon('heart')}<span>${heartCount}</span></button><button class="text-link" data-action="reply-compose" data-id="${e(thread.id)}">${icon('chat')} ${replies.length} ${replies.length === 1 ? 'reply' : 'replies'}</button><button class="text-link" data-action="share-thread" data-id="${e(thread.id)}" aria-label="Share this event with someone">${icon('share')} Share</button></div>${replies.length ? `<div class="chat-replies" aria-label="Replies to ${e(thread.title)}">${visibleReplies.map(reply => chatMessage(reply)).join('')}${replies.length > 2 ? `<button class="read-replies" data-action="read-replies" data-id="${e(thread.id)}">${expanded ? 'Show fewer replies' : `Read ${replies.length - 2} more ${replies.length - 2 === 1 ? 'reply' : 'replies'}`}</button>` : ''}</div>` : ''}${openReplyForms.has(thread.id) ? chatComposer(`reply-${thread.id}`, { replyTo: thread.id }) : ''}</article>`;
+}
+
+function renderRelatedContextSuggestion(form, body) {
+  const holder = form.querySelector('[data-related-suggestion]');
+  if (!holder || form.dataset.chatForm !== 'new') return;
+  const stop = new Set(['about', 'after', 'again', 'also', 'and', 'are', 'can', 'could', 'for', 'from', 'have', 'help', 'into', 'just', 'like', 'make', 'need', 'our', 'that', 'the', 'this', 'with', 'would', 'your']);
+  const words = new Set((body.toLowerCase().match(/[a-z]{3,}/g) || []).filter(word => !stop.has(word)));
+  const contexts = [...events, ...challenges, ...allResources].map(item => ({ type: 'context', id: item.id, title: contextFor(item.id).title, topic: contextFor(item.id).topic, workshopId: contextFor(item.id).workshopId, search: contextFor(item.id).title }));
+  const discussions = state.threads.map(item => ({ type: 'thread', id: item.id, title: item.title || item.body.slice(0, 70), topic: contextFor(item.contextId).topic, workshopId: contextFor(item.contextId).workshopId, search: `${item.title} ${item.body}` }));
+  const questions = state.questions.map(item => ({ type: 'question', id: item.id, title: item.body.slice(0, 70), topic: contextFor(item.contextId).topic, workshopId: contextFor(item.contextId).workshopId, search: item.body }));
+  const submissions = state.submissions.map(item => ({ type: 'submission', id: item.id, title: item.title, topic: contextFor(item.challengeId).topic, workshopId: contextFor(item.challengeId).workshopId, search: `${item.title} ${item.description}` }));
+  const selectedContext = form.elements.namedItem('contextId')?.value;
+  const existingLinks = relatedByComposer.get(form.id) || [];
+  const ranked = [...contexts, ...discussions, ...questions, ...submissions].filter(item => !(item.type === 'context' && item.id === selectedContext) && !existingLinks.some(link => link.type === item.type && link.id === item.id)).map(item => {
+    const itemWords = new Set(item.search.toLowerCase().match(/[a-z]{3,}/g) || []);
+    return { item, score: [...words].filter(word => itemWords.has(word) || (item.topic || '').toLowerCase().includes(word)).length };
+  }).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
+  const match = ranked[0];
+  if (!match || words.size < 2) { holder.hidden = true; holder.innerHTML = ''; return; }
+  const owner = events.find(event => event.id === match.item.workshopId);
+  const elsewhere = owner.id !== selectedEvent.id;
+  const title = match.item.type === 'context' ? match.item.title : `${match.item.type === 'thread' ? 'a discussion' : match.item.type === 'question' ? 'a question' : 'a creation'}: ${match.item.title}`;
+  holder.innerHTML = `<span>${elsewhere ? `This may connect to ${title} in <strong>${e(owner.title)}</strong>.` : `This may connect to ${title}.`}</span><button type="button" data-action="add-related" data-form="${e(form.id)}" data-related-type="${e(match.item.type)}" data-id="${e(match.item.id)}">Add link</button>`;
+  holder.hidden = false;
+}
+
+function renderChatMentions(form, body) {
+  const holder = form.querySelector('[data-mention-suggestion]');
+  if (!holder) return;
+  if (!/(^|\s)@[\w-]*$/.test(body)) { holder.hidden = true; holder.innerHTML = ''; return; }
+  holder.innerHTML = `<button type="button" data-action="mention-trainer" data-form="${e(form.id)}">Tag ${e(selectedEvent.trainer)} · assigned trainer for this event</button>`;
+  holder.hidden = false;
+}
+
+function renderPendingUploads(formId) {
+  const holder = document.querySelector(`[data-pending-files="${CSS.escape(formId)}"]`);
+  const files = pendingUploads.get(formId) || [];
+  if (!holder) return;
+  holder.hidden = !files.length;
+  holder.innerHTML = files.map((file, index) => `<span>${e(file.name)}<button type="button" data-action="remove-upload" data-form="${e(formId)}" data-index="${index}" aria-label="Remove ${e(file.name)}">×</button></span>`).join('');
+}
+
+function addPendingUploads(formId, files) {
+  const accepted = [];
+  for (const file of files) {
+    const allowed = file.type.startsWith('image/') || file.type.startsWith('video/') || file.type.startsWith('audio/') || file.type === 'application/pdf' || /\.(docx?|pptx?|xlsx?)$/i.test(file.name);
+    if (!allowed || file.size > 30 * 1024 * 1024) { notify(`${file.name} was skipped. Attach a document, image, audio or video file under 30 MB.`); continue; }
+    accepted.push(file);
+  }
+  const existing = pendingUploads.get(formId) || [];
+  pendingUploads.set(formId, [...existing, ...accepted].slice(0, 8));
+  renderPendingUploads(formId);
+}
+
+function storeChatAttachments(formId) {
+  const files = pendingUploads.get(formId) || [];
+  const attachments = files.map(file => {
+    const attachmentId = crypto.randomUUID();
+    chatObjectUrls.set(attachmentId, URL.createObjectURL(file));
+    return { id: attachmentId, name: file.name, type: file.type || 'application/octet-stream', size: file.size };
+  });
+  pendingUploads.delete(formId);
+  return attachments;
+}
+
+async function toggleEmojiPicker(formId) {
+  const holder = document.querySelector(`[data-emoji-picker="${CSS.escape(formId)}"]`);
+  if (!holder) return;
+  if (!holder.hidden) { holder.hidden = true; return; }
+  holder.hidden = false;
+  try {
+    emojiModulePromise ||= import('https://cdn.jsdelivr.net/npm/emoji-picker-element@1.29.1/index.js');
+    await emojiModulePromise;
+    if (!holder.querySelector('emoji-picker')) holder.innerHTML = '<emoji-picker locale="en" aria-label="Choose an emoji"></emoji-picker>';
+    const picker = holder.querySelector('emoji-picker');
+    if (picker.dataset.studioListener !== 'true') {
+      picker.dataset.studioListener = 'true';
+      picker.addEventListener('emoji-click', event => {
+        const field = document.querySelector(`#${CSS.escape(formId)}-body`);
+        if (!field) return;
+        field.setRangeText(event.detail.unicode, field.selectionStart, field.selectionEnd, 'end');
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+        field.focus();
+        holder.hidden = true;
+      });
+    }
+  } catch {
+    holder.innerHTML = `<div class="emoji-fallback" aria-label="Quick emoji">${['😀', '🎉', '❤️', '👏', '💡', '🙌', '🤔', '✅', '✨', '👀'].map(value => `<button type="button" data-action="insert-emoji" data-form="${e(formId)}" data-emoji="${value}" aria-label="Insert ${value}">${value}</button>`).join('')}</div><p>Emoji picker could not load. Use these quick reactions.</p>`;
+  }
+}
+
+function setTheme(value) {
+  theme = value;
+  document.body.dataset.studioTheme = value;
+  try { localStorage.setItem(themeKey, value); } catch { /* Theme still applies for this visit. */ }
+  const toggle = document.querySelector('[data-action="theme"]');
+  if (toggle) {
+    toggle.innerHTML = `${theme === 'dark' ? '☀' : '◐'}<span>${theme === 'dark' ? 'Light' : 'Dark'}</span>`;
+    toggle.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+  }
 }
 
 function renderStudio() {
   const availableResources = selectedResources.filter(resourceIsAvailable);
-  return `${prototypeBar()}${header()}<div class="room-topbar"><a class="room-back" href="${base}" aria-label="Back to all Publisher Studio events">${icon('back')}<span>Events</span></a><a class="room-event-link" href="${eventUrl(selectedEvent)}" aria-label="View event details"><strong>${e(selectedEvent.title)}</strong></a><button class="button secondary room-invite" data-action="share-event" data-slug="${e(selectedEvent.slug)}" aria-label="Invite someone to this event">${icon('share')}<span>Invite</span></button></div><div class="workspace"><aside class="workspace-sidebar"><div class="studio-label">${tag(`${selectedEvent.subject} Studio`, 'teal')}<h2>Keep working<br>on your project.</h2><p class="muted small">This event room</p></div>${renderNav()}<div class="sidebar-bottom"><a class="text-link" href="${base}">Browse events ${icon('arrow')}</a><p class="muted small">${state.profile ? `Previewing as ${e(state.profile.displayName)}` : 'Room access is a preview'}</p></div></aside><main id="main" class="workspace-main" tabindex="-1"><div id="panel">${renderPanel()}</div></main><aside class="context-rail"><div class="eyebrow">This event</div><h2>${e(selectedEvent.title)}</h2><div class="tags">${tag(selectedEvent.subject)}${tag(selectedEvent.topic)}${tag(selectedEvent.level)}</div><div class="person-line">${person(selectedEvent.trainer)}<div><strong>${e(selectedEvent.trainer)}</strong><span class="muted small">Assigned trainer</span></div></div><hr>${phaseControl()}${selectedResources.length ? `<hr><div class="eyebrow">Event resources</div>${availableResources.map(item => `<button class="rail-resource" data-action="resource" data-id="${item.id}">${icon('book')}<span>${e(item.title)}</span></button>`).join('') || '<p class="muted small">Resources appear here when they become available.</p>'}` : ''}<hr><p class="muted small">Prototype conversations are stored only in this browser tab. They are not shared with other participants.</p></aside></div>`;
+  return `${prototypeBar()}${header()}<div class="room-topbar"><a class="room-back" href="${base}" aria-label="Back to all Publisher Studio events">${icon('back')}<span>Events</span></a><a class="room-event-link" href="${eventUrl(selectedEvent)}" aria-label="View event details"><strong>${e(selectedEvent.title)}</strong><span>${e(roomTiming(selectedEvent))} · Room open</span></a><button class="button secondary room-invite" data-action="share-event" data-slug="${e(selectedEvent.slug)}" aria-label="Invite someone to this event">${icon('share')}<span>Invite</span></button></div>${roomDirectory('mobile-room-strip')}<div class="workspace"><aside class="workspace-sidebar"><div class="studio-label">${tag(`${selectedEvent.subject} Studio`, 'teal')}<h2>Keep working<br>on your project.</h2><p class="muted small">This event room</p></div>${renderNav()}${roomDirectory()}<div class="sidebar-bottom"><a class="text-link" href="${base}">Browse events ${icon('arrow')}</a><p class="muted small">${state.profile ? `Previewing as ${e(state.profile.displayName)}` : 'Room access is a preview'}</p></div></aside><main id="main" class="workspace-main" tabindex="-1"><div id="panel">${renderPanel()}</div></main><aside class="context-rail"><div class="eyebrow">This event</div><h2>${e(selectedEvent.title)}</h2><div class="tags">${tag(selectedEvent.subject)}${tag(selectedEvent.topic)}${tag(selectedEvent.level)}</div><div class="person-line">${person(selectedEvent.trainer)}<div><strong>${e(selectedEvent.trainer)}</strong><span class="muted small">Assigned trainer</span></div></div><hr>${phaseControl()}${selectedResources.length ? `<hr><div class="eyebrow">Event resources</div>${availableResources.map(item => `<button class="rail-resource" data-action="resource" data-id="${item.id}">${icon('book')}<span>${e(item.title)}</span></button>`).join('') || '<p class="muted small">Resources appear here when they become available.</p>'}` : ''}<hr><p class="muted small">Prototype conversations are stored only in this browser tab. Files, reactions and messages are demo data for this browser.</p></aside></div>`;
 }
 
 function panelHeading(title, description, action = '') {
@@ -237,7 +461,7 @@ function panelHeading(title, description, action = '') {
 }
 
 function questionCard(question) {
-  return `<article class="question-card"><div class="question-body"><div class="person-line">${person(question.author)}<div><strong>${e(question.author)}</strong><span class="muted small">${e(contextFor(question.contextId).title)}</span></div>${question.answer ? tag('Answered', 'teal') : tag('Open')}</div><p>${e(question.body)}</p>${question.answer ? `<div class="trainer-answer"><span class="eyebrow">Trainer answer / sample</span><p>${e(question.answer)}</p></div>` : ''}<button type="button" class="vote-button" data-action="vote" data-id="${question.id}" aria-pressed="${state.votes.includes(question.id)}" aria-label="I want this answered too: ${e(question.body)}">${icon('up')}<strong>${voteCount(state, question)}</strong><span>I want this answered too</span></button></div></article>`;
+  return `<article class="question-card" id="question-${e(question.id)}"><div class="question-body"><div class="person-line">${person(question.author)}<div><strong>${e(question.author)}</strong><span class="muted small">${e(contextFor(question.contextId).title)}</span></div>${question.answer ? tag('Answered', 'teal') : tag('Open')}</div><p>${e(question.body)}</p>${question.answer ? `<div class="trainer-answer"><span class="eyebrow">Trainer answer / sample</span><p>${e(question.answer)}</p></div>` : ''}<button type="button" class="vote-button" data-action="vote" data-id="${question.id}" aria-pressed="${state.votes.includes(question.id)}" aria-label="I want this answered too: ${e(question.body)}">${icon('up')}<strong>${voteCount(state, question)}</strong><span>I want this answered too</span></button></div></article>`;
 }
 
 function renderPanel() {
@@ -249,10 +473,10 @@ function renderPanel() {
     case 'challenge':
       const submissions = state.submissions.filter(item => item.challengeId === selectedChallenge.id);
       const joined = state.joinedChallenges.includes(selectedChallenge.id);
-      return `${panelHeading('The build challenge', 'A small, useful step from learning to creating.')}<section class="challenge-brief"><span class="challenge-number">01</span><div>${tag('Build', 'teal')}<h2>${e(selectedChallenge.title)}</h2><p>${e(selectedChallenge.description)}</p><p class="muted">${e(selectedEvent.output)}</p>${button(joined ? `${icon('check')} Taking part (demo)` : `${icon('plus')} I'll take part`, 'join-challenge', `aria-pressed="${joined}"`, 'button primary')}</div></section><section class="section-block"><h2>Share your version</h2><p class="muted">For this preview, submit a Wistudi Flow or other secure HTTPS link. File uploads, link metadata previews and public publishing are not connected.</p><form id="submission-form" class="stack-form"><label>Creation title<input name="title" maxlength="120" placeholder="Give your activity a name" required></label><label>What did you create?<textarea name="description" maxlength="2000" rows="3" required></textarea></label><label>Wistudi content or creation link<input type="text" inputmode="url" name="url" placeholder="https://..." required></label><label>What would you like help with? <span class="muted">(optional)</span><textarea name="help" maxlength="1000" rows="2"></textarea></label><p class="form-error" role="alert" hidden></p><div class="actions"><button class="button primary" type="submit">Submit demo creation ${icon('arrow')}</button><span class="muted small">Saved in this browser only</span></div></form></section><section class="section-block"><h2>Your work in this room</h2>${submissions.length ? submissions.map(item => `<article class="submission-card">${tag('Pending review (demo)')}<h3>${e(item.title)}</h3><p>${e(item.description)}</p>${item.help ? `<p class="muted">Feedback requested: ${e(item.help)}</p>` : ''}<a class="text-link" href="${e(item.url)}" target="_blank" rel="noopener noreferrer nofollow">Open submitted link ${icon('arrow')}</a></article>`).join('') : '<div class="empty-state"><p>Share a work-in-progress for feedback. Public showcase approval is a separate step.</p></div>'}</section>`;
+      return `${panelHeading('The build challenge', 'A small, useful step from learning to creating.')}<section class="challenge-brief"><span class="challenge-number">01</span><div>${tag('Build', 'teal')}<h2>${e(selectedChallenge.title)}</h2><p>${e(selectedChallenge.description)}</p><p class="muted">${e(selectedEvent.output)}</p>${button(joined ? `${icon('check')} Taking part (demo)` : `${icon('plus')} I'll take part`, 'join-challenge', `aria-pressed="${joined}"`, 'button primary')}</div></section><section class="section-block"><h2>Share your version</h2><p class="muted">For this preview, submit a Wistudi Flow or other secure HTTPS link. File uploads, link metadata previews and public publishing are not connected.</p><form id="submission-form" class="stack-form"><label>Creation title<input name="title" maxlength="120" placeholder="Give your activity a name" required></label><label>What did you create?<textarea name="description" maxlength="2000" rows="3" required></textarea></label><label>Wistudi content or creation link<input type="text" inputmode="url" name="url" placeholder="https://..." required></label><label>What would you like help with? <span class="muted">(optional)</span><textarea name="help" maxlength="1000" rows="2"></textarea></label><p class="form-error" role="alert" hidden></p><div class="actions"><button class="button primary" type="submit">Submit demo creation ${icon('arrow')}</button><span class="muted small">Saved in this browser only</span></div></form></section><section class="section-block"><h2>Your work in this room</h2>${submissions.length ? submissions.map(item => `<article class="submission-card" id="submission-${e(item.id)}">${tag('Pending review (demo)')}<h3>${e(item.title)}</h3><p>${e(item.description)}</p>${item.help ? `<p class="muted">Feedback requested: ${e(item.help)}</p>` : ''}<a class="text-link" href="${e(item.url)}" target="_blank" rel="noopener noreferrer nofollow">Open submitted link ${icon('arrow')}</a></article>`).join('') : '<div class="empty-state"><p>Share a work-in-progress for feedback. Public showcase approval is a separate step.</p></div>'}</section>`;
     case 'workbench': {
       const threads = state.threads.filter(item => contextFor(item.contextId).workshopId === selectedEvent.id).filter(item => threadFilter === 'all' || item.kind === threadFilter);
-      return `${panelHeading('Community Workbench', 'Ideas, help and work in progress, with the context attached.', button(`${icon('plus')} Contribute`, 'new-thread', '', 'button primary'))}<label class="filter-select">Show<select id="thread-filter"><option value="all">All contributions</option>${Object.entries(contributionKinds).map(([key, label]) => `<option value="${key}" ${threadFilter === key ? 'selected' : ''}>${label}</option>`).join('')}</select></label><div class="thread-list">${threads.map(thread => `<article class="thread-card"><div class="person-line">${person(thread.author)}<div><strong>${e(thread.author)}</strong><span class="muted small">${e(contributionKinds[thread.kind])}</span></div></div><button class="thread-title" data-action="thread" data-id="${thread.id}">${e(thread.title)}</button><p>${e(thread.body)}</p><div class="thread-footer"><span class="context-label">${icon('book')}${e(contextFor(thread.contextId).title)}</span>${button(`${icon('chat')} ${thread.replies.length} replies`, 'thread', `data-id="${thread.id}"`, 'text-link')}</div></article>`).join('') || `<div class="empty-state"><h2>No contributions yet</h2><p>Bring an idea or something you are working on.</p>${button('Start a contribution', 'new-thread')}</div>`}</div>`;
+      return `${panelHeading('Event chat', 'Talk about the work in this room. Every conversation stays connected to its event, challenge or resource.')}<div class="chat-room-status"><span><i></i> Room open</span><span>${threads.length} conversations</span><span>After the event, the room stays available until its owner closes it.</span></div><label class="filter-select">Show<select id="thread-filter"><option value="all">All conversations</option>${Object.entries(contributionKinds).map(([key, label]) => `<option value="${key}" ${threadFilter === key ? 'selected' : ''}>${e(label)}</option>`).join('')}</select></label><div class="thread-list chat-timeline">${threads.map(threadCard).join('') || '<div class="empty-state"><h2>Start the conversation</h2><p>Share a teaching idea, ask for help or show what you are making.</p></div>'}</div>${chatComposer('thread-form')}`;
     }
     case 'resources':
       return `${panelHeading('Event resources', 'Files, links and instructions selected for this event. Availability follows the event schedule.')}<label class="search-label">Search event resources<input type="search" id="resource-search" placeholder="Search event resources" value="${e(resourceFilter)}"></label><div id="resource-results">${filteredResources()}</div><p class="notice">These are sample resources. File uploads, link previews and Wistudi remixing are not connected yet.</p>`;
@@ -381,8 +605,27 @@ function restoreDrafts(container = document) {
 
 function render(focus = false) {
   root.innerHTML = page === 'studio' ? renderStudio() : page === 'event' ? renderEvent() : page === 'builder' ? renderBuilder() : renderHome();
+  document.body.dataset.studioTheme = ['studio', 'event', 'builder'].includes(page) ? theme : 'light';
   restoreDrafts();
   if (page === 'builder') restoreBuilderDraft();
+  if (page === 'studio') {
+    const params = new URLSearchParams(location.search);
+    const contextId = params.get('context');
+    const selector = document.querySelector('#thread-form [name="contextId"]');
+    if (contextId && selector && [...selector.options].some(option => option.value === contextId)) {
+      selector.value = contextId;
+      history.replaceState(null, '', `${location.pathname}${location.hash}`);
+    }
+    const target = params.get('thread') || params.get('question') || params.get('submission');
+    const targetType = params.has('thread') ? 'thread' : params.has('question') ? 'question' : 'submission';
+    if (target) {
+      const element = document.getElementById(`${targetType}-${target}`);
+      if (element) {
+        setTimeout(() => element.scrollIntoView({ block: 'center', behavior: 'smooth' }), 80);
+        history.replaceState(null, '', `${location.pathname}${location.hash}`);
+      }
+    }
+  }
   if (focus) document.querySelector('.panel-heading h1')?.focus({ preventScroll: true });
 }
 
@@ -397,9 +640,8 @@ function openResource(id) {
   const resource = selectedResources.find(item => item.id === id);
   if (!resource || !resourceIsAvailable(resource)) return;
   const context = contextFor(id);
-  dialogTarget = id; dialogMode = 'resource';
-  const replies = state.resourceReplies[id] || [];
-  modal(resource.title, `<div class="dialog-content"><div class="tags">${tag(resource.label, 'teal')}${tag(context.subject)}${tag(context.topic)}${tag(context.level)}${tag('Sample resource')}</div><p class="muted">${e(resource.description)}</p><div class="resource-outline">${resource.sections.map(([title, body], index) => `<section><span class="outline-number">0${index + 1}</span><div><h3>${e(title)}</h3><p>${e(body)}</p></div></section>`).join('')}</div><div class="section-heading"><h3>Discuss this ${e(resource.type)}</h3><span class="muted small">${replies.length} replies</span></div><div class="messages">${replies.map(message).join('') || '<p class="muted">How would you adapt this for your learners?</p>'}</div></div>${replyForm()}`, 'conversation-dialog');
+  dialogMode = 'resource';
+  modal(resource.title, `<div class="dialog-content"><div class="tags">${tag(resource.label, 'teal')}${tag(context.subject)}${tag(context.topic)}${tag(context.level)}${tag('Sample resource')}</div><p class="muted">${e(resource.description)}</p><div class="resource-outline">${resource.sections.map(([title, body], index) => `<section><span class="outline-number">0${index + 1}</span><div><h3>${e(title)}</h3><p>${e(body)}</p></div></section>`).join('')}</div>${button(`Discuss this ${e(resource.type)} in event chat`, 'discuss-resource', `data-context-id="${e(id)}"`, 'button primary')}</div>`);
 }
 
 function openPublicResource(id) {
@@ -411,34 +653,77 @@ function openPublicResource(id) {
   modal(resource.title, `<div class="dialog-content"><div class="tags">${tag(resource.label, 'teal')}${tag('Available before the event')}</div><p class="muted">${e(resource.description)}</p>${externalPreview}${sections.length ? `<div class="resource-outline">${sections.map(([title, body], index) => `<section><span class="outline-number">0${index + 1}</span><div><h3>${e(title)}</h3><p>${e(body)}</p></div></section>`).join('')}</div>` : ''}<p class="notice">You can discuss and adapt this resource in the participant room after registering.</p></div>`);
 }
 
-function message(reply) {
-  return `<div class="message">${person(reply.author)}<div><strong>${e(reply.author)}</strong><p>${e(reply.body)}</p></div></div>`;
-}
-
-function replyForm() {
-  return `<form id="reply-${dialogTarget}" class="reply-form composer" data-form="reply"><label class="sr-only" for="reply-body">Your reply</label><div class="composer-row"><textarea id="reply-body" name="body" rows="2" maxlength="2000" required placeholder="Add to this conversation..."></textarea><button class="icon-button primary" type="submit" title="Send demo reply" aria-label="Send demo reply">${icon('send')}</button></div><p class="form-error" role="alert" hidden></p><span class="muted small">Demo reply / this tab only</span></form>`;
-}
-
-function openThread(id) {
-  const thread = state.threads.find(item => item.id === id);
-  if (!thread) return;
-  dialogTarget = id; dialogMode = 'thread';
-  modal(thread.title, `<div class="dialog-context">${icon('book')}${e(contextFor(thread.contextId).title)}</div><div class="dialog-content"><div class="messages">${message(thread)}${thread.replies.map(message).join('')}</div></div>${replyForm()}`, 'conversation-dialog');
-}
-
-function newThread() {
-  dialogMode = 'new-thread';
-  modal('Bring something to the workbench', `<form id="thread-form" class="dialog-content stack-form"><label>Contribution type<select name="kind">${Object.entries(contributionKinds).map(([key, label]) => `<option value="${key}">${label}</option>`).join('')}</select></label><label>About<select name="contextId">${contextOptions()}</select></label><label>Title<input name="title" maxlength="120" required></label><label>Your contribution<textarea name="body" rows="5" maxlength="2000" required></textarea></label><p class="form-error" role="alert" hidden></p><button class="button primary" type="submit">Post demo contribution ${icon('arrow')}</button><p class="muted small">Visible only in this browser tab.</p></form>`);
-}
-
 document.addEventListener('click', event => {
   const target = event.target.closest('[data-action]');
   if (!target) return;
   const { action, id, value } = target.dataset;
   if (action === 'resource') openResource(id);
   if (action === 'public-resource') openPublicResource(id);
-  if (action === 'thread') openThread(id);
-  if (action === 'new-thread') newThread();
+  if (action === 'new-thread') document.querySelector('#thread-form-body')?.focus({ preventScroll: false });
+  if (action === 'theme') setTheme(theme === 'dark' ? 'light' : 'dark');
+  if (action === 'emoji') toggleEmojiPicker(target.dataset.form);
+  if (action === 'add-related') {
+    const composerId = target.dataset.form;
+    const ids = relatedByComposer.get(composerId) || [];
+    const item = { type: target.dataset.relatedType, id: target.dataset.id };
+    if (!ids.some(link => link.type === item.type && link.id === item.id)) relatedByComposer.set(composerId, [...ids, item]);
+    const details = relatedItemInfo(item);
+    const chips = document.querySelector(`[data-related-chips="${CSS.escape(composerId)}"]`);
+    if (chips) chips.innerHTML = (relatedByComposer.get(composerId) || []).map(link => `<span>${e(relatedItemInfo(link)?.title || link.id)}<button type="button" data-action="remove-related" data-form="${e(composerId)}" data-related-type="${e(link.type)}" data-id="${e(link.id)}" aria-label="Remove related topic">×</button></span>`).join('');
+    const holder = target.closest('[data-related-suggestion]'); if (holder) holder.hidden = true;
+    notify(details?.owner.id === selectedEvent.id ? 'Related item linked to this message.' : 'Related room item linked. Its content remains access-controlled.');
+  }
+  if (action === 'remove-related') {
+    const composerId = target.dataset.form;
+    relatedByComposer.set(composerId, (relatedByComposer.get(composerId) || []).filter(link => link.type !== target.dataset.relatedType || link.id !== target.dataset.id));
+    const form = document.getElementById(composerId);
+    const chips = form?.querySelector('[data-related-chips]');
+    if (chips) chips.innerHTML = (relatedByComposer.get(composerId) || []).map(link => `<span>${e(relatedItemInfo(link)?.title || link.id)}<button type="button" data-action="remove-related" data-form="${e(composerId)}" data-related-type="${e(link.type)}" data-id="${e(link.id)}" aria-label="Remove related topic">×</button></span>`).join('');
+  }
+  if (action === 'mention-trainer') {
+    const composerId = target.dataset.form;
+    const field = document.querySelector(`#${CSS.escape(composerId)}-body`);
+    if (field) { field.value = field.value.replace(/(^|\s)@[\w-]*$/, `$1@${selectedEvent.trainer} `); field.dispatchEvent(new Event('input', { bubbles: true })); field.focus(); }
+    target.closest('[data-mention-suggestion]').hidden = true;
+  }
+  if (action === 'insert-emoji') {
+    const composerId = target.dataset.form;
+    const field = document.querySelector(`#${CSS.escape(composerId)}-body`);
+    if (field) { field.setRangeText(target.dataset.emoji, field.selectionStart, field.selectionEnd, 'end'); field.dispatchEvent(new Event('input', { bubbles: true })); field.focus(); }
+  }
+  if (action === 'remove-upload') {
+    const composerId = target.dataset.form;
+    const files = pendingUploads.get(composerId) || [];
+    files.splice(Number(target.dataset.index), 1); pendingUploads.set(composerId, files); renderPendingUploads(composerId);
+  }
+  if (action === 'reply-compose') {
+    openReplyForms.has(id) ? openReplyForms.delete(id) : openReplyForms.add(id);
+    render();
+    document.querySelector(`#reply-${CSS.escape(id)}-body`)?.focus({ preventScroll: false });
+  }
+  if (action === 'read-replies') {
+    expandedThreads.has(id) ? expandedThreads.delete(id) : expandedThreads.add(id);
+    render();
+    document.querySelector(`[data-action="read-replies"][data-id="${CSS.escape(id)}"]`)?.focus({ preventScroll: true });
+  }
+  if (action === 'heart') {
+    toggleThreadHeart(state, id); persist(); render();
+    document.querySelector(`[data-action="heart"][data-id="${CSS.escape(id)}"]`)?.focus({ preventScroll: true });
+  }
+  if (action === 'share-thread') {
+    const url = `${location.origin}${eventUrl(selectedEvent)}`;
+    const share = { title: selectedEvent.title, text: `Join this Publisher Studio event to view the room and its conversations.`, url };
+    if (navigator.share) navigator.share(share).catch(error => { if (error.name !== 'AbortError') notify('Share the public event page to invite someone. Private room messages stay gated.'); });
+    else if (navigator.clipboard?.writeText) navigator.clipboard.writeText(url).then(() => notify('Public event link copied. Room messages stay behind registration.')).catch(() => notify('Use the event link at the top of this room to invite someone.'));
+    else notify('Share the public event link at the top of this room.');
+  }
+  if (action === 'discuss-resource') {
+    nextChatContext = target.dataset.contextId;
+    dialog.close();
+    if (location.hash !== '#workbench') location.hash = '#workbench';
+    else render();
+    setTimeout(() => { const select = document.querySelector('#thread-form [name="contextId"]'); if (select) select.value = nextChatContext; document.querySelector('#thread-form-body')?.focus(); }, 220);
+  }
   if (action === 'close') dialog.close();
   if (action === 'share-event') openShare(target.dataset.slug);
   if (action === 'add-kit-resource') {
@@ -496,12 +781,23 @@ document.addEventListener('click', event => {
     state = createState(); drafts.clear(); questionFilter = 'all'; threadFilter = 'all'; resourceFilter = '';
     for (const url of localPreviewUrls.values()) URL.revokeObjectURL(url);
     localPreviewUrls.clear();
+    for (const url of chatObjectUrls.values()) URL.revokeObjectURL(url);
+    chatObjectUrls.clear(); pendingUploads.clear(); relatedByComposer.clear(); expandedThreads.clear(); openReplyForms.clear();
     try { storage?.removeItem(STORAGE_KEY); storage?.removeItem(BUILDER_DRAFT_KEY); } catch { /* In-memory reset still succeeds. */ }
     dialog.close(); persist(); render(); notify('Demo reset. You are back to the sample content.');
   }
 });
 
 document.addEventListener('change', event => {
+  if (event.target.matches('[data-chat-files]')) {
+    addPendingUploads(event.target.dataset.chatFiles, [...event.target.files]);
+    event.target.value = '';
+  }
+  if (event.target.matches('.file-dropzone-input')) {
+    const name = event.target.files?.[0]?.name || 'Choose a file or drop it here';
+    const output = event.target.closest('[data-dropzone]')?.querySelector('[data-file-name]');
+    if (output) output.textContent = name;
+  }
   if (event.target.hasAttribute('data-phase')) { state.phaseByEvent[selectedEvent.id] = event.target.value; persist(); render(); [...document.querySelectorAll('[data-phase]')].find(select => select.getClientRects().length)?.focus({ preventScroll: true }); }
   if (event.target.id === 'thread-filter') { threadFilter = event.target.value; render(); document.querySelector('#thread-filter')?.focus({ preventScroll: true }); }
   if (event.target.id === 'event-filter') document.querySelectorAll('.event-card').forEach(card => { card.hidden = event.target.value !== 'all' && card.dataset.subject !== event.target.value; });
@@ -544,12 +840,46 @@ document.addEventListener('input', event => {
   if (event.target.id === 'resource-search') { resourceFilter = event.target.value; document.querySelector('#resource-results').innerHTML = filteredResources(); }
   if (event.target.closest('.kit-editor-row') && event.target.hasAttribute('data-kit-field')) syncKitEditor();
   if (event.target.name === 'promoVideoUrl' || event.target.name === 'imageAlt') renderBuilderMediaPreview();
+  const chatForm = event.target.closest('[data-chat-form]');
+  if (chatForm && event.target.name === 'body') {
+    renderRelatedContextSuggestion(chatForm, event.target.value);
+    renderChatMentions(chatForm, event.target.value);
+  }
+  if (chatForm && event.target.name === 'contextId') nextChatContext = event.target.value;
   const form = event.target.closest('form[id]');
   if (form && event.target.name && !['email', 'file'].includes(event.target.type)) {
     const draft = drafts.get(form.id) || {};
     draft[event.target.name] = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
     drafts.set(form.id, draft);
   }
+});
+
+document.addEventListener('dragover', event => {
+  const zone = event.target.closest('[data-dropzone]');
+  if (!zone) return;
+  event.preventDefault();
+  zone.classList.add('is-dragging');
+});
+
+document.addEventListener('dragleave', event => {
+  const zone = event.target.closest('[data-dropzone]');
+  if (zone && !zone.contains(event.relatedTarget)) zone.classList.remove('is-dragging');
+});
+
+document.addEventListener('drop', event => {
+  const zone = event.target.closest('[data-dropzone]');
+  if (!zone) return;
+  event.preventDefault();
+  zone.classList.remove('is-dragging');
+  const form = zone.closest('[data-chat-form]');
+  if (form) { addPendingUploads(form.id, [...(event.dataTransfer?.files || [])]); return; }
+  const input = zone.querySelector('input[type="file"]');
+  const file = event.dataTransfer?.files?.[0];
+  if (!input || !file) return;
+  try {
+    const transfer = new DataTransfer(); transfer.items.add(file); input.files = transfer.files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  } catch { notify('This browser cannot attach dropped files here. Use Browse to choose the file.'); }
 });
 
 document.addEventListener('submit', event => {
@@ -568,13 +898,21 @@ document.addEventListener('submit', event => {
     } else if (form.id === 'submission-form') {
       submitBuild(state, data, selectedChallenge.id); drafts.delete(form.id); persist(); render(); notify('Demo creation saved locally with pending-review status.');
       document.querySelector('.submission-card').scrollIntoView({ block: 'center', behavior: 'instant' });
-    } else if (form.id === 'thread-form') {
-      addThread(state, data); threadFilter = 'all'; drafts.delete(form.id); persist(); dialog.close(); render(); notify('Demo contribution added to the workbench.');
-    } else if (form.dataset.form === 'reply') {
-      addReply(state, dialogTarget, data.body); drafts.delete(form.id); persist();
-      dialogMode === 'thread' ? openThread(dialogTarget) : openResource(dialogTarget);
-      dialog.querySelector('.dialog-content').scrollTop = dialog.querySelector('.dialog-content').scrollHeight;
-      dialog.querySelector('textarea').focus({ preventScroll: true });
+    } else if (form.dataset.chatForm === 'new') {
+      const attachments = storeChatAttachments(form.id);
+      const relatedItems = relatedByComposer.get(form.id) || [];
+      const thread = addThread(state, { ...data, attachments, relatedItems });
+      nextChatContext = thread.contextId; relatedByComposer.delete(form.id); threadFilter = 'all'; drafts.delete(form.id); persist(); render();
+      document.querySelector(`#thread-${CSS.escape(thread.id)}`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      document.querySelector('#thread-form-body')?.focus({ preventScroll: true });
+      notify('Your demo message is now in this browser’s event room.');
+    } else if (form.dataset.chatForm === 'reply') {
+      const attachments = storeChatAttachments(form.id);
+      const targetId = form.dataset.replyTo;
+      const reply = addReply(state, targetId, data.body, attachments);
+      openReplyForms.delete(targetId); expandedThreads.add(targetId); drafts.delete(form.id); persist(); render();
+      document.querySelector(`#thread-${CSS.escape(targetId)} .chat-replies`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      notify('Demo reply added in this browser.');
     } else if (form.id === 'event-builder-form') {
       const saved = saveBuilderDraft(form);
       const status = document.querySelector('#builder-save-status');
@@ -588,15 +926,7 @@ document.addEventListener('submit', event => {
   }
 });
 
-dialog.addEventListener('close', () => {
-  // Update counts after a conversation without destroying the active reply form.
-  if (dialogMode === 'thread' && page === 'studio') {
-    const target = dialogTarget;
-    render();
-    document.querySelector(`[data-action="thread"][data-id="${CSS.escape(target)}"]`)?.focus({ preventScroll: true });
-  }
-  dialogMode = null;
-});
+dialog.addEventListener('close', () => { dialogMode = null; dialogTarget = null; });
 window.addEventListener('hashchange', () => {
   if (page !== 'studio') return;
   const update = () => { render(true); window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); };
