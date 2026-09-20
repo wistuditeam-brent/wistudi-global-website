@@ -126,6 +126,12 @@ emails, event slugs and third-party identifiers are not primary keys. Timestamps
 server-generated UTC values. Every table with user content has a moderation/deletion
 policy and a server-side authorization check.
 
+The role catalogue, assigner hierarchy, invitation workflow and UI permissions are
+defined in [`roles-and-permissions.md`](roles-and-permissions.md). Store role names
+and scopes as normalized records; keep the permission map in server-owned policy
+code for the MVP. Do not create ad hoc `is_admin` flags or client-selected custom
+role JSON.
+
 | Entity | Important fields and relationships | Constraints and purpose |
 | --- | --- | --- |
 | `studio_user` | `id`, `display_name`, private `avatar_seed`, `avatar_style`, `status`, timestamps | Public profile shell. Never return the seed, email, global role or provider ID. Seed is random and independent of email. |
@@ -148,7 +154,9 @@ policy and a server-side authorization check.
 | `challenge_submission` | `id`, challenge context, author, title/description, link or later media reference, help-needed text, moderation state | Pending by default; public showcase only after approval. Initial live scope should accept links, not uploads. |
 | `moderation_report` | `id`, target type/ID, reporter, reason, status, timestamps | Private report workflow with rate limits and restricted access. |
 | `moderation_action` | `id`, target, action, actor, reason, timestamp | Append-only audit trail for hide/restore/approve/reject/role changes. |
-| `role_assignment` | `id`, user, role, scope type/ID, assigned by, timestamps | Roles are scoped (Studio, workshop, or submission); never a mutable global `user.role` field. |
+| `role_assignment` | `id`, user, named role, scope type/ID, assigned by, active/revoked timestamps | Roles are scoped to the platform, Studio or event; never a mutable global `user.role` field. Use the policy in [`roles-and-permissions.md`](roles-and-permissions.md), and do not accept roles/capabilities supplied by the browser. |
+| `role_invitation` | `id`, invited email reference, role, scope type/ID, inviter, token hash, expiry, state, accepted/revoked timestamps | Named, email-bound, single-use invitations. Re-authorize the inviter and scope when accepted; only acceptance creates an active role assignment. |
+| `authorization_audit` | `id`, actor, action, target, scope, reason, timestamp, safe change summary | Append-only record for role/invitation changes and sensitive event, roster, room or moderation actions. Exclude secrets and minimize personal data. |
 | `integration_outbox` | `id`, event type, aggregate ID, idempotency key, status, attempt count, next attempt, timestamps | Durable retries for Studio enrollment and future platform sync. Avoid storing unnecessary PII in event payloads. |
 
 ### Context integrity
@@ -179,6 +187,11 @@ after the provider is selected. Suggested resource boundaries:
 | Questions/votes | Ask, vote, answer, mark answered | Member writes; assigned trainer/moderator for answers and status changes |
 | Challenges/submissions | Join and submit; list approved showcase | Member writes; pending items private to author and moderators; public read only after approval |
 | Admin/moderation | Review, hide, restore, approve, assign trainer | Scoped staff role checked on every request and object |
+
+Event Lead access to participant data is limited to event operations. Do not treat a
+Studio role as automatic access to the current Google Sheet, Resend account or Zoom
+host credentials. See the role design for attendee-contact and meeting-secret
+boundaries.
 
 Mutations need CSRF protection when cookie-authenticated, origin checks, rate limits,
 input length/type validation, output escaping, and audit records for staff actions.

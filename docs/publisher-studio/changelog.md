@@ -1,5 +1,31 @@
 # Publisher Studio Changelog
 
+## 2026-09-20 / Role and Permission Architecture
+
+### Changed
+
+- Defined Platform Super Admin, Studio Admin, Event Builder, Event Lead, Co-trainer,
+  Event Moderator, Participant and Visitor scopes, with explicit capability limits.
+- Defined who can appoint each role and how named, email-bound, expiring and
+  revocable event invitations become active assignments.
+- Specified the staff management view, the presentation-only Participant preview,
+  and a combined My events view for attendees, managers, drafts and invitations.
+- Documented attendee-data, Zoom-secret, room-lifecycle, event-cancellation and
+  role-revocation boundaries, plus launch acceptance criteria.
+
+### Why
+
+- Trainers need tools to run assigned events without inheriting Wistudi-wide admin
+  powers. The prototype's role labels and local notifications do not provide real
+  identity or authorization.
+
+### Scope
+
+- Architecture/documentation only. No login, database permissions, invitation
+  endpoints, staff controls or production role enforcement were added.
+- The permission model is proposed for review; confirm the remaining launch choices
+  in `roles-and-permissions.md` before enabling live access.
+
 ## 2026-09-20 / In-Shell Navigation
 
 ### Changed

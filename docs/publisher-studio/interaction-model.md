@@ -103,7 +103,7 @@ Keep four different sharing actions clear:
 | Event | Share the canonical public event page via native share, copy, email or social channel | Public details only; recipient registers independently |
 | Room | Share an invitation to the event page/room entry | A URL never grants membership or meeting access |
 | Message or activity inside the community | Share its room context to another member or copy an internal link | Recipient must have room access |
-| Participant creation outside Wistudi | Creator explicitly requests a public preview; moderation approves before a public permalink/OG page exists | Never expose an unapproved submission or private room content |
+| Participant creation outside Wistudi | Creator explicitly requests a public preview; a Studio Admin or designated showcase reviewer approves before a public permalink/OG page exists | Never expose an unapproved submission or private room content |
 
 The current message Share action uses the public event page as an invitation. It
 does not export the private message body. A future public-creation page needs the
@@ -131,38 +131,20 @@ Model room access separately from event schedule:
 - **Archived:** optional later administrative state for retention and discovery;
   it is separate from event end and from a closed room.
 
-Event owner, assigned trainer, Studio admin or super admin may close/reopen a room
-within their scope. Closing never deletes content. Moderators may lock or hide a
-specific contribution only when their assignment includes that permission; a
-moderator cannot close the whole event room by default.
+The Event Lead, Studio Admin or Platform Super Admin may close/reopen a room within
+their scope. Closing never deletes content. Event Moderators can hide/restore
+specific contributions in their assigned area but cannot close the whole room by
+default. The full assignment and capability rules are in
+[`roles-and-permissions.md`](roles-and-permissions.md).
 
 ## Roles and delegated invitations
 
 Authorization is based on an active assignment and capability for a specific scope,
-not a single global role flag.
-
-| Role | Scope | Allowed actions | Cannot do |
-| --- | --- | --- | --- |
-| Wistudi super admin | Entire Publisher Studio | Assign/revoke Studio admins; manage every event, role, setting and escalation; view audit records | Bypass required audit records |
-| Studio admin | Publisher Studio | Create events, assign staff, review/publish, moderate all Studio rooms, reopen rooms, manage room policy | Assign or impersonate a super admin |
-| Event owner/builder | Assigned event | Create/edit event draft, artwork, schedule, resources, challenge and assigned team; submit/publish only where granted | Change another event or global Studio settings |
-| Trainer | Assigned event/room | Host the workshop, answer questions, pin event materials, engage in discussion, manage room open/closed state, invite an event-scoped moderator | Grant Studio admin/builder powers or manage Zoom account credentials by default |
-| Moderator | Explicit event/room/content scope | Review reports, hide/restore content, moderate replies and submissions within scope, leave an audited reason | Publish/edit the event, assign staff, view private contact details or escalate permissions |
-| Participant | Verified membership in registered event | Read and contribute to eligible room, reply, react, mention, submit work and report content | Moderate, change event settings or see another room without membership |
-| Public visitor | Public pages | Browse, share and register for public event details | Read private room content or join by guessing a URL |
-
-An event creator can invite a moderator only within an event and only for the
-capabilities the creator is allowed to delegate. Trainers cannot delegate event
-builder, Studio admin or super admin permissions. Wistudi issues trainer invitations;
-acceptance does not grant access until the invited email is verified and the
-assignment is confirmed.
-
-Every invitation includes a named email, role, scope, allowed capabilities,
-expiry, inviter, single-use token hash and revocation state. On acceptance, require
-sign-in/email verification and confirm the invite's scope again server-side. Never
-allow an open transferable URL to make its holder a trainer. Maintain append-only
-audit events for invite creation/acceptance/revocation, role changes, room locks,
-content hides/restores and publishing.
+not a single global role flag. Use the role catalogue, permission boundaries and
+invitation lifecycle in [`roles-and-permissions.md`](roles-and-permissions.md) as
+the normative design. In brief: Studio Admins appoint Event Leads; Event Leads can
+invite event-scoped Moderators; Platform Super Admins appoint Studio Admins. The
+current prototype's displayed roles and notifications are sample data only.
 
 ## Notifications
 

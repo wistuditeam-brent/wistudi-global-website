@@ -73,9 +73,9 @@ Recommended initial routes and in-shell views:
 | `/publisher-studio/?view=my-events` | The user's registered events in the shared shell | Public shell; event details/actions follow access state |
 | `/publisher-studio/events/[slug]/` | Event Overview and registration in the shared shell | Public |
 | `/publisher-studio/events/[slug]/room/` | Room, Questions, Build, Chat and Event resources inside the same shell | Verified event registration and Studio membership; staff access is scoped |
-| `/publisher-studio/manage/events/` | Event Builder inside the shared shell, opened from the persistent left navigation | Assigned event builder or Studio admin |
+| `/publisher-studio/manage/events/` | Event Builder inside the shared shell, opened from the persistent left navigation | Assigned Event Builder, Event Lead, Studio Admin or Platform Super Admin |
 | `/publisher-studio/submissions/[id]` | Shared participant creation detail | Author/moderator until approved for the public showcase |
-| `/publisher-studio/admin/` | Event assignments, approvals and moderation controls | Studio admin or scoped moderator |
+| `/publisher-studio/admin/` | Studio assignments and approvals | Studio Admin or Platform Super Admin; Event Moderators receive only their assigned event queue |
 
 The existing site uses static HTML and Cloudflare Pages Functions, not Next.js.
 The exact feature-branch Pages alias is open for public prototype review. Other
@@ -96,8 +96,10 @@ integration audit and the boundary between local state and real identity.
 
 These are distinct destinations within the same shell. Home orients the participant
 and gives a clear next step. Discover Events is the browseable workshop catalogue.
-My Events returns a participant to workshops they have registered for, with a direct
-path to each event's Overview and room. Its empty state leads to Discover Events.
+My Events combines the workshops a person is attending with the events they manage.
+Use Attending, Managing, Drafts and Invitations views, but show one event card when a
+person has more than one relationship to it; label each relationship clearly. Its
+empty state leads to Discover Events or Build an event according to the user's role.
 
 The existing `/resources/events/` page remains the wider Wistudi event directory.
 Both the general directory and Publisher Studio must read one canonical event
@@ -172,7 +174,9 @@ rooms remain readable to eligible members but become read-only until an authoriz
 owner, trainer or administrator reopens them.
 
 See [`interaction-model.md`](interaction-model.md) for the room UI, link/Flow preview
-limits, external-sharing rules, notifications and scoped role/invitation matrix.
+limits, external-sharing rules and notification behavior. See
+[`roles-and-permissions.md`](roles-and-permissions.md) for the authoritative role
+catalogue, permission boundaries, invitation lifecycle and management experience.
 
 ### Event Builder
 
@@ -189,6 +193,10 @@ to provide the event's subject-specific materials.
 - Event-specific discussion prompt, project/build challenge and Wistudi content links.
 - Assigned event builders and trainers/moderators with event-scoped permissions.
 - Save draft, preview desktop/mobile, submit for review, schedule, publish, update and archive.
+
+Event creation, first publication, event management and room moderation are separate
+capabilities. The event creator does not automatically become its long-term manager.
+Studio Admin review and event-scoped staff assignment govern the published event.
 
 Use one stable event record as the source for catalogue cards, event details, event
 room, registration payload, confirmation messaging and structured data. Do not
@@ -247,7 +255,7 @@ Recommended user states:
 | Workshop registrant | Attend their workshop; registration alone does not unlock discussion |
 | Enrollment pending | Complete email verification; no member actions yet |
 | Verified Studio member | Read member discussions; ask, vote, reply, join challenges and submit creations |
-| Trainer or moderator | Perform actions only within assigned Studio/workshop scopes |
+| Event staff | See role-appropriate management tools only within assigned Studio/event scopes |
 | Member linked to Wistudi | Future state: remix, save to workspace and publish through a verified account connection |
 
 Use an immutable internal user ID. A verified email is private login/contact data,
@@ -257,6 +265,8 @@ records. A booking does not automatically create an active Studio membership.
 
 See [`identity-and-storage.md`](identity-and-storage.md) for the proposed data model,
 enrollment flow, provider decision gate, authorization boundaries and migration plan.
+See [`roles-and-permissions.md`](roles-and-permissions.md) for how staff use the
+same Studio shell, the Participant preview boundary and event-scoped capabilities.
 
 Avoid anonymous posting. It creates moderation problems and makes later migration to Wistudi harder.
 
@@ -631,5 +641,7 @@ Not included:
 - Confirm the Studio database provider, owner, backups and preview/production separation.
 - Confirm ownership of the existing Google Apps Script / Sheets registration integration.
 - Agree membership consent, retention, deletion, account recovery and moderation policies.
+- Confirm the remaining role policy choices recorded in `roles-and-permissions.md`
+  before enabling real staff or member access.
 - Decide whether approved discussions can be read without membership.
-- What moderation level is acceptable for first public launch?
+- Agree the moderation level acceptable for first public launch.

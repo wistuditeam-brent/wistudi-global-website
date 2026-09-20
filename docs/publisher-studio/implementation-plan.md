@@ -121,6 +121,8 @@ Deliverables:
   enrollment intents, contexts, discussions, votes, submissions and moderation.
 - Idempotent event-registration handoff with retry/reconciliation behavior.
 - Email verification, session, recovery, retention and deletion decisions.
+- Role definitions, scope inheritance, staff appointment, invitation lifecycle and
+  staff/participant presentation as specified in `roles-and-permissions.md`.
 
 Acceptance criteria:
 
@@ -128,7 +130,9 @@ Acceptance criteria:
 - Only explicit Studio opt-in plus successful identity verification activates membership.
 - Stable Studio IDs do not depend on email, display name or provider IDs.
 - Existing Sheets/Resend registration flow has a reviewed, retryable integration plan.
-- Roles and permissions are checked server-side and scoped to a Studio/workshop.
+- Roles and permissions are checked server-side and scoped to a Studio/event.
+- Each management action has a named role, scope, assigner and audited grant or
+  revocation; the browser cannot grant roles.
 - Contextual content has referential integrity and portable external ID mappings.
 - Preview data and credentials are isolated from production.
 
@@ -213,6 +217,11 @@ Deliverables:
 - Pin resources
 - Highlight Trainer Picks
 - Add event-scoped role assignments and expiring, email-bound invitations
+- Add role-aware management areas in the persistent Studio shell, including
+  Participants, Team & access, Event setup and Room settings where permitted
+- Combine attending, managing, draft and invitation relationships in My events
+- Add Participant preview for staff as a presentation-only mode; use a separate
+  test participant identity to verify actual learner permissions
 - Add an auditable open/close/reopen state for event rooms
 - Add per-role notification routing and member notification preferences
 
@@ -222,6 +231,12 @@ Acceptance criteria:
 - The Wistudi team can keep public areas clean.
 - No public showcase item appears without approval.
 - Moderators cannot grant roles outside their scope or change event ownership.
+- Event Leads can invite only event-scoped Moderators by default; Studio Admins
+  assign Event Leads, and Platform Super Admins appoint Studio Admins.
+- A staff member cannot read another event's roster or private content by changing
+  a URL or API object ID.
+- Participant preview does not change the role or authorization result of any API.
+- Staff and attendee links on My events resolve to one card with separate labels.
 - An ended event room remains open until an authorized person closes it; closed rooms are read-only and retain eligible history.
 
 ## Phase 8: Wistudi Platform Connection

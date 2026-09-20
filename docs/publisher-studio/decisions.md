@@ -451,6 +451,20 @@ Reason:
 - Email-bound, expiring, revocable invitations with server-side verification prevent
   a forwarded URL from becoming an untracked privileged account.
 
+The detailed role catalogue and permission boundary are defined in
+[`roles-and-permissions.md`](roles-and-permissions.md). For launch, treat a trainer
+who manages an event as its **Event Lead**. Event Leads may invite event Moderators;
+Studio Admins appoint Event Leads and Studio Admins; only Platform Super Admins
+appoint Studio Admins or other Platform Super Admins. Event creation does not grant
+ongoing management authority. The participant-preview control is presentational and
+does not impersonate a member or change server authorization.
+
+My Events includes both attending and managed events, plus assigned drafts and
+pending invitations. A person with multiple relationships sees one event card with
+separate role/status labels. First publication is reviewed by a Studio Admin by
+default. Event Leads see minimum roster status, not raw attendee email or export
+controls by default.
+
 ### External Sharing Requires an Explicit Public Boundary
 
 Decision: public event shares invite people to the canonical event page. Room and

@@ -123,33 +123,18 @@ promotion video separate from instructional videos attached as Event resources.
 
 ## Roles, invitations and scope
 
-| Role | Scope and capabilities |
-| --- | --- |
-| Wistudi super admin | Global governance, staff assignments, escalations and audit access |
-| Studio admin | Manage Studio events, publish/review, assign event staff and moderate across the Studio |
-| Event owner/builder | Create/edit assigned event, resources, schedule, project and team; publish only when granted |
-| Trainer | Host assigned event, answer questions, pin resources, manage its room state and invite scoped moderators |
-| Moderator | Moderate reports/content only in explicitly assigned event/room/content scope |
-| Participant | Enter eligible rooms, discuss, react, build, submit and report content |
-| Public visitor | Browse public event details and approved creations; register |
+Use the role catalogue, capability boundaries, appointing hierarchy and invitation
+lifecycle in [`roles-and-permissions.md`](roles-and-permissions.md) as the
+normative policy. A role is always assigned to a named user and explicit scope; do
+not store one global `user.role` value. Event creation does not itself grant
+ongoing event-management authority.
 
-One person may hold both builder and trainer assignments. Keep capabilities as
-separate scoped assignments, not a global `user.role` string. New event builders
-should begin with review-before-publish; a trusted-publisher policy can be added
-later.
-
-An invitation must be created for a named email and role, scoped to a Studio or
-specific event, expiring, single-use or safely reissuable, revocable, and accepted
-after sign-in/email verification. Store the invitation token hashed. Do not use an
-open, transferable link that grants general builder powers. Record who invited,
-accepted, revoked and changed roles.
-
-Trainer-created invitations can grant only event-scoped moderator capabilities the
-trainer is allowed to delegate. They cannot grant builder, Studio admin or super
-admin access. Wistudi issues trainer invitations; an accepted link does not grant
-access until the named email is verified and the assignment is rechecked
-server-side. See [`interaction-model.md`](interaction-model.md) for exact role
-boundaries, room closure, notification scope and external-sharing rules.
+Launch defaults: Studio Admins appoint Event Leads and approve first publication;
+Event Leads can invite only event-scoped Moderators; Platform Super Admins appoint
+Studio Admins and govern all Studio scopes. Event and participant invitations are
+separate flows. Staff invitations are named, email-bound, single-use, expiring and
+revocable; server-side authorization is rechecked when accepted and for every later
+request. The current prototype does not enforce any of these permissions.
 
 ## Registration and room access
 
