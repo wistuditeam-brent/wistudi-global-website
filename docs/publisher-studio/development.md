@@ -198,3 +198,28 @@ not an automatic merge based only on matching email strings.
 - Run Studio QA for each interaction change. Review mobile screenshots and keyboard
   behavior. Device keyboard and safe-area checks are still required before launch.
 - Do not merge or enable production routes until the launch checklist is approved.
+
+
+---
+
+## 2026-09-21 Implementation Source of Truth
+
+The prototype has now been reviewed against the intended end-to-end Publisher Studio experience. Before implementing further UX changes, use the following documents as the working specification:
+
+- [Master product specification](product-spec.md)
+- [Build challenges specification](build-challenges.md)
+- [Implementation checklist](implementation-checklist.md)
+- [Roles and permissions](roles-and-permissions.md)
+- [Decisions](decisions.md)
+
+Important: several current prototype behaviours are deliberately superseded by these documents. In particular:
+
+- Event Builder must become four real steps rather than one long page.
+- Full challenge creation moves out of Event Builder and into role-aware Build.
+- Build changes from one challenge per event to multiple challenges.
+- Questions and Chat have separate interaction/permission models.
+- Public Event Overview, registration/status card and Event Room have approved redesigns.
+- Challenge submission does not automatically mean public publication.
+- Wistudi Flow/XP Video creation should be handed off directly from the challenge experience.
+
+Use `implementation-checklist.md` as the queue. Do not skip unresolved checklist items simply because a corresponding prototype interaction already exists.
