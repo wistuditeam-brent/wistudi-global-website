@@ -234,16 +234,20 @@ export async function onRequestPost(context) {
       if (secret.length < 32 || !constantTimeEqual(String(body.secret || ''), secret)) {
         throw new ApiError(403, 'The owner setup key is missing or does not match.');
       }
-      const count = await db.prepare(
-        'SELECT COUNT(*) AS total FROM studio_role_assignments WHERE role = ? AND scope_type = ? AND scope_id = ? ' +
-        'AND revoked_at IS NULL AND (expires_at IS NULL OR expires_at > ?)'
-      ).bind('platform_super_admin', 'platform', PLATFORM_SCOPE_ID, nowIso()).first();
-      if (Number(count?.total || 0) !== 0) throw new ApiError(409, 'The first Super Admin has already been assigned.');
       const createdAt = nowIso();
       const assignmentId = id();
-      await db.prepare(
-        'INSERT INTO studio_role_assignments (id, studio_user_id, role, scope_type, scope_id, assigned_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-      ).bind(assignmentId, user.id, 'platform_super_admin', 'platform', PLATFORM_SCOPE_ID, user.id, createdAt).run();
+      const bootstrapped = await db.prepare(
+        'INSERT INTO studio_role_assignments (id, studio_user_id, role, scope_type, scope_id, assigned_by, created_at) ' +
+        'SELECT ?, ?, ?, ?, ?, ?, ? WHERE NOT EXISTS (' +
+        'SELECT 1 FROM studio_role_assignments WHERE role = ? AND scope_type = ? AND scope_id = ? ' +
+        'AND revoked_at IS NULL AND (expires_at IS NULL OR expires_at > ?))'
+      ).bind(
+        assignmentId, user.id, 'platform_super_admin', 'platform', PLATFORM_SCOPE_ID, user.id, createdAt,
+        'platform_super_admin', 'platform', PLATFORM_SCOPE_ID, createdAt
+      ).run();
+      if (Number(bootstrapped.meta?.changes || 0) !== 1) {
+        throw new ApiError(409, 'The first Super Admin has already been assigned.');
+      }
       await audit(db, user, 'platform_super_admin.bootstrapped', {
         targetUserId: user.id, email: user.email, role: 'platform_super_admin',
         scopeType: 'platform', scopeId: PLATFORM_SCOPE_ID, reason: 'Initial Studio owner setup',
