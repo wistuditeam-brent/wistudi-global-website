@@ -89,7 +89,7 @@ preview, not a single dense form:
 
 1. **Event basics:** title, summary, subject/topic/level, audience, outcomes and the concrete thing attendees should create.
 2. **Schedule and host:** date, time, IANA timezone, duration, trainer and online format.
-3. **Artwork and promotion:** event-page banner, event-card image, optional mobile card crop, accessible descriptions and optional YouTube/Vimeo or hosted promotion video.
+3. **Artwork and promotion:** event-page banner, event-card image, optional mobile card crop, accessible descriptions and optional YouTube/Vimeo or hosted promotion video. On phones the event card stays horizontal with a narrow portrait image at the left; the optional 2:3 asset controls that crop. The event-page banner uses a wide crop on desktop and a 4:3 crop on phones.
 4. **Event resources:** add none, one or many. Each item may be a Wistudi Flow, PDF/Word file, video, external link or step-by-step instructions. Add an optional description, link or file, instructions, release stage and public-preview setting to each item.
 5. **Room project:** pre-event question, live Q&A, challenge prompt, expected submission and feedback settings.
 6. **Team:** scoped creator, trainer and moderator assignments.

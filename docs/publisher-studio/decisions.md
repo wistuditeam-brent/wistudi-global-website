@@ -337,9 +337,11 @@ Decision: event promotion uses an event-page banner, an event-card image and an
 optional mobile card crop. The event can also include a separate promotional video.
 Instructional videos belong under Event resources.
 
-The desktop card uses a wide crop. The mobile card is narrow and portrait; creators
-can supply a 2:3 mobile image when center-cropping the desktop image would cut off
-important content. Otherwise the same card asset can be center-cropped responsively.
+The desktop card uses a wide crop. The mobile card remains a horizontal row: a narrow
+image sits on the left of the event details. Creators can supply a 2:3 portrait crop
+for that image when center-cropping the desktop image would cut off important content.
+Otherwise the same card asset can be center-cropped responsively. The builder preview
+must show this horizontal mobile layout so creators can judge the actual listing card.
 
 YouTube and Vimeo promotion links may embed in a video player when their URL and
 provider allow it. Other links remain link cards. Metadata for Wistudi Flow links

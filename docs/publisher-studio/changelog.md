@@ -189,10 +189,11 @@
   YouTube/Vimeo links can appear in an embedded player, while other URLs use an
   external-link card.
 - Added required learning outcomes, an event-page banner, distinct event-card art,
-  an optional portrait mobile crop and an optional promotional video link or local
-  video preview.
-- Added a creator preview showing the event page, resource visibility and mobile
-  event-card crop.
+  an optional 2:3 crop for the narrow left-side mobile card image and an optional
+  promotional video link or local video preview.
+- Added a creator preview showing the event page, resource visibility and the actual
+  horizontal mobile event-card layout.
+- Clarified that the event-page banner is wide on desktop and crops to 4:3 on phones.
 - Updated the event architecture and decisions to use event-owned resources rather
   than a separate Publisher Kit record.
 
