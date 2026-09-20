@@ -140,7 +140,7 @@ async function overview(context, db, user) {
         id: row.id, userId: row.studio_user_id, displayName: row.display_name,
         email: row.email, role: row.role, roleLabel: labels[row.role] || row.role,
         scopeType: row.scope_type, scopeId: row.scope_id,
-        createdAt: row.created_at, expiresAt: row.expires_at,
+        createdAt: row.created_at, expiresAt: row.expires_at, canRevoke: true,
       });
     }
   }
