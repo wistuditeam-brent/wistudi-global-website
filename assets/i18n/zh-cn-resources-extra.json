@@ -1,14 +1,14 @@
 {
   "titles": {
-    "/resources/all/": "搜索与浏览 | Wistudi 资源",
-    "/resources/guides/": "指南与资源 | Wistudi",
+    "/resources/all/": "浏览 Wistudi 资源 | 指南与洞见",
+    "/resources/guides/": "指南与洞见 | Wistudi 资源",
     "/resources/events/": "活动 | Wistudi 资源",
     "/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/": "Wistudi 亮相 Vietnam EdTech Expo 2026 河内展会"
   },
   "descriptions": {
-    "/resources/all/": "按主题、内容类型和日期搜索与浏览 Wistudi Community Notes。",
-    "/resources/guides/": "Wistudi 实用指南、教学资源、学习设计参考资料和可下载材料。",
-    "/resources/events/": "Wistudi 即将举行和过往的工作坊、网络研讨会、展会与社区活动。",
+    "/resources/all/": "按主题、类型和日期搜索与浏览 Wistudi 指南、现场笔记和洞见。",
+    "/resources/guides/": "Wistudi 关于教学、学习设计、互动出版和教育科技的实用指南、现场笔记与观点。",
+    "/resources/events/": "浏览 Wistudi 工作坊与活动，报名参加即将举行的场次，并查看往期活动资料。",
     "/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/": "Wistudi 在河内 Vietnam EdTech Expo 2026 的现场记录，包括现场演示、教育工作者交流和新的 EdTech 联系。"
   },
   "strings": {

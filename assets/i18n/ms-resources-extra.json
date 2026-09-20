@@ -1,14 +1,14 @@
 {
   "titles": {
-    "/resources/all/": "Cari & terokai | Sumber Wistudi",
-    "/resources/guides/": "Panduan & Sumber | Wistudi",
+    "/resources/all/": "Semak Sumber Wistudi | Panduan & Wawasan",
+    "/resources/guides/": "Panduan & Wawasan | Sumber Wistudi",
     "/resources/events/": "Acara | Sumber Wistudi",
     "/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/": "Wistudi di Vietnam EdTech Expo 2026 di Hanoi"
   },
   "descriptions": {
-    "/resources/all/": "Cari dan terokai Community Notes Wistudi mengikut topik, jenis dan tarikh.",
-    "/resources/guides/": "Panduan praktikal Wistudi, sumber pengajaran, rujukan reka bentuk pembelajaran dan bahan muat turun.",
-    "/resources/events/": "Bengkel, webinar, ekspo dan acara komuniti Wistudi yang akan datang dan yang telah berlangsung.",
+    "/resources/all/": "Cari dan semak panduan, nota lapangan serta pandangan Wistudi mengikut topik, jenis dan tarikh.",
+    "/resources/guides/": "Panduan praktikal, nota lapangan dan pandangan Wistudi tentang pengajaran, reka bentuk pembelajaran, penerbitan interaktif dan EdTech.",
+    "/resources/events/": "Semak bengkel dan acara Wistudi, daftar untuk sesi akan datang dan akses semula bahan acara selepas sesi berlangsung.",
     "/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/": "Catatan lapangan daripada pengalaman Wistudi di Vietnam EdTech Expo 2026 di Hanoi, termasuk demonstrasi langsung, perbualan dengan pendidik dan hubungan EdTech baharu."
   },
   "strings": {

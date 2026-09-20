@@ -1,14 +1,14 @@
 {
   "titles": {
-    "/resources/all/": "البحث والتصفح | موارد Wistudi",
-    "/resources/guides/": "الأدلة والموارد | Wistudi",
+    "/resources/all/": "تصفح موارد Wistudi | الأدلة والرؤى",
+    "/resources/guides/": "الأدلة والرؤى | موارد Wistudi",
     "/resources/events/": "الفعاليات | موارد Wistudi",
     "/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/": "Wistudi في Vietnam EdTech Expo 2026 في هانوي"
   },
   "descriptions": {
-    "/resources/all/": "ابحث وتصفح Community Notes من Wistudi حسب الموضوع والنوع والتاريخ.",
-    "/resources/guides/": "أدلة Wistudi العملية وموارد التدريس ومراجع تصميم التعلم والمواد القابلة للتنزيل.",
-    "/resources/events/": "ورش العمل والندوات عبر الإنترنت والمعارض والفعاليات المجتمعية القادمة والسابقة من Wistudi.",
+    "/resources/all/": "ابحث في أدلة Wistudi وملاحظاته الميدانية ورؤاه حسب الموضوع والنوع والتاريخ.",
+    "/resources/guides/": "أدلة عملية وملاحظات ميدانية ووجهات نظر من Wistudi حول التدريس وتصميم التعلم والنشر التفاعلي وتقنيات التعليم.",
+    "/resources/events/": "تصفح ورش عمل وفعاليات Wistudi، وسجل في الجلسات القادمة، وارجع إلى مواد الفعاليات بعد انتهائها.",
     "/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/": "ملاحظة ميدانية عن تجربة Wistudi في Vietnam EdTech Expo 2026 في هانوي، بما في ذلك العروض الحية والحوارات مع المعلمين وروابط EdTech الجديدة."
   },
   "strings": {

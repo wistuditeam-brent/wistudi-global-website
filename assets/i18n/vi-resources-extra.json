@@ -1,14 +1,14 @@
 {
   "titles": {
-    "/resources/all/": "Tìm kiếm & duyệt | Tài nguyên Wistudi",
-    "/resources/guides/": "Hướng dẫn & Tài nguyên | Wistudi",
+    "/resources/all/": "Tìm kiếm Tài nguyên Wistudi | Hướng dẫn & Góc nhìn",
+    "/resources/guides/": "Hướng dẫn & Góc nhìn | Tài nguyên Wistudi",
     "/resources/events/": "Sự kiện | Tài nguyên Wistudi",
     "/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/": "Wistudi tại Vietnam EdTech Expo 2026 ở Hà Nội"
   },
   "descriptions": {
-    "/resources/all/": "Tìm kiếm và duyệt Community Notes của Wistudi theo chủ đề, loại nội dung và ngày.",
-    "/resources/guides/": "Các hướng dẫn thực tiễn, tài nguyên giảng dạy, tài liệu tham khảo về thiết kế học tập và tài liệu tải xuống từ Wistudi.",
-    "/resources/events/": "Các workshop, webinar, triển lãm và sự kiện cộng đồng sắp tới và đã diễn ra của Wistudi.",
+    "/resources/all/": "Tìm kiếm và duyệt hướng dẫn, ghi chép thực địa và góc nhìn của Wistudi theo chủ đề, loại nội dung và ngày.",
+    "/resources/guides/": "Hướng dẫn thực tiễn, ghi chép thực địa và góc nhìn của Wistudi về giảng dạy, thiết kế học tập, xuất bản tương tác và EdTech.",
+    "/resources/events/": "Duyệt workshop và sự kiện của Wistudi, đăng ký tham gia các buổi sắp tới và xem lại tài liệu sau sự kiện.",
     "/resources/community-notes/wistudi-at-vietnam-edtech-expo-2026/": "Ghi chép thực địa về trải nghiệm của Wistudi tại Vietnam EdTech Expo 2026 ở Hà Nội, gồm trình diễn trực tiếp, trao đổi với nhà giáo dục và các kết nối EdTech mới."
   },
   "strings": {

@@ -7,7 +7,7 @@
   const first=location.pathname.split('/').filter(Boolean)[0]?.toLowerCase();
   const locale=localeCodes.includes(first)?first:'en';
   const intlLocale={en:'en',vi:'vi-VN','zh-cn':'zh-CN',th:'th-TH',id:'id-ID',ms:'ms-MY',ar:'ar'}[locale]||'en';
-  const noteWords={en:['note','notes'],vi:['ghi chú','ghi chú'],'zh-cn':['篇','篇'],th:['รายการ','รายการ'],id:['catatan','catatan'],ms:['catatan','catatan'],ar:['ملاحظة','ملاحظات']}[locale]||['note','notes'];
+  const resourceWords={en:['resource','resources'],vi:['tài nguyên','tài nguyên'],'zh-cn':['项资源','项资源'],th:['ทรัพยากร','ทรัพยากร'],id:['sumber daya','sumber daya'],ms:['sumber','sumber'],ar:['مورد','موارد']}[locale]||['resource','resources'];
 
   const ensureScript=src=>new Promise(resolve=>{
     const existing=[...document.scripts].find(s=>new URL(s.src||'',location.href).pathname===src);
@@ -138,7 +138,7 @@
       }
     }catch(_){ }
 
-    if(!articles.length){if(count&&count.textContent.includes('Loading'))count.textContent='No notes available';return;}
+    if(!articles.length){if(count&&count.textContent.includes('Loading'))count.textContent='No resources available';return;}
     const formatDate=value=>{try{return new Intl.DateTimeFormat(intlLocale,{day:'numeric',month:'short',year:'numeric'}).format(new Date(value));}catch(_){return '';}};
     const localizedUrl=url=>locale==='en'?url:`/${locale}${url.startsWith('/')?url:'/'+url}`;
     const makeCard=a=>{const l=a.locales.en;return `<a class="res-list-card" href="${localizedUrl(l.url)}"><div class="res-list-image"><img src="${a.heroImage}" alt="${escapeHtml(a.heroAlt||l.title)}" loading="lazy" decoding="async"></div><div><div class="res-type">${escapeHtml(a.type)}</div><h2>${escapeHtml(l.title)}</h2><p>${escapeHtml(l.excerpt)}</p><div class="res-card-meta"><span>${escapeHtml((a.topics||[]).slice(0,3).join(' · '))}</span><span data-ws-resource-date="${escapeHtml(a.publishedAt)}">${formatDate(a.publishedAt)}</span></div></div><span class="res-list-arrow" aria-hidden="true">→</span></a>`;};
@@ -150,7 +150,7 @@
       filtered.sort((a,b)=>sortValue==='oldest'?new Date(a.publishedAt)-new Date(b.publishedAt):new Date(b.publishedAt)-new Date(a.publishedAt));
       list.innerHTML=filtered.map(makeCard).join('');
       initImageFallbacks();
-      if(count)count.textContent=`${filtered.length} ${filtered.length===1?noteWords[0]:noteWords[1]}`;
+      if(count)count.textContent=`${filtered.length} ${filtered.length===1?resourceWords[0]:resourceWords[1]}`;
       empty?.classList.toggle('show',filtered.length===0);
       window.__WISTUDI_RESOURCES_TRANSLATE_NODE__?.(list);
     };

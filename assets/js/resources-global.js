@@ -78,7 +78,7 @@
     let last='';try{last=localStorage.getItem(storageKey())||'';}catch(_){ }
     const cutoff=last?new Date(last).getTime():Date.now()-30*86400000;const count=articles.filter(a=>new Date(a.publishedAt).getTime()>cutoff).length;
     document.querySelectorAll('.ws-resource-badge').forEach(b=>{b.hidden=!count;b.textContent=count>9?'9+':String(count||'');});
-    if(!isHome()||!articles.length||document.querySelector('.ws-home-note-section'))return;
+    if(!isHome()||!articles.length||document.querySelector('.ws-home-note-section,.res-feature,[data-ws-featured-resource]'))return;
     const article=articles.find(a=>a.featured===true)||articles[0];const locale=article.locales.en;const section=buildGallery(article,locale);if(!section)return;
     const target=document.querySelector('.cta')||document.querySelector('footer.ws-site-footer');target?.parentNode?.insertBefore(section,target);
   }
