@@ -1,5 +1,6 @@
 import { events, workshop, challenge, challenges, allResources, contributionKinds, contextFor, challengeFor, resourcesFor } from './data.mjs';
 import { STORAGE_KEY, createState, loadState, saveState, escapeHtml as e, avatar, registerDemo, askQuestion, toggleVote, voteCount, addThread, addReply, toggleThreadHeart, submitBuild } from './model.mjs';
+import { renderCalendarApp, handleCalendarClick, handleCalendarChange, handleCalendarSubmit } from './calendar.mjs';
 
 const root = document.querySelector('#app');
 const dialog = document.querySelector('#studio-dialog');
@@ -27,13 +28,14 @@ function syncRouteState(url = new URL(location.href)) {
     try { routeEvent = decodeURIComponent(eventRoute[1]); } catch { routeEvent = eventRoute[1]; }
   } else page = document.body.dataset.page || 'home';
 
-  studioView = ['home', 'discover', 'my-events'].includes(requestedView) ? requestedView : 'home';
+  studioView = ['home', 'discover', 'my-events', 'calendar'].includes(requestedView) ? requestedView : 'home';
   const requestedEvent = routeEvent || url.searchParams.get('event') || '';
   selectedEvent = events.find(item => item.slug === requestedEvent || item.id === requestedEvent) || workshop;
   selectedChallenge = challengeFor(selectedEvent.id);
   selectedResources = resourcesFor(selectedEvent.id);
   tabs = [ ['week', 'Room', 'Room', 'calendar'], ['questions', 'Questions', 'Ask', 'question'], ['challenge', 'Build', 'Build', 'build'], ['workbench', 'Chat', 'Chat', 'chat', 'Event chat'], ...(selectedResources.length ? [['resources', 'Resources', 'Files', 'book', 'Event resources']] : []) ];
   document.body.dataset.page = page;
+  document.body.dataset.studioView = studioView;
   document.body.dataset.eventSlug = selectedEvent.slug;
 }
 
@@ -48,6 +50,7 @@ let resourceFilter = '';
 let dialogTarget = null;
 let dialogMode = null;
 let toastTimer;
+let calendarSearchTimer;
 let theme = 'light';
 const themeKey = 'wistudi.publisher-studio.theme';
 const drafts = new Map();
@@ -114,6 +117,7 @@ function globalNavigation(view = studioView, mobile = false) {
     ['home', 'Home', `${base}?view=home`, 'home'],
     ['discover', 'Discover events', `${base}?view=discover`, 'discover'],
     ['my-events', 'My events', `${base}?view=my-events`, 'events'],
+    ['calendar', 'Calendar', `${base}?view=calendar`, 'calendar'],
   ];
   const active = page === 'builder' ? '' : page === 'event' ? (view === 'my-events' ? 'my-events' : 'discover') : page === 'studio' ? 'my-events' : view;
   const links = items.map(([key, label, href, glyph]) => `<a href="${href}" ${active === key ? 'aria-current="page"' : ''}>${icon(glyph)}<span>${label}</span></a>`).join('');
@@ -282,6 +286,10 @@ function renderHome() {
   const continueEvent = previewEvents[0];
   const content = `<section class="studio-intro"><div><div class="eyebrow">A place to learn by making</div><h1>Wistudi Publisher Studio</h1><p class="lead">Practical workshops that lead to useful teaching resources. Learn something, build an idea, share it for feedback and keep improving it in Wistudi.</p><a class="button primary home-discover-link" href="${base}?view=discover">Discover events ${icon('arrow')}</a></div><div class="studio-journey"><ol class="journey" aria-label="Publisher journey"><li class="current">Discover</li><li>Learn</li><li>Build</li><li>Share</li><li>Publish</li></ol><p class="muted small">Publishing in Wistudi is an optional next step.</p></div></section>${continueEvent ? `<section class="home-continue"><div><div class="eyebrow">Pick up where you left off</div><h2>${e(continueEvent.title)}</h2><p class="muted">Your preview registration is available in this browser tab.</p></div><a class="button primary" href="${eventUrl(continueEvent)}room/#week">Open event room ${icon('arrow')}</a></section>` : `<section class="home-continue home-empty"><div><div class="eyebrow">Your learning space</div><h2>Start with an event that fits your work.</h2><p class="muted">Your events and projects will be easy to return to from My events.</p></div><a class="button secondary" href="${base}?view=my-events">View My events ${icon('arrow')}</a></section>`}<section class="event-catalog-section home-upcoming"><div class="section-heading"><div><div class="eyebrow">Next in the Studio</div><h2>Upcoming events</h2></div><a class="text-link" href="${base}?view=discover">See all events ${icon('arrow')}</a></div><div class="event-grid">${upcoming.slice(0, 3).map(eventCard).join('')}</div></section>`;
   return appShell({ view: 'home', content });
+}
+
+function renderCalendar() {
+  return appShell({ view: 'calendar', content: renderCalendarApp(state.calendar), mainClass: 'calendar-app-main' });
 }
 
 function renderEvent() {
@@ -674,15 +682,16 @@ function restoreDrafts(container = document) {
 }
 
 function render(focus = false) {
-  root.innerHTML = page === 'studio' ? renderStudio() : page === 'event' ? renderEvent() : page === 'builder' ? renderBuilder() : renderHome();
+  root.innerHTML = page === 'studio' ? renderStudio() : page === 'event' ? renderEvent() : page === 'builder' ? renderBuilder() : studioView === 'calendar' ? renderCalendar() : renderHome();
   document.title = page === 'event'
     ? `${selectedEvent.title} | Wistudi Publisher Studio`
     : page === 'builder'
       ? 'Build an event | Wistudi Publisher Studio'
       : page === 'studio'
         ? `${selectedEvent.title} · ${tabs.find(([key]) => key === activeTab())?.[1] || 'Room'} | Wistudi Publisher Studio`
-        : `${studioView === 'discover' ? 'Discover events' : studioView === 'my-events' ? 'My events' : 'Home'} | Wistudi Publisher Studio`;
+        : `${studioView === 'discover' ? 'Discover events' : studioView === 'my-events' ? 'My events' : studioView === 'calendar' ? 'Calendar' : 'Home'} | Wistudi Publisher Studio`;
   document.body.dataset.studioTheme = theme;
+  document.body.dataset.studioView = studioView;
   restoreDrafts();
   if (page === 'builder') restoreBuilderDraft();
   if (page === 'studio') {
@@ -734,6 +743,17 @@ document.addEventListener('click', event => {
   const target = event.target.closest('[data-action]');
   if (!target) return;
   const { action, id, value } = target.dataset;
+  const calendarResult = handleCalendarClick(target, state.calendar);
+  if (calendarResult) {
+    if (action === 'calendar-close-panel') {
+      drafts.delete('calendar-event-form');
+      drafts.delete('calendar-availability-form');
+    }
+    persist();
+    render();
+    if (calendarResult.message) notify(calendarResult.message);
+    return;
+  }
   if (action === 'resource') openResource(id);
   if (action === 'public-resource') openPublicResource(id);
   if (action === 'new-thread') document.querySelector('#thread-form-body')?.focus({ preventScroll: false });
@@ -866,6 +886,14 @@ document.addEventListener('click', event => {
 });
 
 document.addEventListener('change', event => {
+  if (handleCalendarChange(event.target, state.calendar)) {
+    persist();
+    if (event.target.matches('[data-calendar-setting="filter-search"]')) {
+      clearTimeout(calendarSearchTimer);
+      calendarSearchTimer = setTimeout(() => render(), 180);
+    } else render();
+    return;
+  }
   if (event.target.matches('[data-chat-files]')) {
     addPendingUploads(event.target.dataset.chatFiles, [...event.target.files]);
     event.target.value = '';
@@ -962,6 +990,13 @@ document.addEventListener('drop', event => {
 document.addEventListener('submit', event => {
   const form = event.target;
   if (!(form instanceof HTMLFormElement)) return;
+  const calendarResult = handleCalendarSubmit(form, state.calendar);
+  if (calendarResult) {
+    event.preventDefault();
+    if (calendarResult.error) { notify(calendarResult.error); return; }
+    drafts.delete(form.id); persist(); render(); notify(calendarResult.message);
+    return;
+  }
   event.preventDefault();
   const data = Object.fromEntries(new FormData(form));
   try {
