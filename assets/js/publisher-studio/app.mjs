@@ -2,6 +2,7 @@ import { events, workshop, challenge, challenges, allResources, contributionKind
 import { STORAGE_KEY, createState, loadState, saveState, escapeHtml as e, avatar, registerDemo, askQuestion, toggleVote, voteCount, addThread, addReply, toggleThreadHeart, submitBuild } from './model.mjs';
 import { loadRemoteEvent, sendRemoteAction } from './remote.mjs';
 import { renderCalendarApp, handleCalendarClick, handleCalendarChange, handleCalendarSubmit } from './calendar.mjs';
+import { initIdentity } from './identity.mjs';
 
 const root = document.querySelector('#app');
 const dialog = document.querySelector('#studio-dialog');
@@ -145,9 +146,8 @@ function prototypeBar() {
 }
 
 function header() {
-  const themeButton = `<button class="button secondary theme-toggle" type="button" data-action="theme" aria-label="Switch to ${theme === 'dark' ? 'light' : 'dark'} mode">${theme === 'dark' ? '☀' : '◐'}<span>${theme === 'dark' ? 'Light' : 'Dark'}</span></button>`;
-  const action = `${themeButton}${page === 'studio' ? `<details class="trainer-notifications"><summary aria-label="Trainer notifications, 3 sample items">${icon('bell')}<span>3</span></summary><div class="notification-popover"><strong>Trainer notifications <span class="muted">/ sample</span></strong><a href="#questions">2 open participant questions</a><a href="#challenge">1 creation needs review</a><a href="#workbench">A new participant joined this event</a><small>This preview does not send notifications.</small></div></details>` : ''}${state.profile ? person(state.profile.displayName, state.profile.avatarSeed) : ''}`;
-  return `<header class="studio-header"><a class="brand" href="${base}" aria-label="Publisher Studio home"><img src="/assets/images/wistudi-logo.png" alt="Wistudi" width="120" height="40"></a><span class="header-divider"></span><a class="studio-wordmark" href="${base}">Publisher Studio</a><div class="header-actions">${action}</div></header>`;
+  const themeButton = '<button class="button secondary theme-toggle" type="button" data-action="theme" aria-label="Switch to ' + (theme === 'dark' ? 'light' : 'dark') + ' mode">' + (theme === 'dark' ? '☀' : '◐') + '<span>' + (theme === 'dark' ? 'Light' : 'Dark') + '</span></button>';
+  return '<header class="studio-header"><a class="brand" href="' + base + '" aria-label="Publisher Studio home"><img src="/assets/images/wistudi-logo.png" alt="Wistudi" width="120" height="40"></a><span class="header-divider"></span><a class="studio-wordmark" href="' + base + '">Publisher Studio</a><div class="header-actions">' + themeButton + '<div data-identity-mount></div></div></header>';
 }
 
 function globalNavigation(view = studioView, mobile = false) {
@@ -1152,5 +1152,10 @@ window.addEventListener('hashchange', () => {
 });
 render();
 renderedHref = location.href;
+initIdentity({ onIdentity: function(user) {
+  state.profile = user ? { id: user.id, displayName: user.displayName, avatarSeed: user.id, consentToStudio: Boolean(user.studioMember) } : null;
+  persist();
+  render(false);
+} });
 syncRemoteState();
 if (loaded.warning) notify(loaded.warning);
