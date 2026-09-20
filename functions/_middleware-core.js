@@ -212,7 +212,7 @@ function structuredData(locale, pagePath, meta) {
       logo:{'@type':'ImageObject',url:`${PROD_ORIGIN}/assets/images/wistudi-logo.png`},
       email:'support@wistudi.com',
       telephone:'+84 879 876 624',
-      address:{'@type':'PostalAddress',streetAddress:'85 Great Portland Street, First Floor',addressLocality:'London',addressCountry:'GB'},
+      address:{'@type':'PostalAddress',streetAddress:'128 City Road',addressLocality:'London',addressCountry:'GB'},
       contactPoint:[
         {'@type':'ContactPoint',contactType:'customer support',email:'support@wistudi.com',telephone:'+84 879 876 624',availableLanguage:['English','Vietnamese']},
         {'@type':'ContactPoint',contactType:'partnerships',email:'partnerships@wistudi.com'}
