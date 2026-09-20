@@ -33,6 +33,83 @@ export const events = Object.freeze([
   }),
 ]);
 
+// Calendar fixtures model the operational schedule while linking Publisher Studio
+// workshops back to their existing event pages. These records are preview data.
+export const calendarHosts = Object.freeze([
+  Object.freeze({ id: 'host-wistudi', name: 'Wistudi Trainer', role: 'Trainer', timezone: 'Asia/Ho_Chi_Minh' }),
+  Object.freeze({ id: 'host-nadia', name: 'Nadia Nguyen', role: 'Trainer', timezone: 'Asia/Ho_Chi_Minh' }),
+  Object.freeze({ id: 'host-an', name: 'An Pham', role: 'Trainer', timezone: 'Asia/Ho_Chi_Minh' }),
+]);
+
+export const calendarEventTypes = Object.freeze([
+  'Workshop', 'Lesson', 'Coaching', 'Office hours', 'Team meeting', 'Hold',
+]);
+
+const schedulingExamples = [
+  {
+    id: 'calendar-demo-speaking-practice', title: 'B1 speaking practice', type: 'Lesson',
+    startsAt: '2026-09-21T02:30:00.000Z', duration: 60, timezone: 'Asia/Ho_Chi_Minh',
+    hostId: 'host-nadia', hostName: 'Nadia Nguyen', group: 'B1 English cohort',
+    participants: [{ id: 'participant-demo', name: 'Mina Tran' }], status: 'confirmed', visibility: 'private',
+    source: 'calendar', studioEventId: '', location: { mode: 'online', label: 'Zoom', url: '' },
+    resourceUrl: '', notes: 'Practise asking follow-up questions in a short information-gap activity.',
+  },
+  {
+    id: 'calendar-demo-flow-clinic', title: 'Flow build clinic', type: 'Coaching',
+    startsAt: '2026-09-22T06:00:00.000Z', duration: 45, timezone: 'Asia/Ho_Chi_Minh',
+    hostId: 'host-an', hostName: 'An Pham', group: 'Flow Builders',
+    participants: [{ id: 'participant-demo', name: 'Mina Tran' }], status: 'confirmed', visibility: 'private',
+    source: 'calendar', studioEventId: '', location: { mode: 'online', label: 'Google Meet', url: '' },
+    resourceUrl: '', notes: 'Bring one activity in progress for peer feedback.',
+  },
+  {
+    id: 'calendar-demo-team-planning', title: 'Trainer planning session', type: 'Team meeting',
+    startsAt: '2026-09-24T08:00:00.000Z', duration: 45, timezone: 'Asia/Ho_Chi_Minh',
+    hostId: 'host-nadia', hostName: 'Nadia Nguyen', group: 'Wistudi local team',
+    participants: [], status: 'pending', visibility: 'internal',
+    source: 'calendar', studioEventId: '', location: { mode: 'physical', label: 'Hanoi workspace', url: '' },
+    resourceUrl: '', notes: 'Confirm the October workshop resources and trainer assignments.',
+  },
+];
+
+const publisherStudioCalendarEvents = events.map((item, index) => ({
+  id: `calendar-studio-${item.id}`,
+  title: item.title,
+  type: 'Workshop',
+  startsAt: item.startsAt,
+  duration: item.duration,
+  timezone: item.timezone,
+  hostId: 'host-wistudi',
+  hostName: item.trainer,
+  group: 'Publisher Studio',
+  participants: [{ id: 'participant-demo', name: 'Studio participant' }],
+  status: 'confirmed',
+  visibility: 'public',
+  source: 'publisher-studio',
+  studioEventId: item.id,
+  location: { mode: 'online', label: item.zoomMode === 'manual-link-preview' ? 'Online meeting' : 'Meeting link to be added', url: '' },
+  resourceUrl: '',
+  notes: item.summary,
+  colorIndex: index,
+}));
+
+export const calendarSeedEvents = Object.freeze([
+  ...schedulingExamples.map(Object.freeze),
+  ...publisherStudioCalendarEvents.map(Object.freeze),
+]);
+
+// Availability blocks keep external calendar titles private by storing only Busy.
+export const calendarAvailabilityRules = Object.freeze([
+  Object.freeze({ id: 'availability-nadia-mon', hostId: 'host-nadia', weekday: 1, start: '08:30', end: '12:00', label: 'Morning availability' }),
+  Object.freeze({ id: 'availability-nadia-wed', hostId: 'host-nadia', weekday: 3, start: '13:00', end: '17:00', label: 'Afternoon availability' }),
+  Object.freeze({ id: 'availability-an-tue', hostId: 'host-an', weekday: 2, start: '09:00', end: '16:00', label: 'Teaching hours' }),
+  Object.freeze({ id: 'availability-wistudi-thu', hostId: 'host-wistudi', weekday: 4, start: '09:00', end: '17:00', label: 'Studio hours' }),
+]);
+
+export const calendarAvailabilityExceptions = Object.freeze([
+  Object.freeze({ id: 'busy-demo-01', hostId: 'host-nadia', date: '2026-09-23', start: '09:00', end: '10:00', status: 'external_busy', label: 'Busy · connected calendar' }),
+]);
+
 export const workshops = events;
 export const workshop = events[0];
 
