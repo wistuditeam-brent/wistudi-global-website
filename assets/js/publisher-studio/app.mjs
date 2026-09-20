@@ -55,6 +55,9 @@ let toastTimer;
 let calendarSearchTimer;
 let theme = 'light';
 let serverIdentity = null;
+let serverDrafts = [];
+let sharedDraftsForUser = '';
+let sharedDraftsPromise = null;
 const themeKey = 'wistudi.publisher-studio.theme';
 const drafts = new Map();
 const localPreviewUrls = new Map();
@@ -176,7 +179,7 @@ function mirrorRemote(action, payload = {}, successMessage = '') {
 }
 
 function prototypeBar() {
-  return `<div class="prototype-bar"><span><strong>Development preview</strong><span class="prototype-detail"> / Sample content, this tab only</span></span>${button('Reset demo', 'reset', '', 'text-button')}</div>`;
+  return `<div class="prototype-bar"><span><strong>Development preview</strong><span class="prototype-detail">  / Shared drafts use the Studio database; sample content stays local</span></span>${button('Reset demo', 'reset', '', 'text-button')}</div>`;
 }
 
 function header() {
@@ -384,14 +387,14 @@ function openShare(slug) {
 }
 
 function renderBuilder() {
-  const content = `<div class="builder-page"><div class="builder-heading"><div><div class="eyebrow">Event Builder / Preview</div><h1>Create a Studio event</h1><p class="lead">Use the same structure for every event. Each event gets a public page, a participant room and a connected build project.</p></div><span class="tag">Draft only</span></div><div class="builder-flow" aria-label="Event publishing process"><span class="current">1. Details</span><span>2. Schedule</span><span>3. Room and team</span><span>4. Review and publish</span></div><div class="builder-warning"><strong>This builder is a prototype.</strong> Drafts stay in this browser tab. Do not enter real attendee details, private Zoom links or confidential material.</div>
-    <form id="event-builder-form" class="event-builder-form"><div class="builder-columns"><div class="builder-fields">
+  const content = `<div class="builder-page"><div class="builder-heading"><div><div class="eyebrow">Event Builder / Shared drafts</div><h1>Create a Studio event</h1><p class="lead">Use the same structure for every event. Each event gets a public page, a participant room and a connected build project.</p></div><span class="tag">Shared draft workspace</span></div><div class="builder-flow" aria-label="Event publishing process"><span class="current">1. Details</span><span>2. Schedule</span><span>3. Room and team</span><span>4. Review and publish</span></div><div class="builder-warning"><strong>Shared draft workspace.</strong> Event details save to the Publisher Studio database. Sign-in and Event Builder permissions are required. Uploaded files still preview only in this browser; use a secure external link for shared media previews.</div><section class="builder-saved-drafts builder-section"><div class="builder-section-heading"><span>↻</span><div><h2>Continue a shared draft</h2><p>Open a draft saved to your Publisher Studio account.</p></div></div><div id="builder-saved-drafts" aria-live="polite"><p class="muted small">Loading shared drafts…</p></div></section>
+    <form id="event-builder-form" class="event-builder-form"><input type="hidden" name="eventId" value=""><div class="builder-columns"><div class="builder-fields">
       <section class="builder-section"><div class="builder-section-heading"><span>01</span><div><h2>Event details</h2><p>Tell people who this is for, what they will learn and what they will make.</p></div></div><label>Event title<input name="title" maxlength="100" placeholder="e.g. Build an interactive speaking lesson" required></label><label>Short description<textarea name="summary" rows="3" maxlength="320" placeholder="Explain the teaching problem or skill this workshop addresses." required></textarea></label><div class="builder-grid"><label>Subject<input name="subject" maxlength="40" placeholder="English" required></label><label>Topic<input name="topic" maxlength="50" placeholder="Speaking" required></label><label>Level<input name="level" maxlength="32" placeholder="B1" required></label><label>Audience<input name="audience" maxlength="100" placeholder="English teachers and tutors" required></label></div><label>Learning outcomes <span class="muted">(one outcome per line)</span><textarea name="learningOutcomes" rows="4" maxlength="800" placeholder="Adapt a speaking task into a clear lesson sequence\nDesign one purposeful learner activity\nPlan how learners will reflect on their progress" required></textarea></label><label>What will participants make?<textarea name="output" rows="2" maxlength="220" placeholder="One concrete outcome from the session" required></textarea></label></section>
       <section class="builder-section"><div class="builder-section-heading"><span>02</span><div><h2>Schedule and online session</h2><p>Dates are stored with an explicit timezone and displayed in each participant's local time.</p></div></div><div class="builder-grid"><label>Start date and time<input name="startsAt" type="datetime-local" required></label><label>Event timezone<select name="timezone"><option value="Asia/Ho_Chi_Minh">Asia / Ho Chi Minh</option><option value="UTC">UTC</option><option value="Europe/London">Europe / London</option><option value="America/New_York">America / New York</option></select></label><label>Duration<select name="duration"><option>60</option><option>75</option><option>90</option><option>120</option></select></label><label>Trainer name<input name="trainer" maxlength="60" placeholder="Assigned Wistudi trainer" required></label></div><div class="integration-card"><div><span class="eyebrow">Zoom</span><strong>Manual meeting link in this preview</strong><p>For the live system, show the participant join link only inside their registered event room.</p></div><span class="integration-state">Not connected</span><label>Test meeting link<input name="zoomUrl" type="url" placeholder="https://zoom.us/j/..." autocomplete="off"></label><button class="button secondary" type="button" disabled>Connect Zoom account</button></div></section>
       <section class="builder-section"><div class="builder-section-heading"><span>03</span><div><h2>Event artwork and promotion</h2><p>Use a wide image for the event page and separate artwork for the event listing.</p></div></div>${fileDropzone({ title: 'Event page banner image', detail: 'Wide 16:9 · JPG, PNG or WebP · up to 8 MB', accept: 'image/png,image/jpeg,image/webp', inputName: 'bannerImage', inputAttributes: 'data-media-file="bannerImage"' })}${fileDropzone({ title: 'Event listing image', detail: 'Card artwork · JPG, PNG or WebP · up to 8 MB', accept: 'image/png,image/jpeg,image/webp', inputName: 'cardImage', inputAttributes: 'data-media-file="cardImage"' })}${fileDropzone({ title: 'Optional mobile listing crop', detail: 'Portrait 2:3 crop · JPG, PNG or WebP · up to 8 MB', accept: 'image/png,image/jpeg,image/webp', inputName: 'mobileCardImage', inputAttributes: 'data-media-file="mobileCardImage"' })}<div class="upload-note">Use a 16:9 banner; it crops to 4:3 on phones. Event cards stay horizontal on mobile: a narrow image sits on the left beside the event details. The mobile image crop is portrait 2:3. If you do not supply one, the desktop card image is center-cropped. Keep important faces and text near the center. Files preview in this browser only.</div><label>Event promotion video link<input name="promoVideoUrl" type="url" placeholder="YouTube or Vimeo link" autocomplete="off"></label>${fileDropzone({ title: 'Or drop a short video here', detail: 'MP4 or WebM · up to 50 MB for this local preview', accept: 'video/mp4,video/webm', inputName: 'promoVideoFile', inputAttributes: 'data-media-file="promoVideoFile"' })}<label>Media description for screen readers<input name="imageAlt" maxlength="150" placeholder="Describe the key information in the artwork"></label><div id="builder-media-preview" class="builder-media-preview" hidden></div><div class="upload-note">YouTube and Vimeo links can be embedded when supported. Direct video files preview locally only; live upload and video delivery need managed media storage.</div></section>
       <section class="builder-section"><div class="builder-section-heading"><span>04</span><div><h2>Event resources and project</h2><p>Add only the materials this event needs. Each can be shown before registration or released in the participant room later.</p></div></div><div class="resource-editor-intro"><strong>Event resources</strong><p>Examples include a Flow, PDF or Word worksheet, a video, a Drive link or step-by-step instructions. Each item can have its own description and release time.</p></div><input type="hidden" name="resourcesJson" value="[]"><div id="builder-resource-list" class="kit-editor-list"><p class="muted small">No event resources added. Add this section's materials only when the event needs them.</p></div><button class="button secondary builder-add-resource" type="button" data-action="add-kit-resource">${icon('plus')} Add an event resource</button><div class="upload-note">Files are selectable for this preview, but are not stored or uploaded. Production attachments need approved storage and permission checks.</div><label>Discussion prompt<input name="discussionPrompt" maxlength="180" placeholder="What question should participants consider before the event?"></label><label>Build challenge title<input name="challengeTitle" maxlength="100" placeholder="The practical creation task" required></label><label>Build challenge brief<textarea name="challengeBrief" rows="3" maxlength="400" placeholder="Describe what to make, share and ask for feedback on." required></textarea></label><label>Wistudi creation link<input name="wistudiLink" type="url" placeholder="Link to a Flow or template, when available" autocomplete="off"></label></section>
       <section class="builder-section"><div class="builder-section-heading"><span>05</span><div><h2>Team and permissions</h2><p>Assign people to specific events and rooms.</p></div></div><div class="permission-preview"><div><strong>Event builder</strong><span>Creates and edits this event</span></div><div><strong>Trainer / moderator</strong><span>Hosts the session and manages this room</span></div><p>Role invitations must be email-bound, time-limited and revocable. Invitation links are shown as a future service; no permissions are granted by this prototype.</p><button class="button secondary" type="button" disabled>Invite event team</button></div></section>
-    </div><aside class="builder-aside"><div class="builder-sticky"><div class="eyebrow">Event publishing checklist</div><h2>One event, one connected journey</h2><ol class="builder-checklist"><li>Public event page and share link</li><li>Registration and confirmation</li><li>Private participant room</li><li>Optional event resources</li><li>Build challenge and submission</li><li>Optional Wistudi publish step</li></ol><hr><p class="muted small">Only resources marked for public preview appear before registration. Zoom links and room-only resources stay in the participant room.</p><div class="actions builder-controls"><button type="button" class="button secondary" data-action="save-builder">Save draft in this tab</button><button type="button" class="button primary" data-action="preview-builder">Preview event</button><button type="button" class="button" disabled title="Publishing requires authenticated roles and a database">Publish event</button></div><p id="builder-save-status" class="muted small" role="status"></p></div></aside></div></form></div>`;
+    </div><aside class="builder-aside"><div class="builder-sticky"><div class="eyebrow">Event publishing checklist</div><h2>One event, one connected journey</h2><ol class="builder-checklist"><li>Public event page and share link</li><li>Registration and confirmation</li><li>Private participant room</li><li>Optional event resources</li><li>Build challenge and submission</li><li>Optional Wistudi publish step</li></ol><hr><p class="muted small">Only resources marked for public preview appear before registration. Zoom links and room-only resources stay in the participant room.</p><div class="actions builder-controls"><button type="button" class="button secondary" data-action="save-builder">Save shared draft</button><button type="button" class="button primary" data-action="preview-builder">Preview event</button><button type="button" class="button" disabled title="Publishing requires authenticated roles and a database">Publish event</button></div><p id="builder-save-status" class="muted small" role="status"></p></div></aside></div></form></div>`;
   return appShell({ view: 'home', content, mainClass: 'builder-main', crumb: 'Build an event' });
 }
 
@@ -714,7 +717,7 @@ function restoreBuilderDraft() {
     renderBuilderMediaPreview();
     if (Object.keys(values).length) {
       const status = document.querySelector('#builder-save-status');
-      if (status) status.textContent = 'A local draft is saved in this browser tab.';
+      if (status) status.textContent = 'A browser recovery copy is available. Save it as a shared draft to sync it.';
     }
   } catch { /* A damaged preview draft should not prevent the builder opening. */ }
 }
@@ -741,6 +744,138 @@ function resourcePreview(resource) {
   }
   const steps = resource.instructions.split(/\r?\n/).map(step => step.trim()).filter(Boolean);
   return `<article class="event-resource-preview"><div class="eyebrow">${e(resourceTypes[resource.type] || resourceTypes.other)} / ${e(phaseLabel[resource.availableFrom] || phaseLabel.upcoming)}</div><h3>${e(resource.title || 'Untitled resource')}</h3>${resource.description ? `<p class="muted">${e(resource.description)}</p>` : ''}${media.join('')}${steps.length ? `<h4>Instructions</h4><ol>${steps.map(step => `<li>${e(step)}</li>`).join('')}</ol>` : ''}</article>`;
+}
+
+function renderSharedDraftList(message = '') {
+  const container = document.querySelector('#builder-saved-drafts');
+  if (!container) return;
+  if (message) {
+    container.innerHTML = '<p class="muted small">' + e(message) + '</p>';
+    return;
+  }
+  if (!serverDrafts.length) {
+    container.innerHTML = '<p class="muted small">No shared drafts yet. Complete the event details below and save your first one.</p>';
+    return;
+  }
+  container.innerHTML = '<div class="builder-draft-list">' + serverDrafts.map(item => {
+    let schedule = 'Schedule not set';
+    let updated = 'Recently';
+    try {
+      schedule = new Intl.DateTimeFormat(undefined, {
+        dateStyle: 'medium', timeStyle: 'short', timeZone: item.timezone || 'UTC',
+      }).format(new Date(item.startsAt));
+    } catch { /* Keep the neutral schedule label if a timezone is unavailable. */ }
+    try { updated = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(item.updatedAt)); }
+    catch { /* Keep a neutral update label. */ }
+    return '<article class="builder-draft-row"><div class="builder-draft-copy"><strong>' + e(item.title) +
+      '</strong><span>' + e(item.subject) + ' / ' + e(item.topic) + ' · ' + e(schedule) +
+      '</span><small>Draft · updated ' + e(updated) +
+      '</small></div>' + button('Resume draft', 'load-builder-draft', 'data-id="' + e(item.id) + '"', 'button secondary') + '</article>';
+  }).join('') + '</div>';
+}
+
+async function loadSharedEventDrafts(force = false) {
+  const userId = serverIdentity?.id;
+  if (!userId || page !== 'builder' || !canBuildStudioEvents()) return;
+  if (!force && sharedDraftsForUser === userId) return sharedDraftsPromise;
+  sharedDraftsForUser = userId;
+  renderSharedDraftList('Loading shared drafts…');
+  sharedDraftsPromise = (async () => {
+    try {
+      const response = await fetch('/api/publisher-studio/events', {
+        method: 'GET', credentials: 'same-origin', headers: { Accept: 'application/json' },
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || 'Could not load shared drafts.');
+      serverDrafts = Array.isArray(payload.events) ? payload.events : [];
+      renderSharedDraftList();
+    } catch (error) {
+      sharedDraftsForUser = '';
+      renderSharedDraftList(error.message || 'Shared drafts are temporarily unavailable.');
+    } finally {
+      sharedDraftsPromise = null;
+    }
+  })();
+  return sharedDraftsPromise;
+}
+
+function populateSharedDraft(item) {
+  const form = document.querySelector('#event-builder-form');
+  if (!form) return;
+  for (const key of ['bannerImage', 'cardImage', 'mobileCardImage', 'promoVideoFile']) {
+    const previous = localPreviewUrls.get(key);
+    if (previous) URL.revokeObjectURL(previous);
+    localPreviewUrls.delete(key);
+  }
+  for (const [key, url] of [...localPreviewUrls]) {
+    if (key.startsWith('resource:')) { URL.revokeObjectURL(url); localPreviewUrls.delete(key); }
+  }
+  form.querySelectorAll('[data-media-file]').forEach(input => { input.value = ''; });
+  const values = {
+    eventId: item.id,
+    title: item.title,
+    summary: item.summary,
+    subject: item.subject,
+    topic: item.topic,
+    level: item.level,
+    audience: item.audience,
+    learningOutcomes: (item.learningOutcomes || []).join('\n'),
+    output: item.output,
+    startsAt: item.startsAtLocal,
+    timezone: item.timezone,
+    duration: String(item.duration),
+    trainer: item.trainer,
+    zoomUrl: item.zoomUrl,
+    promoVideoUrl: item.promoVideoUrl,
+    imageAlt: item.imageAlt,
+    discussionPrompt: item.discussionPrompt,
+    challengeTitle: item.challengeTitle,
+    challengeBrief: item.challengeBrief,
+    wistudiLink: item.wistudiLink,
+  };
+  for (const [name, value] of Object.entries(values)) {
+    const field = form.elements.namedItem(name);
+    if (field && field.type !== 'file' && typeof value === 'string') field.value = value;
+  }
+  renderKitEditor((item.resources || []).map(resource => ({ ...resource, key: resource.key })));
+  renderBuilderMediaPreview();
+  saveBuilderDraft(form);
+  const status = document.querySelector('#builder-save-status');
+  if (status) status.textContent = 'Shared draft loaded. Re-select any files you need to preview; uploaded files are not stored yet.';
+  form.scrollIntoView({ block: 'start', behavior: 'smooth' });
+}
+
+async function saveSharedEventDraft(form) {
+  if (!serverIdentity?.id || !canBuildStudioEvents()) {
+    throw new Error('Sign in with an Event Builder, Studio Admin or Wistudi Super Admin account.');
+  }
+  syncKitEditor();
+  const values = Object.fromEntries([...new FormData(form)].filter(([, value]) => typeof value === 'string'));
+  const payload = {
+    ...values,
+    duration: Number(values.duration),
+    learningOutcomes: String(values.learningOutcomes || '').split(/\r?\n/).map(item => item.trim()).filter(Boolean),
+    resources: readKitEditor(),
+  };
+  saveBuilderDraft(form);
+  const response = await fetch('/api/publisher-studio/events', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  let result = {};
+  try { result = await response.json(); } catch { /* Report the HTTP status below. */ }
+  if (!response.ok) throw new Error(result.error || 'Shared event draft could not be saved.');
+  const saved = result.event;
+  if (!saved?.id) throw new Error('The server did not return the saved event draft.');
+  const idField = form.elements.namedItem('eventId');
+  if (idField) idField.value = saved.id;
+  serverDrafts = Array.isArray(result.events) ? result.events : [saved];
+  sharedDraftsForUser = serverIdentity.id;
+  renderSharedDraftList();
+  renderKitEditor((saved.resources || []).map(resource => ({ ...resource, key: resource.key })));
+  return saved;
 }
 
 function previewBuilder() {
@@ -794,7 +929,7 @@ function renderBuilderDenied() {
   return appShell({
     view: 'home',
     crumb: 'Event builder',
-    content: '<section class="access-required"><div class="eyebrow">Event builder</div><h1>Event builder access is assigned by Wistudi</h1><p class="lead">Sign in with the email address assigned as a Wistudi Super Admin, Studio Admin or Event Builder. Event creation access is scoped to those roles.</p><p class="notice">This preview builder currently stores drafts in this browser. Shared event publishing is a later backend step.</p></section>',
+    content: '<section class="access-required"><div class="eyebrow">Event builder</div><h1>Event builder access is assigned by Wistudi</h1><p class="lead">Sign in with the email address assigned as a Wistudi Super Admin, Studio Admin or Event Builder. Event creation access is scoped to those roles.</p><p class="notice">Shared event drafts save to the Publisher Studio database. Uploaded media, public event publishing, registration and team invitations still need their later integrations.</p></section>',
   });
 }
 
@@ -810,7 +945,7 @@ function render(focus = false) {
   document.body.dataset.studioTheme = theme;
   document.body.dataset.studioView = studioView;
   restoreDrafts();
-  if (page === 'builder') restoreBuilderDraft();
+  if (page === 'builder') { restoreBuilderDraft(); if (canBuildStudioEvents()) loadSharedEventDrafts(); }
   if (page === 'studio') {
     const params = new URLSearchParams(location.search);
     const contextId = params.get('context');
@@ -856,7 +991,7 @@ function openPublicResource(id) {
   modal(resource.title, `<div class="dialog-content"><div class="tags">${tag(resource.label, 'teal')}${tag('Available before the event')}</div><p class="muted">${e(resource.description)}</p>${externalPreview}${sections.length ? `<div class="resource-outline">${sections.map(([title, body], index) => `<section><span class="outline-number">0${index + 1}</span><div><h3>${e(title)}</h3><p>${e(body)}</p></div></section>`).join('')}</div>` : ''}<p class="notice">You can discuss and adapt this resource in the participant room after registering.</p></div>`);
 }
 
-document.addEventListener('click', event => {
+document.addEventListener('click', async event => {
   const target = event.target.closest('[data-action]');
   if (!target) return;
   const { action, id, value } = target.dataset;
@@ -961,10 +1096,23 @@ document.addEventListener('click', event => {
     document.querySelector('[data-action="add-kit-resource"]')?.focus({ preventScroll: true });
   }
   if (action === 'save-builder') {
-    const saved = saveBuilderDraft();
+    const form = document.querySelector('#event-builder-form');
+    if (!form || !form.reportValidity()) return;
     const status = document.querySelector('#builder-save-status');
-    if (status) status.textContent = saved ? 'Draft saved in this browser tab.' : 'Could not save this draft in browser storage.';
-    notify(saved ? 'Event draft saved in this browser tab.' : 'Browser storage is unavailable; this draft was not saved.');
+    const label = target.textContent;
+    target.disabled = true; target.textContent = 'Saving…';
+    try {
+      await saveSharedEventDraft(form);
+      if (status) status.textContent = 'Shared draft saved. Uploaded media files remain local previews.';
+      notify('Shared event draft saved.');
+    } catch (error) {
+      if (status) status.textContent = 'Shared save failed. ' + error.message + ' Your browser recovery copy was kept.';
+      notify('Shared draft was not saved. ' + error.message);
+    } finally { target.disabled = false; target.textContent = label; }
+  }
+  if (action === 'load-builder-draft') {
+    const item = serverDrafts.find(draft => draft.id === id);
+    if (item) { populateSharedDraft(item); notify('Shared event draft opened.'); }
   }
   if (action === 'copy-share') {
     const url = target.dataset.url;
@@ -1110,7 +1258,7 @@ document.addEventListener('drop', event => {
   } catch { notify('This browser cannot attach dropped files here. Use Browse to choose the file.'); }
 });
 
-document.addEventListener('submit', event => {
+document.addEventListener('submit', async event => {
   const form = event.target;
   if (!(form instanceof HTMLFormElement)) return;
   const calendarResult = handleCalendarSubmit(form, state.calendar);
@@ -1159,10 +1307,10 @@ document.addEventListener('submit', event => {
       document.querySelector(`#thread-${CSS.escape(targetId)} .chat-replies`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       notify('Reply submitted. Shared Studio sync is running.');
     } else if (form.id === 'event-builder-form') {
-      const saved = saveBuilderDraft(form);
+      await saveSharedEventDraft(form);
       const status = document.querySelector('#builder-save-status');
-      if (status) status.textContent = saved ? 'Draft saved in this browser tab.' : 'Could not save this draft in browser storage.';
-      notify(saved ? 'Event draft saved in this browser tab.' : 'Browser storage is unavailable; this draft was not saved.');
+      if (status) status.textContent = 'Shared draft saved. Uploaded media files remain local previews.';
+      notify('Shared event draft saved.');
     }
   } catch (error) {
     const output = form.querySelector('.form-error');
