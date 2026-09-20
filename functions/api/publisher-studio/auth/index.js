@@ -43,6 +43,7 @@ async function sendCode(env, email, code) {
 function profilePayload(user, roles, membership) {
   return {
     id: user.id,
+    email: user.email,
     displayName: user.display_name,
     initials: String(user.display_name || '?').trim().split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase(),
     roles: roles.map(item => ({
@@ -155,7 +156,7 @@ export async function onRequestPost(context) {
         if (!sent) return json({ ok: false, error: 'The code email could not be sent. Try again shortly.' }, 503);
       } else {
         await db.prepare('UPDATE studio_auth_challenges SET delivery_status = ? WHERE id = ?')
-          .bind('sent', challengeId).run();
+          .bind('suppressed', challengeId).run();
       }
       return json({ ok: true, challengeId, expiresInSeconds: 600, message: 'If the address can use this option, a code has been sent.' });
     } catch {
@@ -249,7 +250,7 @@ export async function onRequestPost(context) {
         ok: true,
         authenticated: true,
         user: {
-          id: user.id, displayName: user.display_name, initials,
+          id: user.id, email: user.email, displayName: user.display_name, initials,
           roles: roles.results || [], studioMember: membership?.status === 'active',
         },
       }, 200, { [SESSION_COOKIE_HEADER]: session.cookie });
