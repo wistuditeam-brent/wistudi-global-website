@@ -292,7 +292,7 @@ export function loadState(storage) {
       || !Object.entries(value.phaseByEvent).every(([eventId, phase]) => events.some(item => item.id === eventId) && ['upcoming', 'live', 'post_session'].includes(phase))
       || !Array.isArray(value.previewEventIds) || !value.previewEventIds.every(eventId => events.some(item => item.id === eventId)) || new Set(value.previewEventIds).size !== value.previewEventIds.length
       || !Array.isArray(value.joinedChallenges) || !value.joinedChallenges.every(challengeId => challenges.some(challengeItem => challengeItem.id === challengeId)) || new Set(value.joinedChallenges).size !== value.joinedChallenges.length
-      || !(value.profile === null || (string(value.profile?.id) && string(value.profile?.displayName) && string(value.profile?.avatarSeed) && value.profile?.consentToStudio === true))
+      || !(value.profile === null || (string(value.profile?.id) && string(value.profile?.displayName) && string(value.profile?.avatarSeed) && typeof value.profile?.consentToStudio === 'boolean'))
       || !Array.isArray(value.questions) || !value.questions.every(item => reply(item) && context(item.contextId) && Number.isInteger(item.votes) && item.votes >= 0 && string(item.createdAt) && (item.answer === null || string(item.answer)))
       || !Array.isArray(value.threads) || !value.threads.every(item => reply(item) && string(item.title) && Object.hasOwn(contributionKinds, item.kind) && context(item.contextId) && Array.isArray(item.replies) && item.replies.every(reply)
         && Array.isArray(item.attachments) && item.attachments.every(file => file && string(file.id) && string(file.name) && string(file.type) && Number.isFinite(file.size) && file.size >= 0)
