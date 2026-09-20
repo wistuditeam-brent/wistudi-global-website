@@ -68,7 +68,6 @@ function ensureDialog() {
     document.body.appendChild(dialog);
   }
   dialog.addEventListener('submit', handleSubmit, true);
-  dialog.addEventListener('click', handleDialogClick);
   dialog.addEventListener('close', function() {
     if (dialog.dataset.view === 'team') {
       currentPanel = 'access';
@@ -90,6 +89,9 @@ function headerMarkup() {
 
 function mountHeader() {
   document.querySelectorAll('[data-identity-mount]').forEach(function(node) {
+    const key = currentUser ? 'user:' + currentUser.id + ':' + currentUser.displayName : 'guest';
+    if (node.dataset.identityState === key) return;
+    node.dataset.identityState = key;
     node.innerHTML = headerMarkup();
   });
 }
@@ -334,7 +336,7 @@ async function handleAction(action, target) {
   else if (action === 'mode-signin') { authMode = 'sign_in'; challengeId = ''; renderAuth(''); }
   else if (action === 'back-to-email') { challengeId = ''; renderAuth(''); }
   else if (action === 'team-tab') { currentPanel = target.dataset.tab || 'access'; dialog.innerHTML = teamMarkup(''); }
-  else if (action === 'participant-view') { closeDialog(); location.href = '/publisher-studio/?view=home'; }
+  else if (action === 'participant-view') { closeDialog(); history.pushState(history.state, '', '/publisher-studio/?view=home'); window.dispatchEvent(new PopStateEvent('popstate')); }
   else if (action === 'sign-out') {
     try { await api(authUrl, 'POST', { action: 'sign_out' }); } catch { /* Clear the client state even if the server session expired. */ }
     currentUser = null; accessState = null; latestInvitationLink = '';
