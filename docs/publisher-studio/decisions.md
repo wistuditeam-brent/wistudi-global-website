@@ -508,3 +508,98 @@ Reason:
   keeping text inside individual panels readable.
 - Removing repeated event titles and the duplicate resource list from the context
   rail keeps the room focused; Event Resources remains the full source of truth.
+
+
+---
+
+## Publisher Studio UX Consolidation / 2026-09-21
+
+### Event Builder Is a Real Four-Step Flow
+
+Decision: replace the prototype's one-page event form with four functional steps:
+
+1. Details
+2. Schedule
+3. Room and team
+4. Review and publish
+
+Reason: the long page is too dense and the existing headings imply navigation that does not exist.
+
+### Challenge Authoring Moves to Build
+
+Decision: remove full challenge authoring from Event Builder. Use the event's role-aware Build destination for challenge creation and management.
+
+Reason:
+
+- Event setup is already dense.
+- Challenges may be created/released before, during or after an event.
+- Multiple challenges per event are required.
+- Trainers need to manage participation and submissions after publication.
+
+### Multiple Challenges and Release Timing
+
+Decision: one event may own multiple Build challenges. Each challenge can release Before event, During event, After event or at a custom time.
+
+Reason: workshops may use alternative tasks, staged tasks or follow-up work.
+
+### Questions and Chat Stay Separate
+
+Decision:
+
+- Questions = structured host/trainer Q&A with votes and answered state.
+- Chat = open event conversation.
+
+Participants cannot directly answer trainer Questions. Event Lead and Co-trainer can answer; Moderator alone cannot.
+
+Reason: trainer questions should remain prioritized and easy to scan rather than becoming another chat thread.
+
+### Question Voting and Answer Feedback
+
+Decision: open Questions sort by vote count. A participant's active vote uses a clear green selected state. After an answer, retain vote count as context and shift interaction to Helpful / Need more clarification.
+
+Reason: votes prioritize what the audience wants answered, while post-answer feedback measures whether the response resolved the issue.
+
+### Public Event Overview Simplification
+
+Decision:
+
+- remove the redundant second event header;
+- use a shallow ~32:9 banner;
+- place event facts in a compact grid;
+- pair optional 16:9 video with About this event;
+- remove What happens next and the separate room-preview card;
+- use a stateful registration/access card in the top-right.
+
+### Registration Is Not Account Creation
+
+Decision: event registration stays lightweight. A Wistudi account is not required just to reserve a place. Protected interactive access may use verified identity later; Wistudi account connection is prompted when platform creation/remix/publish capabilities are needed.
+
+### Event Activity Preview
+
+Decision: event creator can optionally expose a read-only Questions/Chat preview on the public event page. The primary visitor action is Join the conversation; registration/access gating happens after click.
+
+### Event Room Is an Operational Dashboard
+
+Decision: Room shows current stage, available resources, compact Build state and recent activity. It does not duplicate Event Overview content or include a Share this event marketing section.
+
+Keep event status/countdown consistently in the right rail.
+
+### Trainer Bio Is a Separate Future Profile Feature
+
+Decision: do not invent trainer biography text from event data. Support external hosts and later introduce a reusable person/profile record.
+
+### Submission Versus Publication
+
+Decision: challenge submission is event participation, not automatic open-web publication.
+
+Default visibility: Event only.
+Optional wider visibility: Public in Studio.
+Underlying Wistudi content keeps its own platform publication/share state.
+
+### Wistudi Creation Handoff
+
+Decision: after a participant joins a Build challenge, provide direct creation routes such as Build a Flow in Wistudi, Create an XP Video and Use starter template where applicable. Manual pasted links are an interim fallback, not the intended final UX.
+
+### Community Creations Direction
+
+Decision: event-visible challenge submissions should appear in the challenge itself rather than requiring a separate mandatory trainer submission room. Public-in-Studio creations may later feed a searchable Community creations surface.
