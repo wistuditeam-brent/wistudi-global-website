@@ -693,12 +693,13 @@ function filteredResources() {
 }
 
 const BUILDER_DRAFT_KEY = `${STORAGE_KEY}.event-builder-draft`;
+const builderDraftStorageKey = () => `${BUILDER_DRAFT_KEY}.${serverIdentity?.id || 'guest'}`;
 
 function saveBuilderDraft(form = document.querySelector('#event-builder-form')) {
   if (!form) return false;
   syncKitEditor();
   const values = Object.fromEntries([...new FormData(form)].filter(([, value]) => typeof value === 'string'));
-  try { storage?.setItem(BUILDER_DRAFT_KEY, JSON.stringify(values)); return Boolean(storage); }
+  try { storage?.setItem(builderDraftStorageKey(), JSON.stringify(values)); return Boolean(storage); }
   catch { return false; }
 }
 
@@ -706,7 +707,7 @@ function restoreBuilderDraft() {
   const form = document.querySelector('#event-builder-form');
   if (!form) return;
   try {
-    const values = JSON.parse(storage?.getItem(BUILDER_DRAFT_KEY) || '{}');
+    const values = JSON.parse(storage?.getItem(builderDraftStorageKey()) || '{}');
     for (const [name, value] of Object.entries(values)) {
       const field = form.elements.namedItem(name);
       if (field && field.type !== 'file' && typeof value === 'string') field.value = value;
@@ -1127,7 +1128,7 @@ document.addEventListener('click', async event => {
       });
       renderKitEditor([]);
       renderBuilderMediaPreview();
-      try { storage?.removeItem(BUILDER_DRAFT_KEY); } catch { /* A fresh shared draft can still be started. */ }
+      try { storage?.removeItem(builderDraftStorageKey()); storage?.removeItem(BUILDER_DRAFT_KEY); } catch { /* A fresh shared draft can still be started. */ }
       const status = document.querySelector('#builder-save-status');
       if (status) status.textContent = 'New event draft. Save it to create a shared draft.';
       form.scrollIntoView({ block: 'start', behavior: 'smooth' });
@@ -1170,7 +1171,7 @@ document.addEventListener('click', async event => {
     localPreviewUrls.clear();
     for (const url of chatObjectUrls.values()) URL.revokeObjectURL(url);
     chatObjectUrls.clear(); pendingUploads.clear(); relatedByComposer.clear(); expandedThreads.clear(); openReplyForms.clear();
-    try { storage?.removeItem(STORAGE_KEY); storage?.removeItem(BUILDER_DRAFT_KEY); } catch { /* In-memory reset still succeeds. */ }
+    try { storage?.removeItem(STORAGE_KEY); storage?.removeItem(builderDraftStorageKey()); storage?.removeItem(BUILDER_DRAFT_KEY); } catch { /* In-memory reset still succeeds. */ }
     dialog.close(); persist(); render(); notify('Demo reset. You are back to the sample content.');
   }
 });
