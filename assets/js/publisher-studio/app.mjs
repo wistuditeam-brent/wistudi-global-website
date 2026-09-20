@@ -54,6 +54,7 @@ let dialogMode = null;
 let toastTimer;
 let calendarSearchTimer;
 let theme = 'light';
+let serverIdentity = null;
 const themeKey = 'wistudi.publisher-studio.theme';
 const drafts = new Map();
 const localPreviewUrls = new Map();
@@ -92,6 +93,20 @@ const selectedPhase = () => state.phaseByEvent[selectedEvent.id] || 'upcoming';
 const phaseOrder = { upcoming: 0, live: 1, post_session: 2 };
 const phaseLabel = { upcoming: 'Before the event', live: 'During the live event', post_session: 'After the live event' };
 const resourcePhase = item => item.availableFrom || 'upcoming';
+function scopedRole(role, eventId = selectedEvent.id) {
+  const roles = serverIdentity?.roles || [];
+  return roles.some(item =>
+    (item.role === 'platform_super_admin' && item.scopeType === 'platform' && item.scopeId === 'wistudi')
+    || (item.role === 'studio_admin' && item.scopeType === 'studio' && item.scopeId === 'publisher-studio')
+    || (item.role === role && item.scopeType === 'event' && item.scopeId === eventId)
+  );
+}
+function canModerateEvent(eventId = selectedEvent.id) {
+  return scopedRole('event_lead', eventId) || scopedRole('event_moderator', eventId);
+}
+function canAnswerEvent(eventId = selectedEvent.id) {
+  return canModerateEvent(eventId) || scopedRole('event_co_trainer', eventId);
+}
 const resourceIsAvailable = item => (phaseOrder[selectedPhase()] ?? 0) >= (phaseOrder[resourcePhase(item)] ?? 0);
 
 function notify(message) {
@@ -475,7 +490,29 @@ function threadCard(thread) {
   const visibleReplies = expanded ? replies : replies.slice(0, 2);
   const isLiked = state.threadHearts.includes(thread.id);
   const heartCount = (thread.hearts || 0) + Number(isLiked);
-  return `<article class="thread-card" id="thread-${e(thread.id)}" data-thread-id="${e(thread.id)}">${chatMessage(thread, { rootMessage: true })}${relatedContextLinks(thread)}<div class="thread-footer"><button class="heart-button ${isLiked ? 'is-liked' : ''}" data-action="heart" data-id="${e(thread.id)}" aria-pressed="${isLiked}" aria-label="${isLiked ? 'Remove heart' : 'Heart'} this message, ${heartCount} hearts">${icon('heart')}<span>${heartCount}</span></button><button class="text-link" data-action="reply-compose" data-id="${e(thread.id)}">${icon('chat')} ${replies.length} ${replies.length === 1 ? 'reply' : 'replies'}</button><button class="text-link" data-action="share-thread" data-id="${e(thread.id)}" aria-label="Share this event with someone">${icon('share')} Share</button></div>${replies.length ? `<div class="chat-replies" aria-label="Replies to ${e(thread.title)}">${visibleReplies.map(reply => chatMessage(reply)).join('')}${replies.length > 2 ? `<button class="read-replies" data-action="read-replies" data-id="${e(thread.id)}">${expanded ? 'Show fewer replies' : `Read ${replies.length - 2} more ${replies.length - 2 === 1 ? 'reply' : 'replies'}`}</button>` : ''}</div>` : ''}${openReplyForms.has(thread.id) ? chatComposer(`reply-${thread.id}`, { replyTo: thread.id }) : ''}</article>`;
+  const realThread = !String(thread.id).startsWith('demo-');
+  const moderation = realThread && canModerateEvent()
+    ? '<button class="text-button moderation-action" data-action="moderate-thread" data-id="' + e(thread.id) + '">Hide conversation</button>'
+    : '';
+  const replyMarkup = replies.length
+    ? '<div class="chat-replies" aria-label="Replies to ' + e(thread.title) + '">' +
+      visibleReplies.map(reply => chatMessage(reply) +
+        (realThread && canModerateEvent() ? '<button class="text-button moderation-action" data-action="moderate-reply" data-id="' + e(reply.id) + '">Hide reply</button>' : '')
+      ).join('') +
+      (replies.length > 2 ? '<button class="read-replies" data-action="read-replies" data-id="' + e(thread.id) + '">' +
+        (expanded ? 'Show fewer replies' : 'Read ' + (replies.length - 2) + ' more ' + (replies.length - 2 === 1 ? 'reply' : 'replies')) + '</button>' : '') +
+      '</div>'
+    : '';
+  return '<article class="thread-card" id="thread-' + e(thread.id) + '" data-thread-id="' + e(thread.id) + '">' +
+    chatMessage(thread, { rootMessage: true }) + relatedContextLinks(thread) +
+    '<div class="thread-footer"><button class="heart-button ' + (isLiked ? 'is-liked' : '') +
+    '" data-action="heart" data-id="' + e(thread.id) + '" aria-pressed="' + isLiked + '" aria-label="' +
+    (isLiked ? 'Remove heart' : 'Heart') + ' this message, ' + heartCount + ' hearts">' + icon('heart') +
+    '<span>' + heartCount + '</span></button><button class="text-link" data-action="reply-compose" data-id="' +
+    e(thread.id) + '">' + icon('chat') + ' ' + replies.length + ' ' + (replies.length === 1 ? 'reply' : 'replies') +
+    '</button><button class="text-link" data-action="share-thread" data-id="' + e(thread.id) +
+    '" aria-label="Share this event with someone">' + icon('share') + ' Share</button>' + moderation + '</div>' +
+    replyMarkup + (openReplyForms.has(thread.id) ? chatComposer('reply-' + thread.id, { replyTo: thread.id }) : '') + '</article>';
 }
 
 function renderRelatedContextSuggestion(form, body) {
@@ -588,7 +625,22 @@ function panelHeading(title, description, action = '') {
 }
 
 function questionCard(question) {
-  return `<article class="question-card" id="question-${e(question.id)}"><div class="question-body"><div class="person-line">${person(question.author)}<div><strong>${e(question.author)}</strong><span class="muted small">${e(contextFor(question.contextId).title)}</span></div>${question.answer ? tag('Answered', 'teal') : tag('Open')}</div><p>${e(question.body)}</p>${question.answer ? `<div class="trainer-answer"><span class="eyebrow">Trainer answer / sample</span><p>${e(question.answer)}</p></div>` : ''}<button type="button" class="vote-button" data-action="vote" data-id="${question.id}" aria-pressed="${state.votes.includes(question.id)}" aria-label="I want this answered too: ${e(question.body)}">${icon('up')}<strong>${voteCount(state, question)}</strong><span>I want this answered too</span></button></div></article>`;
+  const realQuestion = !String(question.id).startsWith('demo-');
+  const answerForm = realQuestion && canAnswerEvent() && !question.answer
+    ? '<form class="trainer-answer-form" data-studio-action="question.answer" data-id="' + e(question.id) + '"><label>Trainer answer<textarea name="answer" rows="2" maxlength="2000" required></textarea></label><button class="button secondary" type="submit">Post answer</button></form>'
+    : '';
+  const moderation = realQuestion && canModerateEvent()
+    ? '<button type="button" class="text-button moderation-action" data-action="moderate-question" data-id="' + e(question.id) + '">Hide question</button>'
+    : '';
+  return '<article class="question-card" id="question-' + e(question.id) + '"><div class="question-body"><div class="person-line">' +
+    person(question.author) + '<div><strong>' + e(question.author) + '</strong><span class="muted small">' +
+    e(contextFor(question.contextId).title) + '</span></div>' + (question.answer ? tag('Answered', 'teal') : tag('Open')) +
+    '</div><p>' + e(question.body) + '</p>' +
+    (question.answer ? '<div class="trainer-answer"><span class="eyebrow">Trainer answer</span><p>' + e(question.answer) + '</p></div>' : '') +
+    '<button type="button" class="vote-button" data-action="vote" data-id="' + e(question.id) + '" aria-pressed="' +
+    state.votes.includes(question.id) + '" aria-label="I want this answered too: ' + e(question.body) + '">' +
+    icon('up') + '<strong>' + voteCount(state, question) + '</strong><span>I want this answered too</span></button>' +
+    answerForm + moderation + '</div></article>';
 }
 
 function renderPanel() {
@@ -600,7 +652,7 @@ function renderPanel() {
     case 'challenge':
       const submissions = state.submissions.filter(item => item.challengeId === selectedChallenge.id);
       const joined = state.joinedChallenges.includes(selectedChallenge.id);
-      return `${panelHeading('The build challenge', 'A small, useful step from learning to creating.')}<section class="challenge-brief"><span class="challenge-number">01</span><div>${tag('Build', 'teal')}<h2>${e(selectedChallenge.title)}</h2><p>${e(selectedChallenge.description)}</p><p class="muted">${e(selectedEvent.output)}</p>${button(joined ? `${icon('check')} Taking part (demo)` : `${icon('plus')} I'll take part`, 'join-challenge', `aria-pressed="${joined}"`, 'button primary')}</div></section><section class="section-block"><h2>Share your version</h2><p class="muted">For this preview, submit a Wistudi Flow or other secure HTTPS link. File uploads, link metadata previews and public publishing are not connected.</p><form id="submission-form" class="stack-form"><label>Creation title<input name="title" maxlength="120" placeholder="Give your activity a name" required></label><label>What did you create?<textarea name="description" maxlength="2000" rows="3" required></textarea></label><label>Wistudi content or creation link<input type="text" inputmode="url" name="url" placeholder="https://..." required></label><label>What would you like help with? <span class="muted">(optional)</span><textarea name="help" maxlength="1000" rows="2"></textarea></label><p class="form-error" role="alert" hidden></p><div class="actions"><button class="button primary" type="submit">Submit demo creation ${icon('arrow')}</button><span class="muted small">Saved in this browser only</span></div></form></section><section class="section-block"><h2>Your work in this room</h2>${submissions.length ? submissions.map(item => `<article class="submission-card" id="submission-${e(item.id)}">${tag('Pending review (demo)')}<h3>${e(item.title)}</h3><p>${e(item.description)}</p>${item.help ? `<p class="muted">Feedback requested: ${e(item.help)}</p>` : ''}<a class="text-link" href="${e(item.url)}" target="_blank" rel="noopener noreferrer nofollow">Open submitted link ${icon('arrow')}</a></article>`).join('') : '<div class="empty-state"><p>Share a work-in-progress for feedback. Public showcase approval is a separate step.</p></div>'}</section>`;
+      return `${panelHeading('The build challenge', 'A small, useful step from learning to creating.')}<section class="challenge-brief"><span class="challenge-number">01</span><div>${tag('Build', 'teal')}<h2>${e(selectedChallenge.title)}</h2><p>${e(selectedChallenge.description)}</p><p class="muted">${e(selectedEvent.output)}</p>${button(joined ? `${icon('check')} Taking part (demo)` : `${icon('plus')} I'll take part`, 'join-challenge', `aria-pressed="${joined}"`, 'button primary')}</div></section><section class="section-block"><h2>Share your version</h2><p class="muted">For this preview, submit a Wistudi Flow or other secure HTTPS link. File uploads, link metadata previews and public publishing are not connected.</p><form id="submission-form" class="stack-form"><label>Creation title<input name="title" maxlength="120" placeholder="Give your activity a name" required></label><label>What did you create?<textarea name="description" maxlength="2000" rows="3" required></textarea></label><label>Wistudi content or creation link<input type="text" inputmode="url" name="url" placeholder="https://..." required></label><label>What would you like help with? <span class="muted">(optional)</span><textarea name="help" maxlength="1000" rows="2"></textarea></label><p class="form-error" role="alert" hidden></p><div class="actions"><button class="button primary" type="submit">Submit demo creation ${icon('arrow')}</button><span class="muted small">Saved in this browser only</span></div></form></section><section class="section-block"><h2>Your work in this room</h2>${submissions.length ? submissions.map(item => `<article class="submission-card" id="submission-${e(item.id)}">${tag(item.moderationStatus === 'approved' ? 'Approved' : item.moderationStatus === 'rejected' ? 'Needs changes' : 'Pending review')}<h3>${e(item.title)}</h3><p>${e(item.description)}</p>${item.help ? `<p class="muted">Feedback requested: ${e(item.help)}</p>` : ''}<a class="text-link" href="${e(item.url)}" target="_blank" rel="noopener noreferrer nofollow">Open submitted link ${icon('arrow')}</a>${canModerateEvent() && !String(item.id).startsWith('demo-') && item.moderationStatus === 'pending' ? `<div class="identity-inline-actions"><button class="button secondary" data-action="review-submission" data-id="${e(item.id)}" data-status="approved">Approve</button><button class="button secondary" data-action="review-submission" data-id="${e(item.id)}" data-status="rejected">Request changes</button></div>` : ''}</article>`).join('') : '<div class="empty-state"><p>Share a work-in-progress for feedback. Public showcase approval is a separate step.</p></div>'}</section>`;
     case 'workbench': {
       const threads = state.threads.filter(item => contextFor(item.contextId).workshopId === selectedEvent.id).filter(item => threadFilter === 'all' || item.kind === threadFilter);
       const roomControls = state.eventControls[selectedEvent.id] || { roomOpen: true, features: { chat: true } };
@@ -804,6 +856,10 @@ document.addEventListener('click', event => {
     if (calendarResult.message) notify(calendarResult.message);
     return;
   }
+  if (action === 'moderate-question') mirrorRemote('question.hide', { questionId: id });
+  if (action === 'moderate-thread') mirrorRemote('thread.hide', { threadId: id });
+  if (action === 'moderate-reply') mirrorRemote('reply.hide', { replyId: id });
+  if (action === 'review-submission') mirrorRemote('submission.review', { submissionId: id, status: target.dataset.status, note: '' });
   if (action === 'resource') openResource(id);
   if (action === 'public-resource') openPublicResource(id);
   if (action === 'new-thread') document.querySelector('#thread-form-body')?.focus({ preventScroll: false });
@@ -1052,7 +1108,10 @@ document.addEventListener('submit', event => {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(form));
   try {
-    if (form.id === 'registration-form') {
+    if (form.dataset.studioAction === 'question.answer') {
+      mirrorRemote('question.answer', { questionId: form.dataset.id, answer: data.answer });
+      notify('Trainer answer submitted.');
+    } else if (form.id === 'registration-form') {
       const optedIntoStudio = data.studioConsent === 'on';
       registerDemo(state, data.displayName, optedIntoStudio, selectedEvent.id); persist(); drafts.delete(form.id);
       if (optedIntoStudio && state.profile && window.StudioIdentity) window.StudioIdentity.openJoin({ displayName: data.displayName, email: data.email });
@@ -1165,6 +1224,7 @@ window.addEventListener('hashchange', () => {
 render();
 renderedHref = location.href;
 initIdentity({ onIdentity: function(user) {
+  serverIdentity = user;
   state.profile = user ? { id: user.id, displayName: user.displayName, avatarSeed: user.id, consentToStudio: Boolean(user.studioMember) } : null;
   persist();
   render(false);
