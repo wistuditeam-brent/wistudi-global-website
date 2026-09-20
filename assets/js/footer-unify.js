@@ -14,6 +14,8 @@
           <a href="/resources/">Resources</a>
           <a href="/contact/">Contact</a>
           <a href="/terms-and-conditions/">Terms and Conditions</a>
+          <a href="/privacy/">Privacy Policy</a>
+          <a href="/cookie-policy/">Cookie Policy</a>
           <a href="/credit-usage-policy/">Credit Usage Policy</a>
         </div>
         <div class="ws-footer-contact">
