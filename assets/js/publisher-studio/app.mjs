@@ -1043,13 +1043,13 @@ document.addEventListener('submit', event => {
     if (form.id === 'registration-form') {
       const optedIntoStudio = data.studioConsent === 'on';
       registerDemo(state, data.displayName, optedIntoStudio, selectedEvent.id); persist(); drafts.delete(form.id);
-      if (optedIntoStudio && state.profile) mirrorRemote('profile.upsert');
+      if (optedIntoStudio && state.profile && window.StudioIdentity) window.StudioIdentity.openJoin({ displayName: data.displayName, email: data.email });
       document.querySelector('#registration-panel').innerHTML = `<div class="registration-success">${icon('check')}<h2 tabindex="-1">Preview registration complete</h2><p>This is a local preview only. No booking was made and no confirmation email was sent.</p>${optedIntoStudio && state.profile ? `<div class="person-line">${person(state.profile.displayName, state.profile.avatarSeed)}<strong>${e(state.profile.displayName)}</strong></div><p>Your sample Studio profile is available in this browser tab.</p>` : '<p>You did not opt into a Studio profile. The preview event is listed in My events for this browser tab only.</p>'}<a class="button primary" href="${eventUrl(selectedEvent)}room/">Enter this event room ${icon('arrow')}</a><a class="text-link" href="${base}?view=my-events">View My events ${icon('arrow')}</a></div>`;
       document.querySelector('.registration-success h2').focus();
     } else if (form.id === 'question-form') {
       askQuestion(state, data.body, data.contextId); questionFilter = 'all'; drafts.delete(form.id); persist(); render();
       mirrorRemote('question.create', { text: data.body, contextId: data.contextId });
-      document.querySelector('#question-body').focus({ preventScroll: true }); notify('Demo question added. It has not been sent to a trainer.');
+      document.querySelector('#question-body').focus({ preventScroll: true }); notify('Question submitted. Shared Studio sync is running.');
     } else if (form.id === 'submission-form') {
       submitBuild(state, data, selectedChallenge.id); drafts.delete(form.id); persist(); render();
       mirrorRemote('submission.create', { challengeId: selectedChallenge.id, title: data.title, description: data.description, url: data.url, help: data.help });
@@ -1063,7 +1063,7 @@ document.addEventListener('submit', event => {
       nextChatContext = thread.contextId; relatedByComposer.delete(form.id); threadFilter = 'all'; drafts.delete(form.id); persist(); render();
       document.querySelector(`#thread-${CSS.escape(thread.id)}`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       document.querySelector('#thread-form-body')?.focus({ preventScroll: true });
-      notify('Your demo message is now in this browser’s event room.');
+      notify('Conversation submitted. Shared Studio sync is running.');
     } else if (form.dataset.chatForm === 'reply') {
       const attachments = storeChatAttachments(form.id);
       const targetId = form.dataset.replyTo;
@@ -1071,7 +1071,7 @@ document.addEventListener('submit', event => {
       if (!String(targetId).startsWith('demo-')) mirrorRemote('thread.reply', { threadId: targetId, text: data.body, attachments });
       openReplyForms.delete(targetId); expandedThreads.add(targetId); drafts.delete(form.id); persist(); render();
       document.querySelector(`#thread-${CSS.escape(targetId)} .chat-replies`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      notify('Demo reply added in this browser.');
+      notify('Reply submitted. Shared Studio sync is running.');
     } else if (form.id === 'event-builder-form') {
       const saved = saveBuilderDraft(form);
       const status = document.querySelector('#builder-save-status');
