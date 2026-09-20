@@ -1,6 +1,8 @@
 (()=>{'use strict';
 const DOCS=[
   {path:'/terms-and-conditions/',label:'Terms and Conditions'},
+  {path:'/privacy/',label:'Privacy Policy'},
+  {path:'/cookie-policy/',label:'Cookie Policy'},
   {path:'/credit-usage-policy/',label:'Credit Usage Policy'},
   {path:'/template-publishing-remix-terms/',label:'Template Publishing & Remix Terms'}
 ];
