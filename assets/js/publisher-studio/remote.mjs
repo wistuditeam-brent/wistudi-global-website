@@ -3,27 +3,25 @@ const endpoint = '/api/publisher-studio/state';
 async function request(method, payload = null, query = '') {
   const response = await fetch(endpoint + query, {
     method,
+    credentials: 'same-origin',
     headers: payload ? { 'Content-Type': 'application/json' } : undefined,
     body: payload ? JSON.stringify(payload) : undefined,
     cache: 'no-store',
   });
   const data = await response.json().catch(() => ({ ok: false, error: 'Invalid API response.' }));
-  if (!response.ok || !data.ok) throw new Error(data.error || 'Studio API request failed.');
+  if (!response.ok || !data.ok) {
+    const error = new Error(data.error || 'Studio API request failed.');
+    error.status = response.status;
+    throw error;
+  }
   return data;
 }
 
-const userPayload = profile => profile ? {
-  id: profile.id,
-  displayName: profile.displayName,
-  avatarSeed: profile.avatarSeed,
-} : null;
-
-export async function loadRemoteEvent(eventId, profile) {
+export async function loadRemoteEvent(eventId) {
   const params = new URLSearchParams({ eventId });
-  if (profile?.id) params.set('userId', profile.id);
-  return request('GET', null, `?${params}`);
+  return request('GET', null, '?' + params.toString());
 }
 
-export async function sendRemoteAction(eventId, profile, action, payload = {}) {
-  return request('POST', { eventId, user: userPayload(profile), action, ...payload });
+export async function sendRemoteAction(eventId, _profile, action, payload = {}) {
+  return request('POST', Object.assign({ eventId, action }, payload));
 }
