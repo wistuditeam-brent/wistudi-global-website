@@ -1,0 +1,54 @@
+name: Publisher Studio QA
+
+on:
+  push:
+    branches: [feature/publisher-studio-mvp]
+    paths:
+      - 'publisher-studio/**'
+      - 'assets/js/publisher-studio/**'
+      - 'assets/css/publisher-studio.css'
+      - 'functions/publisher-studio/**'
+      - 'scripts/publisher_studio*'
+      - '.github/workflows/publisher-studio-qa.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'publisher-studio/**'
+      - 'assets/js/publisher-studio/**'
+      - 'assets/css/publisher-studio.css'
+      - 'functions/publisher-studio/**'
+      - 'scripts/publisher_studio*'
+      - '.github/workflows/publisher-studio-qa.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publisher-studio-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prototype-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check Studio data model and preview gate
+        run: node --test scripts/publisher_studio_test.mjs
+      - name: Install browser QA
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Test desktop and mobile preview journeys
+        run: node scripts/publisher_studio_browser_qa.mjs
+      - name: Upload Studio screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: publisher-studio-screenshots
+          path: qa-artifacts/publisher-studio/
+          if-no-files-found: ignore
+          retention-days: 14
