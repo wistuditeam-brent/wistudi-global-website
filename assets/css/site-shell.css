@@ -1,8 +1,27 @@
-@import url('./site-shell-base.css');
-@import url('./art-direction.css');
-@import url('./art-direction-v2.css');
-@import url('./art-direction-v3-platform.css');
-@import url('./heading-font.css');
-@import url('./integrations-mobile-nav.css');
-@import url('./header-friendly.css');
-@import url('./header-publish-pill.css');
+@import url('./site-shell-base.css?v=20260920-mobile3');
+@import url('./art-direction.css?v=20260920-mobile3');
+@import url('./art-direction-v2.css?v=20260920-mobile3');
+@import url('./art-direction-v3-platform.css?v=20260920-mobile3');
+@import url('./heading-font.css?v=20260920-mobile3');
+@import url('./integrations-mobile-nav.css?v=20260920-mobile3');
+@import url('./header-friendly.css?v=20260920-mobile3');
+@import url('./header-publish-pill.css?v=20260920-mobile3');
+
+/* Critical mobile header fallback.
+   Kept in the top-level stylesheet so a stale nested @import cannot restore
+   the desktop CTA after first paint. */
+@media(max-width:900px){
+  :root{--ws-header-height:68px}
+  .ws-site-header .ws-nav{height:68px!important;min-width:0!important;gap:10px!important}
+  .ws-site-header .ws-brand{min-width:0!important;flex:0 1 auto!important}
+  .ws-site-header .ws-brand img{width:122px!important;max-width:100%!important}
+  .ws-site-header .ws-nav-links{display:none!important}
+  .ws-site-header .ws-nav-actions{min-width:0!important;margin-left:auto!important;padding-right:0!important;gap:8px!important;flex:0 0 auto!important}
+  .ws-site-header .ws-nav-actions>.ws-btn,
+  .ws-site-header .ws-nav-actions>.ws-btn.primary,
+  .ws-site-header .ws-nav-actions>.ws-btn.secondary{display:none!important}
+  .ws-site-header .ws-menu-toggle{display:block!important;flex:0 0 44px!important}
+  .ws-site-header .ws-lang{flex:0 0 auto!important}
+  .ws-site-header .ws-mobile-actions .ws-btn.primary{display:inline-flex!important}
+}
+@media(max-width:420px){.ws-site-header .ws-brand img{width:116px!important}}
