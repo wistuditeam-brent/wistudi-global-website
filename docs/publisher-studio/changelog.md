@@ -1,5 +1,22 @@
 # Publisher Studio Changelog
 
+## 2026-09-20 / In-Shell Navigation
+
+### Changed
+
+- Internal links between Studio Home, event discovery, My events, event details,
+  event rooms and Event Builder now update the URL and render in the existing app
+  instead of requesting another HTML page.
+- Added browser back/forward support, direct-link routing and scroll restoration.
+- Removed the animated View Transition from room section changes so the selected
+  section appears immediately.
+
+### Why
+
+- Prevent the route-specific “Loading…” placeholder from flashing between screens.
+- Keep navigation feeling like one continuous Studio application on desktop and
+  mobile while preserving bookmarkable routes and room sections.
+
 ## 2026-09-20 / Unified Studio Navigation and App Shell
 
 ### Changed
@@ -31,9 +48,10 @@
 
 - Local preview registrations are stored in `sessionStorage` only. There is no
   account, durable database, booking handoff or server-side room authorization.
-- Studio views use the same shell but remain static HTML routes with view transitions
-  where the browser supports them; production login and real-time presence are not
-  part of this change.
+- Studio routes remain directly addressable static HTML documents for refresh and
+  deep links. Internal navigation now uses the History API to keep the Studio open
+  and replace only its rendered view; production login and real-time presence are
+  not part of this change.
 
 ## 2026-09-20 / Desktop Width and Type Scale Revision
 

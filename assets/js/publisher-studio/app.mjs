@@ -3,15 +3,41 @@ import { STORAGE_KEY, createState, loadState, saveState, escapeHtml as e, avatar
 
 const root = document.querySelector('#app');
 const dialog = document.querySelector('#studio-dialog');
-const page = document.body.dataset.page;
 const base = '/publisher-studio/';
-const requestedView = new URLSearchParams(location.search).get('view');
-const studioView = ['home', 'discover', 'my-events'].includes(requestedView) ? requestedView : 'home';
-const requestedEvent = document.body.dataset.eventSlug || new URLSearchParams(location.search).get('event');
-const selectedEvent = events.find(item => item.slug === requestedEvent || item.id === requestedEvent) || workshop;
-const selectedChallenge = challengeFor(selectedEvent.id);
-const selectedResources = resourcesFor(selectedEvent.id);
+const studioRoot = base.replace(/\/$/, '');
+let page;
+let studioView;
+let selectedEvent;
+let selectedChallenge;
+let selectedResources;
+let tabs;
 const eventUrl = item => `${base}events/${item.slug}/`;
+
+function syncRouteState(url = new URL(location.href)) {
+  const pathname = url.pathname.replace(/\/+$/, '') || '/';
+  const eventRoute = pathname.match(/^\/publisher-studio\/events\/([^/]+)(\/room)?$/);
+  const requestedView = url.searchParams.get('view');
+  let routeEvent = '';
+
+  if (pathname === studioRoot) page = 'home';
+  else if (pathname === `${studioRoot}/studio`) page = 'studio';
+  else if (pathname === `${studioRoot}/manage/events`) page = 'builder';
+  else if (eventRoute) {
+    page = eventRoute[2] ? 'studio' : 'event';
+    try { routeEvent = decodeURIComponent(eventRoute[1]); } catch { routeEvent = eventRoute[1]; }
+  } else page = document.body.dataset.page || 'home';
+
+  studioView = ['home', 'discover', 'my-events'].includes(requestedView) ? requestedView : 'home';
+  const requestedEvent = routeEvent || url.searchParams.get('event') || '';
+  selectedEvent = events.find(item => item.slug === requestedEvent || item.id === requestedEvent) || workshop;
+  selectedChallenge = challengeFor(selectedEvent.id);
+  selectedResources = resourcesFor(selectedEvent.id);
+  tabs = [ ['week', 'Room', 'Room', 'calendar'], ['questions', 'Questions', 'Ask', 'question'], ['challenge', 'Build', 'Build', 'build'], ['workbench', 'Chat', 'Chat', 'chat', 'Event chat'], ...(selectedResources.length ? [['resources', 'Resources', 'Files', 'book', 'Event resources']] : []) ];
+  document.body.dataset.page = page;
+  document.body.dataset.eventSlug = selectedEvent.slug;
+}
+
+syncRouteState();
 let storage;
 try { storage = window.sessionStorage; } catch { /* Memory-only preview remains usable. */ }
 const loaded = loadState(storage);
@@ -35,7 +61,6 @@ let emojiModulePromise;
 let nextChatContext = selectedEvent.id;
 try { theme = localStorage.getItem(themeKey) === 'dark' ? 'dark' : 'light'; } catch { /* The light theme remains the default. */ }
 const resourceTypes = { flow: 'Wistudi Flow or template', worksheet: 'Worksheet or document', video: 'Video', link: 'External link', instructions: 'Step-by-step instructions', other: 'Other resource' };
-const tabs = [ ['week', 'Room', 'Room', 'calendar'], ['questions', 'Questions', 'Ask', 'question'], ['challenge', 'Build', 'Build', 'build'], ['workbench', 'Chat', 'Chat', 'chat', 'Event chat'], ...(selectedResources.length ? [['resources', 'Resources', 'Files', 'book', 'Event resources']] : []) ];
 const paths = {
   home: '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1V10Z"/>',
   discover: '<circle cx="10.8" cy="10.8" r="7.2"/><path d="m16.2 16.2 4.3 4.3M10.8 7.5v6.6M7.5 10.8h6.6"/>',
@@ -650,6 +675,13 @@ function restoreDrafts(container = document) {
 
 function render(focus = false) {
   root.innerHTML = page === 'studio' ? renderStudio() : page === 'event' ? renderEvent() : page === 'builder' ? renderBuilder() : renderHome();
+  document.title = page === 'event'
+    ? `${selectedEvent.title} | Wistudi Publisher Studio`
+    : page === 'builder'
+      ? 'Build an event | Wistudi Publisher Studio'
+      : page === 'studio'
+        ? `${selectedEvent.title} · ${tabs.find(([key]) => key === activeTab())?.[1] || 'Room'} | Wistudi Publisher Studio`
+        : `${studioView === 'discover' ? 'Discover events' : studioView === 'my-events' ? 'My events' : 'Home'} | Wistudi Publisher Studio`;
   document.body.dataset.studioTheme = theme;
   restoreDrafts();
   if (page === 'builder') restoreBuilderDraft();
@@ -659,7 +691,7 @@ function render(focus = false) {
     const selector = document.querySelector('#thread-form [name="contextId"]');
     if (contextId && selector && [...selector.options].some(option => option.value === contextId)) {
       selector.value = contextId;
-      history.replaceState(null, '', `${location.pathname}${location.hash}`);
+      history.replaceState(history.state, '', `${location.pathname}${location.hash}`);
     }
     const target = params.get('thread') || params.get('question') || params.get('submission');
     const targetType = params.has('thread') ? 'thread' : params.has('question') ? 'question' : 'submission';
@@ -667,11 +699,11 @@ function render(focus = false) {
       const element = document.getElementById(`${targetType}-${target}`);
       if (element) {
         setTimeout(() => element.scrollIntoView({ block: 'center', behavior: 'smooth' }), 80);
-        history.replaceState(null, '', `${location.pathname}${location.hash}`);
+        history.replaceState(history.state, '', `${location.pathname}${location.hash}`);
       }
     }
   }
-  if (focus) document.querySelector('.panel-heading h1')?.focus({ preventScroll: true });
+  if (focus) document.querySelector('.panel-heading h1, #main h1')?.focus({ preventScroll: true });
 }
 
 function modal(title, body, kind = '') {
@@ -973,12 +1005,70 @@ document.addEventListener('submit', event => {
 });
 
 dialog.addEventListener('close', () => { dialogMode = null; dialogTarget = null; });
+function isStudioRoute(url) {
+  const pathname = url.pathname.replace(/\/+$/, '') || '/';
+  return pathname === studioRoot
+    || pathname === `${studioRoot}/studio`
+    || pathname === `${studioRoot}/manage/events`
+    || /^\/publisher-studio\/events\/[^/]+(?:\/room)?$/.test(pathname);
+}
+
+function updateStudioRoute({ focus = true, restoreScroll = false } = {}) {
+  const previousEventId = selectedEvent.id;
+  const url = new URL(location.href);
+  const hasDeepTarget = ['thread', 'question', 'submission'].some(key => url.searchParams.has(key));
+  syncRouteState(url);
+  if (previousEventId !== selectedEvent.id) {
+    questionFilter = 'all';
+    threadFilter = 'all';
+    resourceFilter = '';
+    nextChatContext = selectedEvent.id;
+  }
+  if (dialog.open) dialog.close();
+  render(focus);
+  if (restoreScroll && !hasDeepTarget) {
+    const savedScrollY = history.state?.publisherStudioScrollY;
+    requestAnimationFrame(() => window.scrollTo(0, Number.isFinite(savedScrollY) ? savedScrollY : 0));
+  }
+  renderedHref = location.href;
+}
+
+function navigateWithinStudio(url) {
+  if (url.href === location.href) return;
+  history.replaceState({ ...(history.state || {}), publisherStudioScrollY: window.scrollY }, '', location.href);
+  history.pushState({ publisherStudioScrollY: 0 }, '', `${url.pathname}${url.search}${url.hash}`);
+  updateStudioRoute();
+  const hasDeepTarget = ['thread', 'question', 'submission'].some(key => url.searchParams.has(key));
+  if (!hasDeepTarget) window.scrollTo(0, 0);
+}
+
+let renderedHref = location.href;
+document.addEventListener('click', event => {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const anchor = event.target instanceof Element ? event.target.closest('a[href]') : null;
+  if (!anchor || (anchor.target && anchor.target !== '_self') || anchor.hasAttribute('download') || anchor.rel.split(/\s+/).includes('external')) return;
+  let url;
+  try { url = new URL(anchor.href, location.href); } catch { return; }
+  if (url.origin !== location.origin || !isStudioRoute(url)) return;
+  if (url.pathname === location.pathname && url.search === location.search && url.hash === '#main') return;
+  event.preventDefault();
+  navigateWithinStudio(url);
+});
+
+window.addEventListener('popstate', () => {
+  if (isStudioRoute(new URL(location.href))) updateStudioRoute({ restoreScroll: true });
+});
+
 window.addEventListener('hashchange', () => {
-  if (page !== 'studio') return;
-  const update = () => { render(true); window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); };
-  if (document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    document.startViewTransition(update);
-  } else update();
+  if (renderedHref === location.href) return;
+  if (!isStudioRoute(new URL(location.href))) { renderedHref = location.href; return; }
+  syncRouteState();
+  if (page !== 'studio' || !tabs.some(([key]) => key === location.hash.slice(1))) { renderedHref = location.href; return; }
+  if (dialog.open) dialog.close();
+  render(true);
+  window.scrollTo(0, 0);
+  renderedHref = location.href;
 });
 render();
+renderedHref = location.href;
 if (loaded.warning) notify(loaded.warning);

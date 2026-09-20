@@ -1,6 +1,6 @@
 # Publisher Studio Development
 
-Status: local-data prototype for multi-event discovery, inline event chat and Event Builder review.
+Status: local-data prototype for multi-event discovery, inline event chat and Event Builder review. Internal Studio navigation is client-side and keeps one app shell mounted.
 Branch: `feature/publisher-studio-mvp`.
 
 ## What Works
@@ -33,6 +33,13 @@ authorization and may be copied when a browser duplicates a tab. Do not enter re
 attendee information or private Zoom links in the public-repository preview.
 
 ## Routes
+
+Every listed route can still be opened directly or refreshed. Once the Studio is
+loaded, links to these routes are handled with the History API, so the browser does
+not replace the app with a route loading placeholder. Back and forward restore the
+previous Studio view and its scroll position. Room-section hashes update the active
+panel in place; deep links to a thread, question or submission still select and
+scroll to that item.
 
 | Path | Current implementation |
 | --- | --- |
@@ -93,7 +100,7 @@ in fixture files. No Cloudflare dashboard settings were changed.
 | `assets/css/publisher-studio.css` | Isolated responsive Studio styles |
 | `assets/js/publisher-studio/data.mjs` | Sample event catalogue, resources, challenges and contexts |
 | `assets/js/publisher-studio/model.mjs` | Validation, local state and mutations |
-| `assets/js/publisher-studio/app.mjs` | Rendering, sharing, builder preview, navigation and local interactions |
+| `assets/js/publisher-studio/app.mjs` | Rendering, client-side route handling, sharing, builder preview and local interactions |
 | `functions/publisher-studio/_middleware.js` | Default-off release gate |
 | `scripts/publisher_studio_test.mjs` | Model, escaping, persistence and gate tests |
 | `scripts/publisher_studio_browser_qa.mjs` | Responsive and workflow regression tests |
