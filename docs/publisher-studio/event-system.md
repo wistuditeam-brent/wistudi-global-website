@@ -8,7 +8,7 @@ fixtures and does not create or publish live events.
 Publisher Studio is the workshop and creation experience. It contains:
 
 1. **Events catalogue** at `/publisher-studio/`: browse upcoming and archived Studio events.
-2. **Public event page** at `/publisher-studio/events/{slug}/`: event details, registration, Publisher Kit preview and share action.
+2. **Public event page** at `/publisher-studio/events/{slug}/`: event details, learning outcomes, registration, share action and optional public Event resources.
 3. **Event room** at `/publisher-studio/events/{slug}/room/`: a mobile-first, access-controlled space for that event.
 4. **Project/workbench** inside the room: questions, discussion, resources, challenge and participant submissions attached to stable contexts.
 5. **Wistudi content link**: a Flow, template or XP Video that can be viewed, adapted or remixed in the Wistudi platform when identity integration is available.
@@ -57,9 +57,9 @@ starts_at_utc, ends_at_utc
 event_timezone        IANA timezone used for authoring/display reference
 status                draft/review/scheduled/live/completed/archived
 visibility            public event page; registration-gated room
-thumbnail_asset_id, thumbnail_alt
-video_preview_asset_id or approved external video URL
-publisher_kit_id
+banner_asset_id, banner_alt
+card_image_asset_id, mobile_card_image_asset_id
+promotion_video_asset_id or approved external video URL
 challenge_id
 canonical_url
 created_by, updated_by, published_by
@@ -73,7 +73,7 @@ Event 1—many EventStaff assignments
 Event 1—many Registrations
 Event 1—1 Room
 Room 1—many Contexts, Projects, Threads, Replies and Submissions
-Event 1—many Resources (Publisher Kit contents)
+Event 1—many EventResource records (zero allowed)
 Resource 0..1—1 external Wistudi content mapping
 ```
 
@@ -89,22 +89,30 @@ preview, not a single dense form:
 
 1. **Event basics:** title, summary, subject/topic/level, audience, outcomes and the concrete thing attendees should create.
 2. **Schedule and host:** date, time, IANA timezone, duration, trainer and online format.
-3. **Media:** thumbnail, alt text, related real product/teaching imagery and an optional hosted video preview.
-4. **Publisher Kit:** featured Flow/template, worksheet, example, tools, links and recording.
+3. **Artwork and promotion:** event-page banner, event-card image, optional mobile card crop, accessible descriptions and optional YouTube/Vimeo or hosted promotion video.
+4. **Event resources:** add none, one or many. Each item may be a Wistudi Flow, PDF/Word file, video, external link or step-by-step instructions. Add an optional description, link or file, instructions, release stage and public-preview setting to each item.
 5. **Room project:** pre-event question, live Q&A, challenge prompt, expected submission and feedback settings.
 6. **Team:** scoped creator, trainer and moderator assignments.
 7. **Preview and release:** public/mobile preview, review, schedule, publish, edit, unpublish/cancel or archive.
 
-Use a standard layout and required sections; permit flexible event-specific copy and
-resources. Drafts support autosave, explicit save, preview and revision history.
+Use a standard layout and required event details, learning outcomes and participant
+output; permit flexible event-specific copy and zero or more resources. Drafts
+support autosave, explicit save, desktop/mobile preview and revision history.
 Changes to time, meeting access or cancellation should create an audit entry and
 notify registered participants through the existing event email service.
 
-Do not add bulk direct video upload to the static site or put media in Git. Images
-can use a managed asset service when chosen. Direct video upload needs a media
-provider with upload limits, durable object storage, transcode/stream delivery,
-thumbnails and caption handling. Begin with approved images and externally hosted
-video previews. Keep asset IDs and metadata portable.
+Do not store uploaded media in Git or leave production file bytes in the website
+repository. A Pages Function can authorize an upload and issue a short-lived upload
+URL for managed object storage. Use private, scoped delivery for participant-only
+files; treat signed URLs as access credentials. PDF files can preview in the browser
+where supported. Word files should open or download unless a derived PDF preview is
+available. Verify content type and file size, scan uploads and keep asset IDs and
+metadata portable.
+
+Promotional videos can be embedded from allow-listed providers or uploaded through a
+dedicated video service that supports transcoding, streaming, thumbnails, captions
+and resumable uploads. Do not proxy large video files through a page handler. Keep
+promotion video separate from instructional videos attached as Event resources.
 
 ## Roles, invitations and scope
 
@@ -202,7 +210,7 @@ maps to a stable context record. The event room may display a chat-shaped timeli
 but it is not an unstructured generic room. Context examples:
 
 - This event's pre-workshop question.
-- A Publisher Kit template or worksheet.
+- An Event resource, such as a template, worksheet or guide.
 - A question to the assigned trainer.
 - The event's build challenge/project.
 - A participant submission.

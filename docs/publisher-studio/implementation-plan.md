@@ -75,7 +75,7 @@ Deliverables:
 - `/publisher-studio/events/[slug]/room` mobile-first event room
 - `/publisher-studio/manage/events` guided Event Builder preview
 - Event listing cards with local-time display and event share modal
-- Mock Publisher Kit
+- Mock event resources
 - Mock Questions tab
 - Mock Challenge tab
 - Mock Workbench tab

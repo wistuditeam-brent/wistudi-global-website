@@ -173,3 +173,35 @@
 - Need current registration method details.
 - Need existing database/auth integration details.
 - Need decision on whether Studio participation is automatic or opt-in during event registration.
+
+## 2026-09-20 / Event Resources and Event Promotion Media
+
+### Added
+
+- Replaced the participant-facing Publisher Kit label with Event resources.
+- Added an optional repeatable resource editor with resource type, title, optional
+  description, link or local file preview, optional step instructions, release stage
+  and public-page visibility.
+- Public event pages show only creator-approved resources available before the event;
+  the section is omitted when there are none. Room resources follow the configured
+  before/live/after stage and the resource tab is omitted when an event has no items.
+- Added PDF, Word, image, audio and video attachment selection for local previews;
+  YouTube/Vimeo links can appear in an embedded player, while other URLs use an
+  external-link card.
+- Added required learning outcomes, an event-page banner, distinct event-card art,
+  an optional portrait mobile crop and an optional promotional video link or local
+  video preview.
+- Added a creator preview showing the event page, resource visibility and mobile
+  event-card crop.
+- Updated the event architecture and decisions to use event-owned resources rather
+  than a separate Publisher Kit record.
+
+### Prototype Boundary
+
+- Files, images and uploaded videos are previewed locally in the current browser tab;
+  they are not uploaded or retained in the event draft.
+- Draft event publishing, persistent resource storage, secure participant-file
+  delivery, external-link metadata resolution and video processing remain unconnected.
+- The preview embeds only recognized YouTube/Vimeo URLs. Google Drive and other
+  external links use their supplied title and description because access and preview
+  metadata depend on the source's sharing settings.

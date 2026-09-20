@@ -308,3 +308,68 @@ Reason:
   names retain their full meaning.
 - Event cards should show enough information to choose an event; full descriptions and
   registration belong on its event page.
+
+## Event Resources and Promotion Media / 2026-09-20
+
+### Use Event Resources as the Participant-Facing Name
+
+Decision: call the materials on the event page and in the room **Event resources**.
+Do not show a generic Publisher Kit section when an event has no resources. There is
+no separate kit record in the data model; an event owns zero or more resource records.
+
+Each resource has a type, title, optional short description, one or more source
+references, optional step-by-step instructions, an availability stage and a
+public-preview setting. Only resources available before the event can be selected
+for the public event page. Other materials remain in the participant room and follow
+their configured release stage.
+
+Reason:
+
+- Creators prepare different materials for different workshops; a mandatory fixed kit
+  would create empty or irrelevant slots.
+- Participants should see the actual format and timing of a file, link, video or
+  instruction set.
+- Public and registered-room visibility need to be explicit for each item.
+
+### Keep Event Art and Event Resources Separate
+
+Decision: event promotion uses an event-page banner, an event-card image and an
+optional mobile card crop. The event can also include a separate promotional video.
+Instructional videos belong under Event resources.
+
+The desktop card uses a wide crop. The mobile card is narrow and portrait; creators
+can supply a 2:3 mobile image when center-cropping the desktop image would cut off
+important content. Otherwise the same card asset can be center-cropped responsively.
+
+YouTube and Vimeo promotion links may embed in a video player when their URL and
+provider allow it. Other links remain link cards. Metadata for Wistudi Flow links
+should resolve through an approved server-side lookup, using a stable Wistudi content
+ID where available. Do not embed or fetch arbitrary URL hosts.
+
+### Media Storage Boundary
+
+Decision: prototype file selections create local previews only. Production images and
+documents belong in managed object storage with scoped upload and delivery
+permissions. Uploaded video needs a dedicated video service for resumable upload,
+transcoding, streaming, thumbnails and captions. Keep resource metadata and asset IDs
+independent of the chosen storage provider.
+
+Implementation candidate: use a server-authorized, short-lived R2 upload URL for
+image and document files, with strict CORS and content-type rules; use Cloudflare
+Stream direct creator uploads for video if the Wistudi Cloudflare account and billing
+owner approve it. Stream issues a one-time upload URL so the API token stays on the
+server, and its documentation recommends resumable TUS uploads for unreliable
+connections and requires TUS for videos over 200 MB. R2 presigned links are bearer
+credentials and use the R2 S3 API domain, so private room files need short expiry or
+an authorization-gated delivery layer.
+
+References: [Cloudflare R2 presigned URLs](https://developers.cloudflare.com/r2/api/s3/presigned-urls/), [Cloudflare Stream direct creator uploads](https://developers.cloudflare.com/stream/uploading-videos/direct-creator-uploads/), [YouTube IFrame Player API](https://developers.google.com/youtube/iframe_api_reference).
+
+Reason:
+
+- The current Studio routes are static pages with local browser state; they do not
+  provide authenticated uploads or durable asset storage.
+- Room-only files must not be made public by placing them in the website repository.
+- Cloudflare documents temporary presigned R2 access and direct Stream creator
+  uploads, but the Wistudi account's bindings, ownership and operating requirements
+  still need confirmation before a production provider is selected.

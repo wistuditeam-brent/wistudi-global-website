@@ -43,7 +43,7 @@ Recommended initial routes:
 | Route | Purpose | Access |
 | --- | --- | --- |
 | `/publisher-studio/` | Publisher Studio event catalogue, journey overview and selected showcase | Public |
-| `/publisher-studio/events/[slug]/` | Canonical public event details, registration, share metadata and Publisher Kit | Public |
+| `/publisher-studio/events/[slug]/` | Canonical public event details, registration, share metadata and optional event resources | Public |
 | `/publisher-studio/events/[slug]/room/` | Chat-shaped room for the event's registered participants | Verified event registration and Studio membership; staff access is scoped |
 | `/publisher-studio/manage/events/` | Guided event creation, scheduling, media, room and project setup | Assigned event builder or Studio admin |
 | `/publisher-studio/submissions/[id]` | Shared participant creation detail | Author/moderator until approved for the public showcase |
@@ -91,11 +91,11 @@ Primary content:
 - Workshop title
 - Date and time
 - Trainer
-- What participants will create or learn
+- Short description, learning outcomes and what participants will make
+- Event page banner and optional promotion video
 - Registration form or an adapter to the existing event booking flow
-- Publisher Kit preview
+- Publicly approved resources that are available before the event
 - Pre-session question prompt
-- Related template or worksheet
 - Add-to-calendar action, if supported
 - Share hub with copy, native sharing, direct channels and event-specific preview metadata
 
@@ -107,7 +107,7 @@ if the optional Studio identity service is unavailable.
 
 Every event has one connected participant room. Recurring sessions may share a
 series ID, but each date/event has its own stable event ID, registration, room
-permissions, Publisher Kit, conversations and challenge. The room is the working
+permissions, event resources, conversations and challenge. The room is the working
 space after registration, not another event landing page.
 
 On mobile, this should feel closer to a focused chat/workbench app than a landing page.
@@ -120,7 +120,7 @@ Recommended bottom navigation:
 | Questions | Ask the trainer, vote, view answers |
 | Build | Join or submit the event's project/challenge |
 | Workbench | Ideas, help requests and shared creations |
-| Kit | Templates, worksheets, tools and recordings |
+| Event resources | Files, links, instructions and recordings for this event |
 
 The Studio space should use sticky context headers, threaded content, fixed reply or submit actions and simple interaction states.
 
@@ -130,9 +130,11 @@ The builder is a role-gated management tool within Publisher Studio, not a publi
 content form. It standardizes public event pages and room configuration while
 allowing each creator to provide the event's subject-specific materials.
 
-- Event basics, audience, topic, outcomes, level and expected participant output.
+- Event basics, audience, topic, level and expected participant output.
 - Start/end time, explicit IANA timezone, trainer and approved online meeting link.
-- Thumbnail, accessible image text, optional video preview and Publisher Kit.
+- Required learning outcomes and participant output.
+- Separate event-page banner, event-card image and optional mobile card crop; optional YouTube/Vimeo or hosted promotion video.
+- Zero or more event resources. Each has a type, title, optional short description, link or attachment, optional step-by-step instructions, availability stage and public-preview setting.
 - Event-specific discussion prompt, project/build challenge and Wistudi content links.
 - Assigned event builders and trainers/moderators with event-scoped permissions.
 - Save draft, preview desktop/mobile, submit for review, schedule, publish, update and archive.
@@ -306,52 +308,49 @@ the purpose, exact policy version, grant/withdraw action, timestamp and source.
 Marketing consent remains separate. Role assignments are scoped to the Studio or a
 workshop rather than stored as one global user role.
 
-### PublisherKit
+### Event Resource Collection
 
-Groups the weekly resources.
-
-Suggested fields:
-
-```text
-id
-workshop_id
-featured_template_id
-worksheet_resource_id
-example_activity_id
-tool_resource_id
-challenge_id
-discussion_prompt
-```
+There is no separate Publisher Kit entity. Event resources are zero or more records
+owned directly by the event. The Event Builder may group them in one editor, but a
+workshop with no attached materials has no empty resource section in the participant
+experience. Room questions, discussion and build challenges remain separate records.
 
 ### Resource
 
-Stores resources such as worksheets, templates, tools, links and recordings.
+Stores an optional event-specific file, Wistudi object, link, video, worksheet or set of instructions. The public event page omits the Event resources section when there are no resources explicitly marked for public preview.
 
 Suggested fields:
 
 ```text
 id
-workshop_id
-type
+event_id
+resource_type
 title
 description
-url
-file_id
-visibility
+external_url
+asset_id
+instructions[]
+available_from          before_event/live/post_session
+public_preview          boolean; allowed only when available_from=before_event
+metadata_provider
+preview_title
+preview_description
+preview_image_asset_id
 created_at
 ```
 
 Resource types:
 
 ```text
-flow_template
-worksheet
-example_activity
-tool
-recording
-guide
+wistudi_flow
+file
+video
 external_link
+instructions
+other
 ```
+
+For an external link, show the creator-provided title and description first. Embed only supported providers such as YouTube or Vimeo. Other URLs use a simple link card; a server-side resolver may add trusted metadata for approved Wistudi content or external providers. Do not fetch arbitrary URLs from the browser or embed arbitrary iframes. Google Drive previews depend on the document owner's sharing settings and each participant's access.
 
 ### Question (thread kind)
 
@@ -551,7 +550,7 @@ Included:
 - Static Studio home shell
 - Static event page shell
 - Static mobile-first Studio shell
-- Mock Publisher Kit
+- Mock event resources
 - Mock Questions tab
 - Mock Challenge tab
 

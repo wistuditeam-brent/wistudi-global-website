@@ -1,4 +1,4 @@
-import { events, workshop, challenge, challenges, resources, contributionKinds, contextFor, challengeFor, resourcesFor } from './data.mjs';
+import { events, workshop, challenge, challenges, contributionKinds, contextFor, challengeFor, resourcesFor } from './data.mjs';
 import { STORAGE_KEY, createState, loadState, saveState, escapeHtml as e, avatar, registerDemo, askQuestion, toggleVote, voteCount, addThread, addReply, submitBuild } from './model.mjs';
 
 const root = document.querySelector('#app');
@@ -21,7 +21,9 @@ let dialogTarget = null;
 let dialogMode = null;
 let toastTimer;
 const drafts = new Map();
-const tabs = [ ['week', 'Room', 'Room', 'calendar'], ['questions', 'Questions', 'Ask', 'question'], ['challenge', 'Build', 'Build', 'build'], ['workbench', 'Workbench', 'Discuss', 'chat', 'Community Workbench'], ['resources', 'Kit', 'Kit', 'book'] ];
+const localPreviewUrls = new Map();
+const resourceTypes = { flow: 'Wistudi Flow or template', worksheet: 'Worksheet or document', video: 'Video', link: 'External link', instructions: 'Step-by-step instructions', other: 'Other resource' };
+const tabs = [ ['week', 'Room', 'Room', 'calendar'], ['questions', 'Questions', 'Ask', 'question'], ['challenge', 'Build', 'Build', 'build'], ['workbench', 'Workbench', 'Discuss', 'chat', 'Community Workbench'], ...(selectedResources.length ? [['resources', 'Event resources', 'Resources', 'book', 'Event resources']] : []) ];
 const paths = {
   calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/>',
   question: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 .5c0 2-2.5 2-2.5 4M12 17h.01"/>',
@@ -40,6 +42,10 @@ const tag = (label, style = '') => `<span class="tag ${style}">${e(label)}</span
 const contextOptions = () => [selectedEvent.id, selectedChallenge.id, ...selectedResources.map(item => item.id)].map(id => `<option value="${id}">${e(contextFor(id).title)}</option>`).join('');
 const localTime = item => new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(new Date((item || selectedEvent).startsAt));
 const selectedPhase = () => state.phaseByEvent[selectedEvent.id] || 'upcoming';
+const phaseOrder = { upcoming: 0, live: 1, post_session: 2 };
+const phaseLabel = { upcoming: 'Before the event', live: 'During the live event', post_session: 'After the live event' };
+const resourcePhase = item => item.availableFrom || 'upcoming';
+const resourceIsAvailable = item => (phaseOrder[selectedPhase()] ?? 0) >= (phaseOrder[resourcePhase(item)] ?? 0);
 
 function notify(message) {
   const toast = document.querySelector('#toast');
@@ -70,21 +76,109 @@ function phaseControl() {
 
 function phaseContent() {
   const content = {
-    upcoming: ['Before the workshop', 'Bring a lesson. Leave with a new direction.', 'Explore the kit and bring a question for the trainer.', `<a class="button primary" href="${eventUrl(selectedEvent)}">View event details ${icon('arrow')}</a>`],
-    live: ['Studio Live (preview)', 'Learn together. Build as you go.', 'Keep the kit open and add questions as they come up.', `<a class="button primary" href="${eventUrl(selectedEvent)}room/#questions">Ask the Trainer ${icon('arrow')}</a><span class="muted small">The live meeting link is not connected.</span>`],
+    upcoming: ['Before the workshop', 'Bring a lesson. Leave with a new direction.', 'Explore the event resources and bring a question for the trainer.', `<a class="button primary" href="${eventUrl(selectedEvent)}">View event details ${icon('arrow')}</a>`],
+    live: ['Studio Live (preview)', 'Learn together. Build as you go.', 'Open the event resources and add questions as they come up.', `<a class="button primary" href="${eventUrl(selectedEvent)}room/#questions">Ask the Trainer ${icon('arrow')}</a><span class="muted small">The live meeting link is not connected.</span>`],
     post_session: ['Keep building', 'The workshop ends. Your idea keeps going.', 'Try the challenge, compare approaches and share what you make.', `<a class="button primary" href="${eventUrl(selectedEvent)}room/#challenge">Open build challenge ${icon('arrow')}</a><span class="muted small">Recording is not connected.</span>`],
   }[selectedPhase()];
   return `<section class="weekly-focus"><div class="eyebrow">${content[0]}</div><h2>${content[1]}</h2><p>${content[2]}</p><div class="actions">${content[3]}</div></section>`;
 }
 
-function resourceRows(limit = resources.length) {
-  return selectedResources.slice(0, limit).map((item, index) => `<button type="button" class="resource-row" data-action="resource" data-id="${item.id}"><span class="resource-icon tone-${index % 3}">${icon(item.type === 'template' ? 'build' : 'book')}</span><span><span class="eyebrow">${e(item.label)}</span><strong>${e(item.title)}</strong><span class="muted small">${e(item.description)}</span></span>${icon('arrow')}</button>`).join('');
+function resourceRows({ limit = selectedResources.length, audience = 'room' } = {}) {
+  const items = selectedResources.filter(item => audience !== 'public' || (resourcePhase(item) === 'upcoming' && item.publicPreview === true)).slice(0, limit);
+  return items.map((item, index) => {
+    const available = audience === 'public' || resourceIsAvailable(item);
+    const timing = phaseLabel[resourcePhase(item)] || phaseLabel.upcoming;
+    const action = audience === 'public' ? 'public-resource' : 'resource';
+    return `<button type="button" class="resource-row" data-action="${action}" data-id="${item.id}" ${available ? '' : 'disabled'}><span class="resource-icon tone-${index % 3}">${icon(item.type === 'template' ? 'build' : 'book')}</span><span><span class="eyebrow">${e(item.label)} / ${e(timing)}</span><strong>${e(item.title)}</strong><span class="muted small">${available ? e(item.description) : 'This resource will be available later in the event.'}</span></span>${icon(available ? 'arrow' : 'calendar')}</button>`;
+  }).join('');
+}
+
+function videoEmbedUrl(value) {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase().replace(/^www\./, '');
+    if (host === 'youtu.be' || host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtube-nocookie.com') {
+      const id = host === 'youtu.be' ? url.pathname.split('/').filter(Boolean)[0] : url.searchParams.get('v') || url.pathname.split('/').filter(Boolean).at(-1);
+      return id && /^[\w-]{11}$/.test(id) ? `https://www.youtube-nocookie.com/embed/${id}` : '';
+    }
+    if (host === 'vimeo.com' || host === 'player.vimeo.com') {
+      const id = url.pathname.split('/').filter(Boolean).find(part => /^\d+$/.test(part));
+      return id ? `https://player.vimeo.com/video/${id}` : '';
+    }
+  } catch { /* Invalid links are shown as ordinary links, never embedded. */ }
+  return '';
+}
+
+function videoEmbed(value, title) {
+  const src = videoEmbedUrl(value);
+  return src ? `<div class="embedded-video"><iframe src="${e(src)}" title="${e(title)}" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>` : '';
+}
+
+function readKitEditor() {
+  return [...document.querySelectorAll('.kit-editor-row')].map(row => {
+    const value = name => row.querySelector(`[data-kit-field="${name}"]`);
+    const file = value('fileName');
+    const availableFrom = value('availableFrom')?.value || 'upcoming';
+    return {
+      key: row.dataset.resourceKey,
+      type: value('type')?.value || 'other',
+      title: value('title')?.value.trim() || '',
+      description: value('description')?.value.trim() || '',
+      instructions: value('instructions')?.value.trim() || '',
+      url: value('url')?.value.trim() || '',
+      availableFrom,
+      publicPreview: availableFrom === 'upcoming' && Boolean(value('publicPreview')?.checked),
+      fileName: file?.value || file?.dataset.savedName || '',
+    };
+  });
+}
+
+function syncKitEditor() {
+  const hidden = document.querySelector('#event-builder-form [name="resourcesJson"]');
+  const items = readKitEditor();
+  if (hidden) hidden.value = JSON.stringify(items);
+  return items;
+}
+
+function kitResourceRow(item = {}) {
+  const key = item.key || `resource-${Math.random().toString(36).slice(2, 10)}`;
+  const availableFrom = item.availableFrom || 'upcoming';
+  const publicPreview = availableFrom === 'upcoming' && Boolean(item.publicPreview);
+  const types = Object.entries(resourceTypes).map(([value, label]) => `<option value="${value}" ${item.type === value ? 'selected' : ''}>${e(label)}</option>`).join('');
+  const fileStatus = item.fileName ? `<p class="kit-file-note" role="status">${e(item.fileName)} / ${localPreviewUrls.has(`resource:${key}`) ? 'local preview ready' : 'reselect the file after reloading this draft'}</p>` : '';
+  return `<article class="kit-editor-row" data-resource-key="${e(key)}"><div class="kit-editor-row-top"><strong>Event resource</strong>${button('Remove', 'remove-kit-resource', `data-key="${e(key)}"`, 'text-button')}</div><div class="builder-grid kit-fields"><label>Resource type<select data-kit-field="type">${types}</select></label><label>Title<input data-kit-field="title" value="${e(item.title || '')}" maxlength="100" placeholder="e.g. Speaking lesson template"></label></div><label>Short description <span class="muted">(optional)</span><input data-kit-field="description" value="${e(item.description || '')}" maxlength="220" placeholder="What this resource contains or helps participants do"></label><label>Link <span class="muted">(optional; use for a Flow, Google Drive, YouTube, Vimeo or other page)</span><input data-kit-field="url" type="url" inputmode="url" value="${e(item.url || '')}" placeholder="https://..."></label><label>Or attach a file <span class="muted">(PDF, Word, image, audio or video)</span><input data-kit-file type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.mp4,.webm,audio/*" aria-label="Attach a file to this event resource"></label><input data-kit-field="fileName" type="hidden" value="${e(item.fileName || '')}" data-saved-name="${e(item.fileName || '')}">${fileStatus}<label>Instructions <span class="muted">(optional; one step per line)</span><textarea data-kit-field="instructions" rows="3" maxlength="1000" placeholder="1. Open the worksheet\n2. Choose one task\n3. Adapt it for your learners">${e(item.instructions || '')}</textarea></label><div class="builder-grid kit-release"><label>Available from<select data-kit-field="availableFrom"><option value="upcoming" ${availableFrom === 'upcoming' ? 'selected' : ''}>Before the event</option><option value="live" ${availableFrom === 'live' ? 'selected' : ''}>During the live event</option><option value="post_session" ${availableFrom === 'post_session' ? 'selected' : ''}>After the live event</option></select></label><label class="checkbox-row kit-public-toggle"><input type="checkbox" data-kit-field="publicPreview" ${publicPreview ? 'checked' : ''} ${availableFrom === 'upcoming' ? '' : 'disabled'}><span>Show on the public event page before registration</span></label></div></article>`;
+}
+
+function renderKitEditor(items = []) {
+  const list = document.querySelector('#builder-resource-list');
+  if (!list) return;
+  list.innerHTML = items.length ? items.map(kitResourceRow).join('') : '<p class="muted small">No event resources added. Add this section\'s materials only when the event needs them.</p>';
+  syncKitEditor();
+}
+
+function renderBuilderMediaPreview() {
+  const preview = document.querySelector('#builder-media-preview');
+  if (!preview) return;
+  const banner = localPreviewUrls.get('bannerImage');
+  const card = localPreviewUrls.get('cardImage');
+  const mobileCard = localPreviewUrls.get('mobileCardImage');
+  const videoFile = localPreviewUrls.get('promoVideoFile');
+  const videoLink = document.querySelector('[name="promoVideoUrl"]')?.value.trim() || '';
+  const parts = [];
+  if (banner) parts.push(`<figure><img src="${e(banner)}" alt="${e(document.querySelector('[name="imageAlt"]')?.value || 'Event page banner preview')}"><figcaption>Event page banner</figcaption></figure>`);
+  if (card) parts.push(`<figure class="card-image-preview"><img src="${e(card)}" alt="${e(document.querySelector('[name="imageAlt"]')?.value || 'Event card preview')}"><figcaption>Event listing image / desktop crop</figcaption></figure>`);
+  if (mobileCard) parts.push(`<figure class="mobile-card-image-preview"><img src="${e(mobileCard)}" alt="${e(document.querySelector('[name="imageAlt"]')?.value || 'Mobile event card crop')}"><figcaption>Optional mobile card crop</figcaption></figure>`);
+  if (videoFile) parts.push(`<figure class="video-preview"><video controls playsinline preload="metadata" src="${e(videoFile)}"></video><figcaption>Local video file preview</figcaption></figure>`);
+  else if (videoLink) parts.push(videoEmbed(videoLink, 'Event promotion video') || `<p class="kit-file-note">Video link saved for the event preview. This URL is not from a supported embeddable provider.</p>`);
+  preview.innerHTML = parts.join('');
+  preview.hidden = !parts.length;
 }
 
 function eventCard(item) {
   const roomUrl = `${eventUrl(item)}room/#week`;
-  const art = item.banner
-    ? `<img src="${e(item.banner)}" alt="" loading="lazy">`
+  const cardImage = item.cardImage || item.banner;
+  const art = cardImage
+    ? `<picture>${item.mobileCardImage ? `<source media="(max-width: 680px)" srcset="${e(item.mobileCardImage)}">` : ''}<img src="${e(cardImage)}" alt="" loading="lazy"></picture>`
     : `<div class="event-art-placeholder topic-${item.topic.toLowerCase().replace(/[^a-z0-9]+/g, '-')}"><span>Wistudi Publisher Studio</span><strong>${e(item.topic)}</strong></div>`;
   return `<article class="event-card" data-subject="${e(item.subject)}"><a class="event-card-art" href="${eventUrl(item)}" aria-label="View ${e(item.title)}">${art}<span class="event-status">${e(item.status === 'upcoming' ? 'Upcoming' : 'Past')}</span></a><div class="event-card-body"><div class="eyebrow">${e(item.subject)} / ${e(item.topic)} / ${e(item.level)}</div><h3><a href="${eventUrl(item)}">${e(item.title)}</a></h3><p class="muted">${e(item.summary)}</p><div class="event-card-meta"><span>${icon('calendar')}${e(localTime(item))}</span><span>${e(item.duration)} min</span></div><p class="event-output"><strong>You'll make</strong> ${e(item.output)}</p><div class="event-card-actions"><a class="button primary" href="${eventUrl(item)}">View event ${icon('arrow')}</a><button class="button secondary share-event-compact" type="button" data-action="share-event" data-slug="${e(item.slug)}" aria-label="Share ${e(item.title)}" title="Share event">${icon('share')}<span class="sr-only">Share</span></button><a class="room-shortcut" href="${roomUrl}" title="Room preview; live access requires registration">Room preview</a></div></div></article>`;
 }
@@ -93,7 +187,7 @@ function renderHome() {
   const upcoming = events.filter(item => item.status === 'upcoming');
   const past = events.filter(item => item.status === 'past');
   return `${prototypeBar()}${header()}<main id="main" class="public-main"><section class="studio-intro"><div><div class="eyebrow">A place to learn by making</div><h1>Wistudi Publisher Studio</h1><p class="lead">Practical workshops that lead to real teaching resources. Join an event, build something useful, share it for feedback and keep improving it in Wistudi.</p></div><div class="studio-journey"><ol class="journey" aria-label="Publisher journey"><li class="current">Discover</li><li>Learn</li><li>Build</li><li>Share</li><li>Publish</li></ol><p class="muted small">Publishing in Wistudi is an optional next step.</p></div></section>
-      <section class="event-catalog-section"><div class="section-heading"><div><div class="eyebrow">Choose a workshop</div><h2>Upcoming Studio events</h2><p class="muted">Every event has its own room, Publisher Kit and build challenge.</p></div><label class="event-filter">Subject<select id="event-filter"><option value="all">All subjects</option>${[...new Set(events.map(item => item.subject))].map(subject => `<option value="${e(subject)}">${e(subject)}</option>`).join('')}</select></label></div><div class="event-grid">${upcoming.map(eventCard).join('')}</div></section>
+      <section class="event-catalog-section"><div class="section-heading"><div><div class="eyebrow">Choose a workshop</div><h2>Upcoming Studio events</h2><p class="muted">Every event has its own room, optional event resources and build challenge.</p></div><label class="event-filter">Subject<select id="event-filter"><option value="all">All subjects</option>${[...new Set(events.map(item => item.subject))].map(subject => `<option value="${e(subject)}">${e(subject)}</option>`).join('')}</select></label></div><div class="event-grid">${upcoming.map(eventCard).join('')}</div></section>
       <section class="ecosystem-strip" aria-label="What happens after registration"><span>Event page</span><b>${icon('arrow')}</b><span>Event room</span><b>${icon('arrow')}</b><span>Build challenge</span><b>${icon('arrow')}</b><span>Wistudi Flow</span></section>
       ${past.length ? `<section class="event-catalog-section past-events"><div class="section-heading"><div><div class="eyebrow">Continue learning</div><h2>Past Studio events</h2></div></div><div class="event-grid">${past.map(eventCard).join('')}</div></section>` : ''}
     </main><footer class="public-footer"><a href="/resources/events/">All Wistudi Events</a><span>Preview fixtures only. Booking, accounts, Zoom and publishing are not connected.</span></footer>`;
@@ -102,7 +196,10 @@ function renderHome() {
 function renderEvent() {
   const item = selectedEvent;
   const roomUrl = `${eventUrl(item)}room/#week`;
-  return `${prototypeBar()}${header()}<main id="main" class="public-main"><a class="back-link" href="${base}">${icon('back')}<span>All events</span></a><div class="event-page-heading"><div><div class="eyebrow">${e(item.subject)} Publisher Studio / ${e(item.topic)}</div><h1>${e(item.title)}</h1><p class="lead">${e(item.summary)}</p></div><button class="button secondary" data-action="share-event" data-slug="${e(item.slug)}">Share event</button></div><div class="event-layout"><article><div class="event-facts"><div><span class="muted small">Your local time</span><strong>${e(localTime(item))}</strong></div><div><span class="muted small">Event timezone</span><strong>${e(item.timezone || 'Shown in your device timezone')}</strong></div><div><span class="muted small">Format</span><strong>${e(item.duration)}-minute ${e(item.format.toLowerCase())}</strong></div><div><span class="muted small">Trainer</span><strong>${e(item.trainer)}</strong></div><div><span class="muted small">For</span><strong>${e(item.audience)}</strong></div></div><section class="section-block"><h2>What you'll leave with</h2><p class="muted">${e(item.output)}</p><ol class="outcomes"><li>Join the live workshop or catch up with the event resources.</li><li>Use the Publisher Kit as a starting point.</li><li>Build or adapt a learning experience for your learners.</li><li>Share it in this event room for feedback.</li></ol></section><section class="section-block"><div class="section-heading"><div><div class="eyebrow">Publisher Kit</div><h2>Start with these resources</h2></div></div>${resourceRows()}</section><section class="event-next-step"><div class="eyebrow">After you register</div><h2>Your event room</h2><p>Questions, workshop links, the build challenge and participant work all stay attached to this event.</p><a class="button secondary" href="${roomUrl}">Preview this room ${icon('arrow')}</a></section></article>
+  const publicResources = selectedResources.filter(resource => resourcePhase(resource) === 'upcoming' && resource.publicPreview === true);
+  const banner = item.banner ? `<div class="event-hero-media"><img src="${e(item.banner)}" alt="${e(item.bannerAlt || item.title)}"></div>` : '';
+  const promo = item.promoVideoUrl ? videoEmbed(item.promoVideoUrl, `${item.title} event preview`) : '';
+  return `${prototypeBar()}${header()}<main id="main" class="public-main"><a class="back-link" href="${base}">${icon('back')}<span>All events</span></a><div class="event-page-heading"><div><div class="eyebrow">${e(item.subject)} Publisher Studio / ${e(item.topic)}</div><h1>${e(item.title)}</h1><p class="lead">${e(item.summary)}</p></div><button class="button secondary" data-action="share-event" data-slug="${e(item.slug)}">Share event</button></div>${banner}${promo}<div class="event-layout"><article><div class="event-facts"><div><span class="muted small">Your local time</span><strong>${e(localTime(item))}</strong></div><div><span class="muted small">Event timezone</span><strong>${e(item.timezone || 'Shown in your device timezone')}</strong></div><div><span class="muted small">Format</span><strong>${e(item.duration)}-minute ${e(item.format.toLowerCase())}</strong></div><div><span class="muted small">Trainer</span><strong>${e(item.trainer)}</strong></div><div><span class="muted small">For</span><strong>${e(item.audience)}</strong></div></div><section class="section-block"><h2>Learning outcomes</h2><ul class="outcomes">${(item.learningOutcomes || []).map(outcome => `<li>${e(outcome)}</li>`).join('')}</ul><div class="event-next-step"><div class="eyebrow">You'll make</div><p>${e(item.output)}</p></div></section>${publicResources.length ? `<section class="section-block"><div class="section-heading"><div><div class="eyebrow">Included with this event</div><h2>Event resources</h2><p class="muted">These materials are available before the event. More may be released in the participant room.</p></div></div>${resourceRows({ audience: 'public' })}</section>` : ''}<section class="section-block"><h2>What happens next</h2><ol class="outcomes"><li>Attend the live event or use the event resources.</li><li>Build or adapt a learning experience for your learners.</li><li>Share it in the event room for feedback.</li></ol></section><section class="event-next-step"><div class="eyebrow">After you register</div><h2>Your event room</h2><p>Questions, workshop links, the build challenge and participant work all stay attached to this event.</p><a class="button secondary" href="${roomUrl}">Preview this room ${icon('arrow')}</a></section></article>
       <aside class="registration-panel" id="registration-panel"><div class="eyebrow">Register for this event</div><h2>Reserve your place</h2><p class="muted">This preview form demonstrates the journey only. It does not create a booking or send an email.</p><form id="registration-form"><label>Display name<input name="displayName" maxlength="60" autocomplete="off" placeholder="Use a sample name" required></label><label>Email (preview only)<input name="email" type="email" autocomplete="off" placeholder="you@example.com" required></label><label class="checkbox-row"><input type="checkbox" name="studioConsent" ${state.profile ? 'checked' : ''}><span>${state.profile ? 'Use my existing Studio profile for discussions and sharing work. Uncheck to continue with event registration only.' : 'Also create a Studio profile for discussions and sharing work. This is optional.'}</span></label><p class="muted small">The checkbox does not create a real account here. A live version would verify your email and keep event booking separate from Studio membership.</p><p class="form-error" role="alert" hidden></p><button class="button primary full-width" type="submit">Preview registration ${icon('arrow')}</button></form><a class="text-link registration-skip" href="${roomUrl}">Explore the room preview</a></aside>
     </div></main>`;
 }
@@ -118,12 +215,12 @@ function openShare(slug) {
 function renderBuilder() {
   return `${prototypeBar()}${header()}<main id="main" class="public-main builder-main"><a class="back-link" href="${base}">Publisher Studio / Events</a><div class="builder-heading"><div><div class="eyebrow">Event Builder / Preview</div><h1>Create a Studio event</h1><p class="lead">Use the same structure for every event. Each event gets a public page, a participant room and a connected build project.</p></div><span class="tag">Draft only</span></div><div class="builder-flow" aria-label="Event publishing process"><span class="current">1. Details</span><span>2. Schedule</span><span>3. Room and team</span><span>4. Review and publish</span></div><div class="builder-warning"><strong>This builder is a prototype.</strong> Drafts stay in this browser tab. Do not enter real attendee details, private Zoom links or confidential material.</div>
     <form id="event-builder-form" class="event-builder-form"><div class="builder-columns"><div class="builder-fields">
-      <section class="builder-section"><div class="builder-section-heading"><span>01</span><div><h2>Event details</h2><p>Tell people who this is for and what they will leave with.</p></div></div><label>Event title<input name="title" maxlength="100" placeholder="e.g. Build an interactive speaking lesson" required></label><label>Short description<textarea name="summary" rows="3" maxlength="320" placeholder="Explain the teaching problem or skill this workshop addresses." required></textarea></label><div class="builder-grid"><label>Subject<input name="subject" maxlength="40" placeholder="English" required></label><label>Topic<input name="topic" maxlength="50" placeholder="Speaking" required></label><label>Level<input name="level" maxlength="32" placeholder="B1" required></label><label>Audience<input name="audience" maxlength="100" placeholder="English teachers and tutors" required></label></div><label>What will participants make?<textarea name="output" rows="2" maxlength="220" placeholder="One concrete outcome from the session" required></textarea></label></section>
+      <section class="builder-section"><div class="builder-section-heading"><span>01</span><div><h2>Event details</h2><p>Tell people who this is for, what they will learn and what they will make.</p></div></div><label>Event title<input name="title" maxlength="100" placeholder="e.g. Build an interactive speaking lesson" required></label><label>Short description<textarea name="summary" rows="3" maxlength="320" placeholder="Explain the teaching problem or skill this workshop addresses." required></textarea></label><div class="builder-grid"><label>Subject<input name="subject" maxlength="40" placeholder="English" required></label><label>Topic<input name="topic" maxlength="50" placeholder="Speaking" required></label><label>Level<input name="level" maxlength="32" placeholder="B1" required></label><label>Audience<input name="audience" maxlength="100" placeholder="English teachers and tutors" required></label></div><label>Learning outcomes <span class="muted">(one outcome per line)</span><textarea name="learningOutcomes" rows="4" maxlength="800" placeholder="Adapt a speaking task into a clear lesson sequence\nDesign one purposeful learner activity\nPlan how learners will reflect on their progress" required></textarea></label><label>What will participants make?<textarea name="output" rows="2" maxlength="220" placeholder="One concrete outcome from the session" required></textarea></label></section>
       <section class="builder-section"><div class="builder-section-heading"><span>02</span><div><h2>Schedule and online session</h2><p>Dates are stored with an explicit timezone and displayed in each participant's local time.</p></div></div><div class="builder-grid"><label>Start date and time<input name="startsAt" type="datetime-local" required></label><label>Event timezone<select name="timezone"><option value="Asia/Ho_Chi_Minh">Asia / Ho Chi Minh</option><option value="UTC">UTC</option><option value="Europe/London">Europe / London</option><option value="America/New_York">America / New York</option></select></label><label>Duration<select name="duration"><option>60</option><option>75</option><option>90</option><option>120</option></select></label><label>Trainer name<input name="trainer" maxlength="60" placeholder="Assigned Wistudi trainer" required></label></div><div class="integration-card"><div><span class="eyebrow">Zoom</span><strong>Manual meeting link in this preview</strong><p>For the live system, show the participant join link only inside their registered event room.</p></div><span class="integration-state">Not connected</span><label>Test meeting link<input name="zoomUrl" type="url" placeholder="https://zoom.us/j/..." autocomplete="off"></label><button class="button secondary" type="button" disabled>Connect Zoom account</button></div></section>
-      <section class="builder-section"><div class="builder-section-heading"><span>03</span><div><h2>Event media</h2><p>Use real workshop or teaching material, with accessible descriptions.</p></div></div><label>Thumbnail image<input name="thumbnail" type="file" accept="image/png,image/jpeg,image/webp" data-thumbnail></label><label>Image description<input name="imageAlt" maxlength="150" placeholder="Describe the event artwork" ></label><label>Optional video preview link<input name="videoUrl" type="url" placeholder="YouTube or Vimeo URL" autocomplete="off"></label><div class="upload-note">Image preview works locally in this browser. Files are not uploaded. Direct video upload needs approved media storage and processing.</div><div id="builder-media-preview" class="builder-media-preview" hidden></div></section>
-      <section class="builder-section"><div class="builder-section-heading"><span>04</span><div><h2>Room, Publisher Kit and project</h2><p>This is where the event leads into ongoing creation.</p></div></div><label>Featured Flow or template<input name="templateTitle" maxlength="100" placeholder="Template participants will explore"></label><label>Worksheet or resource<input name="worksheetTitle" maxlength="100" placeholder="A related printable or teaching resource"></label><label>Discussion prompt<input name="discussionPrompt" maxlength="180" placeholder="What question should participants consider before the event?"></label><label>Build challenge title<input name="challengeTitle" maxlength="100" placeholder="The practical creation task" required></label><label>Build challenge brief<textarea name="challengeBrief" rows="3" maxlength="400" placeholder="Describe what to make, share and ask for feedback on." required></textarea></label><label>Wistudi creation link<input name="wistudiLink" type="url" placeholder="Link to a Flow or template, when available" autocomplete="off"></label></section>
+      <section class="builder-section"><div class="builder-section-heading"><span>03</span><div><h2>Event artwork and promotion</h2><p>Use a wide image for the event page and separate artwork for the event listing.</p></div></div><label>Event page banner image<input name="bannerImage" type="file" accept="image/png,image/jpeg,image/webp" data-media-file="bannerImage"></label><label>Event listing image<input name="cardImage" type="file" accept="image/png,image/jpeg,image/webp" data-media-file="cardImage"></label><label>Optional mobile listing crop<input name="mobileCardImage" type="file" accept="image/png,image/jpeg,image/webp" data-media-file="mobileCardImage"></label><div class="upload-note">Use a 16:9 banner for the event page. Event cards use a wide crop on desktop and a narrow 2:3 portrait crop on mobile. If no mobile image is supplied, the card image is cropped around its center. Keep important faces and text near the center. Files preview in this browser only.</div><label>Event promotion video link<input name="promoVideoUrl" type="url" placeholder="YouTube or Vimeo link" autocomplete="off"></label><label>Or choose a short video file<input name="promoVideoFile" type="file" accept="video/mp4,video/webm" data-media-file="promoVideoFile"></label><label>Media description for screen readers<input name="imageAlt" maxlength="150" placeholder="Describe the key information in the artwork"></label><div id="builder-media-preview" class="builder-media-preview" hidden></div><div class="upload-note">YouTube and Vimeo links can be embedded when supported. Direct video files preview locally only; live upload and video delivery need managed media storage.</div></section>
+      <section class="builder-section"><div class="builder-section-heading"><span>04</span><div><h2>Event resources and project</h2><p>Add only the materials this event needs. Each can be shown before registration or released in the participant room later.</p></div></div><div class="resource-editor-intro"><strong>Event resources</strong><p>Examples include a Flow, PDF or Word worksheet, a video, a Drive link or step-by-step instructions. Each item can have its own description and release time.</p></div><input type="hidden" name="resourcesJson" value="[]"><div id="builder-resource-list" class="kit-editor-list"><p class="muted small">No event resources added. Add this section's materials only when the event needs them.</p></div><button class="button secondary builder-add-resource" type="button" data-action="add-kit-resource">${icon('plus')} Add an event resource</button><div class="upload-note">Files are selectable for this preview, but are not stored or uploaded. Production attachments need approved storage and permission checks.</div><label>Discussion prompt<input name="discussionPrompt" maxlength="180" placeholder="What question should participants consider before the event?"></label><label>Build challenge title<input name="challengeTitle" maxlength="100" placeholder="The practical creation task" required></label><label>Build challenge brief<textarea name="challengeBrief" rows="3" maxlength="400" placeholder="Describe what to make, share and ask for feedback on." required></textarea></label><label>Wistudi creation link<input name="wistudiLink" type="url" placeholder="Link to a Flow or template, when available" autocomplete="off"></label></section>
       <section class="builder-section"><div class="builder-section-heading"><span>05</span><div><h2>Team and permissions</h2><p>Assign people to specific events and rooms.</p></div></div><div class="permission-preview"><div><strong>Event builder</strong><span>Creates and edits this event</span></div><div><strong>Trainer / moderator</strong><span>Hosts the session and manages this room</span></div><p>Role invitations must be email-bound, time-limited and revocable. Invitation links are shown as a future service; no permissions are granted by this prototype.</p><button class="button secondary" type="button" disabled>Invite event team</button></div></section>
-    </div><aside class="builder-aside"><div class="builder-sticky"><div class="eyebrow">Publishing checklist</div><h2>One event, one connected journey</h2><ol class="builder-checklist"><li>Public event page and share link</li><li>Registration and confirmation</li><li>Private participant room</li><li>Publisher Kit and discussion</li><li>Build challenge and submission</li><li>Optional Wistudi publish step</li></ol><hr><p class="muted small">The public event page uses its own share metadata. The Zoom join link and participant work stay private to the room.</p><div class="actions builder-controls"><button type="button" class="button secondary" data-action="save-builder">Save draft in this tab</button><button type="button" class="button primary" data-action="preview-builder">Preview event</button><button type="button" class="button" disabled title="Publishing requires authenticated roles and a database">Publish event</button></div><p id="builder-save-status" class="muted small" role="status"></p></div></aside></div></form></main><footer class="public-footer"><a href="${base}">Publisher Studio events</a><span>Team invites, Zoom connection, direct uploads and publishing require live services.</span></footer>`;
+    </div><aside class="builder-aside"><div class="builder-sticky"><div class="eyebrow">Event publishing checklist</div><h2>One event, one connected journey</h2><ol class="builder-checklist"><li>Public event page and share link</li><li>Registration and confirmation</li><li>Private participant room</li><li>Optional event resources</li><li>Build challenge and submission</li><li>Optional Wistudi publish step</li></ol><hr><p class="muted small">Only resources marked for public preview appear before registration. Zoom links and room-only resources stay in the participant room.</p><div class="actions builder-controls"><button type="button" class="button secondary" data-action="save-builder">Save draft in this tab</button><button type="button" class="button primary" data-action="preview-builder">Preview event</button><button type="button" class="button" disabled title="Publishing requires authenticated roles and a database">Publish event</button></div><p id="builder-save-status" class="muted small" role="status"></p></div></aside></div></form></main><footer class="public-footer"><a href="${base}">Publisher Studio events</a><span>Team invites, Zoom connection, direct uploads and publishing require live services.</span></footer>`;
 }
 
 function renderNav() {
@@ -131,7 +228,8 @@ function renderNav() {
 }
 
 function renderStudio() {
-  return `${prototypeBar()}${header()}<div class="room-topbar"><a class="room-back" href="${base}" aria-label="Back to all Publisher Studio events">${icon('back')}<span>Events</span></a><a class="room-event-link" href="${eventUrl(selectedEvent)}" aria-label="View event details"><strong>${e(selectedEvent.title)}</strong></a><button class="button secondary room-invite" data-action="share-event" data-slug="${e(selectedEvent.slug)}" aria-label="Invite someone to this event">${icon('share')}<span>Invite</span></button></div><div class="workspace"><aside class="workspace-sidebar"><div class="studio-label">${tag(`${selectedEvent.subject} Studio`, 'teal')}<h2>Keep working<br>on your project.</h2><p class="muted small">This event room</p></div>${renderNav()}<div class="sidebar-bottom"><a class="text-link" href="${base}">Browse events ${icon('arrow')}</a><p class="muted small">${state.profile ? `Previewing as ${e(state.profile.displayName)}` : 'Room access is a preview'}</p></div></aside><main id="main" class="workspace-main" tabindex="-1"><div id="panel">${renderPanel()}</div></main><aside class="context-rail"><div class="eyebrow">This event</div><h2>${e(selectedEvent.title)}</h2><div class="tags">${tag(selectedEvent.subject)}${tag(selectedEvent.topic)}${tag(selectedEvent.level)}</div><div class="person-line">${person(selectedEvent.trainer)}<div><strong>${e(selectedEvent.trainer)}</strong><span class="muted small">Assigned trainer</span></div></div><hr>${phaseControl()}<hr><div class="eyebrow">Publisher Kit</div>${selectedResources.map(item => `<button class="rail-resource" data-action="resource" data-id="${item.id}">${icon('book')}<span>${e(item.title)}</span></button>`).join('')}<hr><p class="muted small">Prototype conversations are stored only in this browser tab. They are not shared with other participants.</p></aside></div>`;
+  const availableResources = selectedResources.filter(resourceIsAvailable);
+  return `${prototypeBar()}${header()}<div class="room-topbar"><a class="room-back" href="${base}" aria-label="Back to all Publisher Studio events">${icon('back')}<span>Events</span></a><a class="room-event-link" href="${eventUrl(selectedEvent)}" aria-label="View event details"><strong>${e(selectedEvent.title)}</strong></a><button class="button secondary room-invite" data-action="share-event" data-slug="${e(selectedEvent.slug)}" aria-label="Invite someone to this event">${icon('share')}<span>Invite</span></button></div><div class="workspace"><aside class="workspace-sidebar"><div class="studio-label">${tag(`${selectedEvent.subject} Studio`, 'teal')}<h2>Keep working<br>on your project.</h2><p class="muted small">This event room</p></div>${renderNav()}<div class="sidebar-bottom"><a class="text-link" href="${base}">Browse events ${icon('arrow')}</a><p class="muted small">${state.profile ? `Previewing as ${e(state.profile.displayName)}` : 'Room access is a preview'}</p></div></aside><main id="main" class="workspace-main" tabindex="-1"><div id="panel">${renderPanel()}</div></main><aside class="context-rail"><div class="eyebrow">This event</div><h2>${e(selectedEvent.title)}</h2><div class="tags">${tag(selectedEvent.subject)}${tag(selectedEvent.topic)}${tag(selectedEvent.level)}</div><div class="person-line">${person(selectedEvent.trainer)}<div><strong>${e(selectedEvent.trainer)}</strong><span class="muted small">Assigned trainer</span></div></div><hr>${phaseControl()}${selectedResources.length ? `<hr><div class="eyebrow">Event resources</div>${availableResources.map(item => `<button class="rail-resource" data-action="resource" data-id="${item.id}">${icon('book')}<span>${e(item.title)}</span></button>`).join('') || '<p class="muted small">Resources appear here when they become available.</p>'}` : ''}<hr><p class="muted small">Prototype conversations are stored only in this browser tab. They are not shared with other participants.</p></aside></div>`;
 }
 
 function panelHeading(title, description, action = '') {
@@ -157,27 +255,34 @@ function renderPanel() {
       return `${panelHeading('Community Workbench', 'Ideas, help and work in progress, with the context attached.', button(`${icon('plus')} Contribute`, 'new-thread', '', 'button primary'))}<label class="filter-select">Show<select id="thread-filter"><option value="all">All contributions</option>${Object.entries(contributionKinds).map(([key, label]) => `<option value="${key}" ${threadFilter === key ? 'selected' : ''}>${label}</option>`).join('')}</select></label><div class="thread-list">${threads.map(thread => `<article class="thread-card"><div class="person-line">${person(thread.author)}<div><strong>${e(thread.author)}</strong><span class="muted small">${e(contributionKinds[thread.kind])}</span></div></div><button class="thread-title" data-action="thread" data-id="${thread.id}">${e(thread.title)}</button><p>${e(thread.body)}</p><div class="thread-footer"><span class="context-label">${icon('book')}${e(contextFor(thread.contextId).title)}</span>${button(`${icon('chat')} ${thread.replies.length} replies`, 'thread', `data-id="${thread.id}"`, 'text-link')}</div></article>`).join('') || `<div class="empty-state"><h2>No contributions yet</h2><p>Bring an idea or something you are working on.</p>${button('Start a contribution', 'new-thread')}</div>`}</div>`;
     }
     case 'resources':
-      return `${panelHeading('Your Publisher Kit', 'The lesson outline, task brief and planning guide for this workshop.')}<label class="search-label">Search resources<input type="search" id="resource-search" placeholder="Search the kit" value="${e(resourceFilter)}"></label><div id="resource-results">${filteredResources()}</div><p class="notice">These are sample teaching materials, not live Wistudi templates. Remix and workspace saving are not connected yet.</p>`;
+      return `${panelHeading('Event resources', 'Files, links and instructions selected for this event. Availability follows the event schedule.')}<label class="search-label">Search event resources<input type="search" id="resource-search" placeholder="Search event resources" value="${e(resourceFilter)}"></label><div id="resource-results">${filteredResources()}</div><p class="notice">These are sample resources. File uploads, link previews and Wistudi remixing are not connected yet.</p>`;
     default: {
       const hasSubmission = state.submissions.some(item => item.challengeId === selectedChallenge.id);
       const hasJoined = state.joinedChallenges.includes(selectedChallenge.id);
       const step = hasSubmission ? 4 : (hasJoined || selectedPhase() === 'post_session') ? 3 : 2;
       const labels = ['Discover', 'Learn', 'Build', 'Share', 'Publish'];
       const journey = labels.map((label, index) => `<li class="${index + 1 < step ? 'complete' : index + 1 === step ? 'current' : ''}">${label}</li>`).join('');
-      return `${panelHeading('Event room', e(selectedEvent.title))}<div class="room-progress"><div class="room-progress-top"><strong>Your publisher journey</strong><span>Step ${step} of 5</span></div><ol class="journey" aria-label="Discover, learn, build, share, publish">${journey}</ol><p class="muted small">Your progress is a guide, not a score. Publishing in Wistudi is optional.</p></div><div class="mobile-phase">${phaseControl()}</div>${phaseContent()}<section class="section-block"><div class="section-heading"><h2>Start with the Publisher Kit</h2><a class="text-link" href="#resources">View all ${icon('arrow')}</a></div>${resourceRows(2)}</section><section class="section-block"><div class="section-heading"><h2>This event's build challenge</h2>${tag('Build', 'teal')}</div><h3>${e(selectedChallenge.title)}</h3><p class="muted">${e(selectedChallenge.description)}</p><a class="button secondary" href="#challenge">Open challenge ${icon('arrow')}</a></section><section class="section-block"><h2>Share this event</h2><p class="muted">Invite a colleague to register. Room access is given after registration.</p>${button('Share event link', 'share-event', `data-slug="${e(selectedEvent.slug)}"`)}</section>`;
+      return `${panelHeading('Event room', e(selectedEvent.title))}<div class="room-progress"><div class="room-progress-top"><strong>Your publisher journey</strong><span>Step ${step} of 5</span></div><ol class="journey" aria-label="Discover, learn, build, share, publish">${journey}</ol><p class="muted small">Your progress is a guide, not a score. Publishing in Wistudi is optional.</p></div><div class="mobile-phase">${phaseControl()}</div>${phaseContent()}${selectedResources.length ? `<section class="section-block"><div class="section-heading"><h2>Event resources</h2><a class="text-link" href="#resources">View all ${icon('arrow')}</a></div>${resourceRows({ limit: 2 })}</section>` : ''}<section class="section-block"><div class="section-heading"><h2>This event's build challenge</h2>${tag('Build', 'teal')}</div><h3>${e(selectedChallenge.title)}</h3><p class="muted">${e(selectedChallenge.description)}</p><a class="button secondary" href="#challenge">Open challenge ${icon('arrow')}</a></section><section class="section-block"><h2>Share this event</h2><p class="muted">Invite a colleague to register. Room access is given after registration.</p>${button('Share event link', 'share-event', `data-slug="${e(selectedEvent.slug)}"`)}</section>`;
     }
   }
 }
 
 function filteredResources() {
-  const items = selectedResources.filter(item => `${item.title} ${item.description} ${item.label}`.toLowerCase().includes(resourceFilter.toLowerCase().trim()));
-  return items.length ? items.map(item => { const context = contextFor(item.id); return `<article class="resource-card"><div class="eyebrow">${e(item.label)}</div><h2>${e(item.title)}</h2><p class="muted">${e(item.description)}</p><div class="tags">${tag(context.subject)}${tag(context.topic)}${tag(context.level)}${tag('Sample')}</div><div class="actions">${button('Preview & discuss', 'resource', `data-id="${item.id}"`)}<button class="button secondary" disabled title="Wistudi account connection is planned for a later phase">Remix in Wistudi</button></div></article>`; }).join('') : '<div class="empty-state"><h2>No matching resources</h2><p>Try a different title or resource type.</p></div>';
+  const query = resourceFilter.toLowerCase().trim();
+  const items = selectedResources.filter(item => `${item.title} ${item.label} ${resourceIsAvailable(item) ? item.description : ''}`.toLowerCase().includes(query));
+  return items.length ? items.map(item => {
+    const context = contextFor(item.id);
+    const available = resourceIsAvailable(item);
+    const timing = phaseLabel[resourcePhase(item)] || phaseLabel.upcoming;
+    return `<article class="resource-card ${available ? '' : 'resource-locked'}"><div class="eyebrow">${e(item.label)} / ${e(timing)}</div><h2>${e(item.title)}</h2>${available ? `<p class="muted">${e(item.description)}</p><div class="tags">${tag(context.subject)}${tag(context.topic)}${tag(context.level)}${tag('Sample')}</div><div class="actions">${button('Preview & discuss', 'resource', `data-id="${item.id}"`)}<button class="button secondary" disabled title="Wistudi account connection is planned for a later phase">Remix in Wistudi</button></div>` : `<p class="muted">This resource will appear here ${e(timing.toLowerCase())}.</p><button class="button secondary" disabled>Available ${e(timing.toLowerCase())}</button>`}</article>`;
+  }).join('') : '<div class="empty-state"><h2>No event resources</h2><p>The event creator has not added resources for this workshop.</p></div>';
 }
 
 const BUILDER_DRAFT_KEY = `${STORAGE_KEY}.event-builder-draft`;
 
 function saveBuilderDraft(form = document.querySelector('#event-builder-form')) {
   if (!form) return false;
+  syncKitEditor();
   const values = Object.fromEntries([...new FormData(form)].filter(([, value]) => typeof value === 'string'));
   try { storage?.setItem(BUILDER_DRAFT_KEY, JSON.stringify(values)); return Boolean(storage); }
   catch { return false; }
@@ -192,6 +297,10 @@ function restoreBuilderDraft() {
       const field = form.elements.namedItem(name);
       if (field && field.type !== 'file' && typeof value === 'string') field.value = value;
     }
+    let resources = [];
+    try { resources = JSON.parse(values.resourcesJson || '[]'); } catch { /* Ignore damaged resource draft data. */ }
+    renderKitEditor(Array.isArray(resources) ? resources : []);
+    renderBuilderMediaPreview();
     if (Object.keys(values).length) {
       const status = document.querySelector('#builder-save-status');
       if (status) status.textContent = 'A local draft is saved in this browser tab.';
@@ -199,29 +308,64 @@ function restoreBuilderDraft() {
   } catch { /* A damaged preview draft should not prevent the builder opening. */ }
 }
 
+function safeHttpsUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' ? url.href : '';
+  } catch { return ''; }
+}
+
+function resourcePreview(resource) {
+  const assetUrl = localPreviewUrls.get(`resource:${resource.key}`);
+  const externalUrl = safeHttpsUrl(resource.url);
+  const extension = resource.fileName?.split('.').pop()?.toLowerCase() || '';
+  const media = [];
+  if (assetUrl && ['mp4', 'webm'].includes(extension)) media.push(`<video class="resource-preview-video" controls playsinline preload="metadata" src="${e(assetUrl)}"></video>`);
+  else if (assetUrl && ['png', 'jpg', 'jpeg', 'webp'].includes(extension)) media.push(`<img class="resource-preview-image" src="${e(assetUrl)}" alt="${e(resource.description || resource.title)}">`);
+  else if (assetUrl) media.push(`<a class="resource-link-preview" href="${e(assetUrl)}" target="_blank" rel="noopener noreferrer">Open attached file ${e(resource.title)} ${icon('arrow')}</a>`);
+  else if (resource.fileName) media.push(`<p class="muted small">${e(resource.fileName)} was selected in the draft. Reselect it to preview the attachment.</p>`);
+  if (externalUrl) {
+    const hostname = new URL(externalUrl).hostname;
+    media.push(videoEmbed(externalUrl, resource.title) || `<div class="external-resource-preview"><span class="eyebrow">Linked resource / ${e(hostname)}</span><a class="resource-link-preview" href="${e(externalUrl)}" target="_blank" rel="noopener noreferrer">Open ${e(resource.title)} in a new tab ${icon('arrow')}</a></div>`);
+  }
+  const steps = resource.instructions.split(/\r?\n/).map(step => step.trim()).filter(Boolean);
+  return `<article class="event-resource-preview"><div class="eyebrow">${e(resourceTypes[resource.type] || resourceTypes.other)} / ${e(phaseLabel[resource.availableFrom] || phaseLabel.upcoming)}</div><h3>${e(resource.title || 'Untitled resource')}</h3>${resource.description ? `<p class="muted">${e(resource.description)}</p>` : ''}${media.join('')}${steps.length ? `<h4>Instructions</h4><ol>${steps.map(step => `<li>${e(step)}</li>`).join('')}</ol>` : ''}</article>`;
+}
+
 function previewBuilder() {
   const form = document.querySelector('#event-builder-form');
   if (!form) return;
+  syncKitEditor();
   const data = Object.fromEntries([...new FormData(form)].filter(([, value]) => typeof value === 'string'));
+  const resources = readKitEditor().filter(item => item.title.trim());
+  const publicResources = resources.filter(item => item.availableFrom === 'upcoming' && item.publicPreview);
+  const roomResources = resources.filter(item => item.availableFrom !== 'upcoming' || !item.publicPreview);
   const title = data.title?.trim() || 'Your event title';
   const output = data.output?.trim() || 'Add the outcome participants will create.';
+  const outcomes = (data.learningOutcomes || '').split(/\r?\n/).map(item => item.trim()).filter(Boolean);
+  const banner = localPreviewUrls.get('bannerImage');
+  const card = localPreviewUrls.get('cardImage');
+  const mobileCard = localPreviewUrls.get('mobileCardImage');
+  const promoFile = localPreviewUrls.get('promoVideoFile');
+  const promoLink = safeHttpsUrl(data.promoVideoUrl || '');
+  const promo = promoFile ? `<video class="preview-promo-video" controls playsinline preload="metadata" src="${e(promoFile)}"></video>` : promoLink ? videoEmbed(promoLink, `${title} event promotion video`) || `<a class="resource-link-preview" href="${e(promoLink)}" target="_blank" rel="noopener noreferrer">Open event video link ${icon('arrow')}</a>` : '';
+  const publicBlock = publicResources.length ? `<section class="event-preview-section"><div class="eyebrow">Available before the event</div><h3>Event resources</h3>${publicResources.map(resourcePreview).join('')}</section>` : '';
+  const roomBlock = roomResources.length ? `<section class="event-preview-section"><div class="eyebrow">Participant room</div><h3>Resources available to registered participants</h3>${roomResources.map(resourcePreview).join('')}</section>` : '';
   dialogMode = 'builder-preview';
-  modal('Event page preview', `<div class="dialog-content"><div class="event-preview-card"><div class="eyebrow">${e(data.subject || 'Subject')} Publisher Studio / ${e(data.topic || 'Topic')}</div><h2>${e(title)}</h2><p class="muted">${e(data.summary || 'Your event description will appear here.')}</p><div class="event-facts"><div><span class="muted small">Time</span><strong>${e(data.startsAt || 'Add a date and time')} / ${e(data.timezone || 'Choose a timezone')}</strong></div><div><span class="muted small">Trainer</span><strong>${e(data.trainer || 'Assign a trainer')}</strong></div></div><div class="event-next-step"><div class="eyebrow">You'll make</div><p>${e(output)}</p></div><div class="event-next-step"><div class="eyebrow">Event room</div><strong>${e(data.challengeTitle || 'Add a build challenge')}</strong><p>${e(data.challengeBrief || 'The challenge appears here with the Publisher Kit and discussion.')}</p></div><p class="notice">This is a local layout preview. It has not been published or shared.</p></div></div>`);
+  modal('Event page and mobile card preview', `<div class="dialog-content"><div class="event-preview-layout"><div class="event-preview-card"><div class="eyebrow">${e(data.subject || 'Subject')} Publisher Studio / ${e(data.topic || 'Topic')}</div><h2>${e(title)}</h2><p class="muted">${e(data.summary || 'Your event description will appear here.')}</p>${banner ? `<img class="preview-banner" src="${e(banner)}" alt="${e(data.imageAlt || 'Event banner preview')}">` : ''}${promo ? `<div class="preview-promo">${promo}</div>` : ''}<div class="event-facts"><div><span class="muted small">Time</span><strong>${e(data.startsAt || 'Add a date and time')} / ${e(data.timezone || 'Choose a timezone')}</strong></div><div><span class="muted small">Trainer</span><strong>${e(data.trainer || 'Assign a trainer')}</strong></div></div><section class="event-preview-section"><div class="eyebrow">Learning outcomes</div>${outcomes.length ? `<ul>${outcomes.map(outcome => `<li>${e(outcome)}</li>`).join('')}</ul>` : '<p class="muted">Add learning outcomes to show what participants will be able to do.</p>'}<div class="event-next-step"><div class="eyebrow">You'll make</div><p>${e(output)}</p></div></section>${publicBlock}<div class="event-next-step"><div class="eyebrow">Event room</div><strong>${e(data.challengeTitle || 'Add a build challenge')}</strong><p>${e(data.challengeBrief || 'The challenge appears here with resources and discussion.')}</p></div><p class="notice">Local preview only. It has not been published or shared.</p></div><aside class="event-mobile-preview"><div class="eyebrow">Event listing card / mobile crop</div><div class="mobile-event-card">${mobileCard ? `<img src="${e(mobileCard)}" alt="${e(data.imageAlt || 'Mobile event card crop')}">` : card ? `<img src="${e(card)}" alt="${e(data.imageAlt || 'Event card preview')}">` : '<div class="event-art-placeholder"><span>Wistudi Publisher Studio</span><strong>Event card</strong></div>'}<div><span class="eyebrow">${e(data.subject || 'Subject')} / ${e(data.topic || 'Topic')}</span><h3>${e(title)}</h3><p>${e(data.startsAt || 'Date and time shown here')}</p></div></div><p class="muted small">Mobile cards use a portrait crop. Supply a separate mobile image when the centered crop cuts off important content.</p></aside></div>${roomBlock}</div>`);
 }
 
-let thumbnailPreviewUrl = '';
-function previewThumbnail(field) {
+function previewLocalFile(field, key, kinds, maxBytes, message) {
   const file = field.files?.[0];
-  const preview = document.querySelector('#builder-media-preview');
-  if (!preview) return;
-  if (thumbnailPreviewUrl) URL.revokeObjectURL(thumbnailPreviewUrl);
-  if (!file) { preview.hidden = true; preview.replaceChildren(); thumbnailPreviewUrl = ''; return; }
-  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 8 * 1024 * 1024) {
-    field.value = ''; notify('Choose a JPG, PNG or WebP image under 8 MB.'); return;
+  const previous = localPreviewUrls.get(key);
+  if (previous) URL.revokeObjectURL(previous);
+  localPreviewUrls.delete(key);
+  if (!file) { renderBuilderMediaPreview(); return; }
+  if (!kinds.includes(file.type) || file.size > maxBytes) {
+    field.value = ''; notify(message); renderBuilderMediaPreview(); return;
   }
-  thumbnailPreviewUrl = URL.createObjectURL(file);
-  preview.innerHTML = `<img src="${thumbnailPreviewUrl}" alt="${e(document.querySelector('[name="imageAlt"]')?.value || 'Selected event thumbnail preview')}"><span>${e(file.name)} / local preview only</span>`;
-  preview.hidden = false;
+  localPreviewUrls.set(key, URL.createObjectURL(file));
+  renderBuilderMediaPreview();
 }
 
 function restoreDrafts(container = document) {
@@ -251,11 +395,20 @@ function modal(title, body, kind = '') {
 
 function openResource(id) {
   const resource = selectedResources.find(item => item.id === id);
-  if (!resource) return;
+  if (!resource || !resourceIsAvailable(resource)) return;
   const context = contextFor(id);
   dialogTarget = id; dialogMode = 'resource';
   const replies = state.resourceReplies[id] || [];
   modal(resource.title, `<div class="dialog-content"><div class="tags">${tag(resource.label, 'teal')}${tag(context.subject)}${tag(context.topic)}${tag(context.level)}${tag('Sample resource')}</div><p class="muted">${e(resource.description)}</p><div class="resource-outline">${resource.sections.map(([title, body], index) => `<section><span class="outline-number">0${index + 1}</span><div><h3>${e(title)}</h3><p>${e(body)}</p></div></section>`).join('')}</div><div class="section-heading"><h3>Discuss this ${e(resource.type)}</h3><span class="muted small">${replies.length} replies</span></div><div class="messages">${replies.map(message).join('') || '<p class="muted">How would you adapt this for your learners?</p>'}</div></div>${replyForm()}`, 'conversation-dialog');
+}
+
+function openPublicResource(id) {
+  const resource = selectedResources.find(item => item.id === id);
+  if (!resource || resourcePhase(resource) !== 'upcoming' || resource.publicPreview !== true) return;
+  const externalUrl = safeHttpsUrl(resource.url || '');
+  const externalPreview = externalUrl ? videoEmbed(externalUrl, resource.title) || `<a class="resource-link-preview" href="${e(externalUrl)}" target="_blank" rel="noopener noreferrer">Open ${e(resource.title)} in a new tab ${icon('arrow')}</a>` : '';
+  const sections = Array.isArray(resource.sections) ? resource.sections : [];
+  modal(resource.title, `<div class="dialog-content"><div class="tags">${tag(resource.label, 'teal')}${tag('Available before the event')}</div><p class="muted">${e(resource.description)}</p>${externalPreview}${sections.length ? `<div class="resource-outline">${sections.map(([title, body], index) => `<section><span class="outline-number">0${index + 1}</span><div><h3>${e(title)}</h3><p>${e(body)}</p></div></section>`).join('')}</div>` : ''}<p class="notice">You can discuss and adapt this resource in the participant room after registering.</p></div>`);
 }
 
 function message(reply) {
@@ -283,10 +436,26 @@ document.addEventListener('click', event => {
   if (!target) return;
   const { action, id, value } = target.dataset;
   if (action === 'resource') openResource(id);
+  if (action === 'public-resource') openPublicResource(id);
   if (action === 'thread') openThread(id);
   if (action === 'new-thread') newThread();
   if (action === 'close') dialog.close();
   if (action === 'share-event') openShare(target.dataset.slug);
+  if (action === 'add-kit-resource') {
+    const next = [...readKitEditor(), { key: `resource-${Math.random().toString(36).slice(2, 10)}`, type: 'flow', availableFrom: 'upcoming', publicPreview: false }];
+    renderKitEditor(next);
+    document.querySelector('.kit-editor-row:last-child [data-kit-field="title"]')?.focus({ preventScroll: true });
+  }
+  if (action === 'remove-kit-resource') {
+    const key = target.dataset.key;
+    const localUrl = localPreviewUrls.get(`resource:${key}`);
+    if (localUrl) URL.revokeObjectURL(localUrl);
+    localPreviewUrls.delete(`resource:${key}`);
+    renderKitEditor(readKitEditor().filter(item => item.key !== key));
+    const status = document.querySelector('#builder-save-status');
+    if (status) status.textContent = 'Resource removed from this draft.';
+    document.querySelector('[data-action="add-kit-resource"]')?.focus({ preventScroll: true });
+  }
   if (action === 'save-builder') {
     const saved = saveBuilderDraft();
     const status = document.querySelector('#builder-save-status');
@@ -325,6 +494,8 @@ document.addEventListener('click', event => {
   if (action === 'reset') modal('Reset this demo?', `<div class="dialog-content"><p>Your sample profile, questions, votes, replies, submissions and event-builder draft in this tab will be removed. No live Wistudi data is affected.</p><div class="actions">${button('Keep exploring', 'close')}${button('Reset demo', 'confirm-reset', '', 'button primary')}</div></div>`);
   if (action === 'confirm-reset') {
     state = createState(); drafts.clear(); questionFilter = 'all'; threadFilter = 'all'; resourceFilter = '';
+    for (const url of localPreviewUrls.values()) URL.revokeObjectURL(url);
+    localPreviewUrls.clear();
     try { storage?.removeItem(STORAGE_KEY); storage?.removeItem(BUILDER_DRAFT_KEY); } catch { /* In-memory reset still succeeds. */ }
     dialog.close(); persist(); render(); notify('Demo reset. You are back to the sample content.');
   }
@@ -334,11 +505,45 @@ document.addEventListener('change', event => {
   if (event.target.hasAttribute('data-phase')) { state.phaseByEvent[selectedEvent.id] = event.target.value; persist(); render(); [...document.querySelectorAll('[data-phase]')].find(select => select.getClientRects().length)?.focus({ preventScroll: true }); }
   if (event.target.id === 'thread-filter') { threadFilter = event.target.value; render(); document.querySelector('#thread-filter')?.focus({ preventScroll: true }); }
   if (event.target.id === 'event-filter') document.querySelectorAll('.event-card').forEach(card => { card.hidden = event.target.value !== 'all' && card.dataset.subject !== event.target.value; });
-  if (event.target.matches('[data-thumbnail]')) previewThumbnail(event.target);
+  if (event.target.matches('[data-media-file]')) {
+    const key = event.target.dataset.mediaFile;
+    if (key === 'promoVideoFile') previewLocalFile(event.target, key, ['video/mp4', 'video/webm', 'video/quicktime'], 50 * 1024 * 1024, 'Choose an MP4 or WebM video under 50 MB for this local preview.');
+    else previewLocalFile(event.target, key, ['image/jpeg', 'image/png', 'image/webp'], 8 * 1024 * 1024, 'Choose a JPG, PNG or WebP image under 8 MB.');
+  }
+  if (event.target.matches('[data-kit-file]')) {
+    const row = event.target.closest('.kit-editor-row');
+    const key = row?.dataset.resourceKey;
+    const file = event.target.files?.[0];
+    if (key && file) {
+      const allowedExtensions = /\.(pdf|doc|docx|ppt|pptx|xls|xlsx|png|jpe?g|webp|mp4|webm|mp3|wav|m4a|ogg)$/i;
+      if (file.size > 30 * 1024 * 1024 || !allowedExtensions.test(file.name)) {
+        event.target.value = ''; notify('Choose a supported document, image, audio or video file under 30 MB.');
+      } else {
+        const resourceKey = `resource:${key}`;
+        const previous = localPreviewUrls.get(resourceKey);
+        if (previous) URL.revokeObjectURL(previous);
+        localPreviewUrls.set(resourceKey, URL.createObjectURL(file));
+        const hidden = row.querySelector('[data-kit-field="fileName"]');
+        if (hidden) hidden.value = file.name;
+        const note = row.querySelector('.kit-file-note');
+        if (note) note.textContent = `${file.name} / local preview ready`;
+        else event.target.insertAdjacentHTML('afterend', `<p class="kit-file-note" role="status">${e(file.name)} / local preview ready</p>`);
+        syncKitEditor();
+      }
+    }
+  }
+  if (event.target.matches('[data-kit-field="availableFrom"]')) {
+    const checkbox = event.target.closest('.kit-editor-row')?.querySelector('[data-kit-field="publicPreview"]');
+    if (checkbox) { checkbox.disabled = event.target.value !== 'upcoming'; if (checkbox.disabled) checkbox.checked = false; }
+    syncKitEditor();
+  }
+  if (event.target.closest('.kit-editor-row') && event.target.matches('[data-kit-field="publicPreview"]')) syncKitEditor();
 });
 
 document.addEventListener('input', event => {
   if (event.target.id === 'resource-search') { resourceFilter = event.target.value; document.querySelector('#resource-results').innerHTML = filteredResources(); }
+  if (event.target.closest('.kit-editor-row') && event.target.hasAttribute('data-kit-field')) syncKitEditor();
+  if (event.target.name === 'promoVideoUrl' || event.target.name === 'imageAlt') renderBuilderMediaPreview();
   const form = event.target.closest('form[id]');
   if (form && event.target.name && !['email', 'file'].includes(event.target.type)) {
     const draft = drafts.get(form.id) || {};
