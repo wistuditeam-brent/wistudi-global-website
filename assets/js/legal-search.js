@@ -7,6 +7,7 @@ const DOCS=[
 const norm=s=>(s||'').replace(/\s+/g,' ').trim();
 const esc=s=>(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const locale=()=>document.documentElement.dataset.locale||'en';
+const NO_RESULTS={en:'No matching legal sections found.',vi:'Không tìm thấy mục pháp lý phù hợp.', 'zh-cn':'未找到匹配的法律条款。',th:'ไม่พบหัวข้อกฎหมายที่ตรงกัน',id:'Tidak ada bagian hukum yang cocok.',ms:'Tiada bahagian undang-undang yang sepadan.',ar:'لم يتم العثور على أقسام قانونية مطابقة.'};
 const localizeUrl=(path,hash='')=>{
   const u=new URL(path,location.origin);
   const code=locale();
@@ -79,7 +80,7 @@ const init=async()=>{
     }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.item.title.localeCompare(b.item.title)).slice(0,12);
     last=scored;
     if(!scored.length){
-      results.innerHTML='<div class="legal-search-empty">'+esc((document.documentElement.lang||'en').startsWith('en')?'No matching legal sections found.':'No matching legal sections found.')+'</div>';
+      results.innerHTML='<div class="legal-search-empty">'+esc(NO_RESULTS[locale()]||NO_RESULTS.en)+'</div>';
       results.hidden=false;return;
     }
     results.innerHTML=scored.map((x,i)=>'<a class="legal-search-result" role="option" data-i="'+i+'" href="'+esc(localizeUrl(x.item.path,'#'+x.item.id))+'"><span class="legal-search-result-doc">'+esc(x.item.doc)+'</span><span class="legal-search-result-title">'+esc(x.item.title)+'</span><span class="legal-search-result-snippet">'+esc(snippet(x.item.text,q))+'</span></a>').join('');
