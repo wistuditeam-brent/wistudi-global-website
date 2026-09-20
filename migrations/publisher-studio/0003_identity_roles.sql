@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS studio_auth_challenges (
   attempts INTEGER NOT NULL DEFAULT 0 CHECK (attempts >= 0 AND attempts <= 5),
   expires_at TEXT NOT NULL,
   consumed_at TEXT,
-  delivery_status TEXT NOT NULL DEFAULT 'pending' CHECK (delivery_status IN ('pending','sent','failed')),
+  delivery_status TEXT NOT NULL DEFAULT 'pending' CHECK (delivery_status IN ('pending','sent','failed','suppressed')),
   created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS studio_auth_challenges_email ON studio_auth_challenges(email_normalized, created_at DESC);
@@ -74,7 +74,7 @@ CREATE INDEX IF NOT EXISTS studio_membership_consent_user ON studio_membership_c
 CREATE TABLE IF NOT EXISTS studio_role_assignments (
   id TEXT PRIMARY KEY,
   studio_user_id TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('platform_super_admin','studio_admin','event_builder','event_lead','event_co_trainer','event_moderator','showcase_reviewer')),
+  role TEXT NOT NULL CHECK (role IN ('platform_super_admin','studio_admin','event_builder','event_lead','event_co_trainer','event_moderator')),
   scope_type TEXT NOT NULL CHECK (scope_type IN ('platform','studio','event')),
   scope_id TEXT NOT NULL,
   assigned_by TEXT NOT NULL,
@@ -95,7 +95,7 @@ CREATE INDEX IF NOT EXISTS studio_role_scope_active
 CREATE TABLE IF NOT EXISTS studio_role_invitations (
   id TEXT PRIMARY KEY,
   email_normalized TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('platform_super_admin','studio_admin','event_builder','event_lead','event_co_trainer','event_moderator','showcase_reviewer')),
+  role TEXT NOT NULL CHECK (role IN ('platform_super_admin','studio_admin','event_builder','event_lead','event_co_trainer','event_moderator')),
   scope_type TEXT NOT NULL CHECK (scope_type IN ('platform','studio','event')),
   scope_id TEXT NOT NULL,
   invited_by TEXT NOT NULL,
@@ -130,6 +130,43 @@ CREATE TABLE IF NOT EXISTS studio_role_audit (
 );
 CREATE INDEX IF NOT EXISTS studio_role_audit_time ON studio_role_audit(created_at DESC);
 CREATE INDEX IF NOT EXISTS studio_role_audit_scope ON studio_role_audit(scope_type, scope_id, created_at DESC);
+
+
+CREATE TABLE IF NOT EXISTS studio_capability_assignments (
+  id TEXT PRIMARY KEY,
+  studio_user_id TEXT NOT NULL,
+  capability TEXT NOT NULL CHECK (capability IN ('showcase.review','meeting.host')),
+  scope_type TEXT NOT NULL CHECK (scope_type IN ('studio','event')),
+  scope_id TEXT NOT NULL,
+  assigned_by TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  expires_at TEXT,
+  revoked_at TEXT,
+  revoked_by TEXT,
+  FOREIGN KEY (studio_user_id) REFERENCES studio_users(id) ON DELETE CASCADE,
+  FOREIGN KEY (assigned_by) REFERENCES studio_users(id),
+  FOREIGN KEY (revoked_by) REFERENCES studio_users(id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS studio_capability_one_active_assignment
+  ON studio_capability_assignments(studio_user_id, capability, scope_type, scope_id)
+  WHERE revoked_at IS NULL;
+
+CREATE TABLE IF NOT EXISTS studio_event_controls (
+  event_id TEXT PRIMARY KEY,
+  room_open INTEGER NOT NULL DEFAULT 1 CHECK (room_open IN (0,1)),
+  registration_open INTEGER NOT NULL DEFAULT 1 CHECK (registration_open IN (0,1)),
+  questions_enabled INTEGER NOT NULL DEFAULT 1 CHECK (questions_enabled IN (0,1)),
+  chat_enabled INTEGER NOT NULL DEFAULT 1 CHECK (chat_enabled IN (0,1)),
+  build_enabled INTEGER NOT NULL DEFAULT 1 CHECK (build_enabled IN (0,1)),
+  resources_enabled INTEGER NOT NULL DEFAULT 1 CHECK (resources_enabled IN (0,1)),
+  updated_by TEXT,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  room_closed_by TEXT,
+  room_closed_at TEXT,
+  FOREIGN KEY (event_id) REFERENCES studio_events(id) ON DELETE CASCADE,
+  FOREIGN KEY (updated_by) REFERENCES studio_users(id) ON DELETE SET NULL,
+  FOREIGN KEY (room_closed_by) REFERENCES studio_users(id) ON DELETE SET NULL
+);
 
 INSERT OR IGNORE INTO studio_schema_migrations(version)
 VALUES ('0003_identity_roles');
