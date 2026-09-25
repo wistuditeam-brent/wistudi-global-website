@@ -33,7 +33,7 @@ const stripLocale=pathname=>{
 const normalized=stripLocale((window.__WS_PREVIEW_PATH||location.pathname).replace(/\/index\.html$/,'/'));
 const isEvent=normalized.includes(EVENT_PATH);
 
-/* Sitewide header standard: primary menus + language + contact message icon + Start Publishing. */
+/* Sitewide header standard: desktop shows Start Publishing; mobile uses the hamburger and keeps Start Publishing inside the drawer. */
 const installCompactHeader=()=>{
   if(document.getElementById('ws-compact-header-style')) return;
 
@@ -73,9 +73,8 @@ const installCompactHeader=()=>{
       .ws-site-header .ws-lang-toggle{height:40px;min-width:56px;padding:0 8px}
       .ws-site-header .ws-contact-message{width:44px;height:44px;margin-left:1px;margin-right:7px}
       .ws-site-header .ws-contact-message img{width:37px;height:37px}
-      .ws-site-header .ws-nav-actions>.ws-btn.primary{
-        min-height:40px;padding:0 12px;border-radius:13px;font-size:.7rem;white-space:nowrap
-      }
+      .ws-site-header .ws-nav-actions>.ws-btn.primary{display:none!important}
+      .ws-site-header .ws-mobile-actions>.ws-btn.primary{display:inline-flex!important}
     }
 
     @media(max-width:520px){
