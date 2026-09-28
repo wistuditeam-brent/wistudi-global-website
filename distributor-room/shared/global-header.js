@@ -95,8 +95,8 @@
     document.addEventListener('click',function(e){
       document.querySelectorAll('.wdr-downloads[open]').forEach(d=>{if(!d.contains(e.target))d.removeAttribute('open')});
     });
-    const rootPath=pathFor(locale,'contents').replace(/\\/$/,'');
-    const herePath=location.pathname.replace(/\\/$/,'');
+    const rootPath=pathFor(locale,'contents').replace(/\/$/,'');
+    const herePath=location.pathname.replace(/\/$/,'');
     if(herePath!==rootPath)startPresence(host,locale,L);
   }
   function startPresence(host,locale,L){
