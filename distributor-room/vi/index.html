@@ -7,6 +7,8 @@
 
 <meta name="robots" content="noindex,nofollow,noarchive">
 <title>Wistudi | Phòng Nhà phân phối</title>
+<link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -132,7 +134,7 @@ noteText.addEventListener('blur',saveCurrentNote);
 noteBtn.addEventListener('click',()=>{syncNoteEditor();noteStatus.textContent='';notePanel.classList.add('open');noteText.focus()});
 document.getElementById('noteCancel').addEventListener('click',()=>{saveCurrentNote();notePanel.classList.remove('open')});
 noteSend.addEventListener('click',async()=>{saveCurrentNote();const pending=unsentEntries();if(!pending.length)return;noteStatus.textContent='Đang gửi '+pending.length+' ghi chú…';noteSend.disabled=true;const wst=(new URLSearchParams(location.search).get('wst')||'');const notes=pending.map(([slide,n])=>({slide:Number(slide),note:n.text}));try{const r=await fetch('/api/investor-room/note',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:roomSession.id,full_name:roomSession.name,organisation:roomSession.organisation,email:roomSession.email,wst,notes,url:location.href})});if(!r.ok)throw new Error('send failed');const sentAt=new Date().toISOString();pending.forEach(([slide,n])=>{noteStore.notes[slide]={...n,sentAt,sentText:n.text}});saveNoteStore();renderNotesUI(false);noteStatus.textContent='Đã gửi riêng cho Wistudi.'}catch(_){noteStatus.textContent='Không thể gửi ghi chú. Vui lòng thử lại.';renderNotesUI(false)}});
-document.getElementById('chooseEnglish').addEventListener('click',()=>{location.href='../'+(location.search||'')});
+document.getElementById('chooseEnglish').addEventListener('click',()=>{sessionStorage.setItem('wistudi_distributor_language','en');location.href='../'+(location.search||'')});
 document.getElementById('chooseVietnamese').addEventListener('click',()=>{sessionStorage.setItem('wistudi_distributor_language','vi');openRequestedRoomView()});
 document.addEventListener('wistudi:header-action',async e=>{const action=e.detail?.action;if(action==='contents'){setScreen(tocScreen);return}if(action==='platform-video'){openFullVideo(platformVideoUrl);return}if(action==='event-video'){openFullVideo(eventVideoUrl);return}if(action==='notes'){if(!viewer.classList.contains('active'))await openSlide(Math.max(1,currentPage||1));syncNoteEditor();noteStatus.textContent='';notePanel.classList.add('open');noteText.focus()}});
 window.addEventListener('pagehide',()=>{try{roomSession.socket?.close()}catch(_){}});
