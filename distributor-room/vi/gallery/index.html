@@ -45,22 +45,12 @@ main{width:min(1320px,calc(100% - 36px));margin:0 auto;padding:clamp(44px,6vw,84
 .platform-btn{order:20}.language-switch{order:17}.website-btn{order:18}
 @media(max-width:980px){.language-switch{width:38px;padding:0}.language-code{display:none}.language-flag{width:23px;height:15px}}
 </style>
+<link rel="stylesheet" href="/distributor-room/shared/global-header.css?v=20260928-3">
 </head>
 <body>
 
-<header class="room-header">
-  <div class="viewer-left"><span class="viewer-brand">Wistudi</span><span class="viewer-title">Phòng Nhà phân phối</span></div>
-  <div class="viewer-controls">
-    <a class="header-link header-contents-link" id="contentsLink" href="../?view=contents" title="Mở mục lục bài trình bày"><span class="header-label">Mục lục</span><span aria-hidden="true">☷</span></a>
-    <a class="header-link" href="../feature-releases/" title="Cập nhật tính năng"><span class="header-label">Cập nhật tính năng</span><span aria-hidden="true">★</span></a>
-    <a class="header-link active" href="./" aria-current="page" title="Thư viện ảnh"><span class="header-label">Thư viện ảnh</span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"></rect></svg></a>
-    <details class="downloads-menu"><summary class="downloads-toggle" title="Tải xuống" aria-label="Tải xuống"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7.5 10.5 4.5 4.5 4.5-4.5"></path><path d="M5 20h14"></path></svg><span class="download-label">Tải xuống</span><span class="download-caret">⌄</span></summary><div class="downloads-popover"><div class="downloads-popover-head"><span>Tải xuống</span><small>Tiếng Việt</small></div><a class="download-item" href="../downloads/Wistudi_Partner_Commercial_Integration_Model_VI.pdf" download><span class="download-file-icon">PDF</span><span class="download-copy"><strong>Mô hình Hợp tác Thương mại &amp; Tích hợp Wistudi</strong><span>Khung dành cho đối tác · PDF tiếng Việt</span></span><span class="download-arrow" aria-hidden="true">↓</span></a></div></details>
-    <a class="language-switch" id="languageLink" href="../../gallery/" aria-label="Switch to English" title="English"><svg class="language-flag" viewBox="0 0 60 36" aria-hidden="true"><rect width="60" height="36" fill="#012169"/><path d="M0 0L60 36M60 0L0 36" stroke="#fff" stroke-width="7"/><path d="M0 0L60 36M60 0L0 36" stroke="#C8102E" stroke-width="4"/><path d="M30 0V36M0 18H60" stroke="#fff" stroke-width="11"/><path d="M30 0V36M0 18H60" stroke="#C8102E" stroke-width="7"/></svg><span class="language-code">EN</span></a>
-    <a class="icon-btn website-btn" href="https://global.wistudi.com" target="_blank" rel="noopener" aria-label="Truy cập website Wistudi" title="Truy cập website Wistudi"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3.6 9h16.8M3.6 15h16.8M12 3c2.2 2.4 3.3 5.4 3.3 9S14.2 18.6 12 21M12 3C9.8 5.4 8.7 8.4 8.7 12S9.8 18.6 12 21"></path></svg></a>
-    <a class="platform-btn" href="https://wistudi.com/sign-in" target="_blank" rel="noopener">Mở Wistudi</a>
-  </div>
-</header>
-<main>
+<header data-distributor-header data-locale="vi" data-section="gallery"></header>
+<main class="wdr-page-content">
   <section class="hero">
     <div class="eyebrow">Wistudi Distributor Room</div>
     <h1>Thư viện ảnh</h1>
@@ -83,6 +73,7 @@ main{width:min(1320px,calc(100% - 36px));margin:0 auto;padding:clamp(44px,6vw,84
     <figcaption class="caption" id="lightboxCaption"></figcaption>
   </figure>
 </div>
+<script src="/distributor-room/shared/global-header.js?v=20260928-3"></script>
 <script>
 const CATEGORIES=[{"slug":"wistudi-events","label":"Sự kiện Wistudi","desc":"Các sự kiện, workshop và hoạt động trực tiếp của Wistudi."},{"slug":"real-moments","label":"Khoảnh khắc thực tế","desc":"Những khoảnh khắc chân thực từ cộng đồng và hoạt động Wistudi."}];
 const categoryBar=document.getElementById('categoryBar');
@@ -134,14 +125,6 @@ async function loadCollection(){
     state.hidden=true;grid.hidden=false;
   }catch(_){state.innerHTML='<div><strong>'+cat.label+'</strong>Không thể tải thư viện ảnh lúc này.</div>'}
 }
-const query=location.search||'';
-const roomParams=new URLSearchParams();
-const wst=params.get('wst');
-if(wst)roomParams.set('wst',wst);
-roomParams.set('view','contents');
-const roomQuery='?'+roomParams.toString();
-document.getElementById('contentsLink').href='../'+roomQuery;
-document.getElementById('languageLink').href='../../gallery/'+query;
 
 renderCategories();loadCollection();
 </script>
