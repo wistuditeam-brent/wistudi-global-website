@@ -74,6 +74,7 @@ main{width:min(1320px,calc(100% - 36px));margin:0 auto;padding:clamp(44px,6vw,84
   </figure>
 </div>
 <script src="/distributor-room/shared/global-header.js?v=20260928-3"></script>
+<script src="/distributor-room/gallery/gallery-manifest.js?v=20260928-1"></script>
 <script>
 const CATEGORIES=[{"slug":"wistudi-events","label":"Wistudi Events","desc":"Events, workshops and live Wistudi experiences."},{"slug":"real-moments","label":"Real Moments","desc":"Authentic moments from the Wistudi community and activities."}];
 const categoryBar=document.getElementById('categoryBar');
@@ -107,23 +108,29 @@ function closeLightbox(){lightbox.classList.remove('open');lightboxImage.removeA
 document.getElementById('closeLightbox').addEventListener('click',closeLightbox);
 lightbox.addEventListener('click',e=>{if(e.target===lightbox)closeLightbox()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&lightbox.classList.contains('open'))closeLightbox()});
+function manifestImages(category){
+  const folder='distributor-room/gallery/images/'+category;
+  const names=window.WISTUDI_GALLERY_MANIFEST?.[category]||[];
+  return names.map(name=>({name,src:'/'+folder+'/'+encodeURIComponent(name)}));
+}
 async function loadCollection(){
   const cat=CATEGORIES.find(c=>c.slug===active)||CATEGORIES[0];
   titleEl.textContent=cat.label;descEl.textContent=cat.desc;grid.hidden=true;grid.innerHTML='';state.hidden=false;state.textContent="Loading images…";countEl.textContent='';
+  let images=[];
   try{
-    const r=await fetch('/api/distributor-room/gallery?category='+encodeURIComponent(active)+'&v=20260928-2',{cache:'no-store',headers:{'Accept':'application/json','Cache-Control':'no-cache'}});
-    if(!r.ok)throw new Error('gallery');
-    const data=await r.json();const images=Array.isArray(data.images)?data.images:[];
-    if(!images.length){state.innerHTML='<div><strong>'+cat.label+'</strong>No images have been added to this collection yet.</div>';return}
-    images.forEach((image,i)=>{
-      const btn=document.createElement('button');btn.type='button';btn.className='gallery-card';
-      if(i%9===0)btn.classList.add('wide');else if(i%11===5)btn.classList.add('tall');
-      const img=document.createElement('img');img.src=image.src;img.alt=humanise(image.name)||cat.label;img.loading=i<4?'eager':'lazy';img.decoding='async';
-      const item={...image,title:humanise(image.name)};btn.appendChild(img);btn.addEventListener('click',()=>openLightbox(item));grid.appendChild(btn);
-    });
-    countEl.textContent=images.length+' '+("images");
-    state.hidden=true;grid.hidden=false;
-  }catch(_){state.innerHTML='<div><strong>'+cat.label+'</strong>The gallery could not be loaded right now.</div>'}
+    const r=await fetch('/api/distributor-room/gallery?category='+encodeURIComponent(active)+'&v=20260928-4',{cache:'no-store',headers:{'Accept':'application/json','Cache-Control':'no-cache'}});
+    if(r.ok){const data=await r.json();images=Array.isArray(data.images)?data.images:[]}
+  }catch(_){}
+  if(!images.length)images=manifestImages(active);
+  if(!images.length){state.innerHTML='<div><strong>'+cat.label+'</strong>No images have been added to this collection yet.</div>';return}
+  images.forEach((image,i)=>{
+    const btn=document.createElement('button');btn.type='button';btn.className='gallery-card';
+    if(i%9===0)btn.classList.add('wide');else if(i%11===5)btn.classList.add('tall');
+    const img=document.createElement('img');img.src=image.src;img.alt=humanise(image.name)||cat.label;img.loading=i===0?'eager':'lazy';img.fetchPriority=i===0?'high':'auto';img.decoding='async';
+    const item={...image,title:humanise(image.name)};btn.appendChild(img);btn.addEventListener('click',()=>openLightbox(item));grid.appendChild(btn);
+  });
+  countEl.textContent=images.length+' '+"images";
+  state.hidden=true;grid.hidden=false;
 }
 
 renderCategories();loadCollection();
