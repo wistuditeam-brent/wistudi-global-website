@@ -37,11 +37,11 @@ main{width:min(1320px,calc(100% - 36px));margin:0 auto;padding:clamp(44px,6vw,84
 
 <header class="room-header">
   <div class="viewer-left">
-    <a class="viewer-brand" id="roomLink" href="../">Wistudi</a>
+    <span class="viewer-brand">Wistudi</span>
     <span class="viewer-title">Distributor Room</span>
   </div>
   <div class="viewer-controls">
-    <a class="platform-btn" href="https://wistudi.com/sign-in" target="_blank" rel="noopener">Open Wistudi</a>
+    <a class="platform-btn" href="https://wistudi.com/sign-in" target="_blank" rel="noopener">Open Wistudi</a><a class="header-link" id="contentsLink" href="../?view=contents" title="Open presentation contents"><span class="header-label">Contents</span><span aria-hidden="true">☷</span></a>
     <a class="header-link" href="../feature-releases/" title="View feature releases"><span class="header-label">Feature Releases</span><span aria-hidden="true">★</span></a>
     <a class="header-link active" href="./" aria-current="page" title="Image Gallery"><span class="header-label">Gallery</span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"></rect></svg></a>
     <details class="downloads-menu"><summary class="downloads-toggle" title="Downloads" aria-label="Downloads"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7.5 10.5 4.5 4.5 4.5-4.5"></path><path d="M5 20h14"></path></svg><span class="download-label">Downloads</span><span class="download-caret">⌄</span></summary><div class="downloads-popover"><div class="downloads-popover-head"><span>Downloads</span><small>English</small></div><a class="download-item" href="../downloads/DOC%20-%20Wistudi%20Commercial%20Partnership%20Integration%20Model.pdf" download><span class="download-file-icon">PDF</span><span class="download-copy"><strong>Wistudi Commercial Partnership &amp; Integration Model</strong><span>Commercial partnerships and integrations · English PDF</span></span><span class="download-arrow" aria-hidden="true">↓</span></a></div></details>
@@ -124,7 +124,13 @@ async function loadCollection(){
   }catch(_){state.innerHTML='<div><strong>'+cat.label+'</strong>The gallery could not be loaded right now.</div>'}
 }
 const query=location.search||'';
-document.getElementById('roomLink').href="../"+query;document.getElementById('languageLink').href="../vi/gallery/"+query;
+const roomParams=new URLSearchParams();
+const wst=params.get('wst');
+if(wst)roomParams.set('wst',wst);
+roomParams.set('view','contents');
+const roomQuery='?'+roomParams.toString();
+document.getElementById('contentsLink').href='../'+roomQuery;
+document.getElementById('languageLink').href="../vi/gallery/"+query;
 renderCategories();loadCollection();
 </script>
 </body>

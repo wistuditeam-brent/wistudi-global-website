@@ -37,11 +37,11 @@ main{width:min(1320px,calc(100% - 36px));margin:0 auto;padding:clamp(44px,6vw,84
 
 <header class="room-header">
   <div class="viewer-left">
-    <a class="viewer-brand" id="roomLink" href="../">Wistudi</a>
+    <span class="viewer-brand">Wistudi</span>
     <span class="viewer-title">Phòng Nhà phân phối</span>
   </div>
   <div class="viewer-controls">
-    <a class="platform-btn" href="https://wistudi.com/sign-in" target="_blank" rel="noopener">Mở Wistudi</a>
+    <a class="platform-btn" href="https://wistudi.com/sign-in" target="_blank" rel="noopener">Mở Wistudi</a><a class="header-link" id="contentsLink" href="../?view=contents" title="Mở mục lục bài trình bày"><span class="header-label">Mục lục</span><span aria-hidden="true">☷</span></a>
     <a class="header-link" href="../feature-releases/" title="Xem cập nhật tính năng"><span class="header-label">Cập nhật tính năng</span><span aria-hidden="true">★</span></a>
     <a class="header-link active" href="./" aria-current="page" title="Thư viện ảnh"><span class="header-label">Thư viện ảnh</span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"></rect></svg></a>
     <details class="downloads-menu"><summary class="downloads-toggle" title="Tải xuống" aria-label="Tải xuống"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7.5 10.5 4.5 4.5 4.5-4.5"></path><path d="M5 20h14"></path></svg><span class="download-label">Tải xuống</span><span class="download-caret">⌄</span></summary><div class="downloads-popover"><div class="downloads-popover-head"><span>Tải xuống</span><small>Tiếng Việt</small></div><a class="download-item" href="../downloads/Wistudi_Partner_Commercial_Integration_Model_VI.pdf" download><span class="download-file-icon">PDF</span><span class="download-copy"><strong>Mô hình Hợp tác Thương mại &amp; Tích hợp Wistudi</strong><span>Khung dành cho đối tác · PDF tiếng Việt</span></span><span class="download-arrow" aria-hidden="true">↓</span></a></div></details>
@@ -124,7 +124,13 @@ async function loadCollection(){
   }catch(_){state.innerHTML='<div><strong>'+cat.label+'</strong>Không thể tải thư viện ảnh lúc này.</div>'}
 }
 const query=location.search||'';
-document.getElementById('roomLink').href="../"+query;document.getElementById('languageLink').href="../../gallery/"+query;
+const roomParams=new URLSearchParams();
+const wst=params.get('wst');
+if(wst)roomParams.set('wst',wst);
+roomParams.set('view','contents');
+const roomQuery='?'+roomParams.toString();
+document.getElementById('contentsLink').href='../'+roomQuery;
+document.getElementById('languageLink').href="../../gallery/"+query;
 renderCategories();loadCollection();
 </script>
 </body>
