@@ -95,7 +95,9 @@
     document.addEventListener('click',function(e){
       document.querySelectorAll('.wdr-downloads[open]').forEach(d=>{if(!d.contains(e.target))d.removeAttribute('open')});
     });
-    startPresence(host,locale,L);
+    const rootPath=pathFor(locale,'contents').replace(/\\/$/,'');
+    const herePath=location.pathname.replace(/\\/$/,'');
+    if(herePath!==rootPath)startPresence(host,locale,L);
   }
   function startPresence(host,locale,L){
     let identity=null;try{identity=JSON.parse(sessionStorage.getItem('wistudi_distributor_identity')||'null')}catch(_){}
