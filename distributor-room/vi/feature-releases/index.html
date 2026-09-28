@@ -28,6 +28,17 @@ a{color:inherit;text-decoration:none}.shell{width:min(1320px,calc(100% - 36px));
 .download-item{display:grid;grid-template-columns:40px minmax(0,1fr) 22px;gap:11px;align-items:center;padding:11px;border-radius:12px;text-decoration:none;color:#fff;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);transition:.16s ease}.download-item:hover{background:rgba(255,255,255,.085);border-color:rgba(255,255,255,.16);transform:translateY(-1px)}.download-file-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:rgba(255,116,23,.14);border:1px solid rgba(255,116,23,.24);color:#ff9a52;font-size:.65rem;font-weight:850;letter-spacing:.04em}.download-copy{min-width:0}.download-copy strong{display:block;font-size:.79rem;line-height:1.32;font-weight:700;letter-spacing:-.012em}.download-copy span{display:block;margin-top:4px;color:rgba(255,255,255,.52);font-size:.68rem;line-height:1.35}.download-arrow{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;color:rgba(255,255,255,.68);font-size:1rem}
 @media(max-width:980px){.room-header .viewer-title{display:none}.header-link .header-label{display:none}.header-link{width:36px;padding:0;justify-content:center}.room-header .viewer-left,.room-header .viewer-controls{gap:7px}.platform-btn{height:34px;padding:0 11px;font-size:.72rem}.icon-btn{width:34px;height:34px}.downloads-toggle{width:34px;padding:0;justify-content:center}.download-label,.download-caret{display:none}.downloads-popover{position:fixed;right:10px;top:58px;width:min(390px,calc(100vw - 20px))}}
 @media(max-width:620px){.room-header{height:58px;padding:0 10px}.website-btn{display:none}.platform-btn{display:none}.lang-link{width:34px}.room-header .viewer-brand{font-size:.94rem}}
+
+/* Distributor Room header ordering */
+.platform-btn{background:#7c3aed!important;color:#fff!important;border-color:#8b5cf6!important;box-shadow:0 7px 20px rgba(124,58,237,.22)}
+.platform-btn:hover{background:#6d28d9!important;color:#fff!important;border-color:#7c3aed!important}
+.language-switch{height:36px;padding:0 10px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;background:rgba(255,255,255,.055);color:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.13);font-size:.74rem;font-weight:780;white-space:nowrap;transition:.18s ease}
+.language-switch:hover{background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.24);color:#fff}
+.language-flag{width:24px;height:16px;border-radius:3px;display:block;box-shadow:0 0 0 1px rgba(255,255,255,.24);overflow:hidden;flex:0 0 auto}
+.language-code{line-height:1}
+.header-contents-link{order:-20}
+.platform-btn{order:20}.language-switch{order:17}.website-btn{order:18}
+@media(max-width:980px){.language-switch{width:38px;padding:0}.language-code{display:none}.language-flag{width:23px;height:15px}}
 </style>
 </head>
 <body>
@@ -35,13 +46,13 @@ a{color:inherit;text-decoration:none}.shell{width:min(1320px,calc(100% - 36px));
 <header class="room-header">
   <div class="viewer-left"><span class="viewer-brand">Wistudi</span><span class="viewer-title">Phòng Nhà phân phối</span></div>
   <div class="viewer-controls">
-    <a class="platform-btn" href="https://wistudi.com/sign-in" target="_blank" rel="noopener">Mở Wistudi</a>
-    <a class="header-link" href="../?view=contents" title="Mở mục lục bài trình bày"><span class="header-label">Mục lục</span><span aria-hidden="true">☷</span></a>
+    <a class="header-link header-contents-link" href="../?view=contents" title="Mở mục lục bài trình bày"><span class="header-label">Mục lục</span><span aria-hidden="true">☷</span></a>
     <a class="header-link active" href="./" aria-current="page" title="Cập nhật tính năng"><span class="header-label">Cập nhật tính năng</span><span aria-hidden="true">★</span></a>
     <a class="header-link" href="../gallery/" title="Thư viện ảnh"><span class="header-label">Thư viện ảnh</span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"></rect></svg></a>
     <details class="downloads-menu"><summary class="downloads-toggle" title="Tải xuống" aria-label="Tải xuống"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7.5 10.5 4.5 4.5 4.5-4.5"></path><path d="M5 20h14"></path></svg><span class="download-label">Tải xuống</span><span class="download-caret">⌄</span></summary><div class="downloads-popover"><div class="downloads-popover-head"><span>Tải xuống</span><small>Tiếng Việt</small></div><a class="download-item" href="../downloads/Wistudi_Partner_Commercial_Integration_Model_VI.pdf" download><span class="download-file-icon">PDF</span><span class="download-copy"><strong>Mô hình Hợp tác Thương mại &amp; Tích hợp Wistudi</strong><span>Khung dành cho đối tác · PDF tiếng Việt</span></span><span class="download-arrow" aria-hidden="true">↓</span></a></div></details>
-    <a class="header-link lang-link" href="../../feature-releases/" aria-label="English" title="English">EN</a>
+    <a class="language-switch" href="../../feature-releases/" aria-label="Switch to English" title="English"><svg class="language-flag" viewBox="0 0 60 36" aria-hidden="true"><rect width="60" height="36" fill="#012169"/><path d="M0 0L60 36M60 0L0 36" stroke="#fff" stroke-width="7"/><path d="M0 0L60 36M60 0L0 36" stroke="#C8102E" stroke-width="4"/><path d="M30 0V36M0 18H60" stroke="#fff" stroke-width="11"/><path d="M30 0V36M0 18H60" stroke="#C8102E" stroke-width="7"/></svg><span class="language-code">EN</span></a>
     <a class="icon-btn website-btn" href="https://global.wistudi.com" target="_blank" rel="noopener" aria-label="Truy cập website Wistudi" title="Truy cập website Wistudi"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3.6 9h16.8M3.6 15h16.8M12 3c2.2 2.4 3.3 5.4 3.3 9S14.2 18.6 12 21M12 3C9.8 5.4 8.7 8.4 8.7 12S9.8 18.6 12 21"></path></svg></a>
+    <a class="platform-btn" href="https://wistudi.com/sign-in" target="_blank" rel="noopener">Mở Wistudi</a>
   </div>
 </header>
 <main class="shell">
