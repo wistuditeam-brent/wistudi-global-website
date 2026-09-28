@@ -118,7 +118,7 @@ async function loadCollection(){
   const cat=CATEGORIES.find(c=>c.slug===active)||CATEGORIES[0];
   titleEl.textContent=cat.label;descEl.textContent=cat.desc;grid.hidden=true;grid.innerHTML='';state.hidden=false;state.textContent="Đang tải hình ảnh…";countEl.textContent='';
   try{
-    const r=await fetch('/api/distributor-room/gallery?category='+encodeURIComponent(active),{headers:{'Accept':'application/json'}});
+    const r=await fetch('/api/distributor-room/gallery?category='+encodeURIComponent(active)+'&v=20260928-2',{cache:'no-store',headers:{'Accept':'application/json','Cache-Control':'no-cache'}});
     if(!r.ok)throw new Error('gallery');
     const data=await r.json();const images=Array.isArray(data.images)?data.images:[];
     if(!images.length){state.innerHTML='<div><strong>'+cat.label+'</strong>Chưa có hình ảnh trong bộ sưu tập này.</div>';return}
