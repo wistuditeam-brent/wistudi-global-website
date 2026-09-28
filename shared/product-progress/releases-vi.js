@@ -78,7 +78,7 @@ export const PRODUCT_PROGRESS = [
     area: "Tích hợp",
     status: "Chuẩn bị pilot",
     summary: "Chuẩn bị pilot để đưa trải nghiệm quiz trò chơi hóa có hỗ trợ AI của ZEP Quiz vào Flow.",
-    detail: "ZEP Quiz kết hợp tạo câu hỏi với AI cùng bản đồ trò chơi hóa và avatar có thể tùy chỉnh. Wistudi đang chuẩn bị lộ trình tích hợp để trải nghiệm quiz có thể khởi chạy bên trong Flow, với định hướng dài hạn toward tích hợp đối tác và LTI sâu hơn."
+    detail: "ZEP Quiz kết hợp tạo câu hỏi với AI cùng bản đồ trò chơi hóa và avatar có thể tùy chỉnh. Wistudi đang chuẩn bị lộ trình tích hợp để trải nghiệm quiz có thể khởi chạy bên trong Flow, với định hướng dài hạn tiến tới tích hợp đối tác và LTI sâu hơn."
   },
   {
     date: "2026-11-01",
