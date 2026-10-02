@@ -22,27 +22,30 @@ export async function onRequestGet({request}){
   const url=new URL(request.url);
   const category=String(url.searchParams.get('category')||'').trim().toLowerCase();
   if(!ALLOWED.has(category))return json({ok:false,error:'invalid_category'},400);
-  const folder=ROOT+'/'+category;
-  const gh='https://api.github.com/repos/'+REPO+'/contents/'+folder+'?ref='+encodeURIComponent(REF)+'&t='+Date.now();
-  try{
-    const res=await fetch(gh,{
-      cache:'no-store',
-      headers:{
-        'Accept':'application/vnd.github+json',
-        'User-Agent':'Wistudi-Gallery',
-        'X-GitHub-Api-Version':'2022-11-28',
-        'Cache-Control':'no-cache'
-      }
-    });
-    if(res.ok){
+  // Gallery_2 is an accepted source folder for the new Classroom Moments category.
+  // Serve image URLs at their actual deployed paths, without renaming original files.
+  const folders=category==='classroom-moments'
+    ? [ROOT+'/classroom-moments',ROOT+'/Gallery_2','Gallery_2']
+    : [ROOT+'/'+category];
+  for(const folder of folders){
+    const gh='https://api.github.com/repos/'+REPO+'/contents/'+folder+'?ref='+encodeURIComponent(REF);
+    try{
+      const res=await fetch(gh,{
+        headers:{
+          'Accept':'application/vnd.github+json',
+          'User-Agent':'Wistudi-Gallery',
+          'X-GitHub-Api-Version':'2022-11-28'
+        }
+      });
+      if(!res.ok)continue;
       const items=await res.json();
       const images=(Array.isArray(items)?items:[])
         .filter(item=>item&&item.type==='file'&&IMAGE_RE.test(item.name||''))
         .sort((a,b)=>String(a.name).localeCompare(String(b.name),undefined,{numeric:true,sensitivity:'base'}))
-        .map(item=>({name:item.name,src:'/'+folder+'/'+encodeURIComponent(item.name)}));
-      if(images.length)return json({ok:true,category,images,source:'github'});
-    }
-  }catch(_){}
+        .map(item=>({name:item.name,src:'/'+folder.split('/').map(encodeURIComponent).join('/')+'/'+encodeURIComponent(item.name)}));
+      if(images.length)return json({ok:true,category,images,source:'github',folder});
+    }catch(_){}
+  }
   const images=fallbackImages(category);
   return json({ok:true,category,images,source:'fallback'});
 }
