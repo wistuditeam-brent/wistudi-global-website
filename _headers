@@ -16,6 +16,10 @@
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
 
+# Hash-versioned WebP assets can be cached aggressively by browsers and Cloudflare.
+/distributor-room/gallery/optimized/*
+  Cache-Control: public, max-age=31536000, immutable
+
 /distributor-room/gallery/images/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
