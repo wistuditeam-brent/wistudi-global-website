@@ -4,7 +4,8 @@ Upload gallery images into one of the category folders:
 
 - `images/wistudi-events/`
 - `images/real-moments/`
-- `images/classroom-moments/`
+- `images/classroom-moments/` (preferred)
+- `images/Gallery_2/` or repository-root `Gallery_2/` (accepted legacy upload folder for Classroom Moments)
 
 Supported browser formats: JPG/JPEG, PNG, WebP, AVIF and GIF.
 
