@@ -1,0 +1,64 @@
+name: Classroom Moments HEIC Browser Copies
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'distributor-room/gallery/images/classroom-moments/**'
+      - '.github/workflows/classroom-heic-lossless.yml'
+permissions:
+  contents: write
+concurrency:
+  group: classroom-heic-lossless
+  cancel-in-progress: false
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install HEIC reader and lossless WebP encoder
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libheif-examples webp imagemagick
+      - name: Create pixel-preserving browser copies
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob nocaseglob
+          folder=distributor-room/gallery/images/classroom-moments
+          count=0
+          for file in "$folder"/*.heic; do
+            target="${file%.*}.webp"
+            if [[ -f "$target" ]]; then continue; fi
+            raw=$(mktemp --suffix=.png)
+            check=$(mktemp --suffix=.png)
+            trap 'rm -f "$raw" "$check"' EXIT
+            heif-convert "$file" "$raw"
+            cwebp -quiet -lossless -z 6 -metadata all "$raw" -o "$target"
+            dwebp -quiet "$target" -o "$check"
+            if ! compare -metric AE "$raw" "$check" null: 2>/dev/null; then
+              echo "Decoded pixels do not match: $file" >&2
+              rm -f "$target"
+              exit 1
+            fi
+            bytes=$(stat -c %s "$target")
+            if (( bytes >= 25000000 )); then
+              echo "Generated file exceeds Cloudflare Pages per-file limit: $target ($bytes bytes)" >&2
+              rm -f "$target"
+              exit 1
+            fi
+            rm -f "$raw" "$check"
+            trap - EXIT
+            count=$((count+1))
+            echo "Verified lossless display copy: $target ($bytes bytes)"
+          done
+          echo "Created $count lossless browser-compatible display copies; original HEIC files retained."
+      - name: Commit generated WebP display files
+        run: |
+          git add distributor-room/gallery/images/classroom-moments/*.webp
+          if git diff --cached --quiet; then
+            echo "No new conversions."
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Add pixel-verified lossless Classroom Moments WebP display copies"
+          git push
