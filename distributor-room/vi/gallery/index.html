@@ -27,7 +27,7 @@ a,button{font:inherit}.room-header{position:sticky;top:0;z-index:50;height:64px;
 @media(max-width:620px){.room-header{height:58px;padding:0 10px}.viewer-title{display:none}.website-btn{display:none}.platform-btn{display:none}.viewer-controls{overflow:visible}.lang-link{width:34px}.viewer-brand{font-size:.94rem}}
 main{width:min(1320px,calc(100% - 36px));margin:0 auto;padding:clamp(44px,6vw,84px) 0 90px}.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:.68rem;font-weight:800;color:#b8bdc8}.hero h1{font-size:clamp(2.5rem,6vw,5.8rem);letter-spacing:-.065em;line-height:.92;margin:12px 0 18px;font-weight:780;max-width:920px}.hero p{margin:0;color:var(--muted);font-size:clamp(1rem,1.5vw,1.18rem);line-height:1.7;max-width:720px}
 .category-bar{display:flex;flex-wrap:wrap;gap:10px;margin:38px 0 20px}.category-btn{border:1px solid var(--line);background:transparent;color:#d7dae2;border-radius:999px;padding:11px 16px;cursor:pointer;font-weight:700;font-size:.8rem;transition:.18s ease}.category-btn:hover{background:var(--soft);color:#fff}.category-btn.active{background:#fff;color:#0d0f16;border-color:#fff}
-.collection-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin:24px 0 18px}.collection-head h2{font-size:clamp(1.5rem,2.4vw,2.15rem);margin:0;letter-spacing:-.04em}.collection-head p{margin:6px 0 0;color:var(--muted);font-size:.9rem;max-width:620px}.count{font-size:.76rem;color:#8e94a3;white-space:nowrap}
+.collection-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin:24px 0 18px}.collection-head h2{font-size:clamp(1.5rem,2.4vw,2.15rem);margin:0;letter-spacing:-.04em}.collection-description{margin-top:16px;max-width:850px;color:var(--muted);font-size:clamp(.91rem,1.05vw,1rem);line-height:1.68}.collection-description p{margin:0 0 12px}.collection-description p:last-child{margin-bottom:0}.collection-description strong{color:var(--text);font-weight:750}.count{font-size:.76rem;color:#8e94a3;white-space:nowrap}
 .gallery-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-flow:dense;gap:12px}.gallery-card{appearance:none;border:0;padding:0;background:#11131b;border-radius:18px;overflow:hidden;position:relative;cursor:zoom-in;aspect-ratio:4/3;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);transition:transform .22s ease,box-shadow .22s ease}.gallery-card.wide{grid-column:span 2;aspect-ratio:16/9}.gallery-card.tall{grid-row:span 2;aspect-ratio:auto;min-height:500px}.gallery-card:hover{transform:translateY(-3px);box-shadow:0 18px 40px rgba(0,0,0,.28),inset 0 0 0 1px rgba(255,255,255,.12)}.gallery-card img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .35s ease}.gallery-card:hover img{transform:scale(1.025)}.gallery-card:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(0,0,0,.2));pointer-events:none}
 .status{min-height:260px;border:1px dashed rgba(255,255,255,.12);border-radius:22px;display:grid;place-items:center;text-align:center;color:var(--muted);padding:36px}.status strong{display:block;color:#fff;margin-bottom:6px}
 .lightbox{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(3,4,7,.92);backdrop-filter:blur(14px);padding:clamp(16px,3vw,38px)}.lightbox.open{display:flex}.lightbox-figure{margin:0;max-width:min(1500px,94vw);max-height:92vh;display:flex;flex-direction:column;gap:12px;align-items:center}.lightbox img{max-width:100%;max-height:82vh;object-fit:contain;border-radius:16px;box-shadow:0 30px 100px rgba(0,0,0,.5)}.caption{font-size:.82rem;color:#c6cad4;min-height:20px;text-align:center}.close-btn{position:absolute;right:22px;top:20px;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:white;cursor:pointer;font-size:1.45rem;line-height:1;display:grid;place-items:center}.close-btn:hover{background:rgba(255,255,255,.15)}
@@ -59,7 +59,7 @@ main{width:min(1320px,calc(100% - 36px));margin:0 auto;padding:clamp(44px,6vw,84
   <div class="category-bar" id="categoryBar"></div>
   <section>
     <div class="collection-head">
-      <div><h2 id="collectionTitle"></h2><p id="collectionDescription"></p></div>
+      <div><h2 id="collectionTitle"></h2><div id="collectionDescription" class="collection-description"></div></div>
       <div class="count" id="imageCount"></div>
     </div>
     <div id="galleryState" class="status">Đang tải hình ảnh…</div>
@@ -74,9 +74,9 @@ main{width:min(1320px,calc(100% - 36px));margin:0 auto;padding:clamp(44px,6vw,84
   </figure>
 </div>
 <script src="/distributor-room/shared/global-header.js?v=20260928-3"></script>
-<script src="/distributor-room/gallery/gallery-manifest.js?v=20260928-1"></script>
+<script src="/distributor-room/gallery/gallery-manifest.js?v=20261002-1"></script>
 <script>
-const CATEGORIES=[{"slug":"wistudi-events","label":"Sự kiện Wistudi","desc":"Các sự kiện, workshop và hoạt động trực tiếp của Wistudi."},{"slug":"real-moments","label":"Khoảnh khắc thực tế","desc":"Những khoảnh khắc chân thực từ cộng đồng và hoạt động Wistudi."}];
+const CATEGORIES=[{"slug":"wistudi-events","label":"Sự kiện Wistudi","desc":["Bất kỳ ai từng tự mình xây dựng một điều gì đó từ con số không, bằng chính nguồn lực và uy tín của mình, đều hiểu hành trình ấy thực sự có ý nghĩa lớn đến nhường nào.","Mọi người có thể nhìn thấy gian hàng, phần trình bày và những cuộc trò chuyện. Nhưng phía sau đó là nhiều năm ấp ủ ý tưởng, làm việc chăm chỉ, thử nghiệm, vượt qua trở ngại và biến kế hoạch thành hiện thực.","Xây dựng Wistudi chưa bao giờ chỉ đơn thuần là tạo ra một nền tảng. Đó là hành trình biến một tầm nhìn thành điều gì đó có thật, hữu ích và có ý nghĩa với mọi người.","Tự hào về chặng đường đã qua và càng mong chờ những điều sắp tới!"],"strong":[]},{"slug":"real-moments","label":"Khoảnh khắc thực tế","desc":["Tạo một lần. Dạy ở bất cứ đâu.","Từ bài học tương tác đến tài liệu in dùng trong lớp, tất cả được tạo cùng lúc trong Wistudi Publishing.","Trong những hình ảnh này, một giáo viên đã tạo ra trải nghiệm học tập tương tác hoàn chỉnh để giảng dạy trực tiếp trên lớp, chia sẻ cho học viên tự luyện tập tại nhà, đồng thời chuyển ngay thành phiếu bài tập và tài liệu chương trình giảng dạy có thể tải xuống, in ra để thực hành tại lớp.","Một quy trình sáng tạo, nhiều cách dạy và học. Kết nối liền mạch việc học trên nền tảng số với hoạt động giảng dạy thực tế trong lớp học.","Tạo. Dạy. Chia sẻ. Xuất bản. Tất cả trong một nền tảng."],"strong":[0,4]},{"slug":"classroom-moments","label":"Khoảnh khắc lớp học","desc":["Đưa công cụ xuất bản nội dung tương tác chuyên nghiệp đến tay mọi nhà giáo dục.","Từ chương trình giảng dạy và bài học tương tác hoàn chỉnh đến phiếu bài tập có thể tải xuống và tài liệu giảng dạy có thể in, Wistudi mang những khả năng xuất bản mạnh mẽ vốn thường chỉ dành cho các nhà xuất bản giáo dục thương mại lớn đến với giáo viên hằng ngày.","Với Trợ lý AI Wistudi, nhà giáo dục có thể tạo ra những trải nghiệm học tập tương tác toàn diện chỉ trong vài phút, ngay trên một nền tảng duy nhất.","Tạo. Dạy. Chia sẻ. Xuất bản. Tất cả trong một nền tảng."],"strong":[0,3]}];
 const categoryBar=document.getElementById('categoryBar');
 const grid=document.getElementById('galleryGrid');
 const state=document.getElementById('galleryState');
@@ -96,7 +96,7 @@ function humanise(name){
 function renderCategories(){
   categoryBar.innerHTML='';
   CATEGORIES.forEach(cat=>{
-    const b=document.createElement('button');b.type='button';b.className='category-btn'+(cat.slug===active?' active':'');b.textContent=cat.label;
+    const b=document.createElement('button');b.type='button';b.className='category-btn'+(cat.slug===active?' active':'');b.textContent=cat.label;b.setAttribute("aria-pressed",String(cat.slug===active));
     b.addEventListener('click',()=>{if(active===cat.slug)return;active=cat.slug;const u=new URL(location.href);u.searchParams.set('category',active);history.replaceState({},'',u);renderCategories();loadCollection();});
     categoryBar.appendChild(b);
   });
@@ -113,20 +113,34 @@ function manifestImages(category){
   const names=window.WISTUDI_GALLERY_MANIFEST?.[category]||[];
   return names.map(name=>({name,src:'/'+folder+'/'+encodeURIComponent(name)}));
 }
+let collectionRequest=0;
 async function loadCollection(){
+  const requestId=++collectionRequest;
   const cat=CATEGORIES.find(c=>c.slug===active)||CATEGORIES[0];
-  titleEl.textContent=cat.label;descEl.textContent=cat.desc;grid.hidden=true;grid.innerHTML='';state.hidden=false;state.textContent="Đang tải hình ảnh…";countEl.textContent='';
-  let images=[];
-  try{
-    const r=await fetch('/api/distributor-room/gallery?category='+encodeURIComponent(active)+'&v=20260928-4',{cache:'no-store',headers:{'Accept':'application/json','Cache-Control':'no-cache'}});
-    if(r.ok){const data=await r.json();images=Array.isArray(data.images)?data.images:[]}
-  }catch(_){}
-  if(!images.length)images=manifestImages(active);
-  if(!images.length){state.innerHTML='<div><strong>'+cat.label+'</strong>Chưa có hình ảnh trong bộ sưu tập này.</div>';return}
+  titleEl.textContent=cat.label;
+  descEl.replaceChildren();
+  cat.desc.forEach((line,i)=>{
+    const p=document.createElement('p');
+    if(cat.strong.includes(i)){const strong=document.createElement('strong');strong.textContent=line;p.appendChild(strong);}
+    else p.textContent=line;
+    descEl.appendChild(p);
+  });
+  grid.hidden=true;grid.replaceChildren();state.hidden=false;state.textContent="Đang tải hình ảnh…";countEl.textContent='';
+  // The shipped manifest removes an unnecessary network/API wait for established collections.
+  let images=manifestImages(active);
+  if(!images.length){
+    try{
+      const r=await fetch('/api/distributor-room/gallery?category='+encodeURIComponent(active),{headers:{'Accept':'application/json'}});
+      if(r.ok){const data=await r.json();images=Array.isArray(data.images)?data.images:[];}
+    }catch(_){}
+  }
+  if(requestId!==collectionRequest)return;
+  if(!images.length){state.textContent="Chưa có hình ảnh trong bộ sưu tập này.";return;}
   images.forEach((image,i)=>{
     const btn=document.createElement('button');btn.type='button';btn.className='gallery-card';
     if(i%9===0)btn.classList.add('wide');else if(i%11===5)btn.classList.add('tall');
-    const img=document.createElement('img');img.src=image.src;img.alt=humanise(image.name)||cat.label;img.loading=i===0?'eager':'lazy';img.fetchPriority=i===0?'high':'auto';img.decoding='async';
+    const img=document.createElement('img');img.src=image.src;img.alt=humanise(image.name)||cat.label;
+    img.loading=i<2?'eager':'lazy';img.fetchPriority=i===0?'high':'auto';img.decoding='async';
     const item={...image,title:humanise(image.name)};btn.appendChild(img);btn.addEventListener('click',()=>openLightbox(item));grid.appendChild(btn);
   });
   countEl.textContent=images.length+' '+"hình ảnh";
