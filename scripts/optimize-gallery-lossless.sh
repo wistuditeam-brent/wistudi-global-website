@@ -19,7 +19,7 @@ while IFS= read -r -d '' file; do
       if ((after < before)); then
         chmod --reference="$file" "$tmp"
         mv -f "$tmp" "$file"
-        ((saved+=before-after))
+        saved=$((saved+before-after))
         printf 'JPEG optimized: %s (%d -> %d bytes)\n' "$file" "$before" "$after"
       else rm -f "$tmp"; fi
       trap - EXIT
@@ -28,7 +28,7 @@ while IFS= read -r -d '' file; do
       # OptiPNG recompresses pixels losslessly, keeping metadata (no --strip).
       optipng -o3 -preserve -quiet "$file"
       after=$(stat -c %s "$file")
-      ((saved+=before-after))
+      saved=$((saved+before-after))
       if ((after < before)); then printf 'PNG optimized: %s (%d -> %d bytes)\n' "$file" "$before" "$after"; fi
       ;;
   esac
