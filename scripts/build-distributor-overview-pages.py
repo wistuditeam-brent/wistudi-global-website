@@ -21,7 +21,7 @@ MANIFEST = Path("distributor-room/overview-page-manifest.json")
 
 
 def git_blob_hash(data: bytes) -> str:
-    header = f"blob {len(data)}\\0".encode().replace(b"\\0", b"\\x00")
+    header = f"blob {len(data)}".encode() + bytes([0])
     return hashlib.sha1(header + data).hexdigest()
 
 
