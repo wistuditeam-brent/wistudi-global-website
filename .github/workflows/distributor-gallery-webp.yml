@@ -41,19 +41,24 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+          from urllib.parse import unquote
           source=Path('distributor-room/gallery/gallery-manifest.js').read_text()
           manifest=json.loads(source.split('window.WISTUDI_GALLERY_MANIFEST=',1)[1].rstrip(';\n'))
           for category, items in manifest.items():
               print(f'{category}: {len(items)} images')
               for item in items:
                   for key in ('thumb','display','original'):
-                      asset=Path(item[key].lstrip('/'))
+                      asset=Path(unquote(item[key].lstrip('/')))
                       assert asset.is_file() and asset.stat().st_size>0, (category,item,key)
                   assert item['thumb'].endswith('.webp')
                   assert item['display'].endswith('.webp')
-          assert sum(map(len,manifest.values()))>=3
+          assert all(manifest.values()), 'A gallery category is unexpectedly empty'
           print('All gallery image links verified')
           PY
+      - name: Validate gallery JavaScript syntax
+        run: |
+          node --check distributor-room/gallery/gallery-app.js
+          node --check distributor-room/gallery/gallery-manifest.js
       - name: Commit generated WebP assets and authoritative manifest
         run: |
           git add -A distributor-room/gallery/optimized distributor-room/gallery/gallery-manifest.js
