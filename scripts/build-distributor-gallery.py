@@ -8,6 +8,7 @@ Requires: Pillow and pillow-heif.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -60,7 +61,7 @@ def build():
         entries = []
         expected = set()
         for original in sources(category):
-            filename = original.name + ".webp"
+            filename = original.name + "." + hashlib.blake2s(original.read_bytes(), digest_size=6).hexdigest() + ".webp"
             thumb = OUTPUT / "thumbs" / category / filename
             display = OUTPUT / "display" / category / filename
             thumb.parent.mkdir(parents=True, exist_ok=True)
