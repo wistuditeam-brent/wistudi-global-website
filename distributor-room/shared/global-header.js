@@ -61,7 +61,8 @@
   function mount(host){
     if(!host||host.dataset.mounted==='1')return;
     host.dataset.mounted='1';
-    const locale=host.dataset.locale==='vi'?'vi':'en';
+    const locale=(location.pathname.includes('/distributor-room/vi/')||host.dataset.locale==='vi')?'vi':'en';
+    host.dataset.locale=locale;
     const section=host.dataset.section||currentSection();
     const L=labels(locale),D=download(locale);
     const langFlag=locale==='vi'?FLAG_UK:FLAG_VN;
@@ -114,7 +115,7 @@
   function setPresence(count){
     const n=Math.max(1,Number(count)||1);
     document.querySelectorAll('.wdr-global-header').forEach(host=>{
-      const locale=host.dataset.locale==='vi'?'vi':'en',L=labels(locale);
+      const locale=(location.pathname.includes('/distributor-room/vi/')||host.dataset.locale==='vi')?'vi':'en',L=labels(locale);
       host.querySelectorAll('[data-wdr-presence]').forEach(el=>el.textContent=n+' '+L.viewing);
     });
   }
