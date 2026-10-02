@@ -1,0 +1,50 @@
+name: Verify production gallery in Chromium
+on:
+  push:
+    branches: ['verify/gallery-browser-live-*']
+    paths: ['.github/workflows/gallery-live-browser.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  production-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Wait for corrected production HTML
+        run: |
+          python3 <<'PY'
+          import time
+          from urllib.request import Request,urlopen
+          paths=('/distributor-room/gallery/','/distributor-room/vi/gallery/')
+          for iteration in range(25):
+            ready=True
+            for path in paths:
+              try:
+                req=Request('https://global.wistudi.com'+path+'?smoke=final-gallery-20261002',headers={'Cache-Control':'no-cache','User-Agent':'Mozilla/5.0 GalleryRegression'})
+                with urlopen(req,timeout=20) as response: html=response.read().decode('utf-8')
+                if ('window.WISTUDI_GALLERY_CATEGORIES=CATEGORIES;\n</script>' not in html
+                   or 'renderCategories();loadCollection();' in html
+                   or '.lightbox{position:fixed;inset:0;z-index:2000;' not in html):
+                  ready=False
+                  print('Awaiting production update for',path,flush=True)
+              except Exception as error:
+                ready=False
+                print('Production request failed',path,error,flush=True)
+            if ready:
+              print('Both corrected gallery HTML pages are live',flush=True)
+              break
+            time.sleep(12)
+          else:
+            raise SystemExit('Corrected gallery HTML did not appear on production in time')
+          PY
+      - name: Install Chromium
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.0
+          npx playwright install --with-deps chromium
+      - name: Verify real production categories, image decoding and lightbox
+        run: GALLERY_BASE_URL=https://global.wistudi.com node tests/distributor-gallery.browser.cjs
