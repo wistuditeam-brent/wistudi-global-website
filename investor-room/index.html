@@ -54,13 +54,13 @@ body.wdr-has-header .full-video-stage{top:calc(var(--dr-header-h) + 70px)}
 body.wdr-has-header .note-panel{top:calc(var(--dr-header-h) + 8px);z-index:80}
 #investorGlobalHeader[hidden]{display:none!important}
 .presentations-screen{overflow:auto;background:radial-gradient(circle at 10% 8%,rgba(139,92,246,.18),transparent 30%),linear-gradient(135deg,#090a10,#10121b 55%,#090a10)}
-.presentation-layout{min-height:100%;display:grid;grid-template-columns:minmax(240px,420px) minmax(0,1fr);gap:clamp(30px,7vw,110px);align-items:center;padding:calc(var(--dr-header-h) + 42px) clamp(24px,5vw,82px) 52px}
-.presentation-layout h1{font-family:Inter,sans-serif;font-size:clamp(2.65rem,5.7vw,5.8rem);letter-spacing:-.055em;line-height:.97;margin:0 0 20px}
+.presentation-layout{min-height:100%;display:grid;grid-template-columns:minmax(0,430px) minmax(0,1fr);gap:clamp(36px,6vw,100px);align-items:center;padding:calc(var(--dr-header-h) + 42px) clamp(24px,5vw,82px) 52px}.presentation-layout>div{min-width:0}
+.presentation-layout h1{font-family:Inter,sans-serif;font-size:clamp(2.7rem,3.8vw,4rem);letter-spacing:-.065em;line-height:1.03;max-width:100%;margin:0 0 20px}
 .presentation-layout .room-kicker{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);font-weight:800;margin-bottom:16px}
 .presentation-layout .room-copy{max-width:480px;color:var(--muted);font-size:1rem;line-height:1.65}
-.presentation-list{border-top:1px solid var(--line)}
+.presentation-list{min-width:0;border-top:1px solid var(--line)}
 .presentation-choice{width:100%;border-bottom:1px solid var(--line);padding:25px 0;display:flex;align-items:center;justify-content:space-between;gap:22px;text-align:left}
-.presentation-choice strong{display:block;font-family:"Be Vietnam Pro",Inter,sans-serif;letter-spacing:-.035em;font-size:clamp(1.2rem,2vw,1.9rem);font-weight:800}
+.presentation-choice strong{display:block;font-family:"Be Vietnam Pro",Inter,sans-serif;letter-spacing:-.035em;font-size:clamp(1.2rem,2vw,1.9rem);font-weight:800;overflow-wrap:break-word}.presentation-choice>span:first-child{min-width:0}
 .presentation-choice small{display:block;color:var(--muted);font-size:.85rem;margin-top:7px;line-height:1.45}
 .presentation-choice .presentation-meta{white-space:nowrap;color:var(--soft);font-size:.78rem}
 .presentation-choice:hover strong{color:#ff9857}
@@ -69,7 +69,8 @@ body.wdr-has-header .note-panel{top:calc(var(--dr-header-h) + 8px);z-index:80}
 .room-resource-links a:hover{color:#fff;background:rgba(255,255,255,.12)}
 #backPresentations{margin:0 0 24px}
 .investor-viewer-tools{position:absolute;top:calc(var(--dr-header-h) + 10px);right:16px;z-index:50;display:flex;gap:8px}.investor-viewer-tools button{height:36px;padding:0 12px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(10,12,20,.76);backdrop-filter:blur(12px);font-size:.76rem;font-weight:700}.investor-viewer-tools button:hover{background:rgba(255,255,255,.13)}
-@media(max-width:800px){.presentation-layout{display:block;padding:calc(var(--dr-header-h) + 38px) 22px 58px}.presentation-list{margin-top:32px}.presentation-choice{padding:20px 0}body.wdr-has-header .toc-inner{padding-top:calc(var(--dr-header-h) + 24px)}}
+@media(max-width:1050px){.presentation-layout{grid-template-columns:minmax(0,1fr);align-content:start;gap:32px;padding-top:calc(var(--dr-header-h) + 52px)}.presentation-layout h1{font-size:clamp(2.7rem,6vw,4rem)}}
+@media(max-width:800px){.presentation-layout{display:block;padding:calc(var(--dr-header-h) + 38px) 22px 58px}.presentation-layout h1{font-size:clamp(2.5rem,9vw,4rem)}.presentation-list{margin-top:32px}.presentation-choice{padding:20px 0}body.wdr-has-header .toc-inner{padding-top:calc(var(--dr-header-h) + 24px)}}
 </style>
 </head>
 <body>
