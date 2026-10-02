@@ -1,0 +1,85 @@
+name: Verify live Distributor Room gallery delivery
+
+on:
+  push:
+    branches: ['verify/gallery-live-*']
+    paths: ['.github/workflows/gallery-live-smoke.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-gallery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Probe production pages, manifest, images and cache headers
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import time
+          from concurrent.futures import ThreadPoolExecutor, as_completed
+          from urllib.request import Request, urlopen
+
+          BASE='https://global.wistudi.com'
+          MANIFEST=BASE+'/distributor-room/gallery/gallery-manifest.js?smoke=20261002'
+          EXPECTED={'wistudi-events':14,'real-moments':23,'classroom-moments':10}
+
+          def get(url, method='GET'):
+              request=Request(url, method=method, headers={
+                  'User-Agent':'Mozilla/5.0 WistudiGallerySmoke/1.0',
+                  'Cache-Control':'no-cache'
+              })
+              with urlopen(request, timeout=22) as response:
+                  data=response.read() if method=='GET' else b''
+                  return response.status,response.headers,data
+
+          ready=None
+          for attempt in range(18):
+              try:
+                  status,headers,raw=get(MANIFEST)
+                  script=raw.decode('utf-8')
+                  prefix='window.WISTUDI_GALLERY_MANIFEST='
+                  manifest=json.loads(script.split(prefix,1)[1].strip().rstrip(';'))
+                  observed={cat:len(manifest.get(cat,[])) for cat in EXPECTED}
+                  if observed==EXPECTED and all(
+                      isinstance(item,dict) and item.get('thumb','').endswith('.webp')
+                      for items in manifest.values() for item in items
+                  ):
+                      ready=manifest
+                      print('Live published manifest:',observed,flush=True)
+                      break
+                  print('Manifest still stale:',observed,flush=True)
+              except Exception as error:
+                  print('Manifest not ready:',repr(error),flush=True)
+              time.sleep(12)
+          assert ready is not None, 'The production gallery manifest has not deployed'
+
+          for path in ('/distributor-room/gallery/?category=classroom-moments',
+                       '/distributor-room/vi/gallery/?category=classroom-moments'):
+              status,headers,raw=get(BASE+path)
+              assert status==200, (path,status)
+              assert b'gallery-app.js?v=20261002-2' in raw, (path,'frontend not deployed')
+              print('Live gallery page OK:',path,flush=True)
+
+          requests=[]
+          for category,items in ready.items():
+              for item in items:
+                  requests.extend([(category,item['name'],k,BASE+item[k]) for k in ('thumb','display')])
+
+          def check_image(entry):
+              category,name,kind,url=entry
+              status,headers,_=get(url,method='HEAD')
+              mime=headers.get('Content-Type','').lower()
+              assert status==200 and 'image/webp' in mime, (entry,status,mime)
+              assert 'immutable' in headers.get('Cache-Control','').lower(), (entry,headers.get('Cache-Control'))
+              return entry
+
+          with ThreadPoolExecutor(max_workers=10) as pool:
+              futures={pool.submit(check_image,e):e for e in requests}
+              for future in as_completed(futures):
+                  future.result()
+          print(f'PRODUCTION PASS: {len(requests)} WebP URLs return 200, correct MIME and immutable caching',flush=True)
+          PY
