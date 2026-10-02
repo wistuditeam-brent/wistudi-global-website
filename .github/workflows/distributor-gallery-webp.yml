@@ -1,0 +1,67 @@
+name: Build optimized Distributor Room gallery
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'fix/distributor-gallery-*'
+    paths:
+      - 'distributor-room/gallery/images/**'
+      - 'Gallery_2/**'
+      - 'distributor-room/gallery/gallery-manifest.js'
+      - 'scripts/build-distributor-gallery.py'
+      - '.github/workflows/distributor-gallery-webp.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: distributor-gallery-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-gallery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HEIC and WebP support
+        run: python -m pip install 'Pillow>=11,<13' 'pillow-heif>=1,<2'
+      - name: Generate browser-compatible thumbnail and display images
+        run: python scripts/build-distributor-gallery.py
+      - name: Verify every manifest image resolves to a generated asset
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          source=Path('distributor-room/gallery/gallery-manifest.js').read_text()
+          manifest=json.loads(source.split('window.WISTUDI_GALLERY_MANIFEST=',1)[1].rstrip(';\n'))
+          for category, items in manifest.items():
+              print(f'{category}: {len(items)} images')
+              for item in items:
+                  for key in ('thumb','display','original'):
+                      asset=Path(item[key].lstrip('/'))
+                      assert asset.is_file() and asset.stat().st_size>0, (category,item,key)
+                  assert item['thumb'].endswith('.webp')
+                  assert item['display'].endswith('.webp')
+          assert sum(map(len,manifest.values()))>=3
+          print('All gallery image links verified')
+          PY
+      - name: Commit generated WebP assets and authoritative manifest
+        run: |
+          git add -A distributor-room/gallery/optimized distributor-room/gallery/gallery-manifest.js
+          if git diff --cached --quiet; then
+            echo 'Gallery derivatives and manifest already up to date.'
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'Build verified WebP Distributor Room gallery assets'
+          git push origin "HEAD:${{ github.ref_name }}"
