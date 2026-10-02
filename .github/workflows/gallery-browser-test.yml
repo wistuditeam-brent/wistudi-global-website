@@ -1,0 +1,51 @@
+name: Distributor Room Gallery Browser Regression
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'fix/gallery-inline-script-*'
+    paths:
+      - 'distributor-room/gallery/index.html'
+      - 'distributor-room/vi/gallery/index.html'
+      - 'distributor-room/gallery/gallery-app.js'
+      - 'distributor-room/gallery/gallery-manifest.js'
+      - 'tests/distributor-gallery.browser.cjs'
+      - '.github/workflows/gallery-browser-test.yml'
+permissions:
+  contents: read
+jobs:
+  chromium-gallery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check gallery scripts and HTML inline syntax
+        run: |
+          node --check distributor-room/gallery/gallery-app.js
+          node --check distributor-room/gallery/gallery-manifest.js
+          node --check tests/distributor-gallery.browser.cjs
+          node <<'NODE'
+          const fs=require('node:fs'),vm=require('node:vm');
+          for(const file of ['distributor-room/gallery/index.html','distributor-room/vi/gallery/index.html']){
+            const html=fs.readFileSync(file,'utf8');
+            const inline=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).filter(x=>x.trim());
+            if(inline.length!==1)throw Error(file+': exactly one category-data inline script required, found '+inline.length);
+            new vm.Script(inline[0],{filename:file});
+            if(!inline[0].includes('window.WISTUDI_GALLERY_CATEGORIES=CATEGORIES;')||/renderCategories\(\)|loadCollection\(\)/.test(inline[0]))
+              throw Error(file+': category bootstrap invalid or obsolete renderer left behind');
+            console.log(file+': bootstrap JavaScript valid');
+          }
+          NODE
+      - name: Install Chromium
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.0
+          npx playwright install --with-deps chromium
+      - name: Test both galleries in actual browser
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/gallery-server.log 2>&1 &
+          sleep 2
+          GALLERY_BASE_URL=http://127.0.0.1:8765 node tests/distributor-gallery.browser.cjs
