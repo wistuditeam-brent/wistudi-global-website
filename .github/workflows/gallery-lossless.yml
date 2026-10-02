@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'distributor-room/gallery/images/**'
+      - 'Gallery_2/**'
       - 'scripts/optimize-gallery-lossless.sh'
       - '.github/workflows/gallery-lossless.yml'
 permissions:
@@ -28,6 +29,7 @@ jobs:
       - name: Commit smaller image files only
         run: |
           git add -u distributor-room/gallery/images
+          if [ -d Gallery_2 ]; then git add -u Gallery_2; fi
           if git diff --cached --quiet; then
             echo "Image bytes are already optimal with these settings."
             exit 0
