@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Repack existing JPEG coefficients and PNG data without changing decoded image pixels.
 set -euo pipefail
-root="distributor-room/gallery/images"
+roots=("distributor-room/gallery/images")
+for candidate in "Gallery_2" "distributor-room/gallery/images/Gallery_2"; do
+  if [[ -d "$candidate" ]]; then roots+=("$candidate"); fi
+done
 command -v jpegtran >/dev/null || { echo "jpegtran is required" >&2; exit 1; }
 command -v optipng >/dev/null || { echo "optipng is required" >&2; exit 1; }
 saved=0
@@ -32,5 +35,5 @@ while IFS= read -r -d '' file; do
       if ((after < before)); then printf 'PNG optimized: %s (%d -> %d bytes)\n' "$file" "$before" "$after"; fi
       ;;
   esac
-done < <(find "$root" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) -print0)
+done < <(find "${roots[@]}" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) -print0)
 printf 'Processed %d images, saved %d bytes using lossless methods.\n' "$processed" "$saved"
