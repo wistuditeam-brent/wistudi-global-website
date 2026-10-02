@@ -57,12 +57,27 @@ jobs:
               time.sleep(12)
           assert ready is not None, 'The production gallery manifest has not deployed'
 
-          for path in ('/distributor-room/gallery/?category=classroom-moments',
-                       '/distributor-room/vi/gallery/?category=classroom-moments'):
-              status,headers,raw=get(BASE+path)
-              assert status==200, (path,status)
-              assert b'gallery-app.js?v=20261002-2' in raw, (path,'frontend not deployed')
-              print('Live gallery page OK:',path,flush=True)
+          paths=('/distributor-room/gallery/?category=classroom-moments',
+                 '/distributor-room/vi/gallery/?category=classroom-moments')
+          pages_ready=False
+          for attempt in range(18):
+              pages_ready=True
+              for path in paths:
+                  try:
+                      status,headers,raw=get(BASE+path)
+                      if not (status==200
+                          and b'gallery-app.js?v=20261002-2' in raw
+                          and b'#galleryGrid[hidden],#galleryState[hidden]{display:none!important}' in raw):
+                          pages_ready=False
+                          print('Waiting for updated page:',path,flush=True)
+                  except Exception as error:
+                      pages_ready=False
+                      print('Page delivery error:',path,repr(error),flush=True)
+              if pages_ready:
+                  print('Both live gallery pages have the final visibility fix',flush=True)
+                  break
+              time.sleep(12)
+          assert pages_ready, 'The final gallery HTML fix has not deployed'
 
           requests=[]
           for category,items in ready.items():
