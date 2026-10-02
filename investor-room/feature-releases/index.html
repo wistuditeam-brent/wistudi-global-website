@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>Wistudi | Feature Releases</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#08090e;--panel:#10121a;--panel2:#151821;--line:rgba(255,255,255,.10);--text:#f8fafc;--muted:rgba(248,250,252,.62);--soft:rgba(248,250,252,.42);--orange:#ff7417;--purple:#8b5cf6;--blue:#38bdf8;--green:#4ade80;--amber:#fbbf24}
+*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;min-height:100vh;color:var(--text);background:radial-gradient(circle at 8% 0%,rgba(139,92,246,.16),transparent 30%),radial-gradient(circle at 100% 16%,rgba(56,189,248,.10),transparent 28%),var(--bg);font-family:Inter,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}.shell{width:min(1320px,calc(100% - 36px));margin:0 auto;padding:34px 0 64px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:58px}.brand{font-family:Inter,Arial,sans-serif;font-weight:800;letter-spacing:-.045em;font-size:1.16rem}.brand .wi{color:var(--orange)}.back{display:inline-flex;align-items:center;gap:9px;height:40px;padding:0 14px;border:1px solid var(--line);border-radius:999px;color:rgba(255,255,255,.78);font-size:.82rem;font-weight:650;background:rgba(255,255,255,.035)}.back:hover{background:rgba(255,255,255,.07);color:white}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:end;margin-bottom:28px}.eyebrow{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:15px}.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px rgba(74,222,128,.09)}h1{font-family:Inter,Arial,sans-serif;font-size:clamp(2.6rem,6vw,5.6rem);line-height:.94;letter-spacing:-.06em;margin:0 0 18px}.intro{max-width:720px;color:var(--muted);font-size:clamp(.98rem,1.4vw,1.1rem);line-height:1.7;margin:0}.updated{font-size:.78rem;color:var(--soft);white-space:nowrap;padding-bottom:8px}.controls{display:flex;gap:8px;flex-wrap:wrap;margin:30px 0 18px}.filter{height:38px;padding:0 13px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.035);color:rgba(255,255,255,.68);font:600 .78rem Inter;cursor:pointer}.filter:hover,.filter.active{background:#fff;color:#0a0b10;border-color:#fff}
+.table-wrap{border:1px solid var(--line);border-radius:22px;background:rgba(16,18,26,.82);overflow:hidden;box-shadow:0 22px 80px rgba(0,0,0,.22);backdrop-filter:blur(14px)}.table-head,.release-row{display:grid;grid-template-columns:145px minmax(230px,1.15fr) 150px 165px minmax(300px,1.7fr) 38px;gap:18px;align-items:center}.table-head{padding:14px 20px;border-bottom:1px solid var(--line);font-size:.79rem;text-transform:uppercase;letter-spacing:.12em;color:var(--soft);font-weight:700}.release-row{width:100%;padding:20px;border:0;border-bottom:1px solid rgba(255,255,255,.075);background:transparent;color:inherit;text-align:left;font:inherit;cursor:pointer;transition:.18s ease}.release-row:last-of-type{border-bottom:0}.release-row:hover{background:rgba(255,255,255,.035)}.release-date{font-size:.90rem;color:var(--muted);font-weight:600}.release-title{font-family:Inter,Arial,sans-serif;font-size:1.125rem;font-weight:700;letter-spacing:-.025em}.pill{display:inline-flex;width:max-content;align-items:center;height:27px;padding:0 9px;border-radius:999px;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.045);font-size:.82rem;font-weight:700;color:rgba(255,255,255,.72)}.status{font-size:.82rem;font-weight:800;letter-spacing:.02em}.status.released{color:#86efac}.status.in-progress{color:#93c5fd}.status.preview{color:#fcd34d}.status.release-target{color:#86efac}.status.pilot-preparation{color:#fcd34d}.status.integration-preparation{color:#93c5fd}.status.partner-rollout{color:#c4b5fd}.release-summary{color:var(--muted);font-size:.96rem;line-height:1.55}.chev{font-size:1.2rem;color:var(--soft);transition:.18s ease}.release-item.open .chev{transform:rotate(180deg)}.detail{display:none;padding:0 20px 22px 183px;border-bottom:1px solid rgba(255,255,255,.075);background:rgba(255,255,255,.018)}.release-item.open .detail{display:block}.detail-inner{max-width:760px;border-left:2px solid rgba(139,92,246,.72);padding:4px 0 4px 18px;color:rgba(255,255,255,.72);font-size:1rem;line-height:1.7}.empty{display:none;padding:34px;text-align:center;color:var(--muted)}
+.preview-note{margin-top:14px;color:var(--soft);font-size:.72rem;text-align:right}
+@media(max-width:900px){.hero{grid-template-columns:1fr}.updated{padding:0}.table-head{display:none}.release-row{grid-template-columns:100px 1fr 34px;gap:10px 14px}.release-row .area{grid-column:1}.release-row .status{grid-column:1}.release-summary{grid-column:2}.release-row .chev{grid-column:3;grid-row:1 / span 3;align-self:center}.release-title{grid-column:2}.release-date{grid-column:1;grid-row:1}.detail{padding:0 18px 20px 128px}}
+@media(max-width:600px){.shell{width:min(100% - 24px,1320px);padding-top:20px}.topbar{margin-bottom:38px}.hero{margin-bottom:18px}.release-row{grid-template-columns:1fr 34px;padding:17px 16px}.release-date,.release-title,.area,.status,.release-summary{grid-column:1}.release-date{grid-row:auto}.release-row .chev{grid-column:2;grid-row:1 / span 5}.detail{padding:0 16px 18px}.detail-inner{padding-left:14px}.preview-note{text-align:left}}
+
+.room-header{position:sticky;top:0;z-index:50;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(14px,2.7vw,34px);border-bottom:1px solid rgba(255,255,255,.09);background:rgba(7,8,13,.94);backdrop-filter:blur(18px)}
+.room-header .viewer-left,.room-header .viewer-controls{display:flex;align-items:center;gap:12px}.room-header .viewer-left{min-width:max-content}.room-header .viewer-brand{font-weight:800;letter-spacing:-.035em;font-size:1rem;color:#fff}.room-header .viewer-title{font-size:.82rem;color:var(--muted);margin-left:2px}
+.platform-btn{height:38px;display:inline-flex;align-items:center;padding:0 15px;border-radius:999px;text-decoration:none;font-size:.8rem;font-weight:650;background:#fff;color:#0b0c10;border:1px solid rgba(255,255,255,.9);transition:.18s ease}.platform-btn:hover{background:#f3f4f6;transform:translateY(-1px)}
+.header-link{height:36px;padding:0 12px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;text-decoration:none;background:rgba(255,255,255,.055);color:rgba(255,255,255,.86);border:1px solid rgba(255,255,255,.13);font-size:.76rem;font-weight:760;white-space:nowrap;transition:.18s ease}.header-link:hover{background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.24);color:#fff}.header-link.active{background:#fff;color:#0b0c10;border-color:#fff}.header-link svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6}.lang-link{min-width:38px;justify-content:center}
+.icon-btn{width:38px;height:38px;border-radius:999px;display:grid;place-items:center;color:rgba(255,255,255,.82);text-decoration:none;border:1px solid transparent}.icon-btn:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.13);color:#fff}.icon-btn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7}
+.downloads-menu{position:relative}.downloads-menu>summary{list-style:none}.downloads-menu>summary::-webkit-details-marker{display:none}.downloads-toggle{height:36px;padding:0 12px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.055);color:rgba(255,255,255,.86);font-size:.76rem;font-weight:750;white-space:nowrap;cursor:pointer;user-select:none;transition:.18s ease}.downloads-toggle:hover,.downloads-menu[open] .downloads-toggle{background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.24);color:#fff}.downloads-toggle svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.download-caret{font-size:.78rem;opacity:.56;transition:transform .18s ease}.downloads-menu[open] .download-caret{transform:rotate(180deg)}
+.downloads-popover{position:absolute;right:0;top:calc(100% + 10px);z-index:80;width:min(390px,calc(100vw - 28px));padding:9px;border:1px solid rgba(255,255,255,.14);border-radius:16px;background:rgba(12,14,21,.98);box-shadow:0 22px 70px rgba(0,0,0,.48);backdrop-filter:blur(20px)}.downloads-popover-head{display:flex;align-items:center;justify-content:space-between;padding:7px 9px 9px;font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;font-weight:750;color:rgba(255,255,255,.48)}.downloads-popover-head small{font:inherit;letter-spacing:.08em;color:rgba(255,255,255,.34)}
+.download-item{display:grid;grid-template-columns:40px minmax(0,1fr) 22px;gap:11px;align-items:center;padding:11px;border-radius:12px;text-decoration:none;color:#fff;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);transition:.16s ease}.download-item:hover{background:rgba(255,255,255,.085);border-color:rgba(255,255,255,.16);transform:translateY(-1px)}.download-file-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:rgba(255,116,23,.14);border:1px solid rgba(255,116,23,.24);color:#ff9a52;font-size:.65rem;font-weight:850;letter-spacing:.04em}.download-copy{min-width:0}.download-copy strong{display:block;font-size:.79rem;line-height:1.32;font-weight:700;letter-spacing:-.012em}.download-copy span{display:block;margin-top:4px;color:rgba(255,255,255,.52);font-size:.68rem;line-height:1.35}.download-arrow{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;color:rgba(255,255,255,.68);font-size:1rem}
+@media(max-width:980px){.room-header .viewer-title{display:none}.header-link .header-label{display:none}.header-link{width:36px;padding:0;justify-content:center}.room-header .viewer-left,.room-header .viewer-controls{gap:7px}.platform-btn{height:34px;padding:0 11px;font-size:.72rem}.icon-btn{width:34px;height:34px}.downloads-toggle{width:34px;padding:0;justify-content:center}.download-label,.download-caret{display:none}.downloads-popover{position:fixed;right:10px;top:58px;width:min(390px,calc(100vw - 20px))}}
+@media(max-width:620px){.room-header{height:58px;padding:0 10px}.website-btn{display:none}.platform-btn{display:none}.lang-link{width:34px}.room-header .viewer-brand{font-size:.94rem}}
+
+/* Investor Room header ordering */
+.platform-btn{background:#7c3aed!important;color:#fff!important;border-color:#8b5cf6!important;box-shadow:0 7px 20px rgba(124,58,237,.22)}
+.platform-btn:hover{background:#6d28d9!important;color:#fff!important;border-color:#7c3aed!important}
+.language-switch{height:36px;padding:0 10px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;background:rgba(255,255,255,.055);color:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.13);font-size:.74rem;font-weight:780;white-space:nowrap;transition:.18s ease}
+.language-switch:hover{background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.24);color:#fff}
+.language-flag{width:24px;height:16px;border-radius:3px;display:block;box-shadow:0 0 0 1px rgba(255,255,255,.24);overflow:hidden;flex:0 0 auto}
+.language-code{line-height:1}
+.header-contents-link{order:-20}
+.platform-btn{order:20}.language-switch{order:17}.website-btn{order:18}
+@media(max-width:980px){.language-switch{width:38px;padding:0}.language-code{display:none}.language-flag{width:23px;height:15px}}
+</style>
+<link rel="stylesheet" href="/investor-room/shared/global-header.css?v=20260928-3">
+</head>
+<body>
+
+<header data-investor-header data-locale="en" data-section="releases"></header>
+<main class="shell wdr-page-content">
+  <section class="hero">
+    <div>
+      <div class="eyebrow"><span class="live-dot"></span> Product roadmap</div>
+      <h1>Feature Releases</h1>
+      <p class="intro">Follow Wistudi's upcoming product releases, platform capabilities and partner-integration roadmap from late September through November 2026.</p>
+    </div>
+    <div class="updated" id="updated"></div>
+  </section>
+  <div class="controls" id="filters" aria-label="Filter product progress"></div>
+  <section class="table-wrap" aria-label="Wistudi product progress">
+    <div class="table-head"><span>Target</span><span>Release / update</span><span>Area</span><span>Stage</span><span>What this enables</span><span></span></div>
+    <div id="rows"></div>
+    <div class="empty" id="empty">No updates match this filter.</div>
+  </section>
+  <div class="preview-note">Current target roadmap · product and partner milestones are maintained independently of the presentation deck.</div>
+</main>
+<script src="/investor-room/shared/global-header.js?v=20260928-3"></script>
+<script type="module">
+import { PRODUCT_PROGRESS, PRODUCT_PROGRESS_META } from '../product-progress/releases.js';
+const rows=document.getElementById('rows'),filters=document.getElementById('filters'),empty=document.getElementById('empty'),updated=document.getElementById('updated');
+const areas=['All',...new Set(PRODUCT_PROGRESS.map(r=>r.area))];let active='All';
+const fmt=d=>new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(d+'T00:00:00Z'));
+updated.textContent='Last updated '+fmt(PRODUCT_PROGRESS_META.updated);
+function cls(s){return s.toLowerCase().replace(/\s+/g,'-')}
+function renderFilters(){filters.innerHTML='';areas.forEach(area=>{const b=document.createElement('button');b.type='button';b.className='filter'+(area===active?' active':'');b.textContent=area;b.addEventListener('click',()=>{active=area;renderFilters();renderRows()});filters.appendChild(b)})}
+function renderRows(){rows.innerHTML='';const data=PRODUCT_PROGRESS.filter(r=>active==='All'||r.area===active);empty.style.display=data.length?'none':'block';data.forEach(r=>{const item=document.createElement('div');item.className='release-item';const button=document.createElement('button');button.type='button';button.className='release-row';button.setAttribute('aria-expanded','false');button.innerHTML='<span class="release-date">'+(r.dateLabel||fmt(r.date))+'</span><span class="release-title"></span><span class="area pill"></span><span class="status '+cls(r.status)+'"></span><span class="release-summary"></span><span class="chev">⌄</span>';button.querySelector('.release-title').textContent=r.title;button.querySelector('.area').textContent=r.area;button.querySelector('.status').textContent=r.status.toUpperCase();button.querySelector('.release-summary').textContent=r.summary;const detail=document.createElement('div');detail.className='detail';detail.innerHTML='<div class="detail-inner"></div>';detail.querySelector('.detail-inner').textContent=r.detail;button.addEventListener('click',()=>{const open=item.classList.toggle('open');button.setAttribute('aria-expanded',String(open))});item.append(button,detail);rows.appendChild(item)})}
+renderFilters();renderRows();
+</script>
+</body>
+</html>
