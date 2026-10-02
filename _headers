@@ -21,3 +21,6 @@
 
 /distributor-room/gallery/gallery-manifest.js
   Cache-Control: public, max-age=0, must-revalidate
+
+/Gallery_2/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
