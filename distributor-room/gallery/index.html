@@ -46,6 +46,8 @@ main{width:min(1320px,calc(100% - 36px));margin:0 auto;padding:clamp(44px,6vw,84
 @media(max-width:980px){.language-switch{width:38px;padding:0}.language-code{display:none}.language-flag{width:23px;height:15px}}
 
 /* Stable tile dimensions, low-cost loading skeleton and per-image retry. */
+#galleryGrid[hidden],#galleryState[hidden]{display:none!important}
+
 .gallery-card{isolation:isolate}
 .gallery-card::before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,#11131b 8%,#20232e 36%,#11131b 62%);background-size:240% 100%;animation:gallery-sheen 1.7s ease-in-out infinite;transition:opacity .2s}
 .gallery-card.is-loaded::before,.gallery-card.is-error::before{opacity:0;animation:none}
