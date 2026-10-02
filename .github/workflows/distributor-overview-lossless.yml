@@ -1,0 +1,47 @@
+name: Lossless Distributor Overview Pages
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/distributor-overview-lossless.yml'
+      - 'scripts/build-distributor-overview-pages.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: distributor-overview-lossless
+  cancel-in-progress: false
+jobs:
+  create-lossless-pages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install lossless PDF processing dependency
+        run: python -m pip install 'PyMuPDF==1.26.7'
+      - name: Fetch exact earlier English overview PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin 760a96a3907d7fbf0de7b48038e69a6a50936c9f
+          git show '760a96a3907d7fbf0de7b48038e69a6a50936c9f:distributor-room/assets/presentation/Presentation ENG.pdf' > /tmp/wistudi-overview-original-en.pdf
+          test -s /tmp/wistudi-overview-original-en.pdf
+      - name: Split, losslessly optimize and pixel-verify all overview pages
+        run: python scripts/build-distributor-overview-pages.py
+      - name: Commit original-quality individual page PDFs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add distributor-room/assets/presentation/overview-en-pages distributor-room/vi/assets/presentation/overview-vi-pages distributor-room/overview-page-manifest.json
+          if git diff --cached --quiet; then
+            echo "Lossless pages already up-to-date."
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Publish 29 pixel-verified lossless overview slide PDFs"
+          git push origin HEAD:main
