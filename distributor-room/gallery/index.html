@@ -90,57 +90,7 @@ main{width:min(1320px,calc(100% - 36px));margin:0 auto;padding:clamp(44px,6vw,84
 <script src="/distributor-room/gallery/gallery-manifest.js?v=20261002-2"></script>
 <script>
 const CATEGORIES=[{"slug":"wistudi-events","label":"Wistudi Events","desc":["Anyone who has ever truly built something from the ground up with their own resources and name on it will understand the full scale of what it represents.","People may see the booth, the presentation and the conversations, but behind it are years of ideas, hard work, testing, setbacks and execution.","Building Wistudi has never been just about creating a platform. It has been about turning a vision into something real, useful and meaningful for people.","Proud of the journey so far, and even more excited for what comes next!!"],"strong":[]},{"slug":"real-moments","label":"Real Moments","desc":["Create once. Teach anywhere.","From interactive lessons to printable classroom resources, all created together in Wistudi Publishing.","Here, a teacher created a complete interactive learning experience that could be delivered live in the classroom, shared with learners for independent practice at home, and instantly converted into downloadable, printable worksheets and curriculum materials for hands-on classroom activities.","One creation process. Multiple ways to teach and learn. Seamlessly connecting digital learning with real-world classroom teaching.","Create. Teach. Share. Publish. All in one place."],"strong":[0,4]},{"slug":"classroom-moments","label":"Classroom Moments","desc":["Bringing professional interactive publishing into the hands of every educator.","From complete curricula and interactive lessons to downloadable worksheets and printable teaching resources, Wistudi brings powerful publishing capabilities, traditionally reserved for major commercial educational publishers, to everyday educators.","With the Wistudi AI Assistant, educators can create comprehensive, interactive learning experiences in minutes, all from one platform.","Create. Teach. Share. Publish. All in one place."],"strong":[0,3]}];
-window.WISTUDI_GALLERY_CATEGORIES=CATEGORIES;});
-    categoryBar.appendChild(b);
-  });
-}
-function openLightbox(image){
-  lightboxImage.src=image.src;lightboxImage.alt=image.title||'';lightboxCaption.textContent=image.title||'';lightbox.classList.add('open');document.body.style.overflow='hidden';document.getElementById('closeLightbox').focus();
-}
-function closeLightbox(){lightbox.classList.remove('open');lightboxImage.removeAttribute('src');document.body.style.overflow=''}
-document.getElementById('closeLightbox').addEventListener('click',closeLightbox);
-lightbox.addEventListener('click',e=>{if(e.target===lightbox)closeLightbox()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&lightbox.classList.contains('open'))closeLightbox()});
-function manifestImages(category){
-  const folder='distributor-room/gallery/images/'+category;
-  const names=window.WISTUDI_GALLERY_MANIFEST?.[category]||[];
-  return names.map(name=>({name,src:'/'+folder+'/'+encodeURIComponent(name)}));
-}
-let collectionRequest=0;
-async function loadCollection(){
-  const requestId=++collectionRequest;
-  const cat=CATEGORIES.find(c=>c.slug===active)||CATEGORIES[0];
-  titleEl.textContent=cat.label;
-  descEl.replaceChildren();
-  cat.desc.forEach((line,i)=>{
-    const p=document.createElement('p');
-    if(cat.strong.includes(i)){const strong=document.createElement('strong');strong.textContent=line;p.appendChild(strong);}
-    else p.textContent=line;
-    descEl.appendChild(p);
-  });
-  grid.hidden=true;grid.replaceChildren();state.hidden=false;state.textContent="Loading images…";countEl.textContent='';
-  // The shipped manifest removes an unnecessary network/API wait for established collections.
-  let images=manifestImages(active);
-  if(!images.length){
-    try{
-      const r=await fetch('/api/distributor-room/gallery?category='+encodeURIComponent(active),{headers:{'Accept':'application/json'}});
-      if(r.ok){const data=await r.json();images=Array.isArray(data.images)?data.images:[];}
-    }catch(_){}
-  }
-  if(requestId!==collectionRequest)return;
-  if(!images.length){state.textContent="No images have been added to this collection yet.";return;}
-  images.forEach((image,i)=>{
-    const btn=document.createElement('button');btn.type='button';btn.className='gallery-card';
-    if(i%9===0)btn.classList.add('wide');else if(i%11===5)btn.classList.add('tall');
-    const img=document.createElement('img');img.src=image.src;img.alt=humanise(image.name)||cat.label;
-    img.loading=i<2?'eager':'lazy';img.fetchPriority=i===0?'high':'auto';img.decoding='async';
-    const item={...image,title:humanise(image.name)};btn.appendChild(img);btn.addEventListener('click',()=>openLightbox(item));grid.appendChild(btn);
-  });
-  countEl.textContent=images.length+' '+"images";
-  state.hidden=true;grid.hidden=false;
-}
-
-renderCategories();loadCollection();
+window.WISTUDI_GALLERY_CATEGORIES=CATEGORIES;
 </script>
 <script src="/distributor-room/gallery/gallery-app.js?v=20261002-2"></script>
 </body>
