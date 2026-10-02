@@ -1,0 +1,1 @@
+Distributor Room presentations hub release 2026-10-02. Adds main Presentations screen, Learn About Wistudi deck contents, Distributor Pathways three-page deck, EN/VI support, neutral loader copy and smoother PDF rendering.
