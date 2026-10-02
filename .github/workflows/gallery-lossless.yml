@@ -1,0 +1,36 @@
+name: Lossless Distributor Gallery Image Optimization
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'distributor-room/gallery/images/**'
+      - 'scripts/optimize-gallery-lossless.sh'
+      - '.github/workflows/gallery-lossless.yml'
+permissions:
+  contents: write
+concurrency:
+  group: gallery-image-optimization
+  cancel-in-progress: false
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Install pixel-preserving optimizers
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libjpeg-turbo-progs optipng
+      - name: Optimize gallery JPEG and PNG files without quality reduction
+        run: bash scripts/optimize-gallery-lossless.sh
+      - name: Commit smaller image files only
+        run: |
+          git add -u distributor-room/gallery/images
+          if git diff --cached --quiet; then
+            echo "Image bytes are already optimal with these settings."
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Losslessly optimize gallery images"
+          git push
