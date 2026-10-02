@@ -26,8 +26,8 @@
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
 # Original Distributor Pathways PDFs are versioned in player URLs for stable browser caching.
-/distributor-room/assets/presentation/*.pdf
+/distributor-room/assets/presentation/*
   Cache-Control: public, max-age=604800, stale-while-revalidate=604800
 
-/distributor-room/vi/assets/presentation/*.pdf
+/distributor-room/vi/assets/presentation/*
   Cache-Control: public, max-age=604800, stale-while-revalidate=604800
