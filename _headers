@@ -15,3 +15,9 @@
 
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
+
+/distributor-room/gallery/images/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/distributor-room/gallery/gallery-manifest.js
+  Cache-Control: public, max-age=0, must-revalidate
