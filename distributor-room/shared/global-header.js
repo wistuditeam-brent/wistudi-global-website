@@ -66,9 +66,9 @@
     const section=host.dataset.section||currentSection();
     const L=labels(locale),D=download(locale);
     const langFlag=locale==='vi'?FLAG_UK:FLAG_VN;
-    const extraEnglishDownload = locale==='en'
+    const extraLocalizedDownload = locale==='en'
       ? '<a class="wdr-download-item" href="/distributor-room/downloads/Wistudi_Distributor_Commercial_Pathways_Inter_Spaced.pdf" download><span class="wdr-file-icon">PDF</span><span class="wdr-download-copy"><strong>Wistudi Distributor Commercial Pathways</strong><span>Commercial pathways and additional solutions · English PDF</span></span><span class="wdr-download-arrow">↓</span></a>'
-      : '';
+      : '<a class="wdr-download-item" href="/distributor-room/vi/downloads/Wistudi_Distributor_Commercial_Pathways_VI.pdf" download><span class="wdr-file-icon">PDF</span><span class="wdr-download-copy"><strong>Các Mô hình Thương mại dành cho Nhà phân phối Wistudi</strong><span>Mô hình thương mại và giải pháp bổ sung · PDF tiếng Việt</span></span><span class="wdr-download-arrow">↓</span></a>';
     host.className='wdr-global-header';
     host.innerHTML='<div class="wdr-brand-wrap"><span class="wdr-brand">Wistudi</span><span class="wdr-room-title">'+L.room+'</span></div>'+
       '<nav class="wdr-nav" aria-label="'+L.room+'">'+
@@ -77,7 +77,7 @@
       '<a class="wdr-pill optional" data-room-action="event-video" href="'+navHref(locale,'event-video')+'">'+ICONS.play+'<span class="wdr-pill-label optional">'+L.event+'</span></a>'+
       '<a class="wdr-pill compact '+(section==='releases'?'is-active':'')+'" href="'+pathFor(locale,'releases')+'">'+ICONS.star+'<span class="wdr-pill-label compact">'+L.releases+'</span></a>'+
       '<a class="wdr-pill compact '+(section==='gallery'?'is-active':'')+'" href="'+pathFor(locale,'gallery')+'">'+ICONS.gallery+'<span class="wdr-pill-label compact">'+L.gallery+'</span></a>'+
-      '<details class="wdr-downloads"><summary class="wdr-pill compact">'+ICONS.download+'<span class="wdr-pill-label compact">'+L.downloads+'</span><span aria-hidden="true">⌄</span></summary><div class="wdr-download-popover"><div class="wdr-download-head"><span>'+L.downloads+'</span><span>'+L.code+'</span></div><a class="wdr-download-item" href="'+D.href+'" download><span class="wdr-file-icon">PDF</span><span class="wdr-download-copy"><strong>'+D.title+'</strong><span>'+D.meta+'</span></span><span class="wdr-download-arrow">↓</span></a>'+extraEnglishDownload+'</div></details>'+
+      '<details class="wdr-downloads"><summary class="wdr-pill compact">'+ICONS.download+'<span class="wdr-pill-label compact">'+L.downloads+'</span><span aria-hidden="true">⌄</span></summary><div class="wdr-download-popover"><div class="wdr-download-head"><span>'+L.downloads+'</span><span>'+L.code+'</span></div><a class="wdr-download-item" href="'+D.href+'" download><span class="wdr-file-icon">PDF</span><span class="wdr-download-copy"><strong>'+D.title+'</strong><span>'+D.meta+'</span></span><span class="wdr-download-arrow">↓</span></a>'+extraLocalizedDownload+'</div></details>'+
       '<span class="wdr-pill wdr-presence" aria-label="'+L.viewing+'"><span class="wdr-presence-dot"></span><span class="wdr-presence-text" data-wdr-presence>1 '+L.viewing+'</span></span>'+
       '<a class="wdr-pill optional" data-room-action="notes" href="'+navHref(locale,'notes')+'">'+ICONS.note+'<span class="wdr-pill-label optional">'+L.notes+'</span></a>'+
       '<a class="wdr-pill wdr-language" data-language-switch href="'+targetLanguageHref(locale,section)+'" title="'+L.language+'" aria-label="'+L.language+'">'+langFlag+'<span class="wdr-language-code">'+L.code+'</span></a>'+
