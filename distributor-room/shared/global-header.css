@@ -21,3 +21,6 @@ body.wdr-has-header{--dr-content-top:var(--dr-header-h)}body.wdr-has-header .wdr
 .wdr-slide-loader[hidden]{display:none!important}.wdr-loader-spinner{width:30px;height:30px;border:3px solid rgba(255,255,255,.14);border-top-color:#8b5cf6;border-radius:50%;animation:wdr-spin .8s linear infinite}.wdr-loader-title{font-size:.84rem;font-weight:750}.wdr-loader-copy{font-size:.7rem;color:rgba(255,255,255,.54)}@keyframes wdr-spin{to{transform:rotate(360deg)}}
 
 body.wdr-has-header .full-video-top{top:var(--dr-header-h)}body.wdr-has-header .full-video-stage{top:calc(var(--dr-header-h) + 52px)}
+
+/* Separate multiple files in the Downloads menu. */
+.wdr-download-popover .wdr-download-item + .wdr-download-item{margin-top:8px}
