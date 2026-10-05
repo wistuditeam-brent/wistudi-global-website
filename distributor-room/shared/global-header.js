@@ -46,9 +46,9 @@
   }
   function labels(locale){
     return locale==='vi'?{
-      room:'Phòng Nhà phân phối',contents:'Mục lục',platform:'Video nền tảng',event:'Sự kiện Wistudi',releases:'Cập nhật tính năng',gallery:'Thư viện ảnh',downloads:'Tải xuống',notes:'Ghi chú cho Wistudi',viewing:'đang xem',website:'Truy cập website Wistudi',open:'Mở Wistudi',language:'English',code:'EN'
+      room:'Phòng Nhà phân phối',contents:'Mục lục',videos:'Xem Video',releases:'Cập nhật tính năng',gallery:'Thư viện ảnh',downloads:'Tải xuống',notes:'Ghi chú cho Wistudi',viewing:'đang xem',website:'Truy cập website Wistudi',open:'Mở Wistudi',language:'English',code:'EN'
     }:{
-      room:'Distributor Room',contents:'Contents',platform:'Platform video',event:'Wistudi Event',releases:'Feature Releases',gallery:'Gallery',downloads:'Downloads',notes:'Notes to Wistudi',viewing:'viewing',website:'Visit Wistudi website',open:'Open Wistudi',language:'Tiếng Việt',code:'VI'
+      room:'Distributor Room',contents:'Contents',videos:'Watch Videos',releases:'Feature Releases',gallery:'Gallery',downloads:'Downloads',notes:'Notes to Wistudi',viewing:'viewing',website:'Visit Wistudi website',open:'Open Wistudi',language:'Tiếng Việt',code:'VI'
     };
   }
   function navHref(locale,action){
@@ -73,8 +73,7 @@
     host.innerHTML='<div class="wdr-brand-wrap"><span class="wdr-brand">Wistudi</span><span class="wdr-room-title">'+L.room+'</span></div>'+
       '<nav class="wdr-nav" aria-label="'+L.room+'">'+
       '<a class="wdr-pill compact '+(section==='contents'?'is-active':'')+'" data-room-action="contents" href="'+navHref(locale,'contents')+'">'+ICONS.contents+'<span class="wdr-pill-label compact">'+L.contents+'</span></a>'+
-      '<a class="wdr-pill optional" data-room-action="platform-video" href="'+navHref(locale,'platform-video')+'">'+ICONS.play+'<span class="wdr-pill-label optional">'+L.platform+'</span></a>'+
-      '<a class="wdr-pill optional" data-room-action="event-video" href="'+navHref(locale,'event-video')+'">'+ICONS.play+'<span class="wdr-pill-label optional">'+L.event+'</span></a>'+
+      '<a class="wdr-pill optional" data-room-action="videos" href="'+navHref(locale,'videos')+'">'+ICONS.play+'<span class="wdr-pill-label optional">'+L.videos+'</span></a>'+
       '<a class="wdr-pill compact '+(section==='releases'?'is-active':'')+'" href="'+pathFor(locale,'releases')+'">'+ICONS.star+'<span class="wdr-pill-label compact">'+L.releases+'</span></a>'+
       '<a class="wdr-pill compact '+(section==='gallery'?'is-active':'')+'" href="'+pathFor(locale,'gallery')+'">'+ICONS.gallery+'<span class="wdr-pill-label compact">'+L.gallery+'</span></a>'+
       '<details class="wdr-downloads"><summary class="wdr-pill compact">'+ICONS.download+'<span class="wdr-pill-label compact">'+L.downloads+'</span><span aria-hidden="true">⌄</span></summary><div class="wdr-download-popover"><div class="wdr-download-head"><span>'+L.downloads+'</span><span>'+L.code+'</span></div><a class="wdr-download-item" href="'+D.href+'" download><span class="wdr-file-icon">PDF</span><span class="wdr-download-copy"><strong>'+D.title+'</strong><span>'+D.meta+'</span></span><span class="wdr-download-arrow">↓</span></a>'+extraLocalizedDownload+'</div></details>'+
