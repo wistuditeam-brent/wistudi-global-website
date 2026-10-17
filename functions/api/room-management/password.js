@@ -5,7 +5,7 @@ export async function onRequestPost({request,env}){
  if(request.headers.get('origin')!==new URL(request.url).origin)return json({error:'invalid_origin'},403);
  const manager=await authenticate(request,env);if(!manager)return json({error:'unauthorized'},401);
  const body=await request.json().catch(()=>null),current=body?.current_password,next=body?.new_password;
- if(typeof current!=='string'||typeof next!=='string'||next.length<12||next.length>512)return json({error:'invalid_input'},400);
+ if(typeof current!=='string'||typeof next!=='string'||next.length<8||next.length>512)return json({error:'invalid_input'},400);
  const row=await env.ROOM_DB.prepare('SELECT password_salt,password_hash FROM room_managers WHERE id=?').bind(manager.id).first();
  const candidate=await derivePassword(current,row.password_salt);if(!safeEqual(candidate,row.password_hash))return json({error:'invalid_credentials'},401);
  const salt=newSalt(),hash=await derivePassword(next,salt);

@@ -14,7 +14,7 @@
 2. Bind private R2 bucket as ROOM_MEDIA.
 3. Set ROOM_BOOTSTRAP_TOKEN to a long random secret only for initial provisioning, then remove/rotate it after bootstrap.
 4. The old ROOM_MANAGER_TOKEN is no longer used by active Stage 7/8 auth and should not be relied upon.
-5. Provision the first manager by POSTing JSON to /api/room-management/bootstrap with Bearer ROOM_BOOTSTRAP_TOKEN. Password minimum: 12 characters.
+5. Provision the first manager by POSTing JSON to /api/room-management/bootstrap with Bearer ROOM_BOOTSTRAP_TOKEN. Password minimum: 8 characters.
 6. Browser-test login, content CRUD, upload, publish/unpublish, EN/VI Client Room display, manager creation and access denial across rooms.
 
 ## Not yet completed

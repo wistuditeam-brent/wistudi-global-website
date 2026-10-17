@@ -13,7 +13,7 @@ export async function onRequest({request,env}){
  }
  if(request.method==='POST'){
   const email=String(body?.email||'').trim().toLowerCase(),password=body?.password,role=body?.role==='admin'?'admin':'editor';
-  if(email.length>254||!email.includes('@')||typeof password!=='string'||password.length<12||password.length>512)return json({error:'invalid_input'},400);
+  if(email.length>254||!email.includes('@')||typeof password!=='string'||password.length<8||password.length>512)return json({error:'invalid_input'},400);
   const existing=await env.ROOM_DB.prepare('SELECT id FROM room_managers WHERE email=?').bind(email).first();
   if(existing)return json({error:'manager_exists'},409);
   const id=crypto.randomUUID(),salt=newSalt(),hash=await derivePassword(password,salt);
