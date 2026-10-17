@@ -35,3 +35,16 @@
 
 /distributor-room/vi/assets/presentation/*
   Cache-Control: public, max-age=604800, stale-while-revalidate=604800
+
+/client-room/*
+  Cache-Control: no-store, max-age=0
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  X-Frame-Options: DENY
+  Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'
+
+/room-manager/*
+  Cache-Control: no-store, max-age=0
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  X-Frame-Options: DENY
