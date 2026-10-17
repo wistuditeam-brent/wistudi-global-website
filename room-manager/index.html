@@ -1,23 +1,229 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wistudi · Room Manager</title><style>
-:root{font-family:Inter,system-ui,-apple-system,sans-serif;color:#25233c;background:#f6f5fa}*{box-sizing:border-box}body{margin:0}header{background:#fff;border-bottom:1px solid #e7e5ee;padding:18px clamp(18px,4vw,60px);display:flex;justify-content:space-between;align-items:center}header strong{font-size:19px}main{max-width:1140px;margin:36px auto;padding:0 20px}.card{background:#fff;border:1px solid #e7e5ee;border-radius:18px;padding:24px;box-shadow:0 8px 25px #30234a08}h1{font-size:29px;margin:0 0 8px}p{color:#716d80}label{display:grid;gap:6px;font-weight:600;font-size:13px}input,select,textarea{width:100%;padding:12px;border:1px solid #d9d6e2;border-radius:10px;background:#fff;color:#25233c;font:inherit}button{cursor:pointer;border:0;border-radius:10px;background:#6e42c2;color:white;padding:11px 16px;font-weight:650}button.secondary{background:#f1edf9;color:#56359d}button.danger{background:#fff0f0;color:#a12b3b}button:disabled{opacity:.5;cursor:default}.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin:24px 0}.toolbar label{min-width:155px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.wide{grid-column:1/-1}.items{display:grid;gap:10px}.item{border:1px solid #e8e5ef;border-radius:12px;padding:14px;display:flex;gap:14px;align-items:center;justify-content:space-between}.item strong{display:block}.item small{color:#76717f}.actions{display:flex;gap:8px;flex-wrap:wrap}#message{min-height:24px;color:#63409e}#login,#setup,#initializing{max-width:470px;margin:12vh auto}.hint{font-size:12px;color:#817b8d;margin-top:6px}#editor{margin-top:20px}a{color:#6035af}@media(max-width:680px){.grid{grid-template-columns:1fr}.item{align-items:flex-start;flex-direction:column}.toolbar label{width:100%}}
-</style></head><body><header><strong>Wistudi <span style="color:#6e42c2">Room Manager</span></strong><button id="logout" class="secondary" hidden>Sign out</button></header><main>
-<section id="initializing" class="card"><h1>Room Manager</h1><p>Preparing your management account…</p></section><section id="setup" class="card" hidden><h1>Create administrator account</h1><p>Create the first Room Manager administrator account. This setup is available only once.</p><form id="setupForm"><label>Email<input id="setupEmail" type="email" autocomplete="username" required></label><label>Password<input id="setupPassword" type="password" autocomplete="new-password" minlength="8" required><span class="hint">Minimum 8 characters.</span></label><label>Confirm password<input id="setupConfirm" type="password" autocomplete="new-password" minlength="8" required></label><p><button>Create administrator account</button></p></form></section><section id="login" class="card" hidden><h1>Manager sign in</h1><p>Sign in with your Room Manager email and password.</p><form id="loginForm"><label>Email<input id="email" type="email" autocomplete="username" required></label><label>Manager password<input id="password" type="password" autocomplete="current-password" required></label><p><button>Sign in</button></p></form></section>
-<section id="dashboard" hidden><h1>Room content</h1><p>Manage presentation, video, gallery and download records. Published content is not yet connected to the public room pages.</p><div class="toolbar"><label>Room<select id="room"><option value="client">Client Room</option><option value="distributor">Distributor Room</option><option value="investor">Investor Room</option></select></label><label>Content type<select id="filter"><option value="">All content</option><option value="presentation">Presentations</option><option value="video">Videos</option><option value="gallery">Gallery</option><option value="document">Downloads</option></select></label><button id="new">Add content</button></div><div class="card"><div id="items" class="items"><span>Loading content…</span></div></div>
-<form id="editor" class="card" hidden><h2 id="editorTitle">Add content</h2><div class="grid"><label>Type<select id="category"><option value="presentation">Presentation</option><option value="video">Video</option><option value="gallery">Gallery image</option><option value="document">Download</option></select></label><label>Language<select id="locale"><option value="en">English</option><option value="vi">Vietnamese</option></select></label><label class="wide">Title<input id="title" maxlength="180" required></label><label class="wide">Asset URL<input id="asset" placeholder="Upload a file or enter an existing URL" required></label><label class="wide">Upload or replace file<input id="upload" type="file" accept=".pdf,.mp4,.webm,.png,.jpg,.jpeg,.webp,.txt"></label><div class="wide"><button type="button" id="uploadButton" class="secondary">Upload / replace file</button> <span id="uploadStatus" role="status"></span></div><label class="wide">Description<textarea id="description" maxlength="2000" rows="3"></textarea></label><label>Status<select id="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label><label>Display order<input id="order" type="number" value="0"></label></div><p class="actions"><button type="submit">Save content</button><button type="button" id="cancel" class="secondary">Cancel</button></p></form></section><p id="message" role="status" aria-live="polite"></p></main>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wistudi · Room Manager</title>
+<style>
+:root{font-family:Inter,system-ui,-apple-system,sans-serif;color:#25233c;background:#f6f5fa}*{box-sizing:border-box}body{margin:0}header{background:#fff;border-bottom:1px solid #e7e5ee;padding:18px clamp(18px,4vw,60px);display:flex;justify-content:space-between;align-items:center}header strong{font-size:19px}main{max-width:1180px;margin:36px auto;padding:0 20px}.card{background:#fff;border:1px solid #e7e5ee;border-radius:18px;padding:24px;box-shadow:0 8px 25px #30234a08}h1{font-size:29px;margin:0 0 8px}h2{margin:0 0 8px}p{color:#716d80}label{display:grid;gap:6px;font-weight:600;font-size:13px}input,select,textarea{width:100%;padding:12px;border:1px solid #d9d6e2;border-radius:10px;background:#fff;color:#25233c;font:inherit}button{cursor:pointer;border:0;border-radius:10px;background:#6e42c2;color:white;padding:11px 16px;font-weight:650}button.secondary,.linkbtn{background:#f1edf9;color:#56359d}button.danger{background:#fff0f0;color:#a12b3b}button:disabled{opacity:.5;cursor:default}.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin:24px 0}.toolbar label{min-width:155px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.wide{grid-column:1/-1}.items{display:grid;gap:10px}.item{border:1px solid #e8e5ef;border-radius:12px;padding:14px;display:flex;gap:14px;align-items:center;justify-content:space-between}.item strong{display:block}.item small{color:#76717f}.item p{margin:5px 0 0;font-size:13px}.actions{display:flex;gap:8px;flex-wrap:wrap}.linkbtn{display:inline-flex;align-items:center;text-decoration:none;padding:11px 16px;border-radius:10px;font-weight:650}#message{min-height:24px;color:#63409e}#login,#setup,#initializing{max-width:470px;margin:12vh auto}.hint{font-size:12px;color:#817b8d;margin-top:6px;line-height:1.45}#editor,#videoGroupsPanel{margin-top:20px}.section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}.subtle{background:#faf9fd;border:1px solid #ece8f4;border-radius:12px;padding:14px}.progress{height:8px;background:#ece8f4;border-radius:999px;overflow:hidden;margin-top:8px}.progress span{display:block;height:100%;width:0;background:#6e42c2}.group-list{display:grid;gap:10px;margin-top:18px}.group-row{display:flex;justify-content:space-between;gap:16px;padding:14px;border:1px solid #e8e5ef;border-radius:12px}.group-row p{margin:4px 0 0}.group-form{margin-top:18px;border-top:1px solid #ece8f4;padding-top:18px}.management-panel{margin-top:20px}.panel-nav{display:flex;gap:10px;flex-wrap:wrap}.tag-chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.tag-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;background:#f1edf9;color:#56359d;font-size:12px}.tag-chip button{padding:0;background:transparent;color:#7a54ba}.upload-line{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.contact-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px;border:1px solid #e8e5ef;border-radius:12px;margin-top:10px}.contact-row .span2{grid-column:span 2}.contact-row .remove-contact{align-self:end}.preview-img{display:block;max-width:260px;max-height:150px;border-radius:10px;border:1px solid #e6e2ed;margin-top:8px}.counter{font-size:12px;color:#817b8d}.partner-list-row{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:14px;align-items:center;border:1px solid #e8e5ef;border-radius:12px;padding:12px}.partner-list-row img{width:110px;height:72px;object-fit:cover;border-radius:9px;background:#eee}@media(max-width:760px){.contact-row{grid-template-columns:1fr}.contact-row .span2{grid-column:auto}.partner-list-row{grid-template-columns:1fr}.partner-list-row img{width:100%;height:auto;aspect-ratio:16/9}}@media(max-width:680px){.grid{grid-template-columns:1fr}.item,.group-row{align-items:flex-start;flex-direction:column}.toolbar label{width:100%}.section-head{flex-direction:column}}
+</style>
+</head>
+<body>
+<header><strong>Wistudi <span style="color:#6e42c2">Room Manager</span></strong><button id="logout" class="secondary" hidden>Sign out</button></header>
+<main>
+<section id="initializing" class="card"><h1>Room Manager</h1><p>Preparing your management account…</p></section>
+<section id="setup" class="card" hidden><h1>Create administrator account</h1><p>Create the first Room Manager administrator account. This setup is available only once.</p><form id="setupForm"><label>Email<input id="setupEmail" type="email" autocomplete="username" required></label><label>Password<input id="setupPassword" type="password" autocomplete="new-password" minlength="8" required><span class="hint">Minimum 8 characters.</span></label><label>Confirm password<input id="setupConfirm" type="password" autocomplete="new-password" minlength="8" required></label><p><button>Create administrator account</button></p></form></section>
+<section id="login" class="card" hidden><h1>Manager sign in</h1><p>Sign in with your Room Manager email and password.</p><form id="loginForm"><label>Email<input id="email" type="email" autocomplete="username" required></label><label>Manager password<input id="password" type="password" autocomplete="current-password" required></label><p><button>Sign in</button></p></form></section>
+
+<section id="dashboard" hidden>
+<h1>Room content</h1><p>Manage the content clients see. Published items appear in the room; draft and archived items stay hidden.</p>
+<div class="toolbar">
+<label>Room<select id="room"><option value="client">Client Room</option><option value="distributor">Distributor Room</option><option value="investor">Investor Room</option></select></label>
+<label>Content type<select id="filter"><option value="">All content</option><option value="presentation">Presentations</option><option value="video">Videos</option><option value="gallery">Gallery</option><option value="document">Downloads</option></select></label>
+<button id="new">Add content</button><button id="manageVideoGroups" class="secondary">Video categories</button><button id="managePartners" class="secondary">Partner ecosystem</button><button id="manageContact" class="secondary">Contact page</button>
+</div>
+<div class="card"><div id="items" class="items"><span>Loading content…</span></div></div>
+
+<section id="videoGroupsPanel" class="card" hidden>
+<div class="section-head"><div><h2>Video categories</h2><p>Create the category title, description and order shown above the videos in the Client Room.</p></div><button id="closeVideoGroups" class="secondary">Close</button></div>
+<div class="toolbar"><label>Language<select id="groupLocale"><option value="en">English</option><option value="vi">Vietnamese</option></select></label><button id="newGroup" class="secondary">Add category</button></div>
+<div id="groupList" class="group-list"></div>
+<form id="groupForm" class="group-form" hidden>
+<h3 id="groupFormTitle">Add video category</h3>
+<div class="grid"><label>Title<input id="groupTitle" maxlength="120" required></label><label>Display order<input id="groupOrder" type="number" value="0"></label><label class="wide">Description<textarea id="groupDescription" rows="4" maxlength="2000"></textarea></label></div>
+<p class="actions"><button>Save category</button><button type="button" id="cancelGroup" class="secondary">Cancel</button></p>
+</form>
+</section>
+
+
+<section id="partnerPanel" class="card management-panel" hidden>
+<div class="section-head"><div><h2>Partner Ecosystem</h2><p>Manage the Partner Ecosystem introduction and partner listings shown in the Client Room.</p></div><button id="closePartnerPanel" class="secondary">Close</button></div>
+<div class="toolbar"><label>Language<select id="partnerLocale"><option value="en">English</option><option value="vi">Vietnamese</option></select></label><button id="addPartner" class="secondary">Add partner</button></div>
+<form id="partnerIntroForm" class="subtle"><div class="grid"><label>Section title<input id="partnerIntroTitle" maxlength="140" required></label><label class="wide">Introduction<textarea id="partnerIntroText" rows="4" maxlength="4000"></textarea></label></div><p><button>Save introduction</button></p></form>
+<div id="partnerList" class="group-list"></div>
+<form id="partnerForm" class="group-form" hidden>
+<h3 id="partnerFormTitle">Add partner</h3>
+<div class="grid">
+<label>Partner name<input id="partnerTitle" maxlength="140" required></label><label>Slug<input id="partnerSlug" maxlength="80" placeholder="Auto-generated if blank"></label>
+<label class="wide">Short description<textarea id="partnerShort" rows="3" maxlength="500"></textarea></label>
+<label class="wide">Banner image URL<input id="partnerBanner" required placeholder="Upload a banner or paste HTTPS image URL"><div class="upload-line"><input id="partnerBannerFile" type="file" accept=".png,.jpg,.jpeg,.webp"><button type="button" id="partnerBannerUpload" class="secondary">Upload banner</button></div><img id="partnerBannerPreview" class="preview-img" hidden alt=""></label>
+<label class="wide">Video URL<input id="partnerVideo" placeholder="Optional YouTube, Vimeo or uploaded video URL"><div class="upload-line"><input id="partnerVideoFile" type="file" accept=".mp4,.webm"><button type="button" id="partnerVideoUpload" class="secondary">Upload video</button><span id="partnerVideoStatus"></span></div></label>
+<label class="wide">About partner <span class="counter" id="partnerWordCount">0 / 500 words</span><textarea id="partnerAbout" rows="10" maxlength="12000"></textarea></label>
+<label class="wide">How this partner works inside Wistudi — one bullet per line<textarea id="partnerBullets" rows="6" maxlength="8000"></textarea></label>
+<label class="wide">Partner website<input id="partnerWebsite" type="url" placeholder="https://..."></label>
+<label>Specialisation preset<select id="partnerTagPreset"><option value="">Choose a label</option><option>STEM & Science</option><option>3D & Immersive Learning</option><option>Debate & Discussion</option><option>Assessment</option><option>Gamification</option><option>Video & Feedback</option><option>Language Learning</option><option>Simulation</option><option>Collaboration</option><option>AI & Personalisation</option><option>Accessibility</option><option>Classroom Engagement</option><option>Content Library</option><option>Virtual Learning</option></select></label>
+<label>Custom label<input id="partnerCustomTag" maxlength="60" placeholder="Add your own"></label>
+<div class="wide"><button type="button" id="addPartnerTag" class="secondary">Add label</button><div id="partnerTagChips" class="tag-chips"></div></div>
+<label class="wide">Additional gallery image URLs — one per line<textarea id="partnerGallery" rows="5"></textarea><div class="upload-line"><input id="partnerGalleryFile" type="file" accept=".png,.jpg,.jpeg,.webp"><button type="button" id="partnerGalleryUpload" class="secondary">Upload & add gallery image</button></div></label>
+<label>Status<select id="partnerStatus"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
+<label>Display order<input id="partnerOrder" type="number" value="0"></label>
+</div>
+<p class="actions"><button>Save partner</button><button type="button" id="cancelPartner" class="secondary">Cancel</button></p>
+</form>
+</section>
+
+<section id="contactPanel" class="card management-panel" hidden>
+<div class="section-head"><div><h2>Contact page</h2><p>Manage the Client Room contact information, regional contacts and social links.</p></div><button id="closeContactPanel" class="secondary">Close</button></div>
+<div class="toolbar"><label>Language<select id="contactLocale"><option value="en">English</option><option value="vi">Vietnamese</option></select></label></div>
+<form id="contactForm"><div class="grid">
+<label>Page title<input id="contactTitle" maxlength="140" required></label>
+<label class="wide">Introduction<textarea id="contactIntro" rows="4" maxlength="4000"></textarea></label>
+<label class="wide">Business address<textarea id="contactAddress" rows="3" maxlength="1200"></textarea></label>
+<label>Primary email<input id="contactEmail1" type="email"></label><label>Secondary email<input id="contactEmail2" type="email"></label>
+<label>Primary phone<input id="contactPhone"></label><label>Website URL<input id="contactWebsite" type="url"></label>
+<label>Facebook URL<input id="contactFacebook" type="url"></label><label>LinkedIn URL<input id="contactLinkedin" type="url"></label>
+</div>
+<div class="section-head" style="margin-top:22px"><div><h3>Additional contacts</h3><p>Add optional contact people, teams, regions, phone numbers, emails or links.</p></div><button type="button" id="addContact" class="secondary">Add contact</button></div>
+<div id="contactRows"></div>
+<p><button>Save contact page</button></p>
+</form>
+</section>
+<form id="editor" class="card" hidden>
+<h2 id="editorTitle">Add content</h2>
+<div class="grid">
+<label>Type<select id="category"><option value="presentation">Presentation</option><option value="video">Video</option><option value="gallery">Gallery image</option><option value="document">Download</option></select></label>
+<label>Language<select id="locale"><option value="en">English</option><option value="vi">Vietnamese</option></select></label>
+<label id="videoGroupField" hidden>Video category<select id="videoGroup"><option value="">No category</option></select></label>
+<label>Display order<input id="order" type="number" value="0"></label>
+<label class="wide">Title<input id="title" maxlength="180" required></label>
+<label class="wide">Asset URL<input id="asset" placeholder="Upload a file, or paste a YouTube / Vimeo / HTTPS link" required><span class="hint">For videos, you can paste a YouTube, Vimeo or direct HTTPS video URL instead of uploading a file.</span></label>
+<label class="wide">Upload or replace file<input id="upload" type="file" accept=".pdf,.mp4,.webm,.png,.jpg,.jpeg,.webp,.txt"><span class="hint">Video files can use multipart R2 upload up to 500 GB. Other content keeps the normal per-file limits.</span></label>
+<div class="wide"><button type="button" id="uploadButton" class="secondary">Upload / replace file</button> <span id="uploadStatus" role="status"></span><div id="uploadProgress" class="progress" hidden><span></span></div></div>
+<label class="wide">Description<textarea id="description" maxlength="2000" rows="3"></textarea></label>
+<label>Status<select id="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
+</div>
+<p class="actions"><button type="submit">Save content</button><button type="button" id="cancel" class="secondary">Cancel</button></p>
+</form>
+</section>
+<p id="message" role="status" aria-live="polite"></p>
+</main>
 <script>
-const $=id=>document.getElementById(id);let editing=null,records=[];
-function message(s){$('message').textContent=s}
+const $=id=>document.getElementById(id);
+let editing=null,records=[],videoGroups=[],editingGroup=null,permitted=[];
+
+let partners=[],editingPartner=null,partnerTags=[],contactData=null;
+async function uploadSmallFile(file,category='gallery'){
+ if(!file)throw Error('Choose a file first');
+ const url='/api/room-management/media?room='+encodeURIComponent($('room').value)+'&category='+encodeURIComponent(category);
+ return request(url,{method:'POST',headers:{'content-type':file.type||'application/octet-stream'},body:file});
+}
+function parseLines(value){return String(value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean)}
+function words(value){return String(value||'').trim()?String(value).trim().split(/\s+/).length:0}
+function renderPartnerTags(){const host=$('partnerTagChips');host.replaceChildren();partnerTags.forEach((tag,i)=>{const chip=document.createElement('span');chip.className='tag-chip';chip.append(document.createTextNode(tag));const b=document.createElement('button');b.type='button';b.textContent='×';b.onclick=()=>{partnerTags.splice(i,1);renderPartnerTags()};chip.append(b);host.append(chip)})}
+$('addPartnerTag').onclick=()=>{const v=($('partnerCustomTag').value.trim()||$('partnerTagPreset').value.trim());if(v&&!partnerTags.includes(v)&&partnerTags.length<20)partnerTags.push(v);$('partnerCustomTag').value='';$('partnerTagPreset').value='';renderPartnerTags()};
+$('partnerAbout').oninput=()=>{$('partnerWordCount').textContent=words($('partnerAbout').value)+' / 500 words'};
+async function loadPartnerPanel(){
+ const locale=$('partnerLocale').value;
+ const [cfg,data]=await Promise.all([
+  request('/api/room-management/config?room='+encodeURIComponent($('room').value)+'&locale='+locale+'&section=partner'),
+  request('/api/room-management/partners?room='+encodeURIComponent($('room').value)+'&locale='+locale)
+ ]);
+ $('partnerIntroTitle').value=cfg.item?.title||'Partner Ecosystem';$('partnerIntroText').value=cfg.item?.intro||'';partners=data.items||[];renderPartnerList();
+}
+function renderPartnerList(){
+ const host=$('partnerList');host.replaceChildren();if(!partners.length){host.textContent='No partners yet. Add a partner when you are ready to publish one.';return}
+ for(const p of partners){const row=document.createElement('div');row.className='partner-list-row';const img=document.createElement('img');img.src=p.banner_url;img.alt='';const d=document.createElement('div');const s=document.createElement('strong');s.textContent=p.title;const meta=document.createElement('small');meta.textContent=[p.status,(p.tags||[]).join(', ')].filter(Boolean).join(' · ');const desc=document.createElement('p');desc.textContent=p.short_description||'';d.append(s,meta,desc);const a=document.createElement('div');a.className='actions';const e=document.createElement('button');e.className='secondary';e.textContent='Edit';e.onclick=()=>openPartner(p);const del=document.createElement('button');del.className='danger';del.textContent='Remove';del.onclick=()=>removePartner(p);a.append(e,del);row.append(img,d,a);host.append(row)}
+}
+function openPartner(p){
+ editingPartner=p?.id||null;$('partnerForm').hidden=false;$('partnerFormTitle').textContent=p?'Edit partner':'Add partner';$('partnerTitle').value=p?.title||'';$('partnerSlug').value=p?.slug||'';$('partnerShort').value=p?.short_description||'';$('partnerBanner').value=p?.banner_url||'';$('partnerVideo').value=p?.video_url||'';$('partnerAbout').value=p?.about_text||'';$('partnerBullets').value=(p?.capability_bullets||[]).join('\n');$('partnerWebsite').value=p?.website_url||'';$('partnerGallery').value=(p?.gallery_urls||[]).join('\n');$('partnerStatus').value=p?.status||'draft';$('partnerOrder').value=p?.sort_order||0;partnerTags=[...(p?.tags||[])];renderPartnerTags();$('partnerWordCount').textContent=words($('partnerAbout').value)+' / 500 words';const b=$('partnerBannerPreview');if(p?.banner_url){b.src=p.banner_url;b.hidden=false}else b.hidden=true;$('partnerForm').scrollIntoView({behavior:'smooth'});
+}
+$('partnerIntroForm').onsubmit=async e=>{e.preventDefault();try{await request('/api/room-management/config?room='+encodeURIComponent($('room').value)+'&locale='+$('partnerLocale').value+'&section=partner',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:$('partnerIntroTitle').value,intro:$('partnerIntroText').value})});message('Partner Ecosystem introduction saved')}catch(err){message(err.message)}};
+$('partnerForm').onsubmit=async e=>{e.preventDefault();if(words($('partnerAbout').value)>500)return message('Partner About text must be 500 words or fewer.');const locale=$('partnerLocale').value,body={room_id:$('room').value,locale,title:$('partnerTitle').value.trim(),slug:$('partnerSlug').value.trim(),short_description:$('partnerShort').value,banner_url:$('partnerBanner').value.trim(),video_url:$('partnerVideo').value.trim(),about_text:$('partnerAbout').value,capability_bullets:parseLines($('partnerBullets').value),website_url:$('partnerWebsite').value.trim(),tags:partnerTags,gallery_urls:parseLines($('partnerGallery').value),status:$('partnerStatus').value,sort_order:Number($('partnerOrder').value)||0};if(editingPartner)body.id=editingPartner;try{await request('/api/room-management/partners?room='+encodeURIComponent($('room').value)+'&locale='+locale,{method:editingPartner?'PATCH':'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});$('partnerForm').hidden=true;editingPartner=null;await loadPartnerPanel();message('Partner saved')}catch(err){message(err.message)}};
+async function removePartner(p){if(!confirm('Remove '+p.title+'?'))return;try{await request('/api/room-management/partners?room='+encodeURIComponent($('room').value)+'&locale='+$('partnerLocale').value+'&id='+encodeURIComponent(p.id),{method:'DELETE'});await loadPartnerPanel();message('Partner removed')}catch(err){message(err.message)}}
+$('partnerBannerUpload').onclick=async()=>{try{const d=await uploadSmallFile($('partnerBannerFile').files?.[0],'gallery');$('partnerBanner').value=d.asset_url;$('partnerBannerPreview').src=d.asset_url;$('partnerBannerPreview').hidden=false;message('Banner uploaded')}catch(e){message(e.message)}};
+$('partnerGalleryUpload').onclick=async()=>{try{const d=await uploadSmallFile($('partnerGalleryFile').files?.[0],'gallery');const lines=parseLines($('partnerGallery').value);lines.push(d.asset_url);$('partnerGallery').value=lines.join('\n');message('Gallery image added')}catch(e){message(e.message)}};
+$('partnerVideoUpload').onclick=async()=>{const f=$('partnerVideoFile').files?.[0];if(!f)return message('Choose a video first');$('partnerVideoStatus').textContent='Uploading…';try{const d=await uploadVideoMultipart(f);$('partnerVideo').value=d.asset_url;$('partnerVideoStatus').textContent='Uploaded'}catch(e){$('partnerVideoStatus').textContent=e.message}};
+$('partnerBanner').oninput=()=>{const b=$('partnerBannerPreview');if($('partnerBanner').value){b.src=$('partnerBanner').value;b.hidden=false}else b.hidden=true};
+$('partnerLocale').onchange=loadPartnerPanel;$('addPartner').onclick=()=>openPartner(null);$('cancelPartner').onclick=()=>{$('partnerForm').hidden=true;editingPartner=null};
+
+function addContactRow(data={}){
+ const row=document.createElement('div');row.className='contact-row';row.innerHTML='<label>Name<input data-c="name"></label><label>Role / team<input data-c="role"></label><label>Region<input data-c="region"></label><label>Email<input data-c="email" type="email"></label><label>Phone<input data-c="phone"></label><label>Link<input data-c="link" type="url"></label><button type="button" class="danger remove-contact">Remove</button>';for(const k of ['name','role','region','email','phone','link'])row.querySelector('[data-c="'+k+'"]').value=data[k]||'';row.querySelector('.remove-contact').onclick=()=>row.remove();$('contactRows').append(row)
+}
+function getContacts(){return [...$('contactRows').querySelectorAll('.contact-row')].map(r=>{const x={};for(const k of ['name','role','region','email','phone','link'])x[k]=r.querySelector('[data-c="'+k+'"]').value.trim();return x}).filter(x=>Object.values(x).some(Boolean))}
+async function loadContactPanel(){
+ const locale=$('contactLocale').value,d=await request('/api/room-management/config?room='+encodeURIComponent($('room').value)+'&locale='+locale+'&section=contact'),x=d.item||{};$('contactTitle').value=x.title||'Contact Wistudi';$('contactIntro').value=x.intro||'';$('contactAddress').value=x.business_address||'';$('contactEmail1').value=x.primary_email||'';$('contactEmail2').value=x.secondary_email||'';$('contactPhone').value=x.primary_phone||'';$('contactWebsite').value=x.website_url||'';$('contactFacebook').value=x.facebook_url||'';$('contactLinkedin').value=x.linkedin_url||'';$('contactRows').replaceChildren();(x.extra_contacts||[]).forEach(addContactRow)
+}
+$('contactForm').onsubmit=async e=>{e.preventDefault();const body={title:$('contactTitle').value.trim(),intro:$('contactIntro').value,business_address:$('contactAddress').value,primary_email:$('contactEmail1').value.trim(),secondary_email:$('contactEmail2').value.trim(),primary_phone:$('contactPhone').value.trim(),website_url:$('contactWebsite').value.trim(),facebook_url:$('contactFacebook').value.trim(),linkedin_url:$('contactLinkedin').value.trim(),extra_contacts:getContacts()};try{await request('/api/room-management/config?room='+encodeURIComponent($('room').value)+'&locale='+$('contactLocale').value+'&section=contact',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});message('Contact page saved')}catch(err){message(err.message)}};
+$('addContact').onclick=()=>addContactRow();$('contactLocale').onchange=loadContactPanel;
+
+function message(s){$('message').textContent=s||''}
 async function request(url,options={}){const r=await fetch(url,{credentials:'same-origin',...options});const raw=await r.text();let j;try{j=raw?JSON.parse(raw):{}}catch{throw Error('Server error '+r.status+(raw?' — '+raw.slice(0,160):''))}if(!r.ok)throw Error(j.detail||j.error||('Request failed ('+r.status+')'));return j}
-async function load(){try{const session=await request('/api/room-management/session');$('initializing').hidden=true;$('setup').hidden=true;const permitted=session.rooms.map(x=>x.room_id);$('room').querySelectorAll('option').forEach(option=>option.disabled=!permitted.includes(option.value));if(!permitted.includes($('room').value))$('room').value=permitted[0]||'';if(!$('room').value)throw Error('no_room_permissions');const data=await request('/api/room-management/content?room='+encodeURIComponent($('room').value));records=data.items;$('login').hidden=true;$('dashboard').hidden=false;$('logout').hidden=false;render();message('')}catch(e){$('dashboard').hidden=true;$('initializing').hidden=true;$('logout').hidden=true;$('login').hidden=false;if(e.message==='unauthorized')message('');else message(e.message)}}
-function render(){const items=records.filter(x=>!$('filter').value||x.category===$('filter').value);$('items').replaceChildren();if(!items.length){$('items').textContent='No content records yet.';return}for(const item of items){const row=document.createElement('div');row.className='item';const details=document.createElement('div');const title=document.createElement('strong');title.textContent=item.title;const meta=document.createElement('small');meta.textContent=[item.category,item.locale,item.status].join(' · ');details.append(title,meta);const actions=document.createElement('div');actions.className='actions';const edit=document.createElement('button');edit.className='secondary';edit.textContent='Edit';edit.onclick=()=>openEditor(item);const open=document.createElement('a');open.className='secondary';open.textContent='Open';open.href=item.asset_url;open.target='_blank';open.rel='noopener noreferrer';open.style.cssText='display:inline-flex;align-items:center;text-decoration:none;padding:11px 16px;border-radius:10px;font-weight:650';const del=document.createElement('button');del.className='danger';del.textContent='Remove from room';del.onclick=()=>remove(item);actions.append(open,edit,del);row.append(details,actions);$('items').append(row)}}
-function openEditor(item){editing=item?.id||null;$('editor').hidden=false;$('editorTitle').textContent=item?'Edit content':'Add content';$('category').value=item?.category||'presentation';$('locale').value=item?.locale||'en';$('title').value=item?.title||'';$('asset').value=item?.asset_url||'';$('description').value=item?.description||'';$('status').value=item?.status||'draft';$('order').value=item?.sort_order||0;$('editor').scrollIntoView({behavior:'smooth'})}
-async function remove(item){if(!confirm('Remove '+item.title+' from the Client Room? The original starter file can remain stored, but it will no longer appear to clients.'))return;try{await request('/api/room-management/content?room='+$('room').value+'&id='+encodeURIComponent(item.id),{method:'DELETE'});await load()}catch(e){message(e.message)}}
-async function initialise(){try{const s=await request('/api/room-management/setup-status');$('initializing').hidden=true;if(s.needs_setup){$('setup').hidden=false;$('login').hidden=true;$('dashboard').hidden=true;message('')}else{await load()}}catch(err){$('initializing').hidden=true;$('login').hidden=false;message(err.message)}}
-$('setupForm').onsubmit=async e=>{e.preventDefault();const email=$('setupEmail').value.trim();const password=$('setupPassword').value;const confirm=$('setupConfirm').value;if(password.length<8){message('Password must be at least 8 characters.');return}if(password!==confirm){message('Passwords do not match.');return}try{await request('/api/room-management/bootstrap',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email,password})});$('setupPassword').value='';$('setupConfirm').value='';await request('/api/room-management/session',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email,password})});$('email').value=email;$('setup').hidden=true;await load();message('Administrator account created.')}catch(err){message(err.message)}};
+async function load(){
+ try{
+  const session=await request('/api/room-management/session');$('initializing').hidden=true;$('setup').hidden=true;permitted=session.rooms.map(x=>x.room_id);
+  $('room').querySelectorAll('option').forEach(o=>o.disabled=!permitted.includes(o.value));if(!permitted.includes($('room').value))$('room').value=permitted[0]||'';if(!$('room').value)throw Error('no_room_permissions');
+  await reloadContent();$('login').hidden=true;$('dashboard').hidden=false;$('logout').hidden=false;message('');
+ }catch(e){$('dashboard').hidden=true;$('initializing').hidden=true;$('logout').hidden=true;$('login').hidden=false;if(e.message==='unauthorized')message('');else message(e.message)}
+}
+async function reloadContent(){
+ const data=await request('/api/room-management/content?room='+encodeURIComponent($('room').value));records=data.items||[];
+ await loadVideoGroups($('locale')?.value||'en');render();
+}
+async function loadVideoGroups(locale){
+ try{const data=await request('/api/room-management/video-groups?room='+encodeURIComponent($('room').value)+'&locale='+encodeURIComponent(locale));videoGroups=data.items||[]}catch{videoGroups=[]}
+ fillVideoGroupSelect();renderGroupList();
+}
+function groupName(id){return videoGroups.find(g=>g.id===id)?.title||''}
+function render(){
+ const items=records.filter(x=>!$('filter').value||x.category===$('filter').value);$('items').replaceChildren();
+ if(!items.length){$('items').textContent='No content records yet.';return}
+ for(const item of items){
+  const row=document.createElement('div');row.className='item';const details=document.createElement('div');const title=document.createElement('strong');title.textContent=item.title;
+  const bits=[item.category,item.locale,item.status];if(item.category==='video'&&item.video_group_id)bits.push(groupName(item.video_group_id)||'Categorised');
+  const meta=document.createElement('small');meta.textContent=bits.join(' · ');details.append(title,meta);if(item.description){const p=document.createElement('p');p.textContent=item.description;details.append(p)}
+  const actions=document.createElement('div');actions.className='actions';const open=document.createElement('a');open.className='linkbtn';open.textContent='Open';open.href=item.asset_url;open.target='_blank';open.rel='noopener noreferrer';
+  const edit=document.createElement('button');edit.className='secondary';edit.textContent='Edit';edit.onclick=()=>openEditor(item);
+  const del=document.createElement('button');del.className='danger';del.textContent='Remove from room';del.onclick=()=>removeItem(item);actions.append(open,edit,del);row.append(details,actions);$('items').append(row);
+ }
+}
+function updateVideoFields(){const isVideo=$('category').value==='video';$('videoGroupField').hidden=!isVideo}
+function fillVideoGroupSelect(selected){
+ const select=$('videoGroup'),keep=selected??select.value;select.replaceChildren(new Option('No category',''));
+ videoGroups.forEach(g=>select.append(new Option(g.title,g.id)));select.value=keep||'';
+}
+async function openEditor(item){
+ editing=item?.id||null;$('editor').hidden=false;$('editorTitle').textContent=item?'Edit content':'Add content';$('category').value=item?.category||'presentation';$('locale').value=item?.locale||'en';
+ $('title').value=item?.title||'';$('asset').value=item?.asset_url||'';$('description').value=item?.description||'';$('status').value=item?.status||'draft';$('order').value=item?.sort_order||0;$('upload').value='';$('uploadStatus').textContent='';$('uploadProgress').hidden=true;updateVideoFields();
+ await loadVideoGroups($('locale').value);fillVideoGroupSelect(item?.video_group_id||'');$('editor').scrollIntoView({behavior:'smooth'});
+}
+async function removeItem(item){if(!confirm('Remove '+item.title+' from this room?'))return;try{await request('/api/room-management/content?room='+encodeURIComponent($('room').value)+'&id='+encodeURIComponent(item.id),{method:'DELETE'});await reloadContent()}catch(e){message(e.message)}}
+async function initialise(){try{const s=await request('/api/room-management/setup-status');$('initializing').hidden=true;if(s.needs_setup){$('setup').hidden=false;$('login').hidden=true;$('dashboard').hidden=true;message('')}else await load()}catch(err){$('initializing').hidden=true;$('login').hidden=false;message(err.message)}}
+$('setupForm').onsubmit=async e=>{e.preventDefault();const email=$('setupEmail').value.trim(),password=$('setupPassword').value,confirm=$('setupConfirm').value;if(password.length<8)return message('Password must be at least 8 characters.');if(password!==confirm)return message('Passwords do not match.');try{await request('/api/room-management/bootstrap',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email,password})});await request('/api/room-management/session',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email,password})});$('email').value=email;$('setup').hidden=true;await load();message('Administrator account created.')}catch(err){message(err.message)}};
 $('loginForm').onsubmit=async e=>{e.preventDefault();try{await request('/api/room-management/session',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:$('email').value,password:$('password').value})});$('password').value='';await load()}catch(err){message(err.message)}};
 $('logout').onclick=async()=>{await request('/api/room-management/session',{method:'DELETE'}).catch(()=>{});location.reload()};
-$('room').onchange=()=>{$('editor').hidden=true;load()};$('filter').onchange=render;$('new').onclick=()=>openEditor(null);$('cancel').onclick=()=>{$('editor').hidden=true};
-$('editor').onsubmit=async e=>{e.preventDefault();const body={room_id:$('room').value,category:$('category').value,locale:$('locale').value,title:$('title').value,asset_url:$('asset').value,description:$('description').value,status:$('status').value,sort_order:Number($('order').value)||0};if(editing)body.id=editing;try{await request('/api/room-management/content?room='+$('room').value,{method:editing?'PATCH':'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});$('editor').hidden=true;await load();message('Saved')}catch(err){message(err.message)}};
-$('uploadButton').onclick=async()=>{const file=$('upload').files?.[0];if(!file){message('Choose a file first');return}const category=$('category').value;const limits={presentation:30e6,video:100e6,gallery:12e6,document:30e6};if(file.size>limits[category]){message('File exceeds category size limit');return}const button=$('uploadButton');button.disabled=true;$('uploadStatus').textContent='Uploading…';try{const url='/api/room-management/media?room='+encodeURIComponent($('room').value)+'&category='+encodeURIComponent(category);const data=await request(url,{method:'POST',headers:{'content-type':file.type||'application/octet-stream'},body:file});$('asset').value=data.asset_url;$('uploadStatus').textContent='Uploaded. Save the content record next.'}catch(err){$('uploadStatus').textContent=err.message}finally{button.disabled=false}};
+$('room').onchange=async()=>{$('editor').hidden=true;$('videoGroupsPanel').hidden=true;$('partnerPanel').hidden=true;$('contactPanel').hidden=true;await reloadContent()};
+$('filter').onchange=render;$('new').onclick=()=>openEditor(null);$('cancel').onclick=()=>{$('editor').hidden=true};
+$('category').onchange=()=>{updateVideoFields()};$('locale').onchange=async()=>{await loadVideoGroups($('locale').value)};
+$('editor').onsubmit=async e=>{
+ e.preventDefault();const body={room_id:$('room').value,category:$('category').value,locale:$('locale').value,title:$('title').value.trim(),asset_url:$('asset').value.trim(),description:$('description').value,status:$('status').value,sort_order:Number($('order').value)||0,video_group_id:$('category').value==='video'?$('videoGroup').value:null};if(editing)body.id=editing;
+ try{await request('/api/room-management/content?room='+encodeURIComponent($('room').value),{method:editing?'PATCH':'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});$('editor').hidden=true;await reloadContent();message('Saved')}catch(err){message(err.message)}
+};
+$('managePartners').onclick=async()=>{$('partnerPanel').hidden=false;$('contactPanel').hidden=true;$('videoGroupsPanel').hidden=true;await loadPartnerPanel();$('partnerPanel').scrollIntoView({behavior:'smooth'})};$('closePartnerPanel').onclick=()=>{$('partnerPanel').hidden=true};$('manageContact').onclick=async()=>{$('contactPanel').hidden=false;$('partnerPanel').hidden=true;$('videoGroupsPanel').hidden=true;await loadContactPanel();$('contactPanel').scrollIntoView({behavior:'smooth'})};$('closeContactPanel').onclick=()=>{$('contactPanel').hidden=true};
+$('manageVideoGroups').onclick=async()=>{$('videoGroupsPanel').hidden=false;$('partnerPanel').hidden=true;$('contactPanel').hidden=true;await loadVideoGroups($('groupLocale').value);$('videoGroupsPanel').scrollIntoView({behavior:'smooth'})};
+$('closeVideoGroups').onclick=()=>{$('videoGroupsPanel').hidden=true};$('groupLocale').onchange=()=>loadVideoGroups($('groupLocale').value);
+$('newGroup').onclick=()=>openGroup(null);$('cancelGroup').onclick=()=>{$('groupForm').hidden=true;editingGroup=null};
+function openGroup(group){editingGroup=group?.id||null;$('groupForm').hidden=false;$('groupFormTitle').textContent=group?'Edit video category':'Add video category';$('groupTitle').value=group?.title||'';$('groupDescription').value=group?.description||'';$('groupOrder').value=group?.sort_order||0;$('groupForm').scrollIntoView({behavior:'smooth'})}
+function renderGroupList(){
+ const list=$('groupList');list.replaceChildren();if($('videoGroupsPanel').hidden)return;if(!videoGroups.length){list.textContent='No video categories yet.';return}
+ for(const g of videoGroups){const row=document.createElement('div');row.className='group-row';const d=document.createElement('div');const s=document.createElement('strong');s.textContent=g.title;const p=document.createElement('p');p.textContent=g.description||'No description';const meta=document.createElement('small');meta.textContent='Order '+g.sort_order+' · '+(g.item_count||0)+' videos';d.append(s,p,meta);const a=document.createElement('div');a.className='actions';const e=document.createElement('button');e.className='secondary';e.textContent='Edit';e.onclick=()=>openGroup(g);const del=document.createElement('button');del.className='danger';del.textContent='Remove category';del.onclick=()=>removeGroup(g);a.append(e,del);row.append(d,a);list.append(row)}
+}
+$('groupForm').onsubmit=async e=>{e.preventDefault();const locale=$('groupLocale').value,body={room_id:$('room').value,locale,title:$('groupTitle').value.trim(),description:$('groupDescription').value,sort_order:Number($('groupOrder').value)||0};if(editingGroup)body.id=editingGroup;try{await request('/api/room-management/video-groups?room='+encodeURIComponent($('room').value)+'&locale='+locale,{method:editingGroup?'PATCH':'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});$('groupForm').hidden=true;editingGroup=null;await loadVideoGroups(locale);await reloadContent();message('Video category saved')}catch(err){message(err.message)}};
+async function removeGroup(g){if(!confirm('Remove video category "'+g.title+'"? Videos in it will remain in the room but become uncategorised.'))return;try{await request('/api/room-management/video-groups?room='+encodeURIComponent($('room').value)+'&locale='+encodeURIComponent($('groupLocale').value)+'&id='+encodeURIComponent(g.id),{method:'DELETE'});await loadVideoGroups($('groupLocale').value);await reloadContent();message('Video category removed')}catch(err){message(err.message)}}
+async function uploadVideoMultipart(file){
+ const room=$('room').value;const init=await request('/api/room-management/media-multipart?room='+encodeURIComponent(room)+'&action=init',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({mime:file.type,size:file.size})});
+ const partSize=init.part_size,parts=[];let uploaded=0;const totalParts=Math.ceil(file.size/partSize);
+ try{
+  for(let i=0;i<totalParts;i++){const start=i*partSize,end=Math.min(file.size,start+partSize),chunk=file.slice(start,end);let part=null,lastErr;
+   for(let attempt=0;attempt<3&&!part;attempt++){try{part=await request('/api/room-management/media-multipart?room='+encodeURIComponent(room)+'&action=part&key='+encodeURIComponent(init.key)+'&upload_id='+encodeURIComponent(init.upload_id)+'&part_number='+(i+1),{method:'POST',headers:{'content-type':'application/octet-stream'},body:chunk})}catch(e){lastErr=e;if(attempt<2)await new Promise(r=>setTimeout(r,1000*(attempt+1)))}}
+   if(!part)throw lastErr;parts.push({partNumber:part.partNumber,etag:part.etag});uploaded=end;const pct=Math.round(uploaded/file.size*100);$('uploadStatus').textContent='Uploading video… '+pct+'% ('+(i+1)+'/'+totalParts+' parts)';$('uploadProgress').hidden=false;$('uploadProgress').firstElementChild.style.width=pct+'%';
+  }
+  return await request('/api/room-management/media-multipart?room='+encodeURIComponent(room)+'&action=complete',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({key:init.key,upload_id:init.upload_id,parts})});
+ }catch(e){await request('/api/room-management/media-multipart?room='+encodeURIComponent(room)+'&action=abort',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({key:init.key,upload_id:init.upload_id})}).catch(()=>{});throw e}
+}
+$('uploadButton').onclick=async()=>{
+ const file=$('upload').files?.[0];if(!file)return message('Choose a file first');const category=$('category').value;const limits={presentation:30e6,video:500e9,gallery:12e6,document:30e6};if(file.size>limits[category])return message('File exceeds the '+(category==='video'?'500 GB':'category')+' size limit');
+ const button=$('uploadButton');button.disabled=true;$('uploadStatus').textContent='Uploading…';$('uploadProgress').hidden=true;
+ try{let data;if(category==='video'){data=await uploadVideoMultipart(file)}else{const url='/api/room-management/media?room='+encodeURIComponent($('room').value)+'&category='+encodeURIComponent(category);data=await request(url,{method:'POST',headers:{'content-type':file.type||'application/octet-stream'},body:file})}$('asset').value=data.asset_url;$('uploadStatus').textContent='Uploaded. Save the content record next.';$('uploadProgress').firstElementChild.style.width='100%'}catch(err){$('uploadStatus').textContent=err.message}finally{button.disabled=false}
+};
 initialise();
-</script></body></html>
+</script>
+</body></html>

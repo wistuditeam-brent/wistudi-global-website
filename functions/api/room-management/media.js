@@ -1,3 +1,4 @@
+import { ensureEcosystemSchema } from './_ecosystem.js';
 import { canManage } from './session.js';
 const TYPES={presentation:['application/pdf'],video:['video/mp4','video/webm'],gallery:['image/jpeg','image/png','image/webp'],document:['application/pdf','image/jpeg','image/png','image/webp','text/plain']};
 const LIMITS={presentation:30e6,video:100e6,gallery:12e6,document:30e6};
@@ -26,7 +27,11 @@ export async function onRequest({request,env}){
   if(!authorized){
    const asset='/api/room-management/media?room='+room+'&key='+encodeURIComponent(key);
    const found=await env.ROOM_DB.prepare("SELECT id FROM room_content WHERE room_id=? AND status='published' AND asset_url=? LIMIT 1").bind(room,asset).first();
-   if(!found)return json({error:'not_found'},404);
+   if(!found){
+    await ensureEcosystemSchema(env);
+    const partner=await env.ROOM_DB.prepare("SELECT id FROM room_partners WHERE room_id=? AND status='published' AND (banner_url=? OR video_url=? OR gallery_urls LIKE ?) LIMIT 1").bind(room,asset,asset,'%'+asset.replace(/[\\%_]/g,'\\   if(!found)return json({error:'not_found'},404);')+'%').first();
+    if(!partner)return json({error:'not_found'},404);
+   }
   }
   const object=await env.ROOM_MEDIA.get(key);if(!object)return json({error:'not_found'},404);
   return new Response(object.body,{headers:{'content-type':object.httpMetadata?.contentType||'application/octet-stream','cache-control':'private,no-store','x-content-type-options':'nosniff','content-security-policy':"default-src 'none'; sandbox"}});

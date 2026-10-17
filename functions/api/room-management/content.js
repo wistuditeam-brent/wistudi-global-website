@@ -1,5 +1,6 @@
 import { canManage } from './session.js';
 import { ensureClientStarter } from './starter-content.js';
+import { ensureVideoSchema,ensureClientVideoGroups,validVideoGroup } from './_video-groups.js';
 // Stage 3: fail-closed metadata API. No upload or public mutation access.
 // Configure ROOM_DB (D1) and ROOM_MANAGER_TOKEN (secret) before deployment.
 const ROOMS=new Set(['client','distributor','investor']);
@@ -31,13 +32,14 @@ export async function onRequest({request,env}){
  if(request.method!=='GET' && request.headers.get('origin')!==new URL(request.url).origin)return respond({ok:false,error:'invalid_origin'},403);
  const store=db(env);if(!store)return respond({ok:false,error:'room_database_not_configured'},503);
  if(requestedRoom==='client')await ensureClientStarter(env);
+ await ensureVideoSchema(env);if(requestedRoom==='client')await ensureClientVideoGroups(env);
  const url=new URL(request.url),r=room(url);
  if(!ROOMS.has(r))return respond({ok:false,error:'invalid_room'},400);
  try{
   if(request.method==='GET'){
    const category=url.searchParams.get('category');
    if(category&&!CATEGORIES.has(category))return respond({ok:false,error:'invalid_category'},400);
-   const sql='SELECT * FROM room_content WHERE room_id = ?'+(category?' AND category = ?':'')+' ORDER BY category,sort_order,created_at';
+   const sql='SELECT c.*,m.group_id AS video_group_id FROM room_content c LEFT JOIN room_video_group_membership m ON m.content_id=c.id WHERE c.room_id = ?'+(category?' AND c.category = ?':'')+' ORDER BY c.category,c.sort_order,c.created_at';
    const result=await store.prepare(sql).bind(...(category?[r,category]:[r])).all();
    return respond({ok:true,items:result.results||[]});
   }
@@ -45,20 +47,33 @@ export async function onRequest({request,env}){
    const body=await request.json().catch(()=>null);
    if(!validate(body)||body.room_id!==r)return respond({ok:false,error:'invalid_content'},400);
    const id=crypto.randomUUID(),description=body.description||'',locale=body.locale||'en',status=body.status||'draft',order=Number.isSafeInteger(body.sort_order)?body.sort_order:0;
-   await store.prepare('INSERT INTO room_content (id,room_id,category,title,description,asset_url,locale,status,sort_order) VALUES (?,?,?,?,?,?,?,?,?)').bind(id,r,body.category,body.title.trim(),description,body.asset_url,locale,status,order).run();
-   return respond({ok:true,id},201);
+   const groupId=body.category==='video'&&typeof body.video_group_id==='string'&&body.video_group_id?body.video_group_id:null;
+   if(groupId&&!await validVideoGroup(env,groupId,r,locale))return respond({ok:false,error:'invalid_video_group'},400);
+   const stmts=[store.prepare('INSERT INTO room_content (id,room_id,category,title,description,asset_url,locale,status,sort_order) VALUES (?,?,?,?,?,?,?,?,?)').bind(id,r,body.category,body.title.trim(),description,body.asset_url,locale,status,order)];
+   if(groupId)stmts.push(store.prepare('INSERT OR REPLACE INTO room_video_group_membership(content_id,group_id) VALUES(?,?)').bind(id,groupId));
+   await store.batch(stmts);return respond({ok:true,id},201);
   }
   if(request.method==='PATCH'){
    const body=await request.json().catch(()=>null);
    if(!body||!valid(body.id,100)||!validate({...body,room_id:r}))return respond({ok:false,error:'invalid_content'},400);
-   const result=await store.prepare('UPDATE room_content SET category=?,title=?,description=?,asset_url=?,locale=?,status=?,sort_order=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND room_id=?').bind(body.category,body.title.trim(),body.description||'',body.asset_url,body.locale||'en',body.status||'draft',Number.isSafeInteger(body.sort_order)?body.sort_order:0,body.id,r).run();
-   return respond({ok:!!result.meta?.changes,updated:result.meta?.changes||0},result.meta?.changes?200:404);
+   const locale=body.locale||'en',groupId=body.category==='video'&&typeof body.video_group_id==='string'&&body.video_group_id?body.video_group_id:null;
+   if(groupId&&!await validVideoGroup(env,groupId,r,locale))return respond({ok:false,error:'invalid_video_group'},400);
+   const stmts=[
+    store.prepare('UPDATE room_content SET category=?,title=?,description=?,asset_url=?,locale=?,status=?,sort_order=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND room_id=?').bind(body.category,body.title.trim(),body.description||'',body.asset_url,locale,body.status||'draft',Number.isSafeInteger(body.sort_order)?body.sort_order:0,body.id,r),
+    store.prepare('DELETE FROM room_video_group_membership WHERE content_id=?').bind(body.id)
+   ];
+   if(groupId)stmts.push(store.prepare('INSERT OR REPLACE INTO room_video_group_membership(content_id,group_id) VALUES(?,?)').bind(body.id,groupId));
+   const results=await store.batch(stmts),changes=results[0]?.meta?.changes||0;
+   return respond({ok:!!changes,updated:changes},changes?200:404);
   }
   if(request.method==='DELETE'){
    const id=url.searchParams.get('id');
    if(!valid(id,100))return respond({ok:false,error:'missing_id'},400);
-   const result=await store.prepare('DELETE FROM room_content WHERE id=? AND room_id=?').bind(id,r).run();
-   return respond({ok:!!result.meta?.changes,deleted:result.meta?.changes||0},result.meta?.changes?200:404);
+   const results=await store.batch([
+    store.prepare('DELETE FROM room_video_group_membership WHERE content_id=?').bind(id),
+    store.prepare('DELETE FROM room_content WHERE id=? AND room_id=?').bind(id,r)
+   ]),changes=results[1]?.meta?.changes||0;
+   return respond({ok:!!changes,deleted:changes},changes?200:404);
   }
   return respond({ok:false,error:'method_not_allowed'},405);
  }catch(error){console.error('room cms failure',String(error));return respond({ok:false,error:'operation_failed',detail:String(error?.message||error).slice(0,220)},500)}

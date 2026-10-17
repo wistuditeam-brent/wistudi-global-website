@@ -4,7 +4,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/p
 const locale=location.pathname.includes('/vi/')?'vi':'en',vi=locale==='vi';
 const W=vi?{
  title:'Phòng Khách hàng',intro:'Tài liệu và thông tin dành cho khách hàng Wistudi.',
- presentations:'Bài trình bày',videos:'Video',gallery:'Thư viện ảnh',documents:'Tài liệu tải xuống',
+ presentations:'Bài trình bày',videos:'Video',gallery:'Thư viện ảnh',documents:'Tài liệu tải xuống',partners:'Hệ sinh thái Đối tác',
  empty:'Chưa có nội dung được xuất bản.',unavailable:'Hiện không thể tải nội dung. Vui lòng thử lại sau.',retry:'Thử lại',
  private:'Tài liệu dành cho khách hàng',choose:'Chọn một bài trình bày để xem mục lục hoặc bắt đầu trình chiếu.',
  back:'Quay lại danh sách bài trình bày',contents:'Mục lục',start:'Bắt đầu bài trình bày',slides:'trang',
@@ -12,7 +12,7 @@ const W=vi?{
  images:'hình ảnh',download:'Tải xuống',more:'Khác'
 }:{
  title:'Client Room',intro:'Wistudi resources and materials for clients.',
- presentations:'Presentations',videos:'Videos',gallery:'Gallery',documents:'Downloads',
+ presentations:'Presentations',videos:'Videos',gallery:'Gallery',documents:'Downloads',partners:'Partner Ecosystem',
  empty:'No published content is available yet.',unavailable:'Content is temporarily unavailable. Please try again.',retry:'Try again',
  private:'Private materials',choose:'Choose a presentation, then open its contents or start the slides.',
  back:'Back to presentations',contents:'Contents',start:'Start presentation',slides:'slides',
@@ -20,8 +20,8 @@ const W=vi?{
  images:'images',download:'Download',more:'More'
 };
 const $=id=>document.getElementById(id);
-const categories=[['presentation',W.presentations],['video',W.videos],['gallery',W.gallery],['document',W.documents]];
-let items=[],active='presentation',failed=false,currentDeck=null,currentSlide=1,totalSlides=1,pdfDoc=null,rendering=false,queued=null,galleryCategory=null;
+const categories=[['presentation',W.presentations],['video',W.videos],['gallery',W.gallery],['document',W.documents],['partner',W.partners]];
+let items=[],videoGroups=[],partners=[],partnerSettings=null,active='presentation',failed=false,currentDeck=null,currentSlide=1,totalSlides=1,pdfDoc=null,rendering=false,queued=null,galleryCategory=null,videoCategory=null;
 const canvas=$('slideCanvas'),ctx=canvas.getContext('2d');
 
 const OVERVIEW_EN=[
@@ -69,11 +69,12 @@ function text(tag,value,cls){const e=document.createElement(tag);e.textContent=v
 function safeUrl(value){try{const u=new URL(value,location.origin);return u.origin===location.origin?u.href:null}catch{return null}}
 function renderTabs(){
  $('tabs').replaceChildren();
- for(const [key,label] of categories){const b=text('button',label,'tab'+(key===active?' selected':''));b.type='button';b.setAttribute('aria-pressed',String(key===active));b.onclick=()=>{active=key;currentDeck=null;galleryCategory=null;render()};$('tabs').append(b)}
+ for(const [key,label] of categories){const b=text('button',label,'tab'+(key===active?' selected':''));b.type='button';b.setAttribute('aria-pressed',String(key===active));b.onclick=()=>{active=key;currentDeck=null;galleryCategory=null;videoCategory=null;render()};$('tabs').append(b)}
 }
 function render(){
  renderTabs();$('content').replaceChildren();$('status').textContent='';$('heading').textContent='';
  if(failed){$('status').textContent=W.unavailable;const b=text('button',W.retry,'retry');b.onclick=load;$('content').append(b);return}
+ if(active==='partner'){renderPartners();return}
  const shown=items.filter(x=>x.category===active);
  if(!shown.length){$('status').textContent=W.empty;return}
  if(active==='presentation')renderPresentations(shown);
@@ -130,10 +131,41 @@ $('fullScreen').onclick=()=>document.fullscreenElement?document.exitFullscreen()
 addEventListener('keydown',e=>{if(!$('slideShell').hidden){if(e.key==='Escape')closeSlides();if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();$('nextSlide').click()}if(e.key==='ArrowLeft'){$('prevSlide').click()}}});
 addEventListener('resize',()=>{if(!$('slideShell').hidden&&currentDeck)renderSlide(currentSlide)});
 
+function videoSource(value){
+ try{
+  const u=new URL(value,location.origin),host=u.hostname.replace(/^www\./,'').toLowerCase();
+  if(host==='youtu.be'){const id=u.pathname.split('/').filter(Boolean)[0];if(id)return {kind:'iframe',url:'https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)}}
+  if(host==='youtube.com'||host==='m.youtube.com'){let id=u.searchParams.get('v');if(!id&&u.pathname.startsWith('/embed/'))id=u.pathname.split('/')[2];if(id)return {kind:'iframe',url:'https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)}}
+  if(host==='vimeo.com'||host==='player.vimeo.com'){const id=u.pathname.split('/').filter(Boolean).find(x=>/^\d+$/.test(x));if(id)return {kind:'iframe',url:'https://player.vimeo.com/video/'+id}}
+  if(u.origin===location.origin||/\.(mp4|webm)(?:$|[?#])/i.test(u.pathname+u.search))return {kind:'video',url:u.href};
+  if(u.protocol==='https:')return {kind:'link',url:u.href};
+ }catch{}
+ return null;
+}
+function makeVideoCard(item){
+ const source=videoSource(item.asset_url);if(!source)return null;
+ const card=document.createElement('article');card.className='media-card';
+ if(source.kind==='iframe'){const f=document.createElement('iframe');f.src=source.url;f.loading='lazy';f.title=item.title;f.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';f.allowFullscreen=true;f.referrerPolicy='strict-origin-when-cross-origin';card.append(f)}
+ else if(source.kind==='video'){const v=document.createElement('video');v.controls=true;v.playsInline=true;v.preload='metadata';v.src=source.url;card.append(v)}
+ const body=document.createElement('div');body.className='media-body';body.append(text('h3',item.title));if(item.description)body.append(text('p',item.description));
+ if(source.kind==='link'){const a=text('a',vi?'Mở video':'Open video','action');a.href=source.url;a.target='_blank';a.rel='noopener noreferrer';body.append(a)}
+ card.append(body);return card;
+}
 function renderVideos(list){
- $('heading').textContent=W.videos;const grid=document.createElement('div');grid.className='video-grid';
- for(const item of list){const url=safeUrl(item.asset_url);if(!url)continue;const card=document.createElement('article');card.className='media-card';const v=document.createElement('video');v.controls=true;v.playsInline=true;v.preload='metadata';v.src=url;const body=document.createElement('div');body.className='media-body';body.append(text('h3',item.title));if(item.description)body.append(text('p',item.description));card.append(v,body);grid.append(card)}
- $('content').append(grid);
+ const groups=videoGroups.filter(g=>list.some(i=>i.video_group_id===g.id));
+ const uncategorised=list.some(i=>!i.video_group_id||!videoGroups.some(g=>g.id===i.video_group_id));
+ if(!groups.length&&!uncategorised){$('heading').textContent=W.videos;return}
+ if(!groups.length){
+  $('heading').textContent=W.videos;const grid=document.createElement('div');grid.className='video-grid';for(const item of list){const card=makeVideoCard(item);if(card)grid.append(card)}$('content').append(grid);return;
+ }
+ const available=[...groups];if(uncategorised)available.push({id:'__other',title:vi?'Video khác':'Other videos',description:vi?'Các video chưa được gán vào danh mục.':'Videos that have not been assigned to a category.',sort_order:999999});
+ if(!videoCategory||!available.some(g=>g.id===videoCategory))videoCategory=available[0].id;
+ const chips=document.createElement('div');chips.className='gallery-tabs';
+ for(const g of available){const b=text('button',g.title,'gallery-chip'+(g.id===videoCategory?' active':''));b.onclick=()=>{videoCategory=g.id;renderVideos(list)};chips.append(b)}
+ const group=available.find(g=>g.id===videoCategory),shown=list.filter(i=>videoCategory==='__other'?(!i.video_group_id||!videoGroups.some(g=>g.id===i.video_group_id)):i.video_group_id===videoCategory);
+ const head=document.createElement('div');head.className='gallery-head';const left=document.createElement('div');left.append(text('div',W.videos,'kicker'),text('h2',group?.title||W.videos));left.append(text('div',shown.length+' '+(vi?'video':'videos'),'gallery-count'));const desc=document.createElement('div');desc.className='gallery-description';if(group?.description){const p=document.createElement('p');p.textContent=group.description;desc.append(p)}head.append(left,desc);
+ const grid=document.createElement('div');grid.className='video-grid';for(const item of shown){const card=makeVideoCard(item);if(card)grid.append(card)}
+ $('heading').textContent='';$('content').replaceChildren(chips,head,grid);
 }
 function gallerySlug(item){
  const id=item.id||'';for(const cat of GALLERY)if(id.includes('-'+cat.slug+'-'))return cat.slug;return 'more';
@@ -151,6 +183,20 @@ function renderGallery(list){
 function openLightbox(url,caption){$('lightboxImage').src=url;$('lightboxImage').alt=caption;$('lightboxCaption').textContent=caption;$('lightbox').hidden=false}
 $('lightboxClose').onclick=()=>{$('lightbox').hidden=true;$('lightboxImage').src=''};$('lightbox').onclick=e=>{if(e.target===$('lightbox'))$('lightboxClose').click()};
 
+function renderPartners(){
+ const wrap=document.createElement('div'),intro=document.createElement('div');intro.className='partner-intro';
+ const left=document.createElement('div');left.append(text('div',vi?'Wistudi + Đối tác':'Wistudi + Partners','kicker'),text('h2',partnerSettings?.title||W.partners));
+ const right=document.createElement('p');right.textContent=partnerSettings?.intro||(vi?'Các đối tác chuyên biệt giúp mở rộng khả năng của Wistudi.':'Specialist partners extend the capabilities of Wistudi.');
+ intro.append(left,right);wrap.append(intro);
+ if(!partners.length){const empty=text('p',W.empty,'status');wrap.append(empty);$('content').replaceChildren(wrap);return}
+ const list=document.createElement('div');list.className='partner-list';
+ for(const p of partners){const a=document.createElement('a');a.className='partner-row';a.href=(vi?'/client-room/vi/partner/':'/client-room/partner/')+'?slug='+encodeURIComponent(p.slug);
+  const img=document.createElement('img');img.src=p.banner_url;img.alt=p.title;img.loading='lazy';
+  const body=document.createElement('div');body.append(text('h3',p.title));if(p.short_description)body.append(text('p',p.short_description));
+  if(Array.isArray(p.tags)&&p.tags.length){const tags=document.createElement('div');tags.className='partner-tags';p.tags.forEach(t=>tags.append(text('span',t,'partner-tag')));body.append(tags)}
+  a.append(img,body,text('span','›','partner-arrow'));list.append(a)}
+ wrap.append(list);$('heading').textContent='';$('content').replaceChildren(wrap);
+}
 function renderDownloads(list){
  $('heading').textContent=W.documents;const grid=document.createElement('div');grid.className='download-grid';
  for(const item of list){const url=safeUrl(item.asset_url);if(!url)continue;const card=document.createElement('article');card.className='media-card download-card';card.append(text('h3',item.title));if(item.description)card.append(text('p',item.description));const a=text('a',W.download,'action');a.href=url;a.download='';a.target='_blank';a.rel='noopener noreferrer';card.append(a);grid.append(card)}
@@ -158,7 +204,7 @@ function renderDownloads(list){
 }
 async function load(){
  failed=false;$('status').textContent='';
- try{const response=await fetch('/api/room-management/published?room=client&locale='+locale,{cache:'no-store'});const raw=await response.text();let data;try{data=JSON.parse(raw)}catch{throw Error(raw||'invalid_response')}if(!response.ok||!data.ok||!Array.isArray(data.items))throw Error(data.detail||data.error||'request_failed');items=data.items;render();const requested=new URLSearchParams(location.search).get('presentation');if(requested&&active==='presentation'){const item=items.find(x=>x.id===requested);if(item)showContents(deckMeta(item))}}
+ try{const [response,partnerResponse]=await Promise.all([fetch('/api/room-management/published?room=client&locale='+locale,{cache:'no-store'}),fetch('/api/room-management/ecosystem?room=client&locale='+locale+'&kind=partners',{cache:'no-store'})]);const raw=await response.text();let data;try{data=JSON.parse(raw)}catch{throw Error(raw||'invalid_response')}if(!response.ok||!data.ok||!Array.isArray(data.items))throw Error(data.detail||data.error||'request_failed');items=data.items;videoGroups=Array.isArray(data.video_groups)?data.video_groups:[];try{const pd=await partnerResponse.json();partners=Array.isArray(pd.items)?pd.items:[];partnerSettings=pd.settings||null}catch{partners=[];partnerSettings=null}render();const requested=new URLSearchParams(location.search).get('presentation');if(requested&&active==='presentation'){const item=items.find(x=>x.id===requested);if(item)showContents(deckMeta(item))}}
  catch(e){console.error(e);items=[];failed=true;render()}
 }
 $('intro').textContent=W.intro;$('language').href=vi?'/client-room/':'/client-room/vi/';$('language').textContent=vi?'English':'Tiếng Việt';load();
