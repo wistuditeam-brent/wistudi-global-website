@@ -61,5 +61,5 @@ export async function onRequest({request,env}){
    return respond({ok:!!result.meta?.changes,deleted:result.meta?.changes||0},result.meta?.changes?200:404);
   }
   return respond({ok:false,error:'method_not_allowed'},405);
- }catch(error){console.error('room cms failure',String(error));return respond({ok:false,error:'operation_failed'},500)}
+ }catch(error){console.error('room cms failure',String(error));return respond({ok:false,error:'operation_failed',detail:String(error?.message||error).slice(0,220)},500)}
 }
