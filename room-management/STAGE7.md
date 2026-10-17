@@ -1,6 +1,6 @@
 # Stage 7 — Per-manager authentication foundation
 
-Migration: room-management/migrations/0002_room_managers.sql. Individual manager credentials use PBKDF2-SHA256 (210000 iterations, random 16+ byte salt stored as hex). Provision accounts and permissions through an **administrative server-side process**, not the public UI. No public sign-up or role assignment endpoint exists.
+Migration: room-management/migrations/0002_room_managers.sql. Individual manager credentials use PBKDF2-SHA256 (100000 iterations, random 16+ byte salt stored as hex). Provision accounts and permissions through an **administrative server-side process**, not the public UI. No public sign-up or role assignment endpoint exists.
 
 Session cookie is opaque, HttpOnly, Secure, SameSite=Strict, scoped to /api/room-management. Session rows expire after 1 hour; sign-out revokes the session. Manager metadata, upload and private media reads check the manager's room permission.
 
