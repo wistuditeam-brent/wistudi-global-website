@@ -1,4 +1,4 @@
-import { managerAuthorized } from './_session.js';
+import { canManage } from './session.js';
 const TYPES={presentation:['application/pdf'],video:['video/mp4','video/webm'],gallery:['image/jpeg','image/png','image/webp'],document:['application/pdf','image/jpeg','image/png','image/webp','text/plain']};
 const LIMITS={presentation:30e6,video:100e6,gallery:12e6,document:30e6};
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json','cache-control':'no-store'}});
@@ -6,7 +6,7 @@ export async function onRequest({request,env}){
  const url=new URL(request.url),room=url.searchParams.get('room')||'client';
  if(!['client','distributor','investor'].includes(room))return json({error:'invalid_room'},400);
  if(!env.ROOM_MEDIA||!env.ROOM_DB)return json({error:'storage_not_configured'},503);
- const authorized=await managerAuthorized(request,env);
+ const authorized=await canManage(request,env,room);
  if(request.method==='POST'){
   if(!authorized)return json({error:'unauthorized'},401);
   if(request.headers.get('origin')!==url.origin)return json({error:'invalid_origin'},403);

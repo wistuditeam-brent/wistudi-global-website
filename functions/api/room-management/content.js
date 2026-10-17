@@ -1,4 +1,4 @@
-import { managerAuthorized } from './_session.js';
+import { canManage } from './session.js';
 // Stage 3: fail-closed metadata API. No upload or public mutation access.
 // Configure ROOM_DB (D1) and ROOM_MANAGER_TOKEN (secret) before deployment.
 const ROOMS=new Set(['client','distributor','investor']);
@@ -25,7 +25,8 @@ function validate(body){
  return !body.description||typeof body.description==='string'&&body.description.length<=2000;
 }
 export async function onRequest({request,env}){
- if(!await managerAuthorized(request,env))return respond({ok:false,error:'unauthorized'},401);
+ const requestedRoom=new URL(request.url).searchParams.get('room')||'client';
+ if(!await canManage(request,env,requestedRoom))return respond({ok:false,error:'forbidden'},403);
  if(request.method!=='GET' && request.headers.get('origin')!==new URL(request.url).origin)return respond({ok:false,error:'invalid_origin'},403);
  const store=db(env);if(!store)return respond({ok:false,error:'room_database_not_configured'},503);
  const url=new URL(request.url),r=room(url);
