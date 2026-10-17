@@ -4,11 +4,11 @@ pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/p
 const locale=location.pathname.includes('/vi/')?'vi':'en',vi=locale==='vi';
 const W=vi?{
  title:'Phòng Khách hàng',intro:'Tài liệu và thông tin dành cho khách hàng Wistudi.',
- presentations:'Bài trình bày',videos:'Video',gallery:'Thư viện ảnh',documents:'Tài liệu tải xuống',partners:'Hệ sinh thái Đối tác',
+ presentations:'Bài thuyết trình',videos:'Video',gallery:'Thư viện ảnh',documents:'Tài liệu tải xuống',partners:'Hệ sinh thái Đối tác',
  empty:'Chưa có nội dung được xuất bản.',unavailable:'Hiện không thể tải nội dung. Vui lòng thử lại sau.',retry:'Thử lại',
- private:'Tài liệu dành cho khách hàng',choose:'Chọn một bài trình bày để xem mục lục hoặc bắt đầu trình chiếu.',
+ private:'Tài liệu dành cho khách hàng',choose:'Chọn một bài thuyết trình để xem mục lục hoặc bắt đầu trình chiếu.',
  back:'Quay lại danh sách bài trình bày',contents:'Mục lục',start:'Bắt đầu bài trình bày',slides:'trang',
- loading:'Đang tải bài trình bày…',slideError:'Không thể tải bài trình bày. Vui lòng thử lại.',
+ loading:'Đang tải bài thuyết trình…',slideError:'Không thể tải bài thuyết trình. Vui lòng thử lại.',
  images:'hình ảnh',download:'Tải xuống',more:'Khác'
 }:{
  title:'Client Room',intro:'Wistudi resources and materials for clients.',
