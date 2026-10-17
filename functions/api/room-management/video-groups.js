@@ -22,13 +22,17 @@ export async function onRequest({request,env}){
    if(!body||body.room_id!==room||body.locale!==locale||!valid(body.title,120)||typeof(body.description||'')!=='string'||(body.description||'').length>2000)return json({error:'invalid_group'},400);
    const id=crypto.randomUUID(),order=Number.isSafeInteger(body.sort_order)?body.sort_order:0;
    await env.ROOM_DB.prepare('INSERT INTO room_video_groups(id,room_id,locale,title,description,sort_order) VALUES(?,?,?,?,?,?)').bind(id,room,locale,body.title.trim(),body.description||'',order).run();
-   return json({ok:true,id},201);
+   const saved=await env.ROOM_DB.prepare('SELECT id,room_id,locale,title,description,sort_order FROM room_video_groups WHERE id=?').bind(id).first();
+   return json({ok:true,id,item:saved},201);
   }
   if(request.method==='PATCH'){
    if(!body||!valid(body.id,100)||!valid(body.title,120)||typeof(body.description||'')!=='string'||(body.description||'').length>2000)return json({error:'invalid_group'},400);
    const order=Number.isSafeInteger(body.sort_order)?body.sort_order:0;
-   const r=await env.ROOM_DB.prepare('UPDATE room_video_groups SET title=?,description=?,sort_order=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND room_id=? AND locale=?').bind(body.title.trim(),body.description||'',order,body.id,room,locale).run();
-   return json({ok:!!r.meta?.changes},r.meta?.changes?200:404);
+   const existing=await env.ROOM_DB.prepare('SELECT id FROM room_video_groups WHERE id=? AND room_id=? AND locale=?').bind(body.id,room,locale).first();
+   if(!existing)return json({error:'not_found'},404);
+   await env.ROOM_DB.prepare('UPDATE room_video_groups SET title=?,description=?,sort_order=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND room_id=? AND locale=?').bind(body.title.trim(),body.description||'',order,body.id,room,locale).run();
+   const saved=await env.ROOM_DB.prepare('SELECT id,room_id,locale,title,description,sort_order FROM room_video_groups WHERE id=? AND room_id=? AND locale=?').bind(body.id,room,locale).first();
+   return json({ok:true,item:saved});
   }
   if(request.method==='DELETE'){
    const id=url.searchParams.get('id');if(!valid(id,100))return json({error:'missing_id'},400);

@@ -1,6 +1,7 @@
 import { canManage } from './session.js';
 import { ensureClientStarter } from './starter-content.js';
 import { ensureVideoSchema,ensureClientVideoGroups,validVideoGroup } from './_video-groups.js';
+import { ensureContentTranslationSchema,ensureClientContentTranslationLinks,translationForContent,ensureTranslationLink } from './_content-translations.js';
 // Stage 3: fail-closed metadata API. No upload or public mutation access.
 // Configure ROOM_DB (D1) and ROOM_MANAGER_TOKEN (secret) before deployment.
 const ROOMS=new Set(['client','distributor','investor']);
@@ -33,13 +34,14 @@ export async function onRequest({request,env}){
  const store=db(env);if(!store)return respond({ok:false,error:'room_database_not_configured'},503);
  if(requestedRoom==='client')await ensureClientStarter(env);
  await ensureVideoSchema(env);if(requestedRoom==='client')await ensureClientVideoGroups(env);
+ await ensureContentTranslationSchema(env);if(requestedRoom==='client')await ensureClientContentTranslationLinks(env);
  const url=new URL(request.url),r=room(url);
  if(!ROOMS.has(r))return respond({ok:false,error:'invalid_room'},400);
  try{
   if(request.method==='GET'){
    const category=url.searchParams.get('category');
    if(category&&!CATEGORIES.has(category))return respond({ok:false,error:'invalid_category'},400);
-   const sql='SELECT c.*,m.group_id AS video_group_id FROM room_content c LEFT JOIN room_video_group_membership m ON m.content_id=c.id WHERE c.room_id = ?'+(category?' AND c.category = ?':'')+' ORDER BY c.category,c.sort_order,c.created_at';
+   const sql='SELECT c.*,m.group_id AS video_group_id,t.group_id AS translation_group_id FROM room_content c LEFT JOIN room_video_group_membership m ON m.content_id=c.id LEFT JOIN room_content_translation_links t ON t.content_id=c.id WHERE c.room_id = ?'+(category?' AND c.category = ?':'')+' ORDER BY c.category,c.sort_order,c.created_at';
    const result=await store.prepare(sql).bind(...(category?[r,category]:[r])).all();
    return respond({ok:true,items:result.results||[]});
   }
@@ -47,32 +49,48 @@ export async function onRequest({request,env}){
    const body=await request.json().catch(()=>null);
    if(!validate(body)||body.room_id!==r)return respond({ok:false,error:'invalid_content'},400);
    const id=crypto.randomUUID(),description=body.description||'',locale=body.locale||'en',status=body.status||'draft',order=Number.isSafeInteger(body.sort_order)?body.sort_order:0;
-   const groupId=body.category==='video'&&typeof body.video_group_id==='string'&&body.video_group_id?body.video_group_id:null;
-   if(groupId&&!await validVideoGroup(env,groupId,r,locale))return respond({ok:false,error:'invalid_video_group'},400);
-   const stmts=[store.prepare('INSERT INTO room_content (id,room_id,category,title,description,asset_url,locale,status,sort_order) VALUES (?,?,?,?,?,?,?,?,?)').bind(id,r,body.category,body.title.trim(),description,body.asset_url,locale,status,order)];
-   if(groupId)stmts.push(store.prepare('INSERT OR REPLACE INTO room_video_group_membership(content_id,group_id) VALUES(?,?)').bind(id,groupId));
-   await store.batch(stmts);return respond({ok:true,id},201);
+   const videoGroupId=body.category==='video'&&typeof body.video_group_id==='string'&&body.video_group_id?body.video_group_id:null;
+   if(videoGroupId&&!await validVideoGroup(env,videoGroupId,r,locale))return respond({ok:false,error:'invalid_video_group'},400);
+   const requestedTranslation=typeof body.translation_group_id==='string'&&body.translation_group_id.trim()?body.translation_group_id.trim():null;
+   if(requestedTranslation&&requestedTranslation.length>100)return respond({ok:false,error:'invalid_translation_group'},400);
+   if(requestedTranslation){
+    const occupied=await store.prepare('SELECT content_id FROM room_content_translation_links WHERE group_id=? AND locale=?').bind(requestedTranslation,locale).first();
+    if(occupied)return respond({ok:false,error:'translation_locale_exists',existing_id:occupied.content_id},409);
+   }
+   await store.prepare('INSERT INTO room_content (id,room_id,category,title,description,asset_url,locale,status,sort_order) VALUES (?,?,?,?,?,?,?,?,?)').bind(id,r,body.category,body.title.trim(),description,body.asset_url,locale,status,order).run();
+   const link=await ensureTranslationLink(env,id,locale,requestedTranslation);
+   if(videoGroupId)await store.prepare('INSERT OR REPLACE INTO room_video_group_membership(content_id,group_id) VALUES(?,?)').bind(id,videoGroupId).run();
+   const saved=await store.prepare('SELECT c.*,m.group_id AS video_group_id,t.group_id AS translation_group_id FROM room_content c LEFT JOIN room_video_group_membership m ON m.content_id=c.id LEFT JOIN room_content_translation_links t ON t.content_id=c.id WHERE c.id=? AND c.room_id=?').bind(id,r).first();
+   return respond({ok:true,id,translation_group_id:link.group_id,item:saved},201);
   }
   if(request.method==='PATCH'){
    const body=await request.json().catch(()=>null);
    if(!body||!valid(body.id,100)||!validate({...body,room_id:r}))return respond({ok:false,error:'invalid_content'},400);
-   const locale=body.locale||'en',groupId=body.category==='video'&&typeof body.video_group_id==='string'&&body.video_group_id?body.video_group_id:null;
-   if(groupId&&!await validVideoGroup(env,groupId,r,locale))return respond({ok:false,error:'invalid_video_group'},400);
-   const stmts=[
-    store.prepare('UPDATE room_content SET category=?,title=?,description=?,asset_url=?,locale=?,status=?,sort_order=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND room_id=?').bind(body.category,body.title.trim(),body.description||'',body.asset_url,locale,body.status||'draft',Number.isSafeInteger(body.sort_order)?body.sort_order:0,body.id,r),
+   const locale=body.locale||'en',videoGroupId=body.category==='video'&&typeof body.video_group_id==='string'&&body.video_group_id?body.video_group_id:null;
+   if(videoGroupId&&!await validVideoGroup(env,videoGroupId,r,locale))return respond({ok:false,error:'invalid_video_group'},400);
+   const current=await store.prepare('SELECT id,locale FROM room_content WHERE id=? AND room_id=?').bind(body.id,r).first();
+   if(!current)return respond({ok:false,error:'not_found'},404);
+   let link=await translationForContent(env,body.id);
+   if(!link)link=await ensureTranslationLink(env,body.id,current.locale,typeof body.translation_group_id==='string'?body.translation_group_id:null);
+   if(link.locale!==locale)return respond({ok:false,error:'locale_mismatch'},400);
+   const order=Number.isSafeInteger(body.sort_order)?body.sort_order:0,status=body.status||'draft';
+   await store.batch([
+    store.prepare('UPDATE room_content SET category=?,asset_url=?,status=?,sort_order=?,updated_at=CURRENT_TIMESTAMP WHERE id IN (SELECT content_id FROM room_content_translation_links WHERE group_id=?)').bind(body.category,body.asset_url,status,order,link.group_id),
+    store.prepare('UPDATE room_content SET title=?,description=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND room_id=?').bind(body.title.trim(),body.description||'',body.id,r),
     store.prepare('DELETE FROM room_video_group_membership WHERE content_id=?').bind(body.id)
-   ];
-   if(groupId)stmts.push(store.prepare('INSERT OR REPLACE INTO room_video_group_membership(content_id,group_id) VALUES(?,?)').bind(body.id,groupId));
-   const results=await store.batch(stmts),changes=results[0]?.meta?.changes||0;
-   return respond({ok:!!changes,updated:changes},changes?200:404);
+   ]);
+   if(videoGroupId)await store.prepare('INSERT OR REPLACE INTO room_video_group_membership(content_id,group_id) VALUES(?,?)').bind(body.id,videoGroupId).run();
+   const saved=await store.prepare('SELECT c.*,m.group_id AS video_group_id,t.group_id AS translation_group_id FROM room_content c LEFT JOIN room_video_group_membership m ON m.content_id=c.id LEFT JOIN room_content_translation_links t ON t.content_id=c.id WHERE c.id=? AND c.room_id=?').bind(body.id,r).first();
+   return respond({ok:true,updated:1,translation_group_id:link.group_id,item:saved});
   }
   if(request.method==='DELETE'){
    const id=url.searchParams.get('id');
    if(!valid(id,100))return respond({ok:false,error:'missing_id'},400);
    const results=await store.batch([
     store.prepare('DELETE FROM room_video_group_membership WHERE content_id=?').bind(id),
+    store.prepare('DELETE FROM room_content_translation_links WHERE content_id=?').bind(id),
     store.prepare('DELETE FROM room_content WHERE id=? AND room_id=?').bind(id,r)
-   ]),changes=results[1]?.meta?.changes||0;
+   ]),changes=results[2]?.meta?.changes||0;
    return respond({ok:!!changes,deleted:changes},changes?200:404);
   }
   return respond({ok:false,error:'method_not_allowed'},405);
