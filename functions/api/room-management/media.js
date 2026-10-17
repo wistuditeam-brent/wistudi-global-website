@@ -29,7 +29,7 @@ export async function onRequest({request,env}){
    const found=await env.ROOM_DB.prepare("SELECT id FROM room_content WHERE room_id=? AND status='published' AND asset_url=? LIMIT 1").bind(room,asset).first();
    if(!found){
     await ensureEcosystemSchema(env);
-    const partner=await env.ROOM_DB.prepare("SELECT id FROM room_partners WHERE room_id=? AND status='published' AND (banner_url=? OR video_url=? OR gallery_urls LIKE ?) LIMIT 1").bind(room,asset,asset,'%'+asset.replace(/[\\%_]/g,'\\   if(!found)return json({error:'not_found'},404);')+'%').first();
+    const partner=await env.ROOM_DB.prepare("SELECT id FROM room_partners WHERE room_id=? AND status='published' AND (banner_url=? OR video_url=? OR instr(gallery_urls, ?)>0) LIMIT 1").bind(room,asset,asset,asset).first();
     if(!partner)return json({error:'not_found'},404);
    }
   }
