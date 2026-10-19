@@ -3,11 +3,14 @@ import { canManage } from './session.js';
 const TYPES={presentation:['application/pdf'],video:['video/mp4','video/webm'],gallery:['image/jpeg','image/png','image/webp'],document:['application/pdf','image/jpeg','image/png','image/webp','text/plain']};
 const LIMITS={presentation:30e6,video:90e6,gallery:12e6,document:30e6};
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json','cache-control':'no-store'}});
-export async function onRequest({request,env}){
+const publicKeyMemo=new Map();
+export async function onRequest(context){
+ const {request,env}=context;
  const url=new URL(request.url),room=url.searchParams.get('room')||'client';
  if(!['client','distributor','investor'].includes(room))return json({error:'invalid_room'},400);
  if(!env.ROOM_MEDIA||!env.ROOM_DB)return json({error:'storage_not_configured'},503);
- const authorized=await canManage(request,env,room);
+ const hasManagerSession=(request.headers.get('cookie')||'').includes('wistudi_room_session=');
+ const authorized=(request.method==='POST'||hasManagerSession)?await canManage(request,env,room):false;
  if(request.method==='POST'){
   if(!authorized)return json({error:'unauthorized'},401);
   if(request.headers.get('origin')!==url.origin)return json({error:'invalid_origin'},403);
@@ -30,7 +33,13 @@ export async function onRequest({request,env}){
  if(request.method==='GET'||request.method==='HEAD'){
   const key=url.searchParams.get('key')||'';
   if(!/^(client|distributor|investor)\/[0-9a-f-]{36}$/.test(key)||!key.startsWith(room+'/'))return json({error:'invalid_key'},400);
-  if(!authorized){
+  const rangeHeader=request.headers.get('range');
+  const cacheable=!authorized&&request.method==='GET'&&!rangeHeader;
+  const edgeCache=cacheable&&typeof caches!=='undefined'?caches.default:null;
+  const cacheKey=edgeCache?new Request(request.url,{method:'GET'}):null;
+  if(edgeCache){const hit=await edgeCache.match(cacheKey);if(hit)return hit}
+  const memoUntil=publicKeyMemo.get(key)||0;
+  if(!authorized&&memoUntil<Date.now()){
    const asset='/api/room-management/media?room='+room+'&key='+encodeURIComponent(key);
    const found=await env.ROOM_DB.prepare("SELECT id FROM room_content WHERE room_id=? AND status='published' AND asset_url=? LIMIT 1").bind(room,asset).first();
    if(!found){
@@ -38,6 +47,7 @@ export async function onRequest({request,env}){
     const partner=await env.ROOM_DB.prepare("SELECT id FROM room_partners WHERE room_id=? AND status='published' AND (banner_url=? OR video_url=? OR instr(gallery_urls, ?)>0) LIMIT 1").bind(room,asset,asset,asset).first();
     if(!partner)return json({error:'not_found'},404);
    }
+   publicKeyMemo.set(key,Date.now()+60000);
   }
   if(request.method==='HEAD'){
    const object=await env.ROOM_MEDIA.head(key);if(!object)return json({error:'not_found'},404);
@@ -45,12 +55,11 @@ export async function onRequest({request,env}){
    if(object.httpEtag)responseHeaders.etag=object.httpEtag;
    return new Response(null,{status:200,headers:responseHeaders});
   }
-  const rangeHeader=request.headers.get('range');
   let object;
   try{object=await env.ROOM_MEDIA.get(key,rangeHeader?{range:request.headers}:undefined)}
   catch{return new Response(null,{status:416,headers:{'accept-ranges':'bytes','content-range':'bytes */*'}})}
   if(!object)return json({error:'not_found'},404);
-  const responseHeaders={'content-type':object.httpMetadata?.contentType||'application/octet-stream','accept-ranges':'bytes','cache-control':authorized?'private,no-store':'public,max-age=3600,immutable','x-content-type-options':'nosniff'};
+  const responseHeaders={'content-type':object.httpMetadata?.contentType||'application/octet-stream','accept-ranges':'bytes','cache-control':authorized?'private,no-store':'public,max-age=3600,stale-while-revalidate=86400','x-content-type-options':'nosniff'};
   if(object.httpEtag)responseHeaders.etag=object.httpEtag;
   let status=200;
   if(rangeHeader&&object.range&&Number.isFinite(object.range.offset)&&Number.isFinite(object.range.length)){
@@ -59,7 +68,9 @@ export async function onRequest({request,env}){
    responseHeaders['content-length']=String(object.range.length);
    status=206;
   }else responseHeaders['content-length']=String(object.size);
-  return new Response(object.body,{status,headers:responseHeaders});
+  const response=new Response(object.body,{status,headers:responseHeaders});
+  if(edgeCache&&status===200)context.waitUntil(edgeCache.put(cacheKey,response.clone()));
+  return response;
  }
  return json({error:'method_not_allowed'},405);
 }
