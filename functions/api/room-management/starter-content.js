@@ -19,8 +19,6 @@ export async function ensureClientStarter(env){
    await db.batch(statements);
   }
  }
- await db.prepare("UPDATE room_content SET asset_url='/client-room/?presentation=seed-pres-en-overview' WHERE id='seed-pres-en-overview' AND room_id='client'").run();
- await db.prepare("UPDATE room_content SET asset_url='/client-room/vi/?presentation=seed-pres-vi-overview' WHERE id='seed-pres-vi-overview' AND room_id='client'").run();
  await db.prepare("INSERT OR IGNORE INTO room_management_audit(id,actor_manager_id,action,room_id,target_id) VALUES('client-starter-content-v1',NULL,'starter_content_seeded','client',NULL)").run();
 }
 

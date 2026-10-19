@@ -59,10 +59,11 @@ const GALLERY=vi?[
 ];
 
 function deckMeta(item){
- if(item.id==='seed-pres-en-overview')return {...item,type:'pages',pages:16,base:'/client-room/starter-assets/assets/presentation/overview-en-pages/',chapters:OVERVIEW_EN};
- if(item.id==='seed-pres-vi-overview')return {...item,type:'pages',pages:13,base:'/client-room/starter-assets/vi/assets/presentation/overview-vi-pages/',chapters:OVERVIEW_VI};
- if(item.id==='seed-pres-en-pathways')return {...item,type:'pdf',pages:3,url:'/client-room/starter-assets/assets/presentation/Distributor-Pathways-EN.pdf',chapters:PATH_EN};
- if(item.id==='seed-pres-vi-pathways')return {...item,type:'pdf',pages:3,url:'/client-room/starter-assets/vi/assets/presentation/Distributor-Pathways-VN.pdf',chapters:PATH_VI};
+ const asset=String(item.asset_url||'');
+ if(item.id==='seed-pres-en-overview'&&asset==='/client-room/?presentation=seed-pres-en-overview')return {...item,type:'pages',pages:16,base:'/client-room/starter-assets/assets/presentation/overview-en-pages/',chapters:OVERVIEW_EN};
+ if(item.id==='seed-pres-vi-overview'&&asset==='/client-room/vi/?presentation=seed-pres-vi-overview')return {...item,type:'pages',pages:13,base:'/client-room/starter-assets/vi/assets/presentation/overview-vi-pages/',chapters:OVERVIEW_VI};
+ if(item.id==='seed-pres-en-pathways'&&asset==='/client-room/starter-assets/assets/presentation/Distributor-Pathways-EN.pdf')return {...item,type:'pdf',pages:3,url:asset,chapters:PATH_EN};
+ if(item.id==='seed-pres-vi-pathways'&&asset==='/client-room/starter-assets/vi/assets/presentation/Distributor-Pathways-VN.pdf')return {...item,type:'pdf',pages:3,url:asset,chapters:PATH_VI};
  return {...item,type:'pdf',pages:null,url:item.asset_url,chapters:[]};
 }
 function text(tag,value,cls){const e=document.createElement(tag);e.textContent=value;if(cls)e.className=cls;return e}

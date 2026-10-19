@@ -240,9 +240,9 @@ async function loadVideoGroups(locale){
 }
 function groupName(id){return videoGroups.find(g=>g.id===id)?.title||''}
 function previewSource(item){
- if(item.id==='seed-pres-en-overview')return {kind:'pdf',url:'/client-room/starter-assets/assets/presentation/overview-en-pages/slide-01.pdf'};
- if(item.id==='seed-pres-vi-overview')return {kind:'pdf',url:'/client-room/starter-assets/vi/assets/presentation/overview-vi-pages/slide-01.pdf'};
  const value=String(item.asset_url||'');
+ if(item.id==='seed-pres-en-overview'&&value==='/client-room/?presentation=seed-pres-en-overview')return {kind:'pdf',url:'/client-room/starter-assets/assets/presentation/overview-en-pages/slide-01.pdf'};
+ if(item.id==='seed-pres-vi-overview'&&value==='/client-room/vi/?presentation=seed-pres-vi-overview')return {kind:'pdf',url:'/client-room/starter-assets/vi/assets/presentation/overview-vi-pages/slide-01.pdf'};
  if(item.category==='gallery')return {kind:'image',url:value};
  if(item.category==='video'){
   try{
