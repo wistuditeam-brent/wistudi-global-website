@@ -88,12 +88,24 @@ export async function onRequest({request,env}){
   if(request.method==='DELETE'){
    const id=url.searchParams.get('id');
    if(!valid(id,100))return respond({ok:false,error:'missing_id'},400);
-   const results=await store.batch([
+   const existing=await store.prepare('SELECT id FROM room_content WHERE id=? AND room_id=?').bind(id,r).first();
+   if(!existing)return respond({ok:false,error:'not_found'},404);
+   if(r==='client'&&id.startsWith('seed-')){
+    await store.prepare(`CREATE TABLE IF NOT EXISTS room_content_tombstones (
+     room_id TEXT NOT NULL,
+     content_id TEXT NOT NULL,
+     deleted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     PRIMARY KEY(room_id,content_id)
+    )`).run();
+    await store.prepare('INSERT OR REPLACE INTO room_content_tombstones(room_id,content_id,deleted_at) VALUES(?,?,CURRENT_TIMESTAMP)').bind(r,id).run();
+   }
+   await store.batch([
     store.prepare('DELETE FROM room_video_group_membership WHERE content_id=?').bind(id),
     store.prepare('DELETE FROM room_content_translation_links WHERE content_id=?').bind(id),
     store.prepare('DELETE FROM room_content WHERE id=? AND room_id=?').bind(id,r)
-   ]),changes=results[2]?.meta?.changes||0;
-   return respond({ok:!!changes,deleted:changes},changes?200:404);
+   ]);
+   const remaining=await store.prepare('SELECT id FROM room_content WHERE id=? AND room_id=?').bind(id,r).first();
+   return remaining?respond({ok:false,error:'delete_not_persisted'},500):respond({ok:true,deleted:1});
   }
   return respond({ok:false,error:'method_not_allowed'},405);
  }catch(error){console.error('room cms failure',String(error));return respond({ok:false,error:'operation_failed',detail:String(error?.message||error).slice(0,220)},500)}

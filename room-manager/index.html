@@ -310,7 +310,18 @@ async function openEditor(item){
  const existingAsset=item?.asset_url||'',external=item?.category==='video'&&!isManagedAsset(existingAsset)?existingAsset:'';$('asset').value=external?'':existingAsset;$('externalVideo').value=external;$('status').value=item?.status||'draft';$('order').value=item?.sort_order||0;$('upload').value='';$('uploadStatus').textContent='';$('uploadProgress').hidden=true;$('contentSaveStatus').textContent='';updateVideoFields();
  await loadEditorLocale(item?.locale||'en');$('editor').scrollIntoView({behavior:'smooth'});
 }
-async function removeItem(item,linked=[item]){if(!confirm('Remove '+item.title+' from this room?'+(linked.length>1?' This will remove both English and Vietnamese versions.':'')))return;try{for(const r of linked)await request('/api/room-management/content?room='+encodeURIComponent($('room').value)+'&id='+encodeURIComponent(r.id),{method:'DELETE'});await reloadContent();message('Content removed')}catch(e){message(e.message)}}
+async function removeItem(item,linked=[item]){
+ if(!confirm('Remove '+item.title+' from this room?'+(linked.length>1?' This will remove both English and Vietnamese versions.':'')))return;
+ const ids=linked.map(r=>r.id);
+ try{
+  message('Removing content…');
+  for(const r of linked)await request('/api/room-management/content?room='+encodeURIComponent($('room').value)+'&id='+encodeURIComponent(r.id),{method:'DELETE'});
+  await reloadContent();
+  const remaining=records.filter(r=>ids.includes(r.id));
+  if(remaining.length)throw Error('The content could not be fully removed. Please try again.');
+  message('Content removed from Room Manager and Client Room.');
+ }catch(e){message(e.message)}
+}
 async function initialise(){try{const s=await request('/api/room-management/setup-status');$('initializing').hidden=true;if(s.needs_setup){$('setup').hidden=false;$('login').hidden=true;$('dashboard').hidden=true;message('')}else await load()}catch(err){$('initializing').hidden=true;$('login').hidden=false;message(err.message)}}
 $('setupForm').onsubmit=async e=>{e.preventDefault();const email=$('setupEmail').value.trim(),password=$('setupPassword').value,confirm=$('setupConfirm').value;if(password.length<8)return message('Password must be at least 8 characters.');if(password!==confirm)return message('Passwords do not match.');try{await request('/api/room-management/bootstrap',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email,password})});await request('/api/room-management/session',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email,password})});$('email').value=email;$('setup').hidden=true;await load();message('Administrator account created.')}catch(err){message(err.message)}};
 $('loginForm').onsubmit=async e=>{e.preventDefault();try{await request('/api/room-management/session',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:$('email').value,password:$('password').value})});$('password').value='';await load()}catch(err){message(err.message)}};
