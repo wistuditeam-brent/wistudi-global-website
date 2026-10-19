@@ -247,6 +247,7 @@ function previewSource(item){
  if(item.id==='seed-pres-vi-overview'&&value==='/client-room/vi/?presentation=seed-pres-vi-overview')return {kind:'pdf',url:'/client-room/starter-assets/vi/assets/presentation/overview-vi-pages/slide-01.pdf'};
  if(item.category==='gallery')return {kind:'image',url:value};
  if(item.category==='video'){
+  if(item.thumbnail_url)return {kind:'image',url:item.thumbnail_url};
   try{
    const u=new URL(value,location.origin),h=u.hostname.replace(/^www\./,'').toLowerCase();
    if(h==='youtu.be'){const id=u.pathname.split('/').filter(Boolean)[0];if(id)return {kind:'youtube',url:'https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)}}
@@ -285,7 +286,7 @@ function render(){
   const del=document.createElement('button');del.className='danger';del.textContent='Remove from room';del.onclick=()=>removeItem(item,linked);actions.append(open,edit,del);row.append(preview,details,actions);$('items').append(row);
  }
 }
-function updateVideoFields(){const isVideo=$('category').value==='video';$('videoGroupField').hidden=!isVideo;$('externalVideoField').hidden=!isVideo}
+function updateVideoFields(){const isVideo=$('category').value==='video';$('videoGroupField').hidden=!isVideo;$('externalVideoField').hidden=!isVideo;$('videoThumbnailField').hidden=!isVideo}
 function fillVideoGroupSelect(selected){
  const select=$('videoGroup'),keep=selected??select.value;select.replaceChildren(new Option('No category',''));
  videoGroups.forEach(g=>select.append(new Option(g.title,g.id)));select.value=keep||'';
@@ -309,8 +310,8 @@ async function openEditor(item){
   for(const r of linked)editorDrafts[r.locale]={id:r.id,title:r.title||'',description:r.description||'',video_group_id:r.video_group_id||''};
  }
  $('editor').hidden=false;$('editorTitle').textContent=item?'Edit content':'Add content';$('category').value=item?.category||$('filter').value||'presentation';
- const existingAsset=item?.asset_url||'',external=item?.category==='video'&&!isManagedAsset(existingAsset)?existingAsset:'';$('asset').value=external?'':existingAsset;$('externalVideo').value=external;$('status').value=item?.status||'draft';$('order').value=item?.sort_order||0;$('upload').value='';$('uploadStatus').textContent='';$('uploadProgress').hidden=true;$('contentSaveStatus').textContent='';updateVideoFields();
- await loadEditorLocale(item?.locale||'en');$('editor').scrollIntoView({behavior:'smooth'});
+ const existingAsset=item?.asset_url||'',external=item?.category==='video'&&!isManagedAsset(existingAsset)?existingAsset:'';$('asset').value=external?'':existingAsset;$('externalVideo').value=external;$('videoThumbnailAsset').value=item?.thumbnail_url||'';$('status').value=item?.status||'draft';$('order').value=item?.sort_order||0;$('upload').value='';$('uploadStatus').textContent='';$('uploadProgress').hidden=true;$('contentSaveStatus').textContent='';updateVideoFields();
+ const tp=$('videoThumbnailPreview');if(item?.thumbnail_url){tp.src=item.thumbnail_url;tp.hidden=false;$('videoThumbnailRemove').hidden=false;$('videoThumbnailStatus').textContent='Thumbnail ready'}else{tp.hidden=true;$('videoThumbnailRemove').hidden=true;$('videoThumbnailStatus').textContent=''};$('videoThumbnailFile').value='';await loadEditorLocale(item?.locale||'en');$('editor').scrollIntoView({behavior:'smooth'});
 }
 async function removeItem(item,linked=[item]){
  if(!confirm('Remove '+item.title+' from this room?'+(linked.length>1?' This will remove both English and Vietnamese versions.':'')))return;
@@ -330,12 +331,13 @@ $('loginForm').onsubmit=async e=>{e.preventDefault();try{await request('/api/roo
 $('logout').onclick=async()=>{await request('/api/room-management/session',{method:'DELETE'}).catch(()=>{});location.reload()};
 $('room').onchange=async()=>{$('editor').hidden=true;await reloadContent();await selectManagerTab(activeManagerTab)};
 $('filter').onchange=async()=>{if($('filter').value==='video')await loadVideoGroups($('locale')?.value||'en');render()};$('new').onclick=async()=>{await selectManagerTab('content');openEditor(null)};$('cancel').onclick=()=>{$('editor').hidden=true;editing=null;editingTranslationGroup=null;editorDrafts={en:null,vi:null}};
-$('category').onchange=()=>{updateVideoFields();if($('category').value!=='video')$('externalVideo').value=''};$('locale').onchange=async()=>{const next=$('locale').value;stashEditorDraft();await loadEditorLocale(next)};
+$('category').onchange=()=>{updateVideoFields();if($('category').value!=='video')$('externalVideo').value=''};$('videoThumbnailFile').onchange=async()=>{const f=$('videoThumbnailFile').files?.[0];if(!f)return;try{await prepareThumbnail(f);const u=URL.createObjectURL(f),img=$('videoThumbnailPreview');img.src=u;img.hidden=false;img.onload=()=>URL.revokeObjectURL(u);$('videoThumbnailRemove').hidden=false;$('videoThumbnailStatus').textContent='Ready to upload when you save.'}catch(e){$('videoThumbnailFile').value='';$('videoThumbnailStatus').textContent=e.message}};$('videoThumbnailRemove').onclick=()=>{$('videoThumbnailAsset').value='';$('videoThumbnailFile').value='';$('videoThumbnailPreview').hidden=true;$('videoThumbnailRemove').hidden=true;$('videoThumbnailStatus').textContent='Thumbnail removed. Save to apply.'};$('locale').onchange=async()=>{const next=$('locale').value;stashEditorDraft();await loadEditorLocale(next)};
 $('editor').onsubmit=async e=>{
  e.preventDefault();stashEditorDraft();
  await performSave('contentSave','contentSaveStatus',async()=>{
   const category=$('category').value,selectedFile=$('upload').files?.[0];
   if(selectedFile)await uploadContentFile(selectedFile,category);
+  if(category==='video'&&$('videoThumbnailFile').files?.[0]){$('videoThumbnailStatus').textContent='Uploading thumbnail…';const prepared=await prepareThumbnail($('videoThumbnailFile').files[0]),d=await uploadSmallFile(prepared,'gallery');$('videoThumbnailAsset').value=d.asset_url;$('videoThumbnailStatus').textContent='Thumbnail ready.'}
   const rawExternal=category==='video'?$('externalVideo').value.trim():'',external=externalVideoUrl(rawExternal);
   if(rawExternal&&!external)throw Error('Use a valid YouTube or Vimeo link.');
   const asset=external||$('asset').value.trim();
@@ -344,7 +346,7 @@ $('editor').onsubmit=async e=>{
   if(!drafts.length)throw Error('Add a title in English or Vietnamese before saving.');
   let group=editingTranslationGroup;
   for(const locale of drafts){
-   const d=editorDrafts[locale],body={room_id:$('room').value,category:$('category').value,locale,title:d.title.trim(),asset_url:asset,description:d.description||'',status:$('status').value,sort_order:Number($('order').value)||0,video_group_id:$('category').value==='video'?(d.video_group_id||null):null};
+   const d=editorDrafts[locale],body={room_id:$('room').value,category:$('category').value,locale,title:d.title.trim(),asset_url:asset,description:d.description||'',status:$('status').value,sort_order:Number($('order').value)||0,video_group_id:$('category').value==='video'?(d.video_group_id||null):null,thumbnail_url:$('category').value==='video'?$('videoThumbnailAsset').value.trim():''};
    if(group)body.translation_group_id=group;
    let result;
    if(d.id){body.id=d.id;result=await request('/api/room-management/content?room='+encodeURIComponent($('room').value),{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify(body)})}
