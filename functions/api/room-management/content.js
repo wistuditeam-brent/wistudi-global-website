@@ -22,9 +22,11 @@ function authorized(request,env){
 function db(env){return env.ROOM_DB&&typeof env.ROOM_DB.prepare==='function'?env.ROOM_DB:null}
 function room(url){return url.searchParams.get('room')||'client'}
 function validate(body){
- if(!body||!ROOMS.has(body.room_id)||!CATEGORIES.has(body.category)||!valid(body.title,180)||!valid(body.asset_url,2048)||!LOCALES.has(body.locale||'en')||!STATUSES.has(body.status||'draft'))return false;
- // Only local managed assets or HTTPS; reject protocol-relative and unsafe schemes.
- if(!(body.asset_url.startsWith('/')&&!body.asset_url.startsWith('//'))&&!/^https:\/\/[^\s]+$/i.test(body.asset_url))return false;
+ if(!body||!ROOMS.has(body.room_id)||!CATEGORIES.has(body.category)||!valid(body.title,180)||!LOCALES.has(body.locale||'en')||!STATUSES.has(body.status||'draft'))return false;
+ const asset=typeof body.asset_url==='string'?body.asset_url.trim():'';
+ if(asset.length>2048)return false;
+ if(asset&&!(asset.startsWith('/')&&!asset.startsWith('//'))&&!/^https:\/\/[^\s]+$/i.test(asset))return false;
+ if((body.status||'draft')==='published'&&!asset)return false;
  return !body.description||typeof body.description==='string'&&body.description.length<=2000;
 }
 export async function onRequest({request,env}){

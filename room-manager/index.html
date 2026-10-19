@@ -54,7 +54,7 @@
 <form id="partnerForm" class="group-form" hidden>
 <h3 id="partnerFormTitle">Add partner</h3>
 <div class="grid">
-<label>Partner name<input id="partnerTitle" maxlength="140" required></label><label>Slug<input id="partnerSlug" maxlength="80" placeholder="Auto-generated if blank"></label>
+<label>Partner name<input id="partnerTitle" maxlength="140" required></label><input id="partnerSlug" type="hidden">
 <label class="wide">Short description<textarea id="partnerShort" rows="3" maxlength="500"></textarea></label>
 <label class="wide">Banner image <span class="hint">(required)</span><input id="partnerBanner" type="hidden"><div class="upload-line"><input id="partnerBannerFile" type="file" accept=".png,.jpg,.jpeg,.webp"><button type="button" id="partnerBannerUpload" class="secondary">Upload banner</button><span id="partnerBannerStatus" class="hint"></span></div><img id="partnerBannerPreview" class="preview-img" hidden alt=""></label>
 <label class="wide">Video <span class="hint">(optional)</span><input id="partnerVideoAsset" type="hidden"><div class="upload-line"><input id="partnerVideoFile" type="file" accept=".mp4,.webm"><button type="button" id="partnerVideoUpload" class="secondary">Upload video</button><span id="partnerVideoStatus"></span></div><div id="partnerVideoProgress" class="progress" hidden><span></span></div><div style="margin-top:10px"><span class="hint">Or use a YouTube / Vimeo link:</span><input id="partnerVideoExternal" type="url" placeholder="https://www.youtube.com/... or https://vimeo.com/..."></div></label>
@@ -80,8 +80,8 @@
 <label class="wide">Introduction<textarea id="contactIntro" rows="4" maxlength="4000"></textarea></label>
 <label class="wide">Business address<textarea id="contactAddress" rows="3" maxlength="1200"></textarea></label>
 <label>Primary email<input id="contactEmail1" type="email"></label><label>Secondary email<input id="contactEmail2" type="email"></label>
-<label>Primary phone<input id="contactPhone"></label><label>Website URL<input id="contactWebsite" type="url"></label>
-<label>Facebook URL<input id="contactFacebook" type="url"></label><label>LinkedIn URL<input id="contactLinkedin" type="url"></label>
+<label>Primary phone<input id="contactPhone"></label><label>Website link<input id="contactWebsite" type="url"></label>
+<label>Facebook link<input id="contactFacebook" type="url"></label><label>LinkedIn link<input id="contactLinkedin" type="url"></label>
 </div>
 <div class="section-head" style="margin-top:22px"><div><h3>Additional contacts</h3><p>Add optional contact people, teams, regions, phone numbers, emails or links.</p></div><button type="button" id="addContact" class="secondary">Add contact</button></div>
 <div id="contactRows"></div>
@@ -95,10 +95,10 @@
 <label>Caption / text language<select id="locale"><option value="en">English</option><option value="vi">Vietnamese</option></select><span class="hint">Switch language to edit the text for the same uploaded asset.</span></label>
 <label id="videoGroupField" hidden>Video category<select id="videoGroup"><option value="">No category</option></select></label>
 <label>Display order<input id="order" type="number" value="0"></label>
-<div class="wide language-note">The media/file is shared between languages. Upload or replace it once, then switch English / Vietnamese above to maintain the localized title, caption and description.</div><label class="wide">Title<input id="title" maxlength="180"><span id="translationStatus" class="hint"></span></label>
+<div class="wide language-note">Upload the file once. Switch languages to edit the English and Vietnamese title and description.</div><label class="wide">Title<input id="title" maxlength="180"><span id="translationStatus" class="hint"></span></label>
 <input id="asset" type="hidden"><label id="externalVideoField" class="wide" hidden>YouTube or Vimeo link <span class="hint">(optional)</span><input id="externalVideo" type="url" placeholder="https://www.youtube.com/... or https://vimeo.com/..."><span class="hint">Use this instead of uploading a video if the video is hosted on YouTube or Vimeo.</span></label>
-<label class="wide">Upload or replace file<input id="upload" type="file" accept=".pdf,.mp4,.webm,.png,.jpg,.jpeg,.webp,.txt"><span class="hint">Upload images, documents, presentations and videos directly. Video files can use multipart R2 upload up to 500 GB.</span></label>
-<div class="wide"><button type="button" id="uploadButton" class="secondary">Upload / replace file</button> <span id="uploadStatus" role="status"></span><div id="uploadProgress" class="progress" hidden><span></span></div></div>
+<label class="wide">Choose file<input id="upload" type="file" accept=".pdf,.mp4,.webm,.png,.jpg,.jpeg,.webp,.txt"><span class="hint">Upload images, documents, presentations and videos directly. Choose a file from your computer. Large videos may take longer to upload.</span></label>
+<div class="wide"><button type="button" id="uploadButton" class="secondary">Upload file now</button> <span id="uploadStatus" role="status"></span><div id="uploadProgress" class="progress" hidden><span></span></div></div>
 <label class="wide">Description<textarea id="description" maxlength="2000" rows="3"></textarea></label>
 <label>Status<select id="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
 </div>
@@ -132,7 +132,7 @@ function words(value){return String(value||'').trim()?String(value).trim().split
 async function performSave(buttonId,statusId,work,successText){
  const button=$(buttonId),status=$(statusId);button.disabled=true;status.classList.remove('error');status.textContent='Saving…';
  try{const result=await work();status.textContent=successText;message(successText);return result}
- catch(err){status.classList.add('error');status.textContent=err.message||'Save failed';message(err.message||'Save failed');throw err}
+ catch(err){status.classList.add('error');status.textContent=err.message||'Save failed';message(err.message||'Save failed');return null}
  finally{button.disabled=false}
 }
 function renderPartnerTags(){const host=$('partnerTagChips');host.replaceChildren();partnerTags.forEach((tag,i)=>{const chip=document.createElement('span');chip.className='tag-chip';chip.append(document.createTextNode(tag));const b=document.createElement('button');b.type='button';b.textContent='×';b.onclick=()=>{partnerTags.splice(i,1);renderPartnerTags()};chip.append(b);host.append(chip)})}
@@ -155,8 +155,13 @@ function openPartner(p){
  const existingVideo=p?.video_url||'',external=existingVideo&&!isManagedAsset(existingVideo)?existingVideo:'';
  $('partnerVideoAsset').value=isManagedAsset(existingVideo)?existingVideo:'';$('partnerVideoExternal').value=external;$('partnerAbout').value=p?.about_text||'';$('partnerBullets').value=(p?.capability_bullets||[]).join('\n');$('partnerWebsite').value=p?.website_url||'';partnerGalleryUrls=[...(p?.gallery_urls||[])];renderPartnerGalleryAssets();$('partnerStatus').value=p?.status||'draft';$('partnerOrder').value=p?.sort_order||0;partnerTags=[...(p?.tags||[])];renderPartnerTags();$('partnerWordCount').textContent=words($('partnerAbout').value)+' / 500 words';const b=$('partnerBannerPreview');if(p?.banner_url){b.src=p.banner_url;b.hidden=false}else b.hidden=true;$('partnerBannerStatus').textContent=p?.banner_url?'Banner uploaded':'';$('partnerVideoStatus').textContent=existingVideo?'Video ready':'';$('partnerForm').scrollIntoView({behavior:'smooth'});
 }
-$('partnerIntroForm').onsubmit=async e=>{e.preventDefault();await performSave('partnerIntroSave','partnerIntroSaveStatus',async()=>{const locale=$('partnerLocale').value;const result=await request('/api/room-management/config?room='+encodeURIComponent($('room').value)+'&locale='+locale+'&section=partner',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:$('partnerIntroTitle').value,intro:$('partnerIntroText').value})});if(!result.item)throw Error('Save could not be verified');$('partnerIntroTitle').value=result.item.title||'';$('partnerIntroText').value=result.item.intro||'';return result},'Partner Ecosystem introduction saved')};
-$('partnerForm').onsubmit=async e=>{e.preventDefault();if(words($('partnerAbout').value)>500){$('partnerSaveStatus').classList.add('error');$('partnerSaveStatus').textContent='Partner About text must be 500 words or fewer.';return}await performSave('partnerSave','partnerSaveStatus',async()=>{const locale=$('partnerLocale').value,banner=$('partnerBanner').value.trim();if(!banner)throw Error('Upload a banner image before saving the partner.');const rawExternal=$('partnerVideoExternal').value.trim(),external=externalVideoUrl(rawExternal);if(rawExternal&&!external)throw Error('Video link must be a valid YouTube or Vimeo HTTPS link.');const video=external||$('partnerVideoAsset').value.trim();const body={room_id:$('room').value,locale,title:$('partnerTitle').value.trim(),slug:$('partnerSlug').value.trim(),short_description:$('partnerShort').value,banner_url:banner,video_url:video,about_text:$('partnerAbout').value,capability_bullets:parseLines($('partnerBullets').value),website_url:$('partnerWebsite').value.trim(),tags:partnerTags,gallery_urls:partnerGalleryUrls,status:$('partnerStatus').value,sort_order:Number($('partnerOrder').value)||0};if(editingPartner)body.id=editingPartner;const result=await request('/api/room-management/partners?room='+encodeURIComponent($('room').value)+'&locale='+locale,{method:editingPartner?'PATCH':'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});if(!result.item)throw Error('Save could not be verified');await loadPartnerPanel();editingPartner=result.item.id||editingPartner;return result},'Partner saved')};
+$('partnerIntroForm').onsubmit=async e=>{e.preventDefault();await performSave('partnerIntroSave','partnerIntroSaveStatus',async()=>{const locale=$('partnerLocale').value;const result=await request('/api/room-management/config?room='+encodeURIComponent($('room').value)+'&locale='+locale+'&section=partner',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:$('partnerIntroTitle').value,intro:$('partnerIntroText').value})});if(!result.item)throw Error('We could not confirm the save. Please try again.');$('partnerIntroTitle').value=result.item.title||'';$('partnerIntroText').value=result.item.intro||'';return result},'Partner Ecosystem introduction saved')};
+$('partnerForm').onsubmit=async e=>{e.preventDefault();if(words($('partnerAbout').value)>500){$('partnerSaveStatus').classList.add('error');$('partnerSaveStatus').textContent='Partner About text must be 500 words or fewer.';return}await performSave('partnerSave','partnerSaveStatus',async()=>{const locale=$('partnerLocale').value;
+ const bannerFile=$('partnerBannerFile').files?.[0];if(bannerFile){$('partnerBannerStatus').textContent='Uploading banner…';const d=await uploadSmallFile(bannerFile,'gallery');$('partnerBanner').value=d.asset_url;$('partnerBannerPreview').src=d.asset_url;$('partnerBannerPreview').hidden=false;$('partnerBannerStatus').textContent='Banner ready.'}
+ const videoFile=$('partnerVideoFile').files?.[0];if(videoFile){$('partnerVideoStatus').textContent='Uploading video…';const d=await uploadVideoMultipart(videoFile,$('partnerVideoStatus'),$('partnerVideoProgress'));$('partnerVideoAsset').value=d.asset_url;$('partnerVideoExternal').value='';$('partnerVideoStatus').textContent='Video ready.'}
+ const galleryFile=$('partnerGalleryFile').files?.[0];if(galleryFile){$('partnerGalleryStatus').textContent='Uploading image…';const d=await uploadSmallFile(galleryFile,'gallery');if(!partnerGalleryUrls.includes(d.asset_url))partnerGalleryUrls.push(d.asset_url);renderPartnerGalleryAssets();$('partnerGalleryStatus').textContent='Image ready.'}
+ const banner=$('partnerBanner').value.trim();if(!banner)throw Error('Choose a banner image before saving the partner.');
+ const rawExternal=$('partnerVideoExternal').value.trim(),external=externalVideoUrl(rawExternal);if(rawExternal&&!external)throw Error('Video link must be a valid YouTube or Vimeo HTTPS link.');const video=external||$('partnerVideoAsset').value.trim();const body={room_id:$('room').value,locale,title:$('partnerTitle').value.trim(),slug:$('partnerSlug').value.trim(),short_description:$('partnerShort').value,banner_url:banner,video_url:video,about_text:$('partnerAbout').value,capability_bullets:parseLines($('partnerBullets').value),website_url:$('partnerWebsite').value.trim(),tags:partnerTags,gallery_urls:partnerGalleryUrls,status:$('partnerStatus').value,sort_order:Number($('partnerOrder').value)||0};if(editingPartner)body.id=editingPartner;const result=await request('/api/room-management/partners?room='+encodeURIComponent($('room').value)+'&locale='+locale,{method:editingPartner?'PATCH':'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});if(!result.item)throw Error('Save could not be verified');await loadPartnerPanel();editingPartner=result.item.id||editingPartner;return result},'Partner saved')};
 async function removePartner(p){if(!confirm('Remove '+p.title+'?'))return;try{await request('/api/room-management/partners?room='+encodeURIComponent($('room').value)+'&locale='+$('partnerLocale').value+'&id='+encodeURIComponent(p.id),{method:'DELETE'});await loadPartnerPanel();message('Partner removed')}catch(err){message(err.message)}}
 $('partnerBannerUpload').onclick=async()=>{try{$('partnerBannerStatus').textContent='Uploading…';const d=await uploadSmallFile($('partnerBannerFile').files?.[0],'gallery');$('partnerBanner').value=d.asset_url;$('partnerBannerPreview').src=d.asset_url;$('partnerBannerPreview').hidden=false;$('partnerBannerStatus').textContent='Uploaded';message('Banner uploaded')}catch(e){$('partnerBannerStatus').textContent=e.message;message(e.message)}};
 $('partnerGalleryUpload').onclick=async()=>{try{$('partnerGalleryStatus').textContent='Uploading…';const d=await uploadSmallFile($('partnerGalleryFile').files?.[0],'gallery');partnerGalleryUrls.push(d.asset_url);renderPartnerGalleryAssets();$('partnerGalleryFile').value='';$('partnerGalleryStatus').textContent='Image added';message('Gallery image added')}catch(e){$('partnerGalleryStatus').textContent=e.message;message(e.message)}};
@@ -186,7 +191,35 @@ async function selectManagerTab(name){
  window.scrollTo({top:0,behavior:'smooth'});
 }
 function message(s){$('message').textContent=s||''}
-async function request(url,options={}){const r=await fetch(url,{credentials:'same-origin',...options});const raw=await r.text();let j;try{j=raw?JSON.parse(raw):{}}catch{throw Error('Server error '+r.status+(raw?' — '+raw.slice(0,160):''))}if(!r.ok)throw Error(j.detail||j.error||('Request failed ('+r.status+')'));return j}
+function adminErrorMessage(code,status){
+ const messages={
+  forbidden:"You do not have permission to make this change.",
+  unauthorized:"Please sign in again.",
+  invalid_content:"Please check the content details and try again.",
+  invalid_group:"Please check the category details and try again.",
+  invalid_partner:"Please check the partner details and try again.",
+  invalid_config:"Please check the information and try again.",
+  invalid_type:"This file type is not supported.",
+  invalid_size:"This file is too large.",
+  upload_failed:"The file could not be uploaded. Please try again.",
+  storage_not_configured:"File uploads are temporarily unavailable. Please try again later.",
+  room_database_not_configured:"Room Manager is temporarily unavailable. Please try again later.",
+  database_unavailable:"Room Manager is temporarily unavailable. Please try again later.",
+  operation_failed:"We could not save your changes. Please try again.",
+  not_found:"This item could not be found. Refresh the page and try again.",
+  translation_locale_exists:"This language version already exists.",
+  locale_mismatch:"Please refresh the page and try again.",
+  invalid_video_group:"Please choose a valid video category.",
+  invalid_origin:"Please refresh the page and try again."
+ };
+ return messages[code]||(status>=500?"Something went wrong. Please try again.":"Please check the information and try again.");
+}
+async function request(url,options={}){
+ const r=await fetch(url,{credentials:'same-origin',...options}),raw=await r.text();let j={};
+ try{j=raw?JSON.parse(raw):{}}catch{throw Error("Something went wrong. Please try again.")}
+ if(!r.ok)throw Error(adminErrorMessage(j.error,r.status));
+ return j;
+}
 async function load(){
  try{
   const session=await request('/api/room-management/session');$('initializing').hidden=true;$('setup').hidden=true;permitted=session.rooms.map(x=>x.room_id);
@@ -262,7 +295,7 @@ async function loadEditorLocale(locale){
  editorLocale=locale;$('locale').value=locale;const d=editorDrafts[locale]||{id:null,title:'',description:'',video_group_id:''};
  $('title').value=d.title||'';$('description').value=d.description||'';await loadVideoGroups(locale);fillVideoGroupSelect(d.video_group_id||'');
  const other=locale==='en'?'vi':'en',hasOther=!!(editorDrafts[other]?.title||editorDrafts[other]?.id);
- $('translationStatus').textContent=(locale==='en'?'English':'Vietnamese')+' text'+(d.id?' is linked to this asset.':' has not been saved yet.')+(hasOther?' The '+(other==='en'?'English':'Vietnamese')+' version is also linked.':'');
+ $('translationStatus').textContent=(locale==='en'?'English':'Vietnamese')+' text'+(d.id?' is saved for this file.':' has not been saved yet.')+(hasOther?' The '+(other==='en'?'English':'Vietnamese')+' version is also linked.':'');
 }
 async function openEditor(item){
  editing=item?.id||null;editingTranslationGroup=item?.translation_group_id||null;editorDrafts={en:null,vi:null};
@@ -285,7 +318,12 @@ $('category').onchange=()=>{updateVideoFields();if($('category').value!=='video'
 $('editor').onsubmit=async e=>{
  e.preventDefault();stashEditorDraft();
  await performSave('contentSave','contentSaveStatus',async()=>{
-  const rawExternal=$('category').value==='video'?$('externalVideo').value.trim():'',external=externalVideoUrl(rawExternal);if(rawExternal&&!external)throw Error('Video link must be a valid YouTube or Vimeo HTTPS link.');const asset=external||$('asset').value.trim();if(!asset)throw Error($('category').value==='video'?'Upload a video or enter a YouTube/Vimeo link before saving.':'Upload a file before saving.');
+  const category=$('category').value,selectedFile=$('upload').files?.[0];
+  if(selectedFile)await uploadContentFile(selectedFile,category);
+  const rawExternal=category==='video'?$('externalVideo').value.trim():'',external=externalVideoUrl(rawExternal);
+  if(rawExternal&&!external)throw Error('Use a valid YouTube or Vimeo link.');
+  const asset=external||$('asset').value.trim();
+  if($('status').value==='published'&&!asset)throw Error(category==='video'?'Add a video file or YouTube/Vimeo link before publishing.':'Add a file before publishing.');
   const drafts=['en','vi'].filter(locale=>String(editorDrafts[locale]?.title||'').trim());
   if(!drafts.length)throw Error('Add a title in English or Vietnamese before saving.');
   let group=editingTranslationGroup;
@@ -299,7 +337,7 @@ $('editor').onsubmit=async e=>{
    group=result.translation_group_id||result.item.translation_group_id||group;editorDrafts[locale]={...d,id:result.item.id,title:result.item.title,description:result.item.description,video_group_id:result.item.video_group_id||''};
   }
   editingTranslationGroup=group;await reloadContent();$('editor').hidden=true;return {group};
- },'Saved. English and Vietnamese text are linked to the shared asset.');
+ },'Saved. English and Vietnamese text use the same file.');
 };
 $('tabContent').onclick=()=>selectManagerTab('content');$('tabVideoGroups').onclick=()=>selectManagerTab('video');$('tabPartners').onclick=()=>selectManagerTab('partners');$('tabContact').onclick=()=>selectManagerTab('contact');$('groupLocale').onchange=()=>loadVideoGroups($('groupLocale').value);
 $('newGroup').onclick=()=>openGroup(null);$('cancelGroup').onclick=()=>{$('groupForm').hidden=true;editingGroup=null};
@@ -316,15 +354,32 @@ async function uploadVideoMultipart(file,statusEl=$('uploadStatus'),progressEl=$
  try{
   for(let i=0;i<totalParts;i++){const start=i*partSize,end=Math.min(file.size,start+partSize),chunk=file.slice(start,end);let part=null,lastErr;
    for(let attempt=0;attempt<3&&!part;attempt++){try{part=await request('/api/room-management/media-multipart?room='+encodeURIComponent(room)+'&action=part&key='+encodeURIComponent(init.key)+'&upload_id='+encodeURIComponent(init.upload_id)+'&part_number='+(i+1),{method:'POST',headers:{'content-type':'application/octet-stream'},body:chunk})}catch(e){lastErr=e;if(attempt<2)await new Promise(r=>setTimeout(r,1000*(attempt+1)))}}
-   if(!part)throw lastErr;parts.push({partNumber:part.partNumber,etag:part.etag});uploaded=end;const pct=Math.round(uploaded/file.size*100);statusEl.textContent='Uploading video… '+pct+'% ('+(i+1)+'/'+totalParts+' parts)';progressEl.hidden=false;progressEl.firstElementChild.style.width=pct+'%';
+   if(!part)throw lastErr;parts.push({partNumber:part.partNumber,etag:part.etag});uploaded=end;const pct=Math.round(uploaded/file.size*100);statusEl.textContent='Uploading video… '+pct+'%';progressEl.hidden=false;progressEl.firstElementChild.style.width=pct+'%';
   }
   return await request('/api/room-management/media-multipart?room='+encodeURIComponent(room)+'&action=complete',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({key:init.key,upload_id:init.upload_id,parts})});
  }catch(e){await request('/api/room-management/media-multipart?room='+encodeURIComponent(room)+'&action=abort',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({key:init.key,upload_id:init.upload_id})}).catch(()=>{});throw e}
 }
+async function uploadContentFile(file,category){
+ if(!file)throw Error('Choose a file first.');
+ const limits={presentation:30e6,video:500e9,gallery:12e6,document:30e6};
+ if(file.size>limits[category])throw Error('This file is too large.');
+ $('uploadStatus').textContent='Uploading…';$('uploadProgress').hidden=true;
+ let data;
+ if(category==='video')data=await uploadVideoMultipart(file);
+ else{
+  const url='/api/room-management/media?room='+encodeURIComponent($('room').value)+'&category='+encodeURIComponent(category);
+  data=await request(url,{method:'POST',headers:{'content-type':file.type||'application/octet-stream'},body:file});
+ }
+ $('asset').value=data.asset_url;if(category==='video')$('externalVideo').value='';
+ $('uploadStatus').textContent='File ready.';
+ $('uploadProgress').firstElementChild.style.width='100%';
+ return data;
+}
 $('uploadButton').onclick=async()=>{
- const file=$('upload').files?.[0];if(!file)return message('Choose a file first');const category=$('category').value;const limits={presentation:30e6,video:500e9,gallery:12e6,document:30e6};if(file.size>limits[category])return message('File exceeds the '+(category==='video'?'500 GB':'category')+' size limit');
- const button=$('uploadButton');button.disabled=true;$('uploadStatus').textContent='Uploading…';$('uploadProgress').hidden=true;
- try{let data;if(category==='video'){data=await uploadVideoMultipart(file)}else{const url='/api/room-management/media?room='+encodeURIComponent($('room').value)+'&category='+encodeURIComponent(category);data=await request(url,{method:'POST',headers:{'content-type':file.type||'application/octet-stream'},body:file})}$('asset').value=data.asset_url;if(category==='video')$('externalVideo').value='';$('uploadStatus').textContent='Uploaded. Save the content record next.';$('uploadProgress').firstElementChild.style.width='100%'}catch(err){$('uploadStatus').textContent=err.message}finally{button.disabled=false}
+ const button=$('uploadButton');button.disabled=true;
+ try{await uploadContentFile($('upload').files?.[0],$('category').value)}
+ catch(err){$('uploadStatus').textContent=err.message;message(err.message)}
+ finally{button.disabled=false}
 };
 initialise();
 </script>
