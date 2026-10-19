@@ -40,7 +40,9 @@ export async function onRequest({request,env}){
    }
   }
   const object=await env.ROOM_MEDIA.get(key);if(!object)return json({error:'not_found'},404);
-  return new Response(object.body,{headers:{'content-type':object.httpMetadata?.contentType||'application/octet-stream','cache-control':'private,no-store','x-content-type-options':'nosniff','content-security-policy':"default-src 'none'; sandbox"}});
+  const responseHeaders={'content-type':object.httpMetadata?.contentType||'application/octet-stream','cache-control':authorized?'private,no-store':'public,max-age=3600,immutable','x-content-type-options':'nosniff','content-security-policy':"default-src 'none'; sandbox"};
+  if(object.httpEtag)responseHeaders.etag=object.httpEtag;
+  return new Response(object.body,{headers:responseHeaders});
  }
  return json({error:'method_not_allowed'},405);
 }
