@@ -1,5 +1,6 @@
+let ecosystemSchemaReady=false;
 export async function ensureEcosystemSchema(env){
- const db=env.ROOM_DB;if(!db)return;
+ const db=env.ROOM_DB;if(!db||ecosystemSchemaReady)return;
  await db.batch([
   db.prepare(`CREATE TABLE IF NOT EXISTS room_partners (
    id TEXT PRIMARY KEY,
@@ -47,9 +48,12 @@ export async function ensureEcosystemSchema(env){
   )`),
   db.prepare('CREATE INDEX IF NOT EXISTS room_partners_listing ON room_partners(room_id,locale,status,sort_order)')
  ]);
+ ecosystemSchemaReady=true;
 }
 export async function ensureClientEcosystemDefaults(env){
  await ensureEcosystemSchema(env);const db=env.ROOM_DB;if(!db)return;
+ const marker=await db.prepare("SELECT id FROM room_management_audit WHERE id='client-ecosystem-defaults-v1' LIMIT 1").first();
+ if(marker)return;
  const enIntro='Wistudi works with specialist technology and education partners to extend the capabilities of the Wistudi platform. These partnerships build on Wistudi Core to support more engaging, specialised and connected learning experiences, while keeping creation, delivery and publishing in one coherent environment.';
  const viIntro='Wistudi hợp tác với các đối tác công nghệ và giáo dục chuyên biệt để mở rộng khả năng của nền tảng Wistudi. Các quan hệ hợp tác này phát triển trên nền Wistudi Core nhằm hỗ trợ những trải nghiệm học tập hấp dẫn, chuyên sâu và kết nối hơn, đồng thời vẫn giữ việc tạo nội dung, phân phối và xuất bản trong một môi trường thống nhất.';
  const extraEn=JSON.stringify([{name:'Wistudi Partnerships',role:'Partnerships',region:'Global',email:'partnerships@wistudi.com',phone:'',link:''},{name:'Wistudi Support',role:'Platform support',region:'Global',email:'support@wistudi.com',phone:'',link:''}]);
@@ -58,7 +62,8 @@ export async function ensureClientEcosystemDefaults(env){
   db.prepare('INSERT OR IGNORE INTO room_partner_settings(room_id,locale,title,intro) VALUES(?,?,?,?)').bind('client','en','Partner Ecosystem',enIntro),
   db.prepare('INSERT OR IGNORE INTO room_partner_settings(room_id,locale,title,intro) VALUES(?,?,?,?)').bind('client','vi','Hệ sinh thái Đối tác',viIntro),
   db.prepare('INSERT OR IGNORE INTO room_contact_settings(room_id,locale,title,intro,business_address,primary_email,secondary_email,primary_phone,facebook_url,linkedin_url,website_url,extra_contacts) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)').bind('client','en','Contact Wistudi','Talk to Wistudi about the platform, partnerships, publishing, integrations or general enquiries.','128 City Road, London, United Kingdom, EC1V 2NX','support@wistudi.com','partnerships@wistudi.com','+84 879 876 624','https://www.facebook.com/profile.php?id=61590336100890','','https://global.wistudi.com',extraEn),
-  db.prepare('INSERT OR IGNORE INTO room_contact_settings(room_id,locale,title,intro,business_address,primary_email,secondary_email,primary_phone,facebook_url,linkedin_url,website_url,extra_contacts) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)').bind('client','vi','Liên hệ Wistudi','Liên hệ Wistudi về nền tảng, quan hệ đối tác, xuất bản, tích hợp hoặc các câu hỏi chung.','128 City Road, London, United Kingdom, EC1V 2NX','support@wistudi.com','partnerships@wistudi.com','+84 879 876 624','https://www.facebook.com/profile.php?id=61590336100890','','https://global.wistudi.com',extraVi)
+  db.prepare('INSERT OR IGNORE INTO room_contact_settings(room_id,locale,title,intro,business_address,primary_email,secondary_email,primary_phone,facebook_url,linkedin_url,website_url,extra_contacts) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)').bind('client','vi','Liên hệ Wistudi','Liên hệ Wistudi về nền tảng, quan hệ đối tác, xuất bản, tích hợp hoặc các câu hỏi chung.','128 City Road, London, United Kingdom, EC1V 2NX','support@wistudi.com','partnerships@wistudi.com','+84 879 876 624','https://www.facebook.com/profile.php?id=61590336100890','','https://global.wistudi.com',extraVi),
+  db.prepare("INSERT OR IGNORE INTO room_management_audit(id,actor_manager_id,action,room_id,target_id) VALUES('client-ecosystem-defaults-v1',NULL,'ecosystem_defaults_seeded','client',NULL)")
  ]);
 }
 export function parseList(text){try{const v=JSON.parse(text||'[]');return Array.isArray(v)?v:[]}catch{return[]}}

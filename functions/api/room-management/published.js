@@ -2,7 +2,7 @@ import { ensureClientStarter } from './starter-content.js';
 import { ensureVideoSchema,ensureClientVideoGroups } from './_video-groups.js';
 export async function onRequestGet({request,env}){
  const url=new URL(request.url),room=url.searchParams.get('room')||'client',locale=url.searchParams.get('locale')||'en';
- const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json','cache-control':'public,max-age=30'}});
+ const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json','cache-control':'no-store'}});
  if(!['client','distributor','investor'].includes(room)||!['en','vi'].includes(locale))return json({error:'invalid_parameters'},400);
  if(!env.ROOM_DB)return json({error:'not_configured'},503);
  if(room==='client')await ensureClientStarter(env);

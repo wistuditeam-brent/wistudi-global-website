@@ -1,5 +1,6 @@
+let videoSchemaReady=false;
 export async function ensureVideoSchema(env){
- const db=env.ROOM_DB;if(!db)return;
+ const db=env.ROOM_DB;if(!db||videoSchemaReady)return;
  await db.batch([
   db.prepare(`CREATE TABLE IF NOT EXISTS room_video_groups (
    id TEXT PRIMARY KEY,
@@ -19,6 +20,7 @@ export async function ensureVideoSchema(env){
   db.prepare('CREATE INDEX IF NOT EXISTS room_video_groups_listing ON room_video_groups(room_id,locale,sort_order)'),
   db.prepare('CREATE INDEX IF NOT EXISTS room_video_membership_group ON room_video_group_membership(group_id)')
  ]);
+ videoSchemaReady=true;
 }
 export async function ensureClientVideoGroups(env){
  await ensureVideoSchema(env);

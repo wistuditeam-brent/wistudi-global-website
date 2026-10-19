@@ -21,7 +21,7 @@ const W=vi?{
 };
 const $=id=>document.getElementById(id);
 const categories=[['presentation',W.presentations],['video',W.videos],['gallery',W.gallery],['document',W.documents],['partner',W.partners]];
-let items=[],videoGroups=[],partners=[],partnerSettings=null,active='presentation',failed=false,currentDeck=null,currentSlide=1,totalSlides=1,pdfDoc=null,rendering=false,queued=null,galleryCategory=null,videoCategory=null;
+let items=[],videoGroups=[],partners=[],partnerSettings=null,partnersLoaded=false,active='presentation',failed=false,currentDeck=null,currentSlide=1,totalSlides=1,pdfDoc=null,rendering=false,queued=null,galleryCategory=null,videoCategory=null;
 const canvas=$('slideCanvas'),ctx=canvas.getContext('2d');
 
 const OVERVIEW_EN=[
@@ -70,7 +70,7 @@ function text(tag,value,cls){const e=document.createElement(tag);e.textContent=v
 function safeUrl(value){try{const u=new URL(value,location.origin);return u.origin===location.origin?u.href:null}catch{return null}}
 function renderTabs(){
  $('tabs').replaceChildren();
- for(const [key,label] of categories){const b=text('button',label,'tab'+(key===active?' selected':''));b.type='button';b.setAttribute('aria-pressed',String(key===active));b.onclick=()=>{active=key;currentDeck=null;galleryCategory=null;videoCategory=null;render()};$('tabs').append(b)}
+ for(const [key,label] of categories){const b=text('button',label,'tab'+(key===active?' selected':''));b.type='button';b.setAttribute('aria-pressed',String(key===active));b.onclick=async()=>{active=key;currentDeck=null;galleryCategory=null;videoCategory=null;if(key==='partner'&&!partnersLoaded)await loadPartners();render()};$('tabs').append(b)}
 }
 function render(){
  renderTabs();$('content').replaceChildren();$('status').textContent='';$('heading').textContent='';
@@ -203,9 +203,25 @@ function renderDownloads(list){
  for(const item of list){const url=safeUrl(item.asset_url);if(!url)continue;const card=document.createElement('article');card.className='media-card download-card';card.append(text('h3',item.title));if(item.description)card.append(text('p',item.description));const a=text('a',W.download,'action');a.href=url;a.download='';a.target='_blank';a.rel='noopener noreferrer';card.append(a);grid.append(card)}
  $('content').append(grid);
 }
+async function loadPartners(){
+ if(partnersLoaded)return;
+ try{
+  const response=await fetch('/api/room-management/ecosystem?room=client&locale='+locale+'&kind=partners',{cache:'no-store'});
+  const data=await response.json();
+  partners=Array.isArray(data.items)?data.items:[];partnerSettings=data.settings||null;
+ }catch{partners=[];partnerSettings=null}
+ partnersLoaded=true;
+}
 async function load(){
  failed=false;$('status').textContent='';
- try{const [response,partnerResponse]=await Promise.all([fetch('/api/room-management/published?room=client&locale='+locale,{cache:'no-store'}),fetch('/api/room-management/ecosystem?room=client&locale='+locale+'&kind=partners',{cache:'no-store'})]);const raw=await response.text();let data;try{data=JSON.parse(raw)}catch{throw Error(raw||'invalid_response')}if(!response.ok||!data.ok||!Array.isArray(data.items))throw Error(data.detail||data.error||'request_failed');items=data.items;videoGroups=Array.isArray(data.video_groups)?data.video_groups:[];try{const pd=await partnerResponse.json();partners=Array.isArray(pd.items)?pd.items:[];partnerSettings=pd.settings||null}catch{partners=[];partnerSettings=null}render();const requested=new URLSearchParams(location.search).get('presentation');if(requested&&active==='presentation'){const item=items.find(x=>x.id===requested);if(item)showContents(deckMeta(item))}}
- catch(e){console.error(e);items=[];failed=true;render()}
+ try{
+  const response=await fetch('/api/room-management/published?room=client&locale='+locale,{cache:'no-store'});
+  const raw=await response.text();let data;try{data=JSON.parse(raw)}catch{throw Error(raw||'invalid_response')}
+  if(!response.ok||!data.ok||!Array.isArray(data.items))throw Error(data.detail||data.error||'request_failed');
+  items=data.items;videoGroups=Array.isArray(data.video_groups)?data.video_groups:[];
+  render();
+  const requested=new URLSearchParams(location.search).get('presentation');
+  if(requested&&active==='presentation'){const item=items.find(x=>x.id===requested);if(item)showContents(deckMeta(item))}
+ }catch(e){console.error(e);items=[];failed=true;render()}
 }
 $('intro').textContent=W.intro;load();

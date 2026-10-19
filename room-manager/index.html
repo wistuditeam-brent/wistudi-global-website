@@ -232,7 +232,7 @@ async function load(){
 }
 async function reloadContent(){
  const data=await request('/api/room-management/content?room='+encodeURIComponent($('room').value));records=data.items||[];
- await loadVideoGroups($('locale')?.value||'en');render();
+ if($('filter').value==='video')await loadVideoGroups($('locale')?.value||'en');render();
 }
 async function loadVideoGroups(locale){
  try{const data=await request('/api/room-management/video-groups?room='+encodeURIComponent($('room').value)+'&locale='+encodeURIComponent(locale));videoGroups=data.items||[]}catch{videoGroups=[]}
@@ -327,7 +327,7 @@ $('setupForm').onsubmit=async e=>{e.preventDefault();const email=$('setupEmail')
 $('loginForm').onsubmit=async e=>{e.preventDefault();try{await request('/api/room-management/session',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:$('email').value,password:$('password').value})});$('password').value='';await load()}catch(err){message(err.message)}};
 $('logout').onclick=async()=>{await request('/api/room-management/session',{method:'DELETE'}).catch(()=>{});location.reload()};
 $('room').onchange=async()=>{$('editor').hidden=true;await reloadContent();await selectManagerTab(activeManagerTab)};
-$('filter').onchange=render;$('new').onclick=async()=>{await selectManagerTab('content');openEditor(null)};$('cancel').onclick=()=>{$('editor').hidden=true;editing=null;editingTranslationGroup=null;editorDrafts={en:null,vi:null}};
+$('filter').onchange=async()=>{if($('filter').value==='video')await loadVideoGroups($('locale')?.value||'en');render()};$('new').onclick=async()=>{await selectManagerTab('content');openEditor(null)};$('cancel').onclick=()=>{$('editor').hidden=true;editing=null;editingTranslationGroup=null;editorDrafts={en:null,vi:null}};
 $('category').onchange=()=>{updateVideoFields();if($('category').value!=='video')$('externalVideo').value=''};$('locale').onchange=async()=>{const next=$('locale').value;stashEditorDraft();await loadEditorLocale(next)};
 $('editor').onsubmit=async e=>{
  e.preventDefault();stashEditorDraft();

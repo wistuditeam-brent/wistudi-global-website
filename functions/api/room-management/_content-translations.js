@@ -1,5 +1,6 @@
+let translationSchemaReady=false;
 export async function ensureContentTranslationSchema(env){
- const db=env.ROOM_DB;if(!db)return;
+ const db=env.ROOM_DB;if(!db||translationSchemaReady)return;
  await db.batch([
   db.prepare(`CREATE TABLE IF NOT EXISTS room_content_translation_links (
    group_id TEXT NOT NULL,
@@ -10,6 +11,7 @@ export async function ensureContentTranslationSchema(env){
   )`),
   db.prepare('CREATE INDEX IF NOT EXISTS room_content_translation_group ON room_content_translation_links(group_id)')
  ]);
+ translationSchemaReady=true;
 }
 export async function ensureClientContentTranslationLinks(env){
  await ensureContentTranslationSchema(env);
