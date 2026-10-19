@@ -163,7 +163,7 @@ function makeVideoCard(item){
  const source=videoSource(item.asset_url);if(!source)return null;
  const card=document.createElement('article');card.className='media-card';
  if(source.kind==='iframe'||source.kind==='video'){
-  const launch=document.createElement('button');launch.type='button';launch.className='video-launch';launch.setAttribute('aria-label',(vi?'Phát video: ':'Play video: ')+item.title);
+  const launch=document.createElement('button');launch.type='button';launch.className='video-launch';launch.setAttribute('aria-label',(vi?'Phát video: ':'Play video: ')+item.title);if(item.thumbnail_url){const thumb=document.createElement('img');thumb.src=item.thumbnail_url;thumb.alt='';thumb.loading='lazy';launch.append(thumb)}
   launch.onclick=()=>{
    let player;
    if(source.kind==='iframe'){
