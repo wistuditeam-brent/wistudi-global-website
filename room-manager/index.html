@@ -215,7 +215,10 @@ function adminErrorMessage(code,status){
  return messages[code]||(status>=500?"Something went wrong. Please try again.":"Please check the information and try again.");
 }
 async function request(url,options={}){
- const r=await fetch(url,{credentials:'same-origin',...options}),raw=await r.text();let j={};
+ let r;
+ try{r=await fetch(url,{credentials:'same-origin',...options})}
+ catch{throw Error("The connection was interrupted. Please try again.")}
+ const raw=await r.text();let j={};
  try{j=raw?JSON.parse(raw):{}}catch{throw Error("Something went wrong. Please try again.")}
  if(!r.ok)throw Error(adminErrorMessage(j.error,r.status));
  return j;
@@ -353,7 +356,7 @@ async function uploadVideoMultipart(file,statusEl=$('uploadStatus'),progressEl=$
  const partSize=init.part_size,parts=[];let uploaded=0;const totalParts=Math.ceil(file.size/partSize);
  try{
   for(let i=0;i<totalParts;i++){const start=i*partSize,end=Math.min(file.size,start+partSize),chunk=file.slice(start,end);let part=null,lastErr;
-   for(let attempt=0;attempt<3&&!part;attempt++){try{part=await request('/api/room-management/media-multipart?room='+encodeURIComponent(room)+'&action=part&key='+encodeURIComponent(init.key)+'&upload_id='+encodeURIComponent(init.upload_id)+'&part_number='+(i+1),{method:'POST',headers:{'content-type':'application/octet-stream'},body:chunk})}catch(e){lastErr=e;if(attempt<2)await new Promise(r=>setTimeout(r,1000*(attempt+1)))}}
+   for(let attempt=0;attempt<4&&!part;attempt++){try{part=await request('/api/room-management/media-multipart?room='+encodeURIComponent(room)+'&action=part&key='+encodeURIComponent(init.key)+'&upload_id='+encodeURIComponent(init.upload_id)+'&part_number='+(i+1),{method:'POST',headers:{'content-type':'application/octet-stream'},body:chunk})}catch(e){lastErr=e;if(attempt<3)await new Promise(r=>setTimeout(r,1200*(attempt+1)))}}
    if(!part)throw lastErr;parts.push({partNumber:part.partNumber,etag:part.etag});uploaded=end;const pct=Math.round(uploaded/file.size*100);statusEl.textContent='Uploading video… '+pct+'%';progressEl.hidden=false;progressEl.firstElementChild.style.width=pct+'%';
   }
   return await request('/api/room-management/media-multipart?room='+encodeURIComponent(room)+'&action=complete',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({key:init.key,upload_id:init.upload_id,parts})});
@@ -365,7 +368,7 @@ async function uploadContentFile(file,category){
  if(file.size>limits[category])throw Error('This file is too large.');
  $('uploadStatus').textContent='Uploading…';$('uploadProgress').hidden=true;
  let data;
- if(category==='video')data=await uploadVideoMultipart(file);
+ if(category==='video'&&file.size>90e6)data=await uploadVideoMultipart(file);
  else{
   const url='/api/room-management/media?room='+encodeURIComponent($('room').value)+'&category='+encodeURIComponent(category);
   data=await request(url,{method:'POST',headers:{'content-type':file.type||'application/octet-stream'},body:file});
