@@ -2,6 +2,7 @@ import { canManage } from './session.js';
 import { ensureClientStarter } from './starter-content.js';
 import { ensureVideoSchema,ensureClientVideoGroups,validVideoGroup } from './_video-groups.js';
 import { ensureContentTranslationSchema,ensureClientContentTranslationLinks,translationForContent,ensureTranslationLink } from './_content-translations.js';
+import { ensureVideoThumbnailSchema,setVideoThumbnail } from './_video-thumbnails.js';
 // Stage 3: fail-closed metadata API. No upload or public mutation access.
 // Configure ROOM_DB (D1) and ROOM_MANAGER_TOKEN (secret) before deployment.
 const ROOMS=new Set(['client','distributor','investor']);
@@ -27,6 +28,8 @@ function validate(body){
  if(asset.length>2048)return false;
  if(asset&&!(asset.startsWith('/')&&!asset.startsWith('//'))&&!/^https:\/\/[^\s]+$/i.test(asset))return false;
  if((body.status||'draft')==='published'&&!asset)return false;
+ const thumb=typeof body.thumbnail_url==='string'?body.thumbnail_url.trim():'';
+ if(thumb.length>2048)return false;if(thumb&&!(thumb.startsWith('/')&&!thumb.startsWith('//'))&&!/^https:\/\/[^\s]+$/i.test(thumb))return false;
  return !body.description||typeof body.description==='string'&&body.description.length<=2000;
 }
 export async function onRequest({request,env}){
@@ -37,13 +40,14 @@ export async function onRequest({request,env}){
  if(requestedRoom==='client')await ensureClientStarter(env);
  await ensureVideoSchema(env);if(requestedRoom==='client')await ensureClientVideoGroups(env);
  await ensureContentTranslationSchema(env);if(requestedRoom==='client')await ensureClientContentTranslationLinks(env);
+ await ensureVideoThumbnailSchema(env);
  const url=new URL(request.url),r=room(url);
  if(!ROOMS.has(r))return respond({ok:false,error:'invalid_room'},400);
  try{
   if(request.method==='GET'){
    const category=url.searchParams.get('category');
    if(category&&!CATEGORIES.has(category))return respond({ok:false,error:'invalid_category'},400);
-   const sql='SELECT c.*,m.group_id AS video_group_id,t.group_id AS translation_group_id FROM room_content c LEFT JOIN room_video_group_membership m ON m.content_id=c.id LEFT JOIN room_content_translation_links t ON t.content_id=c.id WHERE c.room_id = ?'+(category?' AND c.category = ?':'')+' ORDER BY c.category,c.sort_order,c.created_at';
+   const sql="SELECT c.*,m.group_id AS video_group_id,t.group_id AS translation_group_id,COALESCE(vt.thumbnail_url,'') AS thumbnail_url FROM room_content c LEFT JOIN room_video_group_membership m ON m.content_id=c.id LEFT JOIN room_content_translation_links t ON t.content_id=c.id LEFT JOIN room_video_thumbnails vt ON vt.target_type='content' AND vt.target_id=c.id WHERE c.room_id = ?"+(category?' AND c.category = ?':'')+' ORDER BY c.category,c.sort_order,c.created_at';
    const result=await store.prepare(sql).bind(...(category?[r,category]:[r])).all();
    return respond({ok:true,items:result.results||[]});
   }
@@ -62,7 +66,8 @@ export async function onRequest({request,env}){
    await store.prepare('INSERT INTO room_content (id,room_id,category,title,description,asset_url,locale,status,sort_order) VALUES (?,?,?,?,?,?,?,?,?)').bind(id,r,body.category,body.title.trim(),description,body.asset_url,locale,status,order).run();
    const link=await ensureTranslationLink(env,id,locale,requestedTranslation);
    if(videoGroupId)await store.prepare('INSERT OR REPLACE INTO room_video_group_membership(content_id,group_id) VALUES(?,?)').bind(id,videoGroupId).run();
-   const saved=await store.prepare('SELECT c.*,m.group_id AS video_group_id,t.group_id AS translation_group_id FROM room_content c LEFT JOIN room_video_group_membership m ON m.content_id=c.id LEFT JOIN room_content_translation_links t ON t.content_id=c.id WHERE c.id=? AND c.room_id=?').bind(id,r).first();
+   if(body.category==='video')await setVideoThumbnail(env,'content',id,body.thumbnail_url||'');
+   const saved=await store.prepare("SELECT c.*,m.group_id AS video_group_id,t.group_id AS translation_group_id,COALESCE(vt.thumbnail_url,'') AS thumbnail_url FROM room_content c LEFT JOIN room_video_group_membership m ON m.content_id=c.id LEFT JOIN room_content_translation_links t ON t.content_id=c.id LEFT JOIN room_video_thumbnails vt ON vt.target_type='content' AND vt.target_id=c.id WHERE c.id=? AND c.room_id=?").bind(id,r).first();
    return respond({ok:true,id,translation_group_id:link.group_id,item:saved},201);
   }
   if(request.method==='PATCH'){
@@ -82,7 +87,9 @@ export async function onRequest({request,env}){
     store.prepare('DELETE FROM room_video_group_membership WHERE content_id=?').bind(body.id)
    ]);
    if(videoGroupId)await store.prepare('INSERT OR REPLACE INTO room_video_group_membership(content_id,group_id) VALUES(?,?)').bind(body.id,videoGroupId).run();
-   const saved=await store.prepare('SELECT c.*,m.group_id AS video_group_id,t.group_id AS translation_group_id FROM room_content c LEFT JOIN room_video_group_membership m ON m.content_id=c.id LEFT JOIN room_content_translation_links t ON t.content_id=c.id WHERE c.id=? AND c.room_id=?').bind(body.id,r).first();
+   const linkedRows=await store.prepare('SELECT content_id FROM room_content_translation_links WHERE group_id=?').bind(link.group_id).all();
+   for(const row of linkedRows.results||[])await setVideoThumbnail(env,'content',row.content_id,body.category==='video'?(body.thumbnail_url||''):'');
+   const saved=await store.prepare("SELECT c.*,m.group_id AS video_group_id,t.group_id AS translation_group_id,COALESCE(vt.thumbnail_url,'') AS thumbnail_url FROM room_content c LEFT JOIN room_video_group_membership m ON m.content_id=c.id LEFT JOIN room_content_translation_links t ON t.content_id=c.id LEFT JOIN room_video_thumbnails vt ON vt.target_type='content' AND vt.target_id=c.id WHERE c.id=? AND c.room_id=?").bind(body.id,r).first();
    return respond({ok:true,updated:1,translation_group_id:link.group_id,item:saved});
   }
   if(request.method==='DELETE'){
@@ -101,6 +108,7 @@ export async function onRequest({request,env}){
    }
    await store.batch([
     store.prepare('DELETE FROM room_video_group_membership WHERE content_id=?').bind(id),
+    store.prepare("DELETE FROM room_video_thumbnails WHERE target_type='content' AND target_id=?").bind(id),
     store.prepare('DELETE FROM room_content_translation_links WHERE content_id=?').bind(id),
     store.prepare('DELETE FROM room_content WHERE id=? AND room_id=?').bind(id,r)
    ]);
