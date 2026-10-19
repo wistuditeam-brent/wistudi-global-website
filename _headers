@@ -48,3 +48,10 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   X-Frame-Options: DENY
+
+
+/client-room/starter-assets/videos/*
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000
+
+/client-room/starter-assets/assets/videos/*
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000

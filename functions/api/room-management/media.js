@@ -27,7 +27,7 @@ export async function onRequest({request,env}){
   await env.ROOM_MEDIA.put(key,bytes,{httpMetadata:{contentType:mime}});
   return json({ok:true,asset_url:'/api/room-management/media?room='+room+'&key='+encodeURIComponent(key)},201);
  }
- if(request.method==='GET'){
+ if(request.method==='GET'||request.method==='HEAD'){
   const key=url.searchParams.get('key')||'';
   if(!/^(client|distributor|investor)\/[0-9a-f-]{36}$/.test(key)||!key.startsWith(room+'/'))return json({error:'invalid_key'},400);
   if(!authorized){
@@ -39,10 +39,27 @@ export async function onRequest({request,env}){
     if(!partner)return json({error:'not_found'},404);
    }
   }
-  const object=await env.ROOM_MEDIA.get(key);if(!object)return json({error:'not_found'},404);
-  const responseHeaders={'content-type':object.httpMetadata?.contentType||'application/octet-stream','cache-control':authorized?'private,no-store':'public,max-age=3600,immutable','x-content-type-options':'nosniff','content-security-policy':"default-src 'none'; sandbox"};
+  if(request.method==='HEAD'){
+   const object=await env.ROOM_MEDIA.head(key);if(!object)return json({error:'not_found'},404);
+   const responseHeaders={'content-type':object.httpMetadata?.contentType||'application/octet-stream','content-length':String(object.size),'accept-ranges':'bytes','cache-control':authorized?'private,no-store':'public,max-age=3600,immutable','x-content-type-options':'nosniff'};
+   if(object.httpEtag)responseHeaders.etag=object.httpEtag;
+   return new Response(null,{status:200,headers:responseHeaders});
+  }
+  const rangeHeader=request.headers.get('range');
+  let object;
+  try{object=await env.ROOM_MEDIA.get(key,rangeHeader?{range:request.headers}:undefined)}
+  catch{return new Response(null,{status:416,headers:{'accept-ranges':'bytes','content-range':'bytes */*'}})}
+  if(!object)return json({error:'not_found'},404);
+  const responseHeaders={'content-type':object.httpMetadata?.contentType||'application/octet-stream','accept-ranges':'bytes','cache-control':authorized?'private,no-store':'public,max-age=3600,immutable','x-content-type-options':'nosniff'};
   if(object.httpEtag)responseHeaders.etag=object.httpEtag;
-  return new Response(object.body,{headers:responseHeaders});
+  let status=200;
+  if(rangeHeader&&object.range&&Number.isFinite(object.range.offset)&&Number.isFinite(object.range.length)){
+   const start=object.range.offset,end=start+object.range.length-1;
+   responseHeaders['content-range']='bytes '+start+'-'+end+'/'+object.size;
+   responseHeaders['content-length']=String(object.range.length);
+   status=206;
+  }else responseHeaders['content-length']=String(object.size);
+  return new Response(object.body,{status,headers:responseHeaders});
  }
  return json({error:'method_not_allowed'},405);
 }
