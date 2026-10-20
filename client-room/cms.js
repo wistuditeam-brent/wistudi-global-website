@@ -28,7 +28,7 @@ const W=vi?{
 };
 const $=id=>document.getElementById(id);
 const categories=[['presentation',W.presentations],['video',W.videos],['gallery',W.gallery],['document',W.documents],['partner',W.partners]];
-let items=[],videoGroups=[],partners=[],partnerSettings=null,partnersLoaded=false,partnersLoading=null,active='presentation',failed=false,currentDeck=null,currentSlide=1,totalSlides=1,pdfDoc=null,rendering=false,queued=null,galleryCategory=null,videoCategory=null;
+let items=[],videoGroups=[],partners=[],partnerSettings=null,active='presentation',failed=false,currentDeck=null,currentSlide=1,totalSlides=1,pdfDoc=null,rendering=false,queued=null,galleryCategory=null,videoCategory=null;
 const viewCache=new Map(),headingCache=new Map();
 function viewKey(){if(active==='video')return 'video:'+(videoCategory||'default');if(active==='gallery')return 'gallery:'+(galleryCategory||'default');return active}
 const canvas=$('slideCanvas'),ctx=canvas.getContext('2d');
@@ -79,12 +79,16 @@ function text(tag,value,cls){const e=document.createElement(tag);e.textContent=v
 function safeUrl(value){try{const u=new URL(value,location.origin);return u.origin===location.origin?u.href:null}catch{return null}}
 function renderTabs(){
  $('tabs').replaceChildren();
- for(const [key,label] of categories){const b=text('button',label,'tab'+(key===active?' selected':''));b.type='button';b.setAttribute('aria-pressed',String(key===active));b.onclick=()=>{active=key;currentDeck=null;render();if(key==='partner'&&!partnersLoaded)loadPartners().then(()=>{viewCache.delete('partner');headingCache.delete('partner');if(active==='partner')render()})};$('tabs').append(b)}
+ for(const [key,label] of categories){
+  const b=text('button',label,'tab'+(key===active?' selected':''));
+  b.type='button';b.setAttribute('aria-pressed',String(key===active));
+  b.onclick=()=>{if(active===key)return;active=key;currentDeck=null;render()};
+  $('tabs').append(b);
+ }
 }
 function render(){
  renderTabs();$('status').textContent='';
  if(failed){$('content').replaceChildren();$('heading').textContent='';$('status').textContent=W.unavailable;const b=text('button',W.retry,'retry');b.onclick=load;$('content').append(b);return}
- if(active==='partner'&&!partnersLoaded){$('content').replaceChildren();$('heading').textContent='';$('status').textContent=vi?'Đang tải hệ sinh thái đối tác…':'Loading Partner Ecosystem…';return}
  const initialKey=viewKey(),cached=viewCache.get(initialKey);
  if(cached){$('heading').textContent=headingCache.get(initialKey)||'';$('content').replaceChildren(...cached);return}
  $('content').replaceChildren();$('heading').textContent='';
@@ -219,7 +223,7 @@ function renderPartners(){
  if(!partners.length){const empty=text('p',W.empty,'status');wrap.append(empty);$('content').replaceChildren(wrap);return}
  const list=document.createElement('div');list.className='partner-list';
  for(const p of partners){const a=document.createElement('a');a.className='partner-row';a.href=(vi?'/client-room/vi/partner/':'/client-room/partner/')+'?slug='+encodeURIComponent(p.slug);
-  const img=document.createElement('img');img.src=p.banner_url;img.alt=p.title;img.loading='lazy';
+  const img=document.createElement('img');img.src=p.banner_url;img.alt=p.title;img.loading='lazy';img.decoding='async';img.fetchPriority='low';
   const body=document.createElement('div');body.append(text('h3',p.title));if(p.short_description)body.append(text('p',p.short_description));
   if(Array.isArray(p.tags)&&p.tags.length){const tags=document.createElement('div');tags.className='partner-tags';p.tags.forEach(t=>tags.append(text('span',t,'partner-tag')));body.append(tags)}
   a.append(img,body,text('span','›','partner-arrow'));list.append(a)}
@@ -230,40 +234,20 @@ function renderDownloads(list){
  for(const item of list){const url=safeUrl(item.asset_url);if(!url)continue;const card=document.createElement('article');card.className='media-card download-card';card.append(text('h3',item.title));if(item.description)card.append(text('p',item.description));const a=text('a',W.download,'action');a.href=url;a.download='';a.target='_blank';a.rel='noopener noreferrer';card.append(a);grid.append(card)}
  $('content').append(grid);
 }
-async function loadPartners(){
- if(partnersLoaded)return;
- if(partnersLoading)return partnersLoading;
- partnersLoading=(async()=>{
-  const cacheKey='wistudi-client-partners-'+locale;
-  try{
-   const cached=sessionStorage.getItem(cacheKey);
-   if(cached){const data=JSON.parse(cached);partners=Array.isArray(data.items)?data.items:[];partnerSettings=data.settings||null;partnersLoaded=true}
-  }catch{}
-  try{
-   const response=await fetch('/api/room-management/ecosystem?room=client&locale='+locale+'&kind=partners',{cache:'default'});
-   const data=await response.json();partners=Array.isArray(data.items)?data.items:[];partnerSettings=data.settings||null;partnersLoaded=true;
-   try{sessionStorage.setItem(cacheKey,JSON.stringify({items:partners,settings:partnerSettings}))}catch{}
-  }catch{if(!partnersLoaded){partners=[];partnerSettings=null;partnersLoaded=true}}
-  for(const p of partners.slice(0,8)){
-   if(p.banner_url){const img=new Image();img.src=p.banner_url}
-   const detail=(vi?'/client-room/vi/partner/':'/client-room/partner/')+'?slug='+encodeURIComponent(p.slug);
-   const link=document.createElement('link');link.rel='prefetch';link.href=detail;document.head.append(link);
-  }
-  partnersLoading=null;
- })();
- return partnersLoading;
-}
 async function load(){
  failed=false;$('status').textContent='';
  try{
-  const response=await fetch('/api/room-management/published?room=client&locale='+locale,{cache:'no-store'});
+  const response=await fetch('/api/room-management/published?room=client&locale='+locale,{cache:'default'});
   const raw=await response.text();let data;try{data=JSON.parse(raw)}catch{throw Error(raw||'invalid_response')}
   if(!response.ok||!data.ok||!Array.isArray(data.items))throw Error(data.detail||data.error||'request_failed');
-  items=data.items;videoGroups=Array.isArray(data.video_groups)?data.video_groups:[];viewCache.clear();headingCache.clear();
+  items=data.items;
+  videoGroups=Array.isArray(data.video_groups)?data.video_groups:[];
+  partners=Array.isArray(data.partners)?data.partners:[];
+  partnerSettings=data.partner_settings||null;
+  viewCache.clear();headingCache.clear();
   render();
   const requested=new URLSearchParams(location.search).get('presentation');
   if(requested&&active==='presentation'){const item=items.find(x=>x.id===requested);if(item)showContents(deckMeta(item))}
-  setTimeout(()=>loadPartners().catch(()=>{}),50);
- }catch(e){console.error(e);items=[];failed=true;render()}
+ }catch(e){console.error(e);items=[];partners=[];partnerSettings=null;failed=true;render()}
 }
 $('intro').textContent=W.intro;load();

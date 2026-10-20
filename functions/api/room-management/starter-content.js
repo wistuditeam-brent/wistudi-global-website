@@ -12,15 +12,15 @@ export async function ensureClientStarter(env){
  const tombstones=await db.prepare("SELECT content_id FROM room_content_tombstones WHERE room_id='client'").all();
  const deleted=new Set((tombstones.results||[]).map(x=>x.content_id));
  const wanted=CLIENT_STARTER_RECORDS.filter(r=>!deleted.has(r.id));
- if(wanted.length){
-  for(let start=0;start<wanted.length;start+=20){
-   const rows=wanted.slice(start,start+20);
-   const statements=rows.map(r=>db.prepare(
-    'INSERT OR IGNORE INTO room_content(id,room_id,category,title,description,asset_url,locale,status,sort_order) VALUES(?,?,?,?,?,?,?,?,?)'
-   ).bind(r.id,r.room_id,r.category,r.title,r.description,r.asset_url,r.locale,r.status,r.sort_order));
-   await db.batch(statements);
-  }
+ for(let start=0;start<wanted.length;start+=20){
+  const rows=wanted.slice(start,start+20);
+  if(!rows.length)continue;
+  const statements=rows.map(r=>db.prepare(
+   'INSERT OR IGNORE INTO room_content(id,room_id,category,title,description,asset_url,locale,status,sort_order) VALUES(?,?,?,?,?,?,?,?,?)'
+  ).bind(r.id,r.room_id,r.category,r.title,r.description,r.asset_url,r.locale,r.status,r.sort_order));
+  await db.batch(statements);
  }
  await db.prepare("INSERT OR IGNORE INTO room_management_audit(id,actor_manager_id,action,room_id,target_id) VALUES('client-starter-content-v1',NULL,'starter_content_seeded','client',NULL)").run();
 }
+
 
