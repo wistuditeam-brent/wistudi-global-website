@@ -163,11 +163,37 @@ function videoSource(value){
  }catch{}
  return null;
 }
+function addVideoPoster(launch,item,source){
+ const fallback=()=>{
+  if(source.kind==='video'){
+   const still=document.createElement('video');
+   still.muted=true;still.playsInline=true;still.preload='metadata';still.tabIndex=-1;still.setAttribute('aria-hidden','true');
+   still.src=source.url+'#t=0.1';
+   still.addEventListener('loadedmetadata',()=>{if(Number.isFinite(still.duration)&&still.duration>0.15){try{still.currentTime=0.1}catch{}}},{once:true});
+   launch.prepend(still);
+   return;
+  }
+  const raw=String(item.asset_url||'');
+  let id='';
+  try{
+   const u=new URL(raw,location.origin),host=u.hostname.replace(/^www\./,'').toLowerCase();
+   if(host==='youtu.be')id=u.pathname.split('/').filter(Boolean)[0]||'';
+   else if(host==='youtube.com'||host==='m.youtube.com')id=u.searchParams.get('v')||u.pathname.match(/^\/embed\/([^/]+)/)?.[1]||'';
+  }catch{}
+  if(id&&/^[A-Za-z0-9_-]{11}$/.test(id)){
+   const thumb=document.createElement('img');thumb.src='https://i.ytimg.com/vi/'+id+'/hqdefault.jpg';thumb.alt='';thumb.loading='lazy';thumb.onerror=()=>thumb.remove();launch.prepend(thumb);
+  }else if(source.kind==='iframe'&&source.url.startsWith('https://player.vimeo.com/video/')){
+   const frame=document.createElement('iframe');frame.src=source.url+'?autoplay=0&controls=0&title=0&byline=0&portrait=0';frame.title='';frame.tabIndex=-1;frame.setAttribute('aria-hidden','true');frame.loading='lazy';frame.referrerPolicy='strict-origin-when-cross-origin';launch.prepend(frame);
+  }
+ };
+ if(!item.thumbnail_url){fallback();return}
+ const thumb=document.createElement('img');thumb.src=item.thumbnail_url;thumb.alt='';thumb.loading='lazy';thumb.onerror=()=>{thumb.remove();fallback()};launch.prepend(thumb);
+}
 function makeVideoCard(item){
  const source=videoSource(item.asset_url);if(!source)return null;
  const card=document.createElement('article');card.className='media-card';
  if(source.kind==='iframe'||source.kind==='video'){
-  const launch=document.createElement('button');launch.type='button';launch.className='video-launch';launch.setAttribute('aria-label',(vi?'Phát video: ':'Play video: ')+item.title);if(item.thumbnail_url){const thumb=document.createElement('img');thumb.src=item.thumbnail_url;thumb.alt='';thumb.loading='lazy';launch.append(thumb)}
+  const launch=document.createElement('button');launch.type='button';launch.className='video-launch';launch.setAttribute('aria-label',(vi?'Phát video: ':'Play video: ')+item.title);addVideoPoster(launch,item,source)
   launch.onclick=()=>{
    let player;
    if(source.kind==='iframe'){
