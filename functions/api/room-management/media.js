@@ -15,16 +15,16 @@ export async function onRequest(context){
  if(request.method==='POST'){
   if(!authorized)return json({error:'unauthorized'},401);
   if(request.headers.get('origin')!==url.origin)return json({error:'invalid_origin'},403);
-  const type=url.searchParams.get('category'),mime=(request.headers.get('content-type')||'').split(';')[0].toLowerCase(),length=Number(request.headers.get('content-length'));
+  const type=url.searchParams.get('category'),mime=(request.headers.get('content-type')||'').split(';')[0].toLowerCase(),rawLength=request.headers.get('content-length'),length=rawLength===null?null:Number(rawLength);
   if(!TYPES[type]||!TYPES[type].includes(mime))return json({error:'invalid_type'},415);
-  if(!Number.isSafeInteger(length)||length<=0||length>LIMITS[type])return json({error:'invalid_size'},413);
+  if(length!==null&&(!Number.isSafeInteger(length)||length<=0||length>LIMITS[type]))return json({error:'invalid_size'},413);
   const key=room+'/'+crypto.randomUUID();
   if(type==='video'){
-   if(!request.body)return json({error:'invalid_size'},413);
+   if(!request.body||length===null)return json({error:'invalid_size'},413);
    await env.ROOM_MEDIA.put(key,request.body,{httpMetadata:{contentType:mime}});
    return json({ok:true,asset_url:'/api/room-management/media?room='+room+'&key='+encodeURIComponent(key)},201);
   }
-  const bytes=await request.arrayBuffer();if(bytes.byteLength!==length)return json({error:'invalid_size'},413);
+  const bytes=await request.arrayBuffer();if(!bytes.byteLength||bytes.byteLength>LIMITS[type]||(length!==null&&bytes.byteLength!==length))return json({error:'invalid_size'},413);
   const b=new Uint8Array(bytes),head=String.fromCharCode(...b.slice(0,12));
   const matches={'application/pdf':head.startsWith('%PDF'),'image/png':b[0]===137&&head.slice(1,4)==='PNG','image/jpeg':b[0]===255&&b[1]===216&&b[2]===255,'image/webp':head.startsWith('RIFF')&&head.slice(8,12)==='WEBP','text/plain':true};
   if(!matches[mime])return json({error:'invalid_file_signature'},415);
