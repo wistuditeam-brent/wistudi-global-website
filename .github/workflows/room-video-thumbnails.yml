@@ -1,0 +1,27 @@
+name: Room video thumbnail QA
+on:
+  pull_request:
+    paths:
+      - 'room-manager/index.html'
+      - 'client-room/**'
+      - 'functions/api/room-management/**'
+      - 'tests/room-video-thumbnails.test.mjs'
+      - '.github/workflows/room-video-thumbnails.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'room-manager/index.html'
+      - 'client-room/**'
+      - 'functions/api/room-management/**'
+      - 'tests/room-video-thumbnails.test.mjs'
+      - '.github/workflows/room-video-thumbnails.yml'
+jobs:
+  room-video-thumbnails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify video thumbnail upload and previews
+        run: node --test tests/room-video-thumbnails.test.mjs
