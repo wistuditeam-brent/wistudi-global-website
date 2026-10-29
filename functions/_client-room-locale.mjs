@@ -4,7 +4,7 @@ const PREFERENCE_COOKIE = 'wistudi_client_room_locale';
 const CLIENT_ROOT = '/client-room/';
 
 function cookiePreference(header = '') {
- const match = String(header).match(/(?:^|;\\s*)wistudi_client_room_locale=(en|vi)(?:;|$)/i);
+ const match = String(header).match(/(?:^|;\s*)wistudi_client_room_locale=(en|vi)(?:;|$)/i);
  return match ? match[1].toLowerCase() : null;
 }
 
@@ -21,7 +21,7 @@ function browserPreference(header = '') {
 function sectionFor(pathname) {
  // Only route English entry points. Vietnamese URLs are explicit choices and
  // must never be redirected, avoiding loops on /client-room/vi/.
- const match = /^\\/client-room(?:\\/(contact|partner))?\\/?$/.exec(pathname);
+ const match = /^\/client-room(?:\/(contact|partner))?\/?$/.exec(pathname);
  return match ? (match[1] || '') : null;
 }
 
