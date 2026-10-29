@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { runInNewContext } from 'node:vm';
+import { runInNewContext, Script } from 'node:vm';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const manager = read('room-manager/index.html');
@@ -65,6 +65,12 @@ test('Vimeo has a player still without custom upload', () => {
  assert.equal(launch.children[0].tag, 'iframe');
  assert.match(launch.children[0].src, /autoplay=0/);
  assert.equal(launch.children[0].tabIndex, -1);
+});
+
+test('Room Manager inline JavaScript parses correctly', () => {
+ const match = manager.match(/<script>([\s\S]*?)<\/script>/);
+ assert.ok(match, 'manager inline script exists');
+ assert.doesNotThrow(() => new Script(match[1]));
 });
 
 test('manager hidden previews stay hidden and a video fallback is available', () => {
