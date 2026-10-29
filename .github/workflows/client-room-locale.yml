@@ -1,0 +1,27 @@
+name: Client Room automatic language QA
+on:
+  pull_request:
+    paths:
+      - 'functions/_middleware.js'
+      - 'functions/_client-room-locale.mjs'
+      - 'client-room/**'
+      - 'tests/client-room-locale.test.mjs'
+      - '.github/workflows/client-room-locale.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'functions/_middleware.js'
+      - 'functions/_client-room-locale.mjs'
+      - 'client-room/**'
+      - 'tests/client-room-locale.test.mjs'
+      - '.github/workflows/client-room-locale.yml'
+jobs:
+  client-room-locale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify visitor location and language override behaviour
+        run: node --test tests/client-room-locale.test.mjs
