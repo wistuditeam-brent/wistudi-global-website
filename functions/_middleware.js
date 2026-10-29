@@ -1,4 +1,5 @@
 import { onRequest as legacyOnRequest } from './_middleware-core.js';
+import { clientRoomLanguageRedirect } from './_client-room-locale.mjs';
 
 const SUPPORTED = ['en','vi','zh-cn','th','id','ms','ar'];
 
@@ -68,6 +69,11 @@ function stabilizeClientLocale(response) {
 }
 
 export async function onRequest(context) {
+  // Apply country-based defaults only to the Client Room, never to the
+  // Wistudi public site or the Room Manager.
+  const clientRoomRedirect = clientRoomLanguageRedirect(context.request);
+  if (clientRoomRedirect) return clientRoomRedirect;
+
   const url = new URL(context.request.url);
   const explicit = localeFromPath(url.pathname);
 
