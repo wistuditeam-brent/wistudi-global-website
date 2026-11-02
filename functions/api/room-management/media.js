@@ -1,6 +1,7 @@
 import { ensureEcosystemSchema } from './_ecosystem.js';
 import { canManage } from './session.js';
 import { ensureVideoThumbnailSchema } from './_video-thumbnails.js';
+import { ensureClientSections } from './sections.js';
 const TYPES={presentation:['application/pdf'],video:['video/mp4','video/webm'],gallery:['image/jpeg','image/png','image/webp'],document:['application/pdf','image/jpeg','image/png','image/webp','text/plain']};
 const LIMITS={presentation:30e6,video:90e6,gallery:12e6,document:30e6};
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json','cache-control':'no-store'}});
@@ -46,7 +47,10 @@ export async function onRequest(context){
    if(!found){
     await ensureEcosystemSchema(env);
     const partner=await env.ROOM_DB.prepare("SELECT id FROM room_partners WHERE room_id=? AND status='published' AND (banner_url=? OR video_url=? OR instr(gallery_urls, ?)>0) LIMIT 1").bind(room,asset,asset,asset).first();
-    if(!partner){await ensureVideoThumbnailSchema(env);const thumb=await env.ROOM_DB.prepare("SELECT vt.target_id FROM room_video_thumbnails vt LEFT JOIN room_content c ON vt.target_type='content' AND c.id=vt.target_id LEFT JOIN room_partners p ON vt.target_type='partner' AND p.id=vt.target_id WHERE vt.thumbnail_url=? AND ((vt.target_type='content' AND c.room_id=? AND c.status='published') OR (vt.target_type='partner' AND p.room_id=? AND p.status='published')) LIMIT 1").bind(asset,room,room).first();if(!thumb)return json({error:'not_found'},404)}
+    if(!partner){
+     await ensureVideoThumbnailSchema(env);const thumb=await env.ROOM_DB.prepare("SELECT vt.target_id FROM room_video_thumbnails vt LEFT JOIN room_content c ON vt.target_type='content' AND c.id=vt.target_id LEFT JOIN room_partners p ON vt.target_type='partner' AND p.id=vt.target_id WHERE vt.thumbnail_url=? AND ((vt.target_type='content' AND c.room_id=? AND c.status='published') OR (vt.target_type='partner' AND p.room_id=? AND p.status='published')) LIMIT 1").bind(asset,room,room).first();
+     if(!thumb){await ensureClientSections(env);const example=await env.ROOM_DB.prepare("SELECT id FROM room_section_examples WHERE room_id=? AND status='published' AND thumbnail_url=? LIMIT 1").bind(room,asset).first();if(!example)return json({error:'not_found'},404)}
+    }
    }
    publicKeyMemo.set(key,Date.now()+60000);
   }
