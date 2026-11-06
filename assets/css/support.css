@@ -1,0 +1,51 @@
+.page-support{--doc-purple:#5d2dfd;--doc-purple-soft:#f4f0ff}
+.support-skip{position:fixed;top:8px;left:12px;z-index:500;transform:translateY(-160%);padding:12px 18px;background:#fff;border:2px solid var(--doc-purple);border-radius:8px}
+.support-skip:focus{transform:none}
+.support-shell :focus-visible{outline:3px solid #5d2dfd;outline-offset:4px}
+.support-intro{padding:20px 0 26px}
+.support-intro h1{font:700 clamp(2rem,4.5vw,3.1rem)/1.15 'Be Vietnam Pro',Inter,sans-serif;letter-spacing:-.045em;margin:0 0 14px}
+.support-intro p{color:#655e70;line-height:1.65;margin:0;font-size:1rem;max-width:650px}
+.support-search{margin:0 0 18px;max-width:820px}
+.support-search-label{display:block;font-size:.78rem;font-weight:650;margin:0 0 8px;color:#514b58}
+.support-search-box{display:flex;align-items:center;gap:12px;padding:7px 8px 7px 17px;border:1px solid #dcd5e7;border-radius:12px;background:#fff;box-shadow:0 6px 22px #251c3405}
+.support-search-box:focus-within{border-color:#9976ff;box-shadow:0 0 0 3px #5d2dfd12}
+.support-search-box svg{width:21px;height:21px;flex:0 0 21px;fill:none;stroke:#8a7a9a;stroke-width:1.8;stroke-linecap:round}
+.support-search-box input{min-width:0;width:100%;border:0;background:transparent;padding:10px 0;font:400 .92rem/1.4 Inter,sans-serif;color:#211c27}
+.support-search-box input:focus-visible{outline-offset:1px}
+.support-search-box button,.support-empty button{border:0;border-radius:8px;background:var(--doc-purple);color:#fff;min-height:42px;padding:10px 17px;font:650 .8rem/1.4 Inter,sans-serif;cursor:pointer}
+.support-filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 28px}
+.support-filter-bar button{font:550 .75rem/1.4 Inter,sans-serif;color:#655e70;border:1px solid #e0dae8;background:#fff;border-radius:999px;padding:9px 13px;min-height:38px;cursor:pointer;transition:background .15s ease,color .15s ease}
+.support-filter-bar button[aria-pressed="true"]{border-color:#d2c2ff;background:#eee7ff;color:#4c22c8}
+.support-filter-bar button:hover{border-color:#bba7ed}
+.support-preparing{padding:16px 18px;background:#f6f3fd;border:1px solid #e8def7;border-radius:10px;color:#50455f;font-size:.83rem;line-height:1.65}
+.support-preparing p{margin:4px 0 0}.support-preparing a,.support-topic-actions a,.support-empty a{color:var(--doc-purple);font-weight:600;text-decoration:none}
+.support-preparing a:hover,.support-topic-actions a:hover,.support-empty a:hover{text-decoration:underline}
+.support-category{margin:36px 0 0;scroll-margin-top:100px}
+.support-category header{margin:0 0 16px}
+.support-category h2,.support-contact h2,.support-empty h2{font:700 1.4rem/1.3 'Be Vietnam Pro',Inter,sans-serif;letter-spacing:-.025em;margin:0 0 8px}
+.support-category header p,.doc-related>p{font-size:.84rem;color:#746b7d;line-height:1.6;margin:0}
+.support-topic-list{border:1px solid #e7e1ed;border-radius:12px;background:#fff;overflow:hidden}
+.support-topic{scroll-margin-top:110px}.support-topic+.support-topic{border-top:1px solid #ede8f1}
+.support-topic summary{display:flex;align-items:center;justify-content:space-between;gap:15px;list-style:none;padding:17px 18px;min-height:74px;cursor:pointer;transition:background .15s ease}
+.support-topic summary::-webkit-details-marker{display:none}.support-topic summary:hover{background:#fbf9ff}
+.support-topic summary>span{min-width:0}.support-topic-title{display:block;font-weight:650;font-size:.88rem;line-height:1.5;color:#332b3d}
+.support-topic-copy{display:block;font-size:.77rem;line-height:1.55;color:#817687;margin-top:3px}
+.support-topic summary svg{width:20px;height:20px;flex:0 0 20px;fill:none;stroke:#7d6d90;stroke-width:1.6;transition:transform .16s ease}
+.support-topic[open] summary{background:#fbf9ff}.support-topic[open] summary svg{transform:rotate(180deg)}
+.support-outline{padding:0 18px 20px;background:#fbf9ff;color:#65596f;font-size:.81rem;line-height:1.65}
+.support-status{display:inline-block;border-radius:5px;padding:3px 7px;background:#eee8f7;color:#76628d;font-size:.65rem;font-weight:650;margin:0 0 12px}
+.support-outline p{margin:0 0 5px}.support-outline ul{margin:0 0 16px;padding-left:19px}.support-outline li{margin:5px 0}
+.support-topic-actions{display:flex;flex-wrap:wrap;gap:6px 22px;border-top:1px solid #e7deef;padding-top:12px;font-size:.75rem}
+.support-topic-actions a{display:inline-flex;align-items:center;min-height:30px}
+.support-search-status{font-size:.78rem;color:#716479;margin:24px 0 0}.support-empty{padding:28px 0;color:#746b7d}.support-empty p{font-size:.86rem;line-height:1.6}.support-empty a{display:inline-block;padding:12px 16px;font-size:.8rem}
+.support-contact{margin:36px 0 0;padding:28px 24px;background:#f6f2ff;border:1px solid #e7ddfc;border-radius:12px;scroll-margin-top:104px}
+.support-contact p{font-size:.84rem;line-height:1.7;color:#6d6178;margin:12px 0}
+.support-contact-actions{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0 12px}.support-contact-actions a{min-height:44px}
+.support-email{display:inline-block;font-size:.78rem;color:var(--doc-purple);overflow-wrap:anywhere}
+.support-mobile-toc{display:none}
+.support-shell #policies{scroll-margin-top:104px}.support-shell .doc-related h2{font:700 1.4rem/1.3 'Be Vietnam Pro',Inter,sans-serif;margin:0 0 8px;letter-spacing:-.025em}.support-shell .doc-related-grid{margin-top:18px}
+.support-shell [hidden]{display:none!important}
+@media(max-width:960px){.support-shell .doc-side{display:none}.support-mobile-toc{display:block;margin:0 0 18px;border:1px solid #e2dbe9;border-radius:10px;background:#fff}.support-mobile-toc summary{padding:14px 16px;font-size:.83rem;font-weight:650;cursor:pointer}.support-mobile-toc ul{list-style:none;margin:0;padding:0 14px 12px;display:grid;grid-template-columns:1fr 1fr;gap:3px 15px}.support-mobile-toc a{display:block;min-height:40px;padding:9px 2px;font-size:.78rem;line-height:1.45;text-decoration:none;color:#6a597e}}
+@media(max-width:760px){.support-intro{padding:15px 18px 24px}.support-intro p{font-size:.92rem}.support-search{margin:0 18px 16px}.support-filter-bar{flex-wrap:nowrap;overflow:auto;scrollbar-width:thin;padding:0 18px 6px;margin:0 0 18px}.support-filter-bar button{flex:0 0 auto;white-space:nowrap}.support-mobile-toc{margin:0 18px 18px}.support-shell .doc-article{padding-top:22px}.support-category h2,.support-contact h2{font-size:1.22rem}.support-category{margin-top:29px}.support-topic summary{padding:15px 14px}.support-topic-copy{font-size:.75rem}.support-outline{padding:0 14px 16px}.support-contact{padding:23px 18px}.support-contact-actions{display:grid;grid-template-columns:1fr}.support-contact-actions a{justify-content:center}.support-preparing{padding:14px}.support-search-box{gap:8px;padding-left:12px}.support-search-box input{font-size:16px}.support-search-box button{padding:10px 13px}.support-search-box input::placeholder{font-size:.8rem}}
+@media(max-width:390px){.support-search-box svg{display:none}.support-mobile-toc ul{grid-template-columns:1fr}.support-topic-title{font-size:.84rem}}
+@media(prefers-reduced-motion:reduce){.support-shell *{transition:none!important}}

@@ -12,6 +12,7 @@
           <a href="/blocks-activities/">Blocks &amp; Activities</a>
           <a href="/organisations/">Organisations</a>
           <a href="/resources/">Resources</a>
+          <a href="/support/">Support</a>
           <a href="/contact/">Contact</a>
           <a href="/terms-and-conditions/">Terms and Conditions</a>
           <a href="/privacy/">Privacy Policy</a>

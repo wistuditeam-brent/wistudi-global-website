@@ -129,6 +129,24 @@ const internalPath=a=>{
 };
 const isResourceLink=a=>a?.dataset?.wsResourcesLink==='true'||a?.classList?.contains('ws-resource-nav-link')||internalPath(a).startsWith('/resources/');
 
+
+function ensureSupportNav(){
+  document.querySelectorAll('.ws-nav-links,.ws-mobile-inner').forEach(nav=>{
+    let link=[...nav.querySelectorAll('a')].find(a=>internalPath(a)==='/support/');
+    if(!link){
+      link=document.createElement('a');
+      link.href='/support/';
+      link.textContent='Support';
+      const contact=[...nav.querySelectorAll(':scope > a')].find(a=>internalPath(a).startsWith('/contact'));
+      contact?nav.insertBefore(link,contact):nav.appendChild(link);
+    }
+    const active=normalized==='/support/'||normalized.startsWith('/support/');
+    link.classList.toggle('active',active);
+    if(active)link.setAttribute('aria-current','page');
+    else link.removeAttribute('aria-current');
+  });
+}
+
 function ensureResourcesNav(){
   const locale=selectedLocale();
   const href=locale==='en'?'/resources/':`/resources/?lang=${encodeURIComponent(locale)}`;
@@ -372,6 +390,7 @@ const bootEvent=async()=>{
   await loadWithMutationGuard('/assets/js/event-i18n-content.js','wsEventI18nContent');
 
   ensureResourcesNav();
+  ensureSupportNav();
   ensureOrganisationsMenu();
   watchResourcesNav();
   watchOrganisationsMenu();
@@ -383,6 +402,7 @@ const bootSite=async()=>{
   await load('/assets/js/site-shell-core.js','wsCore');
   await load('/assets/js/i18n.js','wsI18n');
   ensureResourcesNav();
+  ensureSupportNav();
   ensureOrganisationsMenu();
   watchResourcesNav();
   watchOrganisationsMenu();
