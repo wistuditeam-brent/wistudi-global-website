@@ -49,3 +49,18 @@
 @media(max-width:760px){.support-intro{padding:15px 18px 24px}.support-intro p{font-size:.92rem}.support-search{margin:0 18px 16px}.support-filter-bar{flex-wrap:nowrap;overflow:auto;scrollbar-width:thin;padding:0 18px 6px;margin:0 0 18px}.support-filter-bar button{flex:0 0 auto;white-space:nowrap}.support-mobile-toc{margin:0 18px 18px}.support-shell .doc-article{padding-top:22px}.support-category h2,.support-contact h2{font-size:1.22rem}.support-category{margin-top:29px}.support-topic summary{padding:15px 14px}.support-topic-copy{font-size:.75rem}.support-outline{padding:0 14px 16px}.support-contact{padding:23px 18px}.support-contact-actions{display:grid;grid-template-columns:1fr}.support-contact-actions a{justify-content:center}.support-preparing{padding:14px}.support-search-box{gap:8px;padding-left:12px}.support-search-box input{font-size:16px}.support-search-box button{padding:10px 13px}.support-search-box input::placeholder{font-size:.8rem}}
 @media(max-width:390px){.support-search-box svg{display:none}.support-mobile-toc ul{grid-template-columns:1fr}.support-topic-title{font-size:.84rem}}
 @media(prefers-reduced-motion:reduce){.support-shell *{transition:none!important}}
+.support-status-live{background:#e9f5ee;color:#276441}
+.support-published>p{font-size:.86rem;line-height:1.7;margin-bottom:16px}
+.support-read-guide{font-weight:750!important}
+.support-guide .doc-breadcrumbs{line-height:1.6}
+.support-guide-search{margin:0 0 24px}
+.support-guide .doc-title-row .doc-type{text-decoration:none}
+.support-guide .doc-content .support-answer{margin-top:0}
+.support-answer>strong{display:block;margin-bottom:5px}
+.support-answer p{margin-bottom:0}
+.support-guide .doc-content{overflow-wrap:anywhere}
+.support-return{margin:24px 0 0!important}
+.support-guide .doc-content .support-contact h2{margin:0 0 12px}
+@media(max-width:960px){.support-guide .support-mobile-toc{margin-bottom:20px}}
+@media(max-width:760px){.support-guide .doc-breadcrumbs{white-space:normal;overflow:visible}.support-guide-search{margin:0 18px 20px}.support-guide .doc-title-row h1{font-size:clamp(1.75rem,7.8vw,2.15rem)}.support-guide .doc-meta{line-height:1.6}.support-guide .doc-content{font-size:.94rem}}
+
