@@ -62,4 +62,19 @@
   document.querySelectorAll('.support-mobile-toc a').forEach(link=>link.addEventListener('click',()=>{document.querySelector('.support-mobile-toc').open=false}));
   filters.hidden=false;
   readURL();apply(false);openHash();
+  // Keep browsing and title search working even if the article index cannot load.
+  fetch('/assets/data/support-articles.json',{cache:'default'})
+    .then(response=>{if(!response.ok)throw new Error('Article index unavailable');return response.json()})
+    .then(articles=>{
+      if(!Array.isArray(articles))return;
+      articles.forEach(article=>{
+        if(typeof article.slug!=='string'||typeof article.text!=='string')return;
+        const topic=topics.find(item=>item.element.id==='guide-'+article.slug);
+        if(topic)topic.text+=' '+normalize(article.text);
+      });
+      apply(false);
+      form.dataset.searchIndex='ready';
+    })
+    .catch(()=>{form.dataset.searchIndex='fallback'});
 })();
+

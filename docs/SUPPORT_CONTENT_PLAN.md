@@ -62,3 +62,20 @@ Check current names, routes and workflows; uploads and media limits; guest and l
 3. Credits and billing, aligned with the existing Credit Usage Policy and without numerical amounts.
 4. Learner management, reports, events and permissions.
 5. Templates, presentation/printing, community and remaining privacy guidance after feature verification.
+
+
+## Stage 1 published content (9 November 2026)
+
+The following article routes now exist and are linked from the hub:
+- [Getting started with Wistudi](/support/getting-started/)
+- [Your account and profile](/support/account-and-profile/)
+- [Sign-in and account recovery](/support/sign-in-help/)
+- [Dashboard and workspaces](/support/dashboard-and-workspaces/)
+- [Find and access learning](/support/accessing-learning/)
+- [Troubleshooting](/support/troubleshooting/)
+
+The other topics remain labelled Guide in preparation. The first six completed outlines retain their original anchors for existing links and now provide a quick answer and Read the full guide action. Search indexes full published article text, with hub-title search as a fallback.
+
+Evidence: current public application shell and JavaScript bundle at https://wistudi.com/sign-up, downloaded 9 November 2026 (asset index-C8ug5eQ1.js), current website source, Terms and Privacy Policy. The deployed application's navigation and auth strings confirm the labels and routes used in the articles. Source includes conditional guest access, invitation errors, workspace/onboarding requirements, account/profile menu routes and desktop-only notice support. Availability is described conditionally; there are no invented guarantees, limits or credit amounts.
+
+Authenticated learner/creator transactions and account mutations were not performed. Public account-screen rendering could not be inspected in the local headless browser because of certificate trust; account instructions were verified against the public deployed frontend bundle. Support-page browser QA uses the generated pages and committed shared assets. No fabricated product screenshots were added.
