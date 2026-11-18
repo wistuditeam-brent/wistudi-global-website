@@ -36,6 +36,7 @@ Build the Support Centre structure first. Do not publish full instructions until
 | Learners, teams & organisations | Manage learners and assignments | [/support/#guide-managing-learners](/support/#guide-managing-learners) | `/support/managing-learners/` |
 | Learners, teams & organisations | Review results and reports | [/support/#guide-results-and-reporting](/support/#guide-results-and-reporting) | `/support/results-and-reporting/` |
 | Learners, teams & organisations | Teams, organisations and permissions | [/support/#guide-teams-and-permissions](/support/#guide-teams-and-permissions) | `/support/teams-and-permissions/` |
+| Zoom & Training Rooms | Using Zoom with Wistudi | [/support/#guide-zoom](/support/#guide-zoom) | `/support/zoom/` |
 | Events & community | Join and participate in an event | [/support/#guide-joining-events](/support/#guide-joining-events) | `/support/joining-events/` |
 | Events & community | Create and manage an event | [/support/#guide-hosting-events](/support/#guide-hosting-events) | `/support/hosting-events/` |
 | Events & community | Community participation | [/support/#guide-community](/support/#guide-community) | `/support/community/` |
@@ -96,3 +97,16 @@ The hub has 12 available guides and 15 outlines in preparation. Published articl
 The publication and sharing articles use the current deployed frontend wording rather than earlier proposals. In particular, Flow workspace publication and Discover review are separate, Single Flow may be unavailable, new editable versions have restrictions, and regenerating a temporary link can invalidate the previous invitation. No fixed credit amounts, package sizes, balances, rates or prices are included. Templates and presentation/printing remain separate future guide topics.
 
 Detailed evidence and verification limits are recorded in SUPPORT_CREATING_PUBLISHING_EVIDENCE.md.
+
+
+## Zoom and Training Rooms guide (18 November 2026)
+
+[Using Zoom with Wistudi](/support/zoom/) is published under a dedicated Zoom & Training Rooms heading, after learner/team management and before events. The category is included in the hub filters and both contents lists. The full article is included in support search and the sitemap. There are now 13 published guides and 15 topics in preparation.
+
+The guide contains Requirements, Add the app, Use the app, Remove the app, and Support. Product steps, browser requirements, host-only learner joining, End room behaviour, token deletion and reconnection behaviour were supplied by Brent for publication on 18 November 2026. No OAuth connection, test meeting, token removal or learner transaction was performed in preparing this documentation.
+
+Zoom's current documentation confirms the normal Basic licence meeting limit and a My Library removal route. The supplied Manage → Added Apps route is retained with the My Library alternative. The redirected Google URL is replaced with https://marketplace.zoom.us/ and the mismatched email target is corrected to mailto:support@wistudi.com. No numerical credit amounts are added.
+
+External references checked 18 November 2026:
+- https://support.zoom.com/hc/en/article?id=zm_kb&sysparm_article=KB0067966
+- https://support.zoom.com/hc/en/article?id=zm_kb&sysparm_article=KB0062865
