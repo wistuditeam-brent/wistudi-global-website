@@ -318,7 +318,7 @@ function renderTextFields(layer) {
     if(allowed){
       content=node('input','pdf-text-input');content.type='text';content.value=f.text;content.placeholder='Text';content.maxLength=2000;content.autocomplete='off';content.spellcheck=false;content.readOnly=state.saving;
       content.setAttribute('aria-label','Text for '+partyName(party)+' on page '+f.page);
-      content.onfocus=()=>{clearPlacement();state.selectedText=f.id;state.selected=null;state.activeParty=f.party_id;for(const item of layer.querySelectorAll('.text-field'))item.classList.toggle('selected',item===box);};
+      content.onfocus=()=>{clearPlacement();state.selectedText=f.id;state.selected=null;if(state.activeParty!==f.party_id)state.template=null;state.activeParty=f.party_id;for(const item of layer.querySelectorAll('.text-field'))item.classList.toggle('selected',item===box);renderSidebar();};
       content.oninput=()=>{f.text=content.value;textDirty(f);applyTextStyle(f,content);const caption=document.querySelector('[data-text-link="'+f.id+'"] .text-field-label');if(caption)caption.textContent=f.text.slice(0,40)||'Text field';};
       content.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'||e.key==='Escape'){e.preventDefault();content.blur();}};
       box.append(content);
@@ -326,7 +326,7 @@ function renderTextFields(layer) {
       const remove=button('×','remove',e=>{e.stopPropagation();removeTextField(f);});remove.setAttribute('aria-label','Remove text field');remove.onpointerdown=e=>e.stopPropagation();box.append(remove);
       box.onpointerdown=e=>{
         if(state.saving||e.button!==0||e.target.closest('input,button'))return;
-        e.preventDefault();state.selectedText=f.id;state.selected=null;state.activeParty=f.party_id;
+        e.preventDefault();state.selectedText=f.id;state.selected=null;if(state.activeParty!==f.party_id)state.template=null;state.activeParty=f.party_id;
         const bounds=$('pageWrap').getBoundingClientRect(),start={x:e.clientX,y:e.clientY,fx:f.x,fy:f.y,fw:f.width,fh:f.height};
         const resizing=e.target.classList.contains('resize');let moved=false;box.setPointerCapture(e.pointerId);
         box.onpointermove=ev=>{
