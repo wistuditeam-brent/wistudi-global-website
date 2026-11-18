@@ -243,3 +243,18 @@ input[type=radio] { width: 20px; height: 20px; min-height: 20px; margin: 0; padd
 
 .plain { min-height: 44px; color: var(--purple-dark); background: transparent; border-color: transparent; padding: 8px 4px; }
 .plain:hover { background: transparent; text-decoration: underline; }
+
+/* PDF text is a transparent, single-line overlay. Handles appear on selection. */
+.signature-methods #addText { flex-basis: 100%; }
+.text-field { display: block; padding: 0; border: 0; border-radius: 0; outline: 1px dashed #8254be; background: transparent; text-align: left; cursor: text; }
+.text-field.signed { outline: none; }
+.text-field.other { outline-color: #b7b0c0; }
+.text-field.selected { outline: 2px solid #9e7bce; outline-offset: 2px; }
+.pdf-text-input, .pdf-text-value { display: block; width: 100%; height: 100%; min-height: 0; padding: 0; margin: 0; border: 0; border-radius: 0; background: transparent; color: #1d2030; font-family: 'Signing Inter', 'Inter', sans-serif; font-weight: 400; font-kerning: none; font-variant-ligatures: none; letter-spacing: 0; text-align: left; white-space: pre; overflow: hidden; }
+.pdf-text-input:focus, .pdf-text-input:focus-visible { outline: 0; outline-offset: 0; }
+.pdf-text-input:read-only { background: transparent; }
+.text-field .resize, .text-field .remove, .text-field .move-text { visibility: hidden; }
+.text-field.selected .resize, .text-field.selected .remove, .text-field.selected .move-text, .text-field:focus-within .resize, .text-field:focus-within .remove, .text-field:focus-within .move-text { visibility: visible; }
+.move-text { position: absolute; left: -27px; top: -4px; width: 24px; height: 24px; background: white; border: 1px solid #b7a0d8; border-radius: 4px; display: grid; place-items: center; cursor: move; color: #7044c4; font-size: 19px; line-height: 1; touch-action: none; }
+
+.text-field-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

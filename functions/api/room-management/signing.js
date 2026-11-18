@@ -1,4 +1,4 @@
-import {schema,json,fail,id,secret,hash,codeHash,sameOrigin,manager,documentById,snapshot,validatePages,validField,event,saveSignature,handleError} from './_signing.js';
+import {schema,json,fail,id,secret,hash,codeHash,sameOrigin,manager,documentById,snapshot,validatePages,validField,validTextField,event,saveSignature,handleError} from './_signing.js';
 import {CHUNK_SIZE} from './_signing.js';
 
 export async function onRequest({request,env}) { return handleError(async()=>{
@@ -52,18 +52,22 @@ export async function onRequest({request,env}) { return handleError(async()=>{
   if(ownerSigns&&(!ownerId||!ids.has(ownerId)))fail('Add your signing details.');
   if(!ownerSigns&&owner&&ids.has(owner.id))fail('Remove the administrator from the signing parties when preparing only.');
   if(new Set(b.fields.map(f=>f.id)).size!==b.fields.length||!b.fields.every(f=>validField(f,JSON.parse(d.pages_json),ids)))fail('Check the signature area positions.');
+  const textFields=b.text_fields;
+  if(textFields!==undefined&&(!Array.isArray(textFields)||new Set(textFields.map(f=>f?.id)).size!==textFields.length||!textFields.every(f=>validTextField(f,JSON.parse(d.pages_json),ids))))fail('Check the text fields.');
   const fieldIds=b.fields.map(f=>f.id),token=id();
   // Global UUIDs cannot be moved between agreements by a crafted request.
-  for(const collection of [{table:'room_signing_parties',values:[...ids]},{table:'room_signing_fields',values:fieldIds}]){
+  for(const collection of [{table:'room_signing_parties',values:[...ids]},{table:'room_signing_fields',values:fieldIds},{table:'room_signing_text_fields',values:(textFields||[]).map(f=>f.id)}]){
    for(const key of collection.values){const found=await env.ROOM_DB.prepare('SELECT document_id FROM '+collection.table+' WHERE id=?').bind(key).first();if(found&&found.document_id!==d.id)fail('Invalid signature area.',403);}
   }
   const q=[env.ROOM_DB.prepare("UPDATE room_signing_documents SET title=?,revision=revision+1,edit_token=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND revision=? AND status='draft' AND NOT EXISTS(SELECT 1 FROM room_signing_parties WHERE document_id=? AND signed_at IS NOT NULL)").bind(b.title?.trim()||d.title,token,d.id,b.revision,d.id)];
   const gate='EXISTS(SELECT 1 FROM room_signing_documents WHERE id=? AND edit_token=?)';
   q.push(env.ROOM_DB.prepare('DELETE FROM room_signing_fields WHERE document_id=? AND '+gate).bind(d.id,d.id,token));
+  if(textFields!==undefined)q.push(env.ROOM_DB.prepare('DELETE FROM room_signing_text_fields WHERE document_id=? AND '+gate).bind(d.id,d.id,token));
   for(const [index,p] of b.parties.entries())q.push(env.ROOM_DB.prepare(`INSERT INTO room_signing_parties(id,document_id,name,email,kind,created_at) SELECT ?,?,?,?,?,? WHERE ${gate} ON CONFLICT(id) DO UPDATE SET name=excluded.name,email=excluded.email,revision=room_signing_parties.revision+1`).bind(p.id,d.id,p.name.trim(),p.email.trim(),p.id===ownerId?'owner':'signer',new Date(Date.now()+index).toISOString().replace('T',' ').replace('Z',''),d.id,token));
-  const removed=old.filter(p=>!ids.has(p.id));for(const p of removed)q.push(env.ROOM_DB.prepare('DELETE FROM room_signing_parties WHERE id=? AND document_id=? AND '+gate).bind(p.id,d.id,d.id,token));
+  const removed=old.filter(p=>!ids.has(p.id));for(const p of removed){q.push(env.ROOM_DB.prepare('DELETE FROM room_signing_text_fields WHERE party_id=? AND document_id=? AND '+gate).bind(p.id,d.id,d.id,token));q.push(env.ROOM_DB.prepare('DELETE FROM room_signing_parties WHERE id=? AND document_id=? AND '+gate).bind(p.id,d.id,d.id,token));}
   const prior=(await env.ROOM_DB.prepare('SELECT id,party_id,page,x,y,width,height,signature_key FROM room_signing_fields WHERE document_id=?').bind(d.id).all()).results||[];
   for(const f of b.fields){const before=prior.find(x=>x.id===f.id);const key=before?.party_id===f.party_id?before.signature_key:null;q.push(env.ROOM_DB.prepare(`INSERT INTO room_signing_fields(id,document_id,party_id,page,x,y,width,height,signature_key) SELECT ?,?,?,?,?,?,?,?,? WHERE ${gate}`).bind(f.id,d.id,f.party_id,f.page,f.x,f.y,f.width,f.height,key,d.id,token));}
+  for(const f of textFields||[])q.push(env.ROOM_DB.prepare(`INSERT INTO room_signing_text_fields(id,document_id,party_id,page,x,y,width,height,text_value,font_size) SELECT ?,?,?,?,?,?,?,?,?,? WHERE ${gate}`).bind(f.id,d.id,f.party_id,f.page,f.x,f.y,f.width,f.height,f.text.normalize('NFC'),f.font_size,d.id,token));
   const result=await env.ROOM_DB.batch(q);if(!result[0].meta.changes)fail('The document changed while saving. Reload and try again.',409);
   return json(await snapshot(env,await documentById(env,d.id),auth));
  }

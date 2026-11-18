@@ -15,15 +15,20 @@ An unauthenticated manager entry returns through `/room-manager/?next=documents`
    JPG or WebP. Click the PDF to place it, then drag or resize before submitting.
    Administrators can also prepare unsigned areas for recipients. Recipients may
    place their own areas without administrator preparation.
-4. Save editable drafts, or submit your own signature with consent to lock it.
-5. Create a separate private link and six-digit code for each recipient. The
+4. Use **Add text**, click the PDF and type a name, position, date or other plain
+   single-line text. Create multiple fields; drag their move handle and resize them
+   on the page. The administrator can assign blank text fields before sharing.
+5. Save editable drafts, or submit your own signature and text together with
+   consent. Only the assigned signer can change their fields after sharing; all
+   of their fields lock on submission. Empty text fields must be filled or removed.
+6. Create a separate private link and six-digit code for each recipient. The
    administrator copies and sends them; recipients do not need accounts. Existing
    links remain copyable. Legacy links created without codes continue to work.
-6. All authorized parties see the shared signing history, including per-party
+7. All authorized parties see the shared signing history, including per-party
    link creation and confirmed signature dates/times. Recipient snapshots hide
    private emails, token material and other parties' editable drafts.
-7. Download the PDF with every confirmed signature. Export fetches the latest
-   server record; draft signatures are excluded.
+8. Download the PDF with every confirmed signature. Export fetches the latest
+   server record; draft signatures and unsubmitted text are excluded.
 
 The original PDF and preparation become immutable once a signature is confirmed
 or a signing link is created. Each unsigned signer can still add, move and resize
@@ -47,7 +52,11 @@ PDF.js 4.10.38 renders each page at its own CropBox and rotation, including A4
 portrait, A4 landscape, mixed paper sizes and rotated pages. Normalized viewer
 positions are converted back through the stored PDF viewport transformation for
 export. PDF-LIB 1.17.1 embeds transparent PNG signature images into the original
-page content. Text and original page dimensions remain in the PDF.
+page content. Typed text is embedded as searchable text using the self-hosted
+Inter 4.1 font and @pdf-lib/fontkit 1.1.1, including Vietnamese and other supported
+accented characters. Shared font metrics keep field baselines and sizes aligned
+in the editor and PDF, including rotated pages and CropBoxes. Original text and
+page dimensions remain in the PDF.
 
 Original PDFs upload as immutable 16 MiB R2 objects. The application imposes no
 total file-size or page-count cap. An interrupted upload resumes from missing
@@ -66,7 +75,9 @@ cryptographic PDF signatures or preservation of pre-existing certificate validit
 ## Storage and security
 
 The existing `ROOM_DB` D1 and private `ROOM_MEDIA` R2 bindings are reused. Migration
-`0009_document_signing.sql` and `0010_document_signing_archive.sql` add only new tables. The signing API applies these
+`0009_document_signing.sql` through `0011_document_signing_text.sql` add only new
+tables. Text is stored separately and shares the party revision and submission
+lock used by signatures. Older layout clients preserve text fields they omit. The signing API applies these
 same idempotent statements on first use, matching the existing room CMS's schema
 initialization pattern. There is no modification to existing content or accounts.
 
@@ -99,11 +110,15 @@ six-digit codes, throttling, account-free sessions, cross-party permissions,
 concurrent submissions, signature-preserving export, A4 geometry, rotation,
 CropBox preservation, revocation, preparer-only agreements, recipient-created and
 movable areas, shared history, draft deletion, completed-document protection,
-archiving and restoration. `tests/signing-runtime/worker.mjs`
+archiving and restoration, multiple text fields, text ownership/privacy,
+concurrent text submissions, Unicode text extraction and export positions. `tests/signing-runtime/worker.mjs`
 and `preview-server.mjs` are local-only fixture runners, not production routes.
 
 Browser checks can run with `tests/signing-runtime/browser-qa.mjs` when Playwright
 and a compatible browser are available. The refreshed interface was also checked
 in the managed browser, including direct upload, the drawing modal, click-to-place,
-drag adjustment, draft saving, signature submission and per-party link generation. The local preview runner also accepts
+drag adjustment, draft saving, signature submission and per-party link generation.
+Text-field browser checks also cover direct typing, multiple fields, movement,
+resizing, reload persistence, locking and an actual downloaded PDF containing
+the typed Unicode names, position and date. The local preview runner also accepts
 `--host` and `--port`. No fixture login route is included in production Functions.
