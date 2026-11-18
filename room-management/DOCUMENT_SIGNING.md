@@ -53,10 +53,20 @@ portrait, A4 landscape, mixed paper sizes and rotated pages. Normalized viewer
 positions are converted back through the stored PDF viewport transformation for
 export. PDF-LIB 1.17.1 embeds transparent PNG signature images into the original
 page content. Typed text is embedded as searchable text using the self-hosted
-Inter 4.1 font and @pdf-lib/fontkit 1.1.1, including Vietnamese and other supported
+complete static Inter Regular 4.1 font and @pdf-lib/fontkit 1.1.1, including Vietnamese and other supported
 accented characters. Shared font metrics keep field baselines and sizes aligned
 in the editor and PDF, including rotated pages and CropBoxes. Original text and
 page dimensions remain in the PDF.
+
+The font is the official `extras/ttf/Inter-Regular.ttf` from the
+[Inter 4.1 release](https://github.com/rsms/inter/releases/tag/v4.1), covered by
+`document-signing/fonts/INTER-LICENSE.txt`. Embed it without subsetting. The
+previous variable-font subset produced malformed glyph outlines: text extraction
+still returned the correct names while PDF viewers omitted visible letters.
+Every download regenerates from the original PDF and saved confirmed fields, so
+this repair applies to existing shared and signed documents without changing
+their text, signatures, confirmation times or links. No data migration is needed;
+previously downloaded attachments must be downloaded again.
 
 Original PDFs upload as immutable 16 MiB R2 objects. The application imposes no
 total file-size or page-count cap. An interrupted upload resumes from missing
@@ -100,6 +110,7 @@ initialization pattern. There is no modification to existing content or accounts
 
 ```sh
 npm ci --prefix tests/signing-runtime
+# Install poppler-utils if pdftoppm is unavailable.
 node --test tests/document-signing.test.mjs
 node --test tests/client-room-locale.test.mjs tests/room-video-thumbnails.test.mjs
 ```
@@ -111,7 +122,12 @@ concurrent submissions, signature-preserving export, A4 geometry, rotation,
 CropBox preservation, revocation, preparer-only agreements, recipient-created and
 movable areas, shared history, draft deletion, completed-document protection,
 archiving and restoration, multiple text fields, text ownership/privacy,
-concurrent text submissions, Unicode text extraction and export positions. `tests/signing-runtime/worker.mjs`
+concurrent text submissions, Unicode text extraction and export positions. A
+Poppler rendering check requires visible ink for every letter, digit and accented
+character, including the previously broken name on an already signed, shared
+Letter document. It also verifies that exporting leaves the record unchanged.
+This catches malformed fonts that extraction-only assertions miss.
+`tests/signing-runtime/worker.mjs`
 and `preview-server.mjs` are local-only fixture runners, not production routes.
 
 Browser checks can run with `tests/signing-runtime/browser-qa.mjs` when Playwright

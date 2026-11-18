@@ -29,6 +29,12 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: tests/signing-runtime/package-lock.json
+      - name: Install PDF renderer
+        run: |
+          if ! command -v pdftoppm >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y poppler-utils
+          fi
       - run: npm ci --prefix tests/signing-runtime
       - run: node --check document-signing/signing.js
       - run: node --test tests/document-signing.test.mjs tests/client-room-locale.test.mjs tests/room-video-thumbnails.test.mjs

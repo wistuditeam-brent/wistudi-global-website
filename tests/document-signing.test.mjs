@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
-import {readFile} from 'node:fs/promises';
+import {readFile,writeFile} from 'node:fs/promises';
 import {randomUUID} from 'node:crypto';
 import vm from 'node:vm';
 import {deflateSync} from 'node:zlib';
 import {harness,root} from './signing-runtime/harness.mjs';
+import {assertRenderedText} from './signing-runtime/pdf-render-check.mjs';
 const require=createRequire(new URL('./signing-runtime/package.json',import.meta.url));
 const {PDFDocument,PDFName,PageSizes,degrees}=require('pdf-lib');
 function png(red,green,blue){
@@ -14,6 +15,20 @@ function png(red,green,blue){
  const ihdr=Buffer.alloc(13);ihdr.writeUInt32BE(3,0);ihdr.writeUInt32BE(1,4);ihdr[8]=8;ihdr[9]=6;
  return 'data:image/png;base64,'+Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chunk('IHDR',ihdr),chunk('IDAT',deflateSync(Buffer.from([0,red,green,blue,255,red,green,blue,255,red,green,blue,255]))),chunk('IEND',Buffer.alloc(0))]).toString('base64');
 }
+
+async function exportSnapshot(h,data){
+ const sources={};for(const path of ['document-signing/vendor/pdf-lib.min.js','document-signing/vendor/fontkit.umd.min.js','document-signing/text-layout.js'])sources['/'+path]=await readFile(root+path,'utf8');
+ let output,error;const context=vm.createContext({console,Uint8Array,ArrayBuffer,DataView,TextEncoder,TextDecoder,setTimeout,clearTimeout,fetch:async path=>{
+  if(path.startsWith('/api/'))return h.request(path.replace('/api/room-management/',''));const buffer=await readFile(root+path.slice(1));return {ok:true,arrayBuffer:async()=>buffer.buffer.slice(buffer.byteOffset,buffer.byteOffset+buffer.byteLength)};
+ },self:{postMessage:m=>{if(m.error)error=m.error;if(m.bytes)output=m.bytes;}}});
+ context.importScripts=(...paths)=>{for(const path of paths)vm.runInContext(sources[path.split('?')[0]],context);};
+ const signed=new Set(data.parties.filter(p=>p.signed_at).map(p=>p.id));
+ vm.runInContext(await readFile(root+'document-signing/export-worker.js','utf8'),context);
+ // Legacy payload: the worker retrieves text from existing records at download time.
+ await context.self.onmessage({data:{document:data.document,fields:data.fields.filter(f=>signed.has(f.party_id)&&f.has_signature),headers:{}}});assert.equal(error,undefined,error);assert.ok(output);
+ return {output,context};
+}
+
 const signature=png(30,10,80);
 test('private PDF signing, A4 geometry, large uploads and final export',async t=>{
  const h=await harness();t.after(()=>h.close());
@@ -124,8 +139,8 @@ test('preparer-only agreements, individual placement, shared history and archive
 
 test('plain PDF text fields belong to each signer and are locked and exported with signatures',async t=>{
  const h=await harness();t.after(()=>h.close());
- const pdf=await PDFDocument.create();pdf.addPage(PageSizes.A4);pdf.addPage([PageSizes.A4[1],PageSizes.A4[0]]);const rotated=pdf.addPage(PageSizes.A4);rotated.setRotation(degrees(90));rotated.setCropBox(20,30,550,760);const bytes=await pdf.save();
- const pages=[{width:595.28,height:841.89,transform:[1,0,0,-1,0,841.89]},{width:841.89,height:595.28,transform:[1,0,0,-1,0,595.28]},{width:760,height:550,transform:[0,1,1,0,-30,-20]}];
+ const pdf=await PDFDocument.create();pdf.addPage([612,792]);pdf.addPage([PageSizes.A4[1],PageSizes.A4[0]]);const rotated=pdf.addPage(PageSizes.A4);rotated.setRotation(degrees(90));rotated.setCropBox(20,30,550,760);const bytes=await pdf.save();
+ const pages=[{width:612,height:792,transform:[1,0,0,-1,0,792]},{width:841.89,height:595.28,transform:[1,0,0,-1,0,595.28]},{width:760,height:550,transform:[0,1,1,0,-30,-20]}];
  const made=await h.json('signing?action=create',{method:'POST',body:{title:'Text UI test only',filename:'text-test-only.pdf',size:bytes.length,pages}}),d=made.body.id;
  await h.request('signing-upload?document='+d+'&part=0',{method:'PUT',body:bytes});await h.request('signing-upload?document='+d+'&action=complete',{method:'POST',body:{}});
  const get=async()=> (await h.json('signing?document='+d)).body;
@@ -142,11 +157,17 @@ test('plain PDF text fields belong to each signer and are locked and exported wi
  async function save(p,options={},session){const data=session?(await h.json('signing-guest',{as:'guest',token:session})).body:await get();return h.json(session?'signing-guest?action=signature':'signing?document='+d+'&action=signature',{method:'POST',...(session?{as:'guest',token:session}:{}),body:{party_id:p.id,revision:data.parties.find(x=>x.id===p.id).revision,...options}});}
  await t.test('hides draft text from other parties, requires own text and locks it on confirmation',async()=>{
   assert.equal((await guest(0)).text_fields.find(f=>f.id===prepared[0].id).text,'');
-  let r=await save(owner,{signatures:[{field_id:signatures[0].id,png:signature}],text_fields:[{...prepared[0],text:'Brent <Test>',x:.18,font_size:11}],confirm:true,consent:true});assert.equal(r.status,200,JSON.stringify(r.body));
-  assert.equal((await guest(0)).text_fields.find(f=>f.id===prepared[0].id).text,'Brent <Test>');
+  let r=await save(owner,{signatures:[{field_id:signatures[0].id,png:signature}],text_fields:[{...prepared[0],text:'Brent Shaun Strydom',x:.18,font_size:11}],confirm:true,consent:true});assert.equal(r.status,200,JSON.stringify(r.body));
+  assert.equal((await guest(0)).text_fields.find(f=>f.id===prepared[0].id).text,'Brent Shaun Strydom');
   assert.equal((await save(owner,{text_fields:[{...prepared[0],text:'Changed'}]})).status,409);
   const bad=await save(a,{text_fields:[{...prepared[0],party_id:a.id,text:'Tampered'}]},sessions[0]);assert.equal(bad.status,403);
   const missing=await save(a,{signatures:[{field_id:signatures[1].id,png:signature}],confirm:true,consent:true},sessions[0]);assert.equal(missing.status,400);assert.match(missing.body.error,/empty text fields/);
+ });
+ await t.test('repairs downloads from an already signed, shared Letter document without altering its record',async()=>{
+  const before=await get();assert.equal(before.document.status,'in_progress');assert.equal(before.parties.filter(p=>p.signed_at).length,1);
+  const {output,context}=await exportSnapshot(h,before),sourceFont=context.fontkit.create(new Uint8Array(await readFile(root+'document-signing/fonts/Inter-Regular.ttf')));
+  await assertRenderedText(output,before.document.pages,before.text_fields.filter(f=>f.party_id===owner.id),sourceFont,context.self.SigningTextLayout);
+  assert.deepEqual(await get(),before,'Export must preserve names, positions, signatures, timestamps and existing link versions.');
  });
  let aText;
  await t.test('creates, edits, resizes, deletes and reloads only the current signer’s text',async()=>{
@@ -169,16 +190,12 @@ test('plain PDF text fields belong to each signer and are locked and exported wi
   assert.equal((await guest(1)).text_fields.find(f=>f.id===aText[0].id).text,a.name);assert.equal(data.events.filter(e=>e.action==='Signature confirmed').length,3);
   assert.equal((await save(a,{text_fields:[{...aText[0],text:'Changed'}]},sessions[0])).status,409);
  });
- await t.test('exports searchable Unicode text on A4 and rotated pages, including older editor sessions',async()=>{
-  const data=await get(),sources={};for(const path of ['document-signing/vendor/pdf-lib.min.js','document-signing/vendor/fontkit.umd.min.js','document-signing/text-layout.js'])sources['/'+path]=await readFile(root+path,'utf8');
-  let output,error;const context=vm.createContext({console,Uint8Array,ArrayBuffer,DataView,TextEncoder,TextDecoder,setTimeout,clearTimeout,fetch:async path=>{
-   if(path.startsWith('/api/'))return h.request(path.replace('/api/room-management/',''));const buffer=await readFile(root+path.slice(1));return {ok:true,arrayBuffer:async()=>buffer.buffer.slice(buffer.byteOffset,buffer.byteOffset+buffer.byteLength)};
-  },self:{postMessage:m=>{if(m.error)error=m.error;if(m.bytes)output=m.bytes;}}});
-  context.importScripts=(...paths)=>{for(const path of paths)vm.runInContext(sources[path.split('?')[0]],context);};
-  vm.runInContext(await readFile(root+'document-signing/export-worker.js','utf8'),context);await context.self.onmessage({data:{document:data.document,fields:data.fields,headers:{}}});assert.equal(error,undefined,error);assert.ok(output);
+ await t.test('exports searchable Unicode text on Letter, A4 and rotated pages, including older editor sessions',async renderTest=>{
+  const data=await get(),{output,context}=await exportSnapshot(h,data);
+  if(process.env.SIGNING_PDF_REVIEW_PATH)await writeFile(process.env.SIGNING_PDF_REVIEW_PATH,new Uint8Array(output));
   const result=await PDFDocument.load(output);assert.equal(result.getPageCount(),3);assert.equal(result.getPage(2).getRotation().angle,90);assert.equal(result.getPage(2).getCropBox().x,20);
   const pdfjs=await import('../document-signing/vendor/pdf.min.mjs');pdfjs.GlobalWorkerOptions.workerSrc=new URL('../document-signing/vendor/pdf.worker.min.mjs',import.meta.url).href;
-  const parsed=await pdfjs.getDocument({data:new Uint8Array(output),useSystemFonts:false,disableFontFace:true,isEvalSupported:false}).promise;
+  const parsed=await pdfjs.getDocument({data:new Uint8Array(output.slice(0)),useSystemFonts:false,disableFontFace:true,isEvalSupported:false}).promise;
   for(let pageIndex=1;pageIndex<=3;pageIndex++){
    const page=await parsed.getPage(pageIndex),content=await page.getTextContent();
    for(const f of data.text_fields.filter(f=>f.page===pageIndex)){
@@ -188,6 +205,8 @@ test('plain PDF text fields belong to each signer and are locked and exported wi
    }
   }
   await parsed.destroy();
+  const sourceFont=context.fontkit.create(new Uint8Array(await readFile(root+'document-signing/fonts/Inter-Regular.ttf')));
+  await renderTest.test('renders every letter, digit and accented character visibly',()=>assertRenderedText(output,data.document.pages,data.text_fields,sourceFont,context.self.SigningTextLayout));
  });
  await t.test('archiving preserves the submitted text while deletion stays blocked',async()=>{
   assert.equal((await h.request('signing?document='+d+'&action=delete',{method:'POST',body:{}})).status,409);
