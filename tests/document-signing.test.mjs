@@ -169,13 +169,13 @@ test('plain PDF text fields belong to each signer and are locked and exported wi
   assert.equal((await guest(1)).text_fields.find(f=>f.id===aText[0].id).text,a.name);assert.equal(data.events.filter(e=>e.action==='Signature confirmed').length,3);
   assert.equal((await save(a,{text_fields:[{...aText[0],text:'Changed'}]},sessions[0])).status,409);
  });
- await t.test('exports searchable Unicode text at its saved position on A4 and rotated pages',async()=>{
+ await t.test('exports searchable Unicode text on A4 and rotated pages, including older editor sessions',async()=>{
   const data=await get(),sources={};for(const path of ['document-signing/vendor/pdf-lib.min.js','document-signing/vendor/fontkit.umd.min.js','document-signing/text-layout.js'])sources['/'+path]=await readFile(root+path,'utf8');
   let output,error;const context=vm.createContext({console,Uint8Array,ArrayBuffer,DataView,TextEncoder,TextDecoder,setTimeout,clearTimeout,fetch:async path=>{
    if(path.startsWith('/api/'))return h.request(path.replace('/api/room-management/',''));const buffer=await readFile(root+path.slice(1));return {ok:true,arrayBuffer:async()=>buffer.buffer.slice(buffer.byteOffset,buffer.byteOffset+buffer.byteLength)};
   },self:{postMessage:m=>{if(m.error)error=m.error;if(m.bytes)output=m.bytes;}}});
   context.importScripts=(...paths)=>{for(const path of paths)vm.runInContext(sources[path.split('?')[0]],context);};
-  vm.runInContext(await readFile(root+'document-signing/export-worker.js','utf8'),context);await context.self.onmessage({data:{document:data.document,fields:data.fields,text_fields:data.text_fields,headers:{}}});assert.equal(error,undefined,error);assert.ok(output);
+  vm.runInContext(await readFile(root+'document-signing/export-worker.js','utf8'),context);await context.self.onmessage({data:{document:data.document,fields:data.fields,headers:{}}});assert.equal(error,undefined,error);assert.ok(output);
   const result=await PDFDocument.load(output);assert.equal(result.getPageCount(),3);assert.equal(result.getPage(2).getRotation().angle,90);assert.equal(result.getPage(2).getCropBox().x,20);
   const pdfjs=await import('../document-signing/vendor/pdf.min.mjs');pdfjs.GlobalWorkerOptions.workerSrc=new URL('../document-signing/vendor/pdf.worker.min.mjs',import.meta.url).href;
   const parsed=await pdfjs.getDocument({data:new Uint8Array(output),useSystemFonts:false,disableFontFace:true,isEvalSupported:false}).promise;
