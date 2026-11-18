@@ -30,6 +30,34 @@ An unauthenticated manager entry returns through `/room-manager/?next=documents`
 8. Download the PDF with every confirmed signature. Export fetches the latest
    server record; draft signatures and unsubmitted text are excluded.
 
+### Preparer text and approvals
+
+The manager's **Add text** control remains available before and after any party
+signs, including when all signatures are complete. These document text fields
+are separate from each signer's own submitted fields. The preparer can type,
+move, resize, remove and save multiple document text fields with **Save changes**.
+Preparing text never changes a signature, signature position, signing timestamp
+or private signing link. Signature image controls apply only to the current
+signing party's unsigned signature.
+
+Each save appends a text version with the before/after values and positions,
+editor and timestamp. Every signing party sees this record in **Document
+history**, alongside each party's approval time. Each party approves the latest
+version with one **Approve text changes** button, through their existing private
+link and code. Approvals become available after sharing or the first signature,
+when the party details are fixed. A preparing manager who is also a signer approves only for their
+own party; a preparing manager who is not signing cannot approve for others.
+Subsequent edits require fresh approvals from every current party. Removing text
+also requires approval. Identical saves retain existing approvals.
+
+The viewer shows the proposed text and approval progress. PDF downloads include
+the latest text version approved by all parties; pending changes never replace
+the last approved text in a download. Existing signed records keep their original
+signatures and signing dates, and need no re-signing. The export worker retrieves
+the authoritative snapshot itself, including for older open editor sessions.
+Visible idle editors refresh approval and document state on focus and every
+20 seconds without interrupting unsaved edits.
+
 The original PDF and preparation become immutable once a signature is confirmed
 or a signing link is created. Each unsigned signer can still add, move and resize
 only their own signature areas. Only the creating manager can submit the owner's
@@ -85,11 +113,14 @@ cryptographic PDF signatures or preservation of pre-existing certificate validit
 ## Storage and security
 
 The existing `ROOM_DB` D1 and private `ROOM_MEDIA` R2 bindings are reused. Migration
-`0009_document_signing.sql` through `0011_document_signing_text.sql` add only new
+`0009_document_signing.sql` through `0012_document_text_approval.sql` add only new
 tables. Text is stored separately and shares the party revision and submission
 lock used by signatures. Older layout clients preserve text fields they omit. The signing API applies these
 same idempotent statements on first use, matching the existing room CMS's schema
 initialization pattern. There is no modification to existing content or accounts.
+The two new preparer-text tables are append-only versions and per-party approval
+records. Document revision checks serialize competing edits; approval writes
+check the latest text revision and the guest link's current version atomically.
 
 - Link tokens use 256 random bits and are hashed for lookup in D1. An active link
   can be copied again by an authorized manager; its token is retained only in
@@ -127,6 +158,12 @@ Poppler rendering check requires visible ink for every letter, digit and accente
 character, including the previously broken name on an already signed, shared
 Letter document. It also verifies that exporting leaves the record unchanged.
 This catches malformed fonts that extraction-only assertions miss.
+Preparer-text tests cover pre-signing edits, completed agreements, two-party
+approvals, approval resets, stale and simultaneous requests, empty revisions,
+archive/link continuity, shared before/after history, unchanged signature records,
+approved-only downloads and visible text rendering. Browser QA also checks
+typing, movement, saving on a completed agreement, both recipient approvals,
+an actual PDF download and reapproval after another edit.
 `tests/signing-runtime/worker.mjs`
 and `preview-server.mjs` are local-only fixture runners, not production routes.
 

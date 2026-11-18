@@ -2,16 +2,19 @@
 importScripts('/document-signing/vendor/pdf-lib.min.js','/document-signing/text-layout.js?v=3');
 function toPdf(t,x,y){const det=t[0]*t[3]-t[1]*t[2];return [(t[3]*(x-t[4])-t[2]*(y-t[5]))/det,(-t[1]*(x-t[4])+t[0]*(y-t[5]))/det];}
 self.onmessage=async({data})=>{try{
- const {document:d,fields=[],headers}=data;
- let text_fields=data.text_fields;
+ const {headers}=data;
+ let d=data.document;
  const read=async url=>{const r=await fetch(url,{headers,credentials:'same-origin',cache:'no-store'});if(!r.ok)throw Error('Your access expired. Reload the document before downloading.');return r.arrayBuffer();};
- // Editors already open before text support may omit text_fields in their message.
- if(text_fields===undefined){
+ // Read the authoritative approved text even for an older editor already open.
+ let fields=[],text_fields=[];
+ {
   const route=headers?.authorization||headers?.Authorization?'signing-guest':'signing?document='+d.id;
   const response=await fetch('/api/room-management/'+route,{headers,credentials:'same-origin',cache:'no-store'});
   if(!response.ok)throw Error('Your access expired. Reload the document before downloading.');
-  const latest=await response.json(),signed=new Set(latest.parties.filter(p=>p.signed_at).map(p=>p.id));
-  text_fields=(latest.text_fields||[]).filter(f=>signed.has(f.party_id)&&f.text.trim());
+  const latest=await response.json();if(latest.document.id!==d.id)throw Error('Document access changed. Reload before downloading.');
+  d=latest.document;const signed=new Set(latest.parties.filter(p=>p.signed_at).map(p=>p.id));
+  fields=latest.fields.filter(f=>signed.has(f.party_id)&&f.has_signature);
+  text_fields=[...(latest.text_fields||[]).filter(f=>signed.has(f.party_id)&&f.text.trim()),...(latest.approved_document_text_fields||[])];
  }
  self.postMessage({status:'Reading the original PDF…'});
  const bytes=await read('/api/room-management/signing-file?document='+d.id);

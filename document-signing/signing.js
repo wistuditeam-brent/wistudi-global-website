@@ -11,7 +11,7 @@ const state = {
   textChanges: new Map(), textRemoved: new Map(), selectedText: null, placementKind: null,
   removed: new Map(), images: new Map(), placing: null, placementImage: null,
   selected: null, activeParty: null, template: null, session: null, upload: null,
-  busy: false, saving: false, uploading: false
+  busy: false, saving: false, uploading: false, documentTextDirty: false, refreshing: false, historyOpen: undefined
 };
 const linkToken = new URLSearchParams(location.hash.slice(1)).get('token');
 let strokes = [], stroke = null, shareParty = null, resizeTimer;
@@ -34,14 +34,17 @@ const editable = () => admin && state.data?.document.status === 'draft';
 const ownParty = () => state.data?.parties.find(p => p.id === state.data.current_party_id) || {id:null};
 const ownFields = () => state.data?.fields.filter(f => f.party_id === state.data.current_party_id) || [];
 const signedParty = p => !!p?.signed_at;
-const dirty = () => state.layoutDirty || state.signatures.size > 0 || state.positions.size > 0 || state.removed.size > 0 || state.textChanges.size > 0 || state.textRemoved.size > 0;
+const dirty = () => state.documentTextDirty || state.layoutDirty || state.signatures.size > 0 || state.positions.size > 0 || state.removed.size > 0 || state.textChanges.size > 0 || state.textRemoved.size > 0;
 const authHeaders = () => state.session ? {authorization:'Bearer '+state.session} : {};
 const sourceUrl = () => API+'signing-file?document='+state.data.document.id;
 const partyName = p => p?.name || 'Party '+String.fromCharCode(65+Math.max(0,state.data.parties.filter(x=>x.kind!=='owner').findIndex(x=>x.id===p?.id)));
 const sizeLabel = bytes => bytes < 1e6 ? Math.round(bytes/1000)+' KB' : bytes < 1e9 ? (bytes/1e6).toFixed(1)+' MB' : (bytes/1e9).toFixed(2)+' GB';
 const currentSignatureParty = () => state.data?.parties.find(p=>p.id===(admin?state.activeParty:state.data.current_party_id));
 const canEditParty = p => p && !p.signed_at && state.data.document.status!=='cancelled' && (editable() || p.id===state.data.current_party_id);
-const canMoveField = f => canEditParty(state.data.parties.find(p=>p.id===f.party_id));
+const canMoveField = f => canEditParty(state.data.parties.find(p=>p.id===f.party_id))&&(!f.has_signature||f.party_id===state.data.current_party_id);
+const canPrepareText = () => admin && state.data?.document.status!=='cancelled';
+const allTextFields = () => [...state.data.text_fields,...state.data.document_text.fields];
+const canEditTextField = f => f.prepared ? canPrepareText() : canMoveField(f);
 const hasSignature = f => state.signatures.has(f.id) ? !!state.signatures.get(f.id) : !!f.has_signature;
 function status(text, error=false) {
   $('globalStatus').textContent = error ? text : '';
@@ -72,9 +75,9 @@ function updateToolbar() {
   const d=state.data.document, own=ownParty(), signed=state.data.parties.filter(signedParty).length;
   $('workTitle').textContent = d.title;
   $('workMeta').textContent = d.pages.length+' page'+(d.pages.length===1?'':'s')+' · '+sizeLabel(d.total_bytes)+' · '+signed+' of '+state.data.parties.length+' signed';
-  $('saveDraft').hidden = d.status==='cancelled' || (!editable() && (!own.id || own.signed_at));
+  $('saveDraft').hidden = d.status==='cancelled' || (!admin && (!own.id || own.signed_at));
   $('saveDraft').disabled = state.saving;
-  $('saveDraft').textContent = state.saving ? 'Saving…' : 'Save draft';
+  $('saveDraft').textContent = state.saving ? 'Saving…' : admin&&!editable()?'Save changes':'Save draft';
   if ($('saveState')) $('saveState').textContent = dirty() ? 'Unsaved changes' : 'Saved';
   if (admin) {
     const others=state.data.parties.filter(p=>p.kind!=='owner');
@@ -82,11 +85,15 @@ function updateToolbar() {
     $('shareDocument').disabled = state.saving;
   }
   $('downloadPdf').disabled = state.busy;
+  $('downloadPdf').title=state.data.document_text.revision>state.data.document_text.approved_revision?'Download with the last approved text':'';
   $('addText').disabled=state.saving;
   for(const input of document.querySelectorAll('.pdf-text-input'))input.readOnly=state.saving;
 }
 function setSnapshot(data) {
   data.text_fields ||= [];
+  data.document_text ||= {revision:0,approved_revision:0,fields:[],approvals:[],history:[],approval_history:[]};
+  if(state.documentTextDirty&&state.data)data.document_text.fields=state.data.document_text.fields;
+  for(const f of data.document_text.fields)f.prepared=true;
   state.data = data;
   for(const f of data.text_fields)f.persisted=true;
   for (const f of data.fields) f.persisted = true;
@@ -106,9 +113,9 @@ async function loadList() {
   for (const d of items) {
     const row=node('article','document-row'), details=node('div'), actions=node('div','row-actions');
     details.append(node('h3','',d.title),node('div','meta',d.filename+' · '+sizeLabel(d.total_bytes)));
-    const complete=d.signers>0&&d.signed===d.signers;
-    const label=!d.file_ready?'Upload incomplete':d.status==='cancelled'?'Cancelled':complete?'Completed':d.status==='draft'?'Draft':d.signed+' of '+d.signers+' signed';
-    actions.append(node('span','badge'+(complete?' green':''),label),button(d.file_ready?'Open':'Resume upload','text-button',()=>run(()=>d.file_ready?openDocument(d.id):resumeUpload(d))));
+    const complete=d.signers>0&&d.signed===d.signers,pendingText=d.text_revision>0&&d.signers>0&&d.text_approved<d.signers;
+    const label=!d.file_ready?'Upload incomplete':d.status==='cancelled'?'Cancelled':pendingText?'Awaiting text approval':complete?'Completed':d.status==='draft'?'Draft':d.signed+' of '+d.signers+' signed';
+    actions.append(node('span','badge'+(complete&&!pendingText?' green':''),label),button(d.file_ready?'Open':'Resume upload','text-button',()=>run(()=>d.file_ready?openDocument(d.id):resumeUpload(d))));
     const deletable=!archived&&d.status==='draft'&&!d.signed&&!d.shared;
     const action=archived?'restore':deletable?'delete':'archive';
     const labelAction=archived?'Restore to active documents':deletable?'Delete draft':complete?'This MOU has been signed by all parties and cannot be deleted. You can only archive it.':'Signing has started. This document cannot be deleted; you can only archive it.';
@@ -184,11 +191,11 @@ async function uploadPdf(file) {
 }
 async function openDocument(documentId) {
   const data=await api('signing?document='+documentId);
-  state.page=1; state.layoutDirty=false; state.signatures.clear(); state.positions.clear(); state.removed.clear(); state.textChanges.clear(); state.textRemoved.clear(); state.selectedText=null;
+  state.page=1; state.layoutDirty=false; state.documentTextDirty=false; state.historyOpen=undefined; state.signatures.clear(); state.positions.clear(); state.removed.clear(); state.textChanges.clear(); state.textRemoved.clear(); state.selectedText=null;
   state.selected=null; state.template=null; state.activeParty=null; clearPlacement();
   setSnapshot(data); $('dashboard').hidden=true; $('workbench').hidden=false;
   history.replaceState(null,'','?document='+documentId);
-  if(state.data.text_fields.length)await document.fonts.load('12px "Signing Inter"');
+  if(allTextFields().length)await document.fonts.load('12px "Signing Inter"');
   await loadViewer(); status('');
 }
 async function loadViewer() {
@@ -292,12 +299,14 @@ function textLayout(f) {
   return self.SigningTextLayout(f,state.data.document.pages[f.page-1],value=>ctx.measureText(value).width);
 }
 function textDirty(f) {
-  if(editable())state.layoutDirty=true;
+  if(f.prepared)state.documentTextDirty=true;
+  else if(editable())state.layoutDirty=true;
   else state.textChanges.set(f.id,textData(f));
   updateToolbar();
 }
 function removeTextField(f) {
-  if(!canMoveField(f)||state.saving)return;
+  if(!canEditTextField(f)||state.saving)return;
+  if(f.prepared){state.data.document_text.fields=state.data.document_text.fields.filter(t=>t.id!==f.id);state.documentTextDirty=true;state.selectedText=null;renderFields();renderSidebar();updateToolbar();return;}
   state.data.text_fields=state.data.text_fields.filter(t=>t.id!==f.id);state.textChanges.delete(f.id);
   if(editable())state.layoutDirty=true;
   else if(f.persisted!==false)state.textRemoved.set(f.id,f.party_id);
@@ -309,16 +318,16 @@ function applyTextStyle(f,content) {
   content.style.lineHeight=f.height*state.data.document.pages[f.page-1].height*state.scale+'px';
 }
 function renderTextFields(layer) {
-  for(const f of state.data.text_fields.filter(t=>t.page===state.page)) {
-    const party=state.data.parties.find(p=>p.id===f.party_id);if(!party)continue;
-    const allowed=canMoveField(f),signed=signedParty(party);
+  for(const f of allTextFields().filter(t=>t.page===state.page)) {
+    const party=state.data.parties.find(p=>p.id===f.party_id);if(!party&&!f.prepared)continue;
+    const allowed=canEditTextField(f),signed=f.prepared?state.data.document_text.approved_revision===state.data.document_text.revision:signedParty(party);
     const box=node('div','signature-field text-field'+(signed?' signed':'')+(allowed?' editable-text':' other')+(state.selectedText===f.id?' selected':''));
     box.dataset.textField=f.id;box.style.left=f.x*100+'%';box.style.top=f.y*100+'%';box.style.width=f.width*100+'%';box.style.height=f.height*100+'%';
     let content;
     if(allowed){
       content=node('input','pdf-text-input');content.type='text';content.value=f.text;content.placeholder='Text';content.maxLength=2000;content.autocomplete='off';content.spellcheck=false;content.readOnly=state.saving;
-      content.setAttribute('aria-label','Text for '+partyName(party)+' on page '+f.page);
-      content.onfocus=()=>{clearPlacement();state.selectedText=f.id;state.selected=null;if(state.activeParty!==f.party_id)state.template=null;state.activeParty=f.party_id;for(const item of layer.querySelectorAll('.text-field'))item.classList.toggle('selected',item===box);renderSidebar();};
+      content.setAttribute('aria-label',(f.prepared?'Document text':'Text for '+partyName(party))+' on page '+f.page);
+      content.onfocus=()=>{clearPlacement();state.selectedText=f.id;state.selected=null;if(!f.prepared){if(state.activeParty!==f.party_id)state.template=null;state.activeParty=f.party_id;}for(const item of layer.querySelectorAll('.text-field'))item.classList.toggle('selected',item===box);renderSidebar();};
       content.oninput=()=>{f.text=content.value;textDirty(f);applyTextStyle(f,content);const caption=document.querySelector('[data-text-link="'+f.id+'"] .text-field-label');if(caption)caption.textContent=f.text.slice(0,40)||'Text field';};
       content.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'||e.key==='Escape'){e.preventDefault();content.blur();}};
       box.append(content);
@@ -326,7 +335,7 @@ function renderTextFields(layer) {
       const remove=button('×','remove',e=>{e.stopPropagation();removeTextField(f);});remove.setAttribute('aria-label','Remove text field');remove.onpointerdown=e=>e.stopPropagation();box.append(remove);
       box.onpointerdown=e=>{
         if(state.saving||e.button!==0||e.target.closest('input,button'))return;
-        e.preventDefault();state.selectedText=f.id;state.selected=null;if(state.activeParty!==f.party_id)state.template=null;state.activeParty=f.party_id;
+        e.preventDefault();state.selectedText=f.id;state.selected=null;if(!f.prepared){if(state.activeParty!==f.party_id)state.template=null;state.activeParty=f.party_id;}
         const bounds=$('pageWrap').getBoundingClientRect(),start={x:e.clientX,y:e.clientY,fx:f.x,fy:f.y,fw:f.width,fh:f.height};
         const resizing=e.target.classList.contains('resize');let moved=false;box.setPointerCapture(e.pointerId);
         box.onpointermove=ev=>{
@@ -344,21 +353,22 @@ function renderTextFields(layer) {
   }
 }
 async function beginTextPlacement(partyId=currentSignatureParty()?.id) {
-  const p=state.data.parties.find(p=>p.id===partyId);if(!canEditParty(p)||state.saving)return;
+  const p=state.data.parties.find(p=>p.id===partyId);if(state.saving||(admin?!canPrepareText():!canEditParty(p)))return;
   await document.fonts.load('12px "Signing Inter"');
-  clearPlacement();state.placing=partyId;state.placementKind='text';state.selected=null;state.selectedText=null;
+  clearPlacement();state.placing=admin?'document':partyId;state.placementKind='text';state.selected=null;state.selectedText=null;
   $('pdfScroll').classList.add('placing');$('placementPrompt').textContent='Click the PDF to add text.';$('placementPrompt').hidden=false;$('cancelPlacement').hidden=false;
   if(innerWidth<=700)$('pageWrap').scrollIntoView({behavior:'smooth',block:'center'});
 }
 function placeText(e) {
   const rect=$('pageWrap').getBoundingClientRect(),meta=state.data.document.pages[state.page-1],width=Math.min(.8,180/meta.width),height=Math.min(.15,18/meta.height);
-  const f={id:crypto.randomUUID(),party_id:state.placing,page:state.page,x:Math.max(0,Math.min(1-width,(e.clientX-rect.left)/rect.width)),y:Math.max(0,Math.min(1-height,(e.clientY-rect.top)/rect.height-height/2)),width,height,font_size:12,text:'',persisted:false};
-  state.data.text_fields.push(f);state.selectedText=f.id;state.activeParty=f.party_id;clearPlacement();textDirty(f);renderFields();renderSidebar();
+  const prepared=state.placing==='document';
+  const f={id:crypto.randomUUID(),party_id:prepared?null:state.placing,prepared,page:state.page,x:Math.max(0,Math.min(1-width,(e.clientX-rect.left)/rect.width)),y:Math.max(0,Math.min(1-height,(e.clientY-rect.top)/rect.height-height/2)),width,height,font_size:12,text:'',persisted:false};
+  (prepared?state.data.document_text.fields:state.data.text_fields).push(f);state.selectedText=f.id;if(!prepared)state.activeParty=f.party_id;clearPlacement();textDirty(f);renderFields();renderSidebar();
   $('fieldLayer').querySelector('[data-text-field="'+f.id+'"] input')?.focus();
 }
 function renderTextList() {
-  const p=currentSignatureParty();if(!p)return;
-  const fields=state.data.text_fields.filter(f=>f.party_id===p.id);if(!fields.length)return;
+  const p=currentSignatureParty();
+  const fields=allTextFields().filter(f=>f.prepared||f.party_id===p?.id);if(!fields.length)return;
   const section=node('section','side-section');section.append(node('h3','','Text fields'));
   for(const f of fields){const row=button('','field-jump',()=>run(async()=>{await jumpTo(f.page);state.selectedText=f.id;renderFields();$('fieldLayer').querySelector('[data-text-field="'+f.id+'"] input')?.focus();}));row.dataset.textLink=f.id;row.append(node('span','text-field-label',f.text.slice(0,40)||'Text field'),node('span','','Page '+f.page));section.append(row);}
   $('signatureAreas').append(section);
@@ -370,6 +380,8 @@ function clearPlacement() {
 }
 function beginPlacement(partyId,png=null) {
   const p=state.data.parties.find(x=>x.id===partyId);if(!canEditParty(p))return;
+  if(png&&partyId!==state.data.current_party_id)return;
+  state.activeParty=partyId;
   state.placing=partyId;state.placementImage=png;state.placementKind='signature';state.selected=null;state.selectedText=null;
   $('pdfScroll').classList.add('placing');$('placementPrompt').textContent=png?'Click the PDF to place your signature.':'Click the PDF to place '+partyName(p)+'’s signature area.';
   $('placementPrompt').hidden=false;$('cancelPlacement').hidden=false;
@@ -405,8 +417,8 @@ function renderSidebar() {
   if(!state.data)return;
   const d=state.data.document,own=ownParty(),prepare=editable(),intro=$('sidebarIntro'),details=$('documentDetails');
   intro.replaceChildren();details.replaceChildren();$('signatureAreas').replaceChildren();$('otherSigners').replaceChildren();$('documentActivity').replaceChildren();
-  intro.append(node('h2','',d.status==='completed'?'Signing complete':'Details & signatures'));
-  if(d.status==='cancelled'){intro.append(node('p','notice error','Signing request cancelled.'));$('signatureTools').hidden=true;renderHistory();return;}
+  intro.append(node('h2','',state.data.document_text.revision>state.data.document_text.approved_revision?'Review text changes':d.status==='completed'?'Signing complete':'Details & signatures'));
+  if(d.status==='cancelled'){intro.append(node('p','notice error','Signing request cancelled.'));$('signatureTools').hidden=true;$('textTools').hidden=true;$('textReview').replaceChildren();renderHistory();return;}
   const doc=node('section','side-section');doc.append(node('h3','','Document details'));
   if(prepare)doc.append(inputField('Document title',d.title,value=>{d.title=value;updateToolbar();},{required:true}));
   else doc.append(node('p','document-name',d.title));
@@ -426,13 +438,17 @@ function renderSidebar() {
   }
   const candidates=state.data.parties.filter(canEditParty);
   if(!candidates.some(p=>p.id===state.activeParty))state.activeParty=candidates[0]?.id||null;
-  $('signatureTools').hidden=!candidates.length;
+  const canSign=canEditParty(currentSignatureParty())&&currentSignatureParty().id===state.data.current_party_id;
+  $('signatureTools').hidden=!canSign;
+  $('drawSignature').hidden=!canSign;$('uploadSignature').hidden=!canSign;
+  $('textTools').hidden=!(canPrepareText()||canEditParty(own));
+  renderTextReview();
   $('signatureParty').replaceChildren();
-  $('signatureParty').hidden=!admin||candidates.length<2;
+  $('signatureParty').hidden=true;
   for(const p of candidates){const option=node('option','',partyName(p));option.value=p.id;$('signatureParty').append(option);}
   $('signatureParty').value=state.activeParty||'';
   $('signaturePreview').hidden=!state.template;if(state.template)$('signaturePreview').src=state.template;
-  $('useSignature').hidden=!state.template;
+  $('useSignature').hidden=!state.template||!canSign;
   $('useSignature').textContent=state.selected?'Apply signature':'Place signature';
   const selected=state.data.fields.find(f=>f.id===state.selected);
   $('removeSignature').hidden=!selected||!canMoveField(selected)||!hasSignature(selected);
@@ -472,11 +488,36 @@ function renderParties() {
 }
 function utcTime(value) { return /Z$|[+-]\d\d:\d\d$/.test(value)?value:value.replace(' ','T')+'Z'; }
 function formatTime(value) { return new Intl.DateTimeFormat(undefined,{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(new Date(utcTime(value))); }
+function renderTextReview() {
+  const host=$('textReview');host.replaceChildren();
+  const review=state.data.document_text;if(!review.revision)return;
+  const section=node('section','side-section'),complete=review.revision===review.approved_revision;
+  section.append(node('h3','','Text approval'),node('p','approval-count',(complete?'Approved':'Awaiting approval')+' · '+review.approvals.length+' of '+state.data.parties.length));
+  for(const p of state.data.parties){const row=node('div','approval-party');row.append(node('span','',partyName(p)),node('span','',review.approvals.some(a=>a.party_id===p.id)?'Approved':'Pending'));section.append(row);}
+  const own=ownParty();if(own.id&&state.data.document.status!=='draft'&&!review.approvals.some(a=>a.party_id===own.id)){
+    const approve=button('Approve text changes','primary full',()=>run(approveText));approve.disabled=state.saving;section.append(approve);
+  }
+  host.append(section);
+}
+async function approveText() {
+  if(state.saving)return;
+  if(dirty())await saveDraft();
+  const revision=state.data.document_text.revision;state.saving=true;updateToolbar();renderTextReview();
+  try{setSnapshot(await api(admin?'signing?document='+state.data.document.id+'&action=approve-text':'signing-guest?action=approve-text',{method:'POST',body:{revision}}));}
+  catch(e){state.saving=false;await refreshSnapshot().catch(()=>{});throw e;}
+  finally{state.saving=false;updateToolbar();renderTextReview();}
+}
 function renderHistory() {
   const host=$('documentActivity'),section=node('section','side-section'),history=node('details','activity');
-  history.open=state.data.document.status==='completed';history.append(node('summary','','Signing history'));
+  history.open=state.historyOpen??(state.data.document.status==='completed'||state.data.document_text.revision>state.data.document_text.approved_revision);history.ontoggle=()=>{state.historyOpen=history.open;};history.append(node('summary','','Document history'));
   const labels={'Document created':'Document created','Signing link created':'Signing link created','Signing link replaced':'Signing link replaced','Signing link revoked':'Link revoked','Signature confirmed':'Signed','Document cancelled':'Signing cancelled'};
-  for(const e of state.data.events||[]){const row=node('div','event');row.append(node('div','',e.actor+' · '+(labels[e.action]||e.action)));const time=node('time','',formatTime(e.created_at));time.dateTime=utcTime(e.created_at);row.append(time);history.append(row);}
+  const review=state.data.document_text;
+  const events=[...(state.data.events||[]),...review.history.map(v=>({...v,action:'Text updated · v'+v.revision})),...review.approval_history.map(a=>({actor:a.actor,action:'Approved text · v'+a.revision,created_at:a.approved_at}))].sort((a,b)=>utcTime(b.created_at).localeCompare(utcTime(a.created_at)));
+  for(const e of events){const row=node('div','event');
+    if(e.changes){for(const change of e.changes){const f=change.after||change.before;let label;
+      if(!change.before)label='Added “'+f.text+'”';else if(!change.after)label='Removed “'+f.text+'”';else if(change.before.text!==change.after.text)label='“'+change.before.text+'” → “'+change.after.text+'”';else label=(change.before.page!==f.page||change.before.x!==f.x||change.before.y!==f.y?'Moved':'Resized')+' “'+f.text+'”';
+      row.append(node('p','text-edit-detail',label+' · Page '+f.page));
+    }}row.append(node('div','',e.actor+' · '+(labels[e.action]||e.action)));const time=node('time','',formatTime(e.created_at));time.dateTime=utcTime(e.created_at);row.append(time);history.append(row);}
   if(admin&&!['cancelled','completed'].includes(state.data.document.status))history.append(button('Cancel signing request','danger',()=>run(async()=>{if(!confirm('Cancel this signing request?'))return;setSnapshot(await api('signing?document='+state.data.document.id+'&action=cancel',{method:'POST',body:{}}));})));
   section.append(history);host.append(section);
 }
@@ -497,6 +538,10 @@ async function saveDraft(confirmOwn=false) {
   state.saving=true;updateToolbar();
   try {
     if(editable())await saveLayout();
+    if(state.documentTextDirty){
+      const data=await api('signing?document='+state.data.document.id+'&action=text',{method:'POST',body:{revision:state.data.document.revision,text_revision:state.data.document_text.revision,fields:state.data.document_text.fields.map(textData)}});
+      state.documentTextDirty=false;setSnapshot(data);
+    }
     const groups=new Map();
     const group=p=>{if(!groups.has(p))groups.set(p,{signatures:[],positions:[],remove_fields:[],text_fields:[],remove_text_fields:[]});return groups.get(p);};
     for(const [fieldId,png] of state.signatures){const f=state.data.fields.find(f=>f.id===fieldId);if(f)group(f.party_id).signatures.push({field_id:fieldId,png});}
@@ -628,11 +673,11 @@ async function downloadPdf() {
   state.busy=true;updateToolbar();const original=$('downloadPdf').innerHTML;
   try {
     const latest=await api(admin?'signing?document='+state.data.document.id:'signing-guest');setSnapshot(latest);
-    const signed=new Set(latest.parties.filter(signedParty).map(p=>p.id)),fields=latest.fields.filter(f=>signed.has(f.party_id)&&f.has_signature),text_fields=latest.text_fields.filter(f=>signed.has(f.party_id)&&f.text.trim());
+    const signed=new Set(latest.parties.filter(signedParty).map(p=>p.id)),fields=latest.fields.filter(f=>signed.has(f.party_id)&&f.has_signature),text_fields=[...latest.text_fields.filter(f=>signed.has(f.party_id)&&f.text.trim()),...(latest.approved_document_text_fields||[])];
     if(!fields.length&&!text_fields.length){const r=await fetch(sourceUrl(),{headers:authHeaders(),credentials:'same-origin'});if(!r.ok)throw Error('Could not download the PDF.');saveDownload(await r.blob(),latest.document.filename);return;}
-    const worker=new Worker('/document-signing/export-worker.js?v=4');
+    const worker=new Worker('/document-signing/export-worker.js?v=5');
     await new Promise((resolve,reject)=>{
-      worker.onmessage=({data})=>{if(data.status)$('downloadPdf').textContent='Preparing PDF…';if(data.error){worker.terminate();reject(Error(data.error));}if(data.bytes){saveDownload(new Blob([data.bytes],{type:'application/pdf'}),latest.document.filename.replace(/\.pdf$/i,'')+(signed.size===latest.parties.length?'-signed.pdf':'-partially-signed.pdf'));worker.terminate();resolve();}};
+      worker.onmessage=({data})=>{if(data.status)$('downloadPdf').textContent='Preparing PDF…';if(data.error){worker.terminate();reject(Error(data.error));}if(data.bytes){saveDownload(new Blob([data.bytes],{type:'application/pdf'}),latest.document.filename.replace(/\.pdf$/i,'')+(signed.size===latest.parties.length?'-signed.pdf':signed.size?'-partially-signed.pdf':'-prepared.pdf'));worker.terminate();resolve();}};
       worker.onerror=()=>{worker.terminate();reject(Error('The PDF could not be prepared on this device.'));};worker.postMessage({document:latest.document,fields,text_fields,headers:authHeaders()});
     });
   } finally {state.busy=false;$('downloadPdf').innerHTML=original;updateToolbar();}
@@ -644,7 +689,7 @@ async function guestAccess(code) {
   state.session=data.session;sessionStorage.setItem('wistudi_signing_'+linkToken,data.session);await startGuest(data);
 }
 async function startGuest(data) {
-  setSnapshot(data);$('accessScreen').hidden=true;$('workbench').hidden=false;if(state.data.text_fields.length)await document.fonts.load('12px "Signing Inter"');await loadViewer();status('');
+  setSnapshot(data);$('accessScreen').hidden=true;$('workbench').hidden=false;if(allTextFields().length)await document.fonts.load('12px "Signing Inter"');await loadViewer();status('');
 }
 async function init() {
   if(admin) {
@@ -678,13 +723,22 @@ draw.onpointerup=draw.onpointercancel=()=>{stroke=null;};
 if(admin) {
   $('uploadPdfButton').onclick=()=>{state.upload=null;selectPdf();};$('pdfUpload').onchange=()=>uploadPdf($('pdfUpload').files[0]);
   $('documentFilter').onchange=()=>run(loadList);
-  $('backToList').onclick=()=>run(async()=>{if(dirty()&&!confirm('Leave without saving?'))return;state.layoutDirty=false;state.signatures.clear();state.positions.clear();state.removed.clear();state.textChanges.clear();state.textRemoved.clear();state.selectedText=null;clearPlacement();history.replaceState(null,'',location.pathname);await loadList();});
+  $('backToList').onclick=()=>run(async()=>{if(dirty()&&!confirm('Leave without saving?'))return;state.layoutDirty=false;state.documentTextDirty=false;state.signatures.clear();state.positions.clear();state.removed.clear();state.textChanges.clear();state.textRemoved.clear();state.selectedText=null;clearPlacement();history.replaceState(null,'',location.pathname);await loadList();});
   $('shareDocument').onclick=()=>run(()=>openShare());$('closeShare').onclick=()=>$('shareDialog').close();$('shareRecipient').onchange=()=>run(()=>loadShareParty($('shareRecipient').value));
   $('generateCode').onclick=newCode;$('createLink').onclick=createLink;$('copyLink').onclick=()=>copyText($('shareUrl').value,'Link');$('copyCode').onclick=()=>copyText($('codeDisplay').textContent,'Code');
   $('signOut').onclick=()=>run(async()=>{if(dirty()&&!confirm('Sign out without saving?'))return;await api('session',{method:'DELETE'});location.replace('/room-manager/');});
 } else {
   $('accessForm').onsubmit=async e=>{e.preventDefault();$('accessSubmit').disabled=true;try{await guestAccess($('accessCode').value);}catch(e){$('accessError').textContent=e.message;}finally{$('accessSubmit').disabled=false;}};
 }
+const snapshotKey = data => JSON.stringify([data.document.revision,data.document.status,data.parties.map(p=>[p.id,p.revision,p.signed_at]),data.document_text?.revision,data.document_text?.approvals]);
+async function refreshSnapshot() {
+  if(!state.data||state.refreshing||state.saving||state.busy||dirty()||$('workbench').hidden)return;
+  state.refreshing=true;
+  try{const data=await api(admin?'signing?document='+state.data.document.id:'signing-guest');if(snapshotKey(data)!==snapshotKey(state.data))setSnapshot(data);}
+  finally{state.refreshing=false;}
+}
+window.addEventListener('focus',()=>run(refreshSnapshot));
+setInterval(()=>{if(document.visibilityState==='visible')refreshSnapshot().catch(()=>{});},20000);
 window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>run(renderPage),200);});
 window.addEventListener('beforeunload',e=>{if(dirty()){e.preventDefault();e.returnValue='';}});
 init();

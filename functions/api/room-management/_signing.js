@@ -12,6 +12,8 @@ export async function codeHash(code, salt) {
  return Array.from(new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: new TextEncoder().encode(salt), iterations: 100000, hash: 'SHA-256' }, key, 256)), n => n.toString(16).padStart(2, '0')).join('');
 }
 const SCHEMA = [
+ `CREATE TABLE IF NOT EXISTS room_signing_document_text_versions (document_id TEXT NOT NULL REFERENCES room_signing_documents(id), revision INTEGER NOT NULL, fields_json TEXT NOT NULL, changes_json TEXT NOT NULL, actor TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(document_id,revision))`,
+ `CREATE TABLE IF NOT EXISTS room_signing_document_text_approvals (document_id TEXT NOT NULL REFERENCES room_signing_documents(id), revision INTEGER NOT NULL, party_id TEXT NOT NULL, actor TEXT NOT NULL, approved_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(document_id,revision,party_id))`,
  `CREATE TABLE IF NOT EXISTS room_signing_text_fields (id TEXT PRIMARY KEY, document_id TEXT NOT NULL REFERENCES room_signing_documents(id), party_id TEXT NOT NULL REFERENCES room_signing_parties(id), page INTEGER NOT NULL, x REAL NOT NULL, y REAL NOT NULL, width REAL NOT NULL, height REAL NOT NULL, text_value TEXT NOT NULL DEFAULT '', font_size REAL NOT NULL DEFAULT 12)`,
  `CREATE TABLE IF NOT EXISTS room_signing_documents (id TEXT PRIMARY KEY, room_id TEXT NOT NULL DEFAULT 'client', title TEXT NOT NULL, filename TEXT NOT NULL, total_bytes INTEGER NOT NULL, chunk_size INTEGER NOT NULL, pages_json TEXT NOT NULL, created_by TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'draft', file_ready INTEGER NOT NULL DEFAULT 0, revision INTEGER NOT NULL DEFAULT 0, edit_token TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
  `CREATE TABLE IF NOT EXISTS room_signing_parties (id TEXT PRIMARY KEY, document_id TEXT NOT NULL REFERENCES room_signing_documents(id), name TEXT NOT NULL, email TEXT NOT NULL DEFAULT '', kind TEXT NOT NULL DEFAULT 'signer', link_hash TEXT UNIQUE, link_version INTEGER NOT NULL DEFAULT 0, code_salt TEXT, code_hash TEXT, revoked_at TEXT, signed_at TEXT, revision INTEGER NOT NULL DEFAULT 0, edit_token TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
@@ -31,7 +33,7 @@ let readyDb=null;
 export async function schema(env) {
  if (!env.ROOM_DB || !env.ROOM_MEDIA) fail('Document storage is not configured.', 503);
  if(readyDb===env.ROOM_DB)return;
- // New tables only. The same idempotent statements are included in migrations 0009–0011.
+ // New tables only. The same idempotent statements are included in migrations 0009–0012.
  await env.ROOM_DB.batch(SCHEMA.map(sql => env.ROOM_DB.prepare(sql)));
  readyDb=env.ROOM_DB;
 }
@@ -67,15 +69,21 @@ export async function snapshot(env, d, auth) {
   env.ROOM_DB.prepare('SELECT id,name,email,kind,signed_at,revision,link_version,revoked_at,CASE WHEN link_hash IS NULL THEN 0 ELSE 1 END AS has_link,CASE WHEN code_hash IS NULL THEN 0 ELSE 1 END AS requires_code FROM room_signing_parties WHERE document_id=? ORDER BY created_at,id').bind(d.id),
   env.ROOM_DB.prepare('SELECT * FROM room_signing_fields WHERE document_id=? ORDER BY page,id').bind(d.id),
   env.ROOM_DB.prepare("SELECT party_id,actor,action,created_at FROM room_signing_events WHERE document_id=? AND action IN ('Document created','Signing link created','Signing link replaced','Signing link revoked','Signature confirmed','Document cancelled') ORDER BY created_at DESC,rowid DESC LIMIT 200").bind(d.id),
-  env.ROOM_DB.prepare('SELECT * FROM room_signing_text_fields WHERE document_id=? ORDER BY page,id').bind(d.id)
+  env.ROOM_DB.prepare('SELECT * FROM room_signing_text_fields WHERE document_id=? ORDER BY page,id').bind(d.id),
+  env.ROOM_DB.prepare('SELECT revision,fields_json,changes_json,actor,created_at FROM room_signing_document_text_versions WHERE document_id=? ORDER BY revision DESC').bind(d.id),
+  env.ROOM_DB.prepare('SELECT revision,party_id,actor,approved_at FROM room_signing_document_text_approvals WHERE document_id=? ORDER BY approved_at,revision,party_id').bind(d.id)
  ]);
  const parties = result[0].results || [], fields = result[1].results || [];
  const signed = parties.filter(p => p.signed_at).length;
+ const versions=result[4].results||[],approvals=result[5].results||[],latest=versions[0];
+ const approved=versions.find(v=>parties.length&&parties.every(p=>approvals.some(a=>a.revision===v.revision&&a.party_id===p.id)));
  return {
   document: { id:d.id,title:d.title,filename:d.filename,total_bytes:d.total_bytes,pages:JSON.parse(d.pages_json),file_ready:!!d.file_ready,status:d.status==='cancelled'?'cancelled':parties.length && signed===parties.length?'completed':d.status,archived_at:d.archived_at||null,revision:d.revision,can_sign_owner:!!auth.manager&&auth.manager.id===d.created_by,created_at:d.created_at,updated_at:d.updated_at },
   parties: parties.map(p => auth.manager ? p : {id:p.id,name:p.name,kind:p.kind,signed_at:p.signed_at,revision:p.id===auth.party.id?p.revision:undefined}),
   fields: fields.map(f => { const party = parties.find(p=>p.id===f.party_id); const visible = auth.manager || f.party_id===auth.party.id || party?.signed_at; const {signature_key,...rest}=f; return {...rest,has_signature:!!signature_key&&!!visible,signature_url:signature_key&&visible?'/api/room-management/signing-file?document='+d.id+'&signature='+f.id+'&v='+party.revision:null}; }),
   text_fields: (result[3].results||[]).map(f=>({id:f.id,document_id:f.document_id,party_id:f.party_id,page:f.page,x:f.x,y:f.y,width:f.width,height:f.height,font_size:f.font_size,text:auth.manager||f.party_id===auth.party.id||parties.find(p=>p.id===f.party_id)?.signed_at?f.text_value:''})),
+  document_text: {revision:latest?.revision||0,approved_revision:approved?.revision||0,fields:latest?JSON.parse(latest.fields_json):[],approvals:approvals.filter(a=>a.revision===latest?.revision&&parties.some(p=>p.id===a.party_id)),history:versions.map(v=>({revision:v.revision,actor:v.actor,created_at:v.created_at,changes:JSON.parse(v.changes_json)})),approval_history:approvals},
+  approved_document_text_fields:approved?JSON.parse(approved.fields_json):[],
   current_party_id: auth.party?.id || (auth.manager?.id===d.created_by?parties.find(p=>p.kind==='owner')?.id||null:null),
   events: (result[2].results||[]).map(e=>({...e,actor:parties.find(p=>p.id===e.party_id)?.name||'Administrator'}))
  };
@@ -90,6 +98,38 @@ export function validField(f, pages, partyIds) {
 }
 export function validTextField(f,pages,partyIds) {
  return validField(f,pages,partyIds)&&typeof f.text==='string'&&f.text.length<=2000&&!/[\u0000-\u001f\u007f]/.test(f.text)&&Number.isFinite(f.font_size)&&f.font_size>=6&&f.font_size<=72;
+}
+export async function saveDocumentText(env,d,auth,body) {
+ if(!auth.manager)fail('Manager access is required.',403);
+ if(['cancelled','trashed'].includes(d.status)||!d.file_ready)fail('This document is not available for editing.',409);
+ const latest=await env.ROOM_DB.prepare('SELECT revision,fields_json FROM room_signing_document_text_versions WHERE document_id=? ORDER BY revision DESC LIMIT 1').bind(d.id).first();
+ if(body.revision!==d.revision||body.text_revision!==(latest?.revision||0))fail('The document changed. Reload before saving text.',409);
+ if(!Array.isArray(body.fields)||new Set(body.fields.map(f=>f?.id)).size!==body.fields.length||!body.fields.every(f=>validTextField(f,JSON.parse(d.pages_json),new Set([null]))&&f.text.trim()))fail('Complete or remove empty text fields.');
+ const fields=body.fields.map(f=>({id:f.id,party_id:null,page:f.page,x:f.x,y:f.y,width:f.width,height:f.height,text:f.text.normalize('NFC'),font_size:f.font_size})).sort((a,b)=>a.id.localeCompare(b.id));
+ const before=latest?JSON.parse(latest.fields_json):[],changes=[];
+ for(const previous of before){const after=fields.find(f=>f.id===previous.id);if(!after)changes.push({before:previous,after:null});else if(JSON.stringify(previous)!==JSON.stringify(after))changes.push({before:previous,after});}
+ for(const after of fields)if(!before.some(f=>f.id===after.id))changes.push({before:null,after});
+ if(!changes.length)return snapshot(env,d,auth);
+ const owner=await env.ROOM_DB.prepare("SELECT name FROM room_signing_parties WHERE document_id=? AND kind='owner'").bind(d.id).first();
+ const actor=auth.manager.id===d.created_by&&owner?owner.name:'Administrator',token=id();
+ const result=await env.ROOM_DB.batch([
+  env.ROOM_DB.prepare("UPDATE room_signing_documents SET revision=revision+1,edit_token=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND revision=? AND status NOT IN ('cancelled','trashed')").bind(token,d.id,d.revision),
+  env.ROOM_DB.prepare('INSERT INTO room_signing_document_text_versions(document_id,revision,fields_json,changes_json,actor) SELECT ?,?,?,?,? WHERE EXISTS(SELECT 1 FROM room_signing_documents WHERE id=? AND edit_token=?)').bind(d.id,(latest?.revision||0)+1,JSON.stringify(fields),JSON.stringify(changes),actor,d.id,token)
+ ]);
+ if(!result[0].meta.changes)fail('The document changed. Reload before saving text.',409);
+ return snapshot(env,await documentById(env,d.id),auth);
+}
+export async function approveDocumentText(env,d,auth,body) {
+ if(['cancelled','trashed'].includes(d.status)||!d.file_ready)fail('This document is not available for approval.',409);
+ const p=auth.party|| (auth.manager?.id===d.created_by?await env.ROOM_DB.prepare("SELECT * FROM room_signing_parties WHERE document_id=? AND kind='owner'").bind(d.id).first():null);
+ if(!p||p.document_id!==d.id)fail('Only a signing party can approve text changes.',403);
+ // Party identities remain editable in a draft. Collect approvals after they lock.
+ if(d.status==='draft')fail('Share the document or submit your signature before approving text.',409);
+ const latest=await env.ROOM_DB.prepare('SELECT MAX(revision) AS revision FROM room_signing_document_text_versions WHERE document_id=?').bind(d.id).first();
+ if(!latest.revision||body.revision!==latest.revision)fail('The text changed. Review the latest version before approving.',409);
+ const result=await env.ROOM_DB.prepare(`INSERT INTO room_signing_document_text_approvals(document_id,revision,party_id,actor) SELECT ?,?,?,? WHERE EXISTS(SELECT 1 FROM room_signing_documents WHERE id=? AND revision=? AND status NOT IN ('cancelled','trashed')) AND (SELECT MAX(revision) FROM room_signing_document_text_versions WHERE document_id=?)=? AND EXISTS(SELECT 1 FROM room_signing_parties WHERE id=? AND document_id=? AND (? OR (link_version=? AND revoked_at IS NULL))) ON CONFLICT(document_id,revision,party_id) DO NOTHING`).bind(d.id,body.revision,p.id,p.name,d.id,d.revision,d.id,body.revision,p.id,d.id,auth.manager?1:0,auth.party?.link_version||0).run();
+ if(!result.meta.changes){const exists=await env.ROOM_DB.prepare('SELECT 1 FROM room_signing_document_text_approvals WHERE document_id=? AND revision=? AND party_id=?').bind(d.id,body.revision,p.id).first();if(!exists)fail('The document changed. Review it again before approving.',409);}
+ return snapshot(env,await documentById(env,d.id),auth);
 }
 function pngBytes(data) {
  if (typeof data!=='string' || !data.startsWith('data:image/png;base64,') || data.length>3e6) fail('Use a PNG signature image.');
@@ -131,6 +171,7 @@ export async function saveSignature(request,env,d,auth,body) {
  }
  if(body.confirm&&finalText.some(f=>!f.text.trim()))fail('Complete or remove your empty text fields before submitting.');
  const pending=new Map(),changes=Array.isArray(body.signatures)?body.signatures:[];
+ if(auth.manager&&!managerOwn&&(changes.length||original.some(f=>f.signature_key&&(remove.includes(f.id)||positions.some(x=>x.id===f.id)))))fail('You can change only your own signature.',403);
  for(const change of changes){if(!fields.some(f=>f.id===change.field_id)||pending.has(change.field_id))fail('Invalid signature area.');pending.set(change.field_id,change.png===null?null:pngBytes(change.png));}
  if(body.confirm&&body.consent!==true)fail('Confirm that these are your signatures before finishing.');
  if(body.confirm&&(!fields.length||fields.some(f=>pending.has(f.id)?!pending.get(f.id):!f.signature_key)))fail('Add your signature before finishing.');

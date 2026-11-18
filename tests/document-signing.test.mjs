@@ -30,6 +30,11 @@ async function exportSnapshot(h,data){
 }
 
 const signature=png(30,10,80);
+async function pdfText(bytes){
+ const pdfjs=await import('../document-signing/vendor/pdf.min.mjs');pdfjs.GlobalWorkerOptions.workerSrc=new URL('../document-signing/vendor/pdf.worker.min.mjs',import.meta.url).href;
+ const parsed=await pdfjs.getDocument({data:new Uint8Array(bytes.slice(0)),useSystemFonts:false,disableFontFace:true,isEvalSupported:false}).promise;
+ const result=[];for(let i=1;i<=parsed.numPages;i++)result.push((await (await parsed.getPage(i)).getTextContent()).items.map(x=>x.str).join(' '));await parsed.destroy();return result.join('\n');
+}
 test('private PDF signing, A4 geometry, large uploads and final export',async t=>{
  const h=await harness();t.after(()=>h.close());
  const pdf=await PDFDocument.create();pdf.addPage(PageSizes.A4).drawText('A4 portrait original text',{x:35,y:780});pdf.addPage([PageSizes.A4[1],PageSizes.A4[0]]).drawText('A4 landscape original text',{x:35,y:540});const rotated=pdf.addPage(PageSizes.A4);rotated.setRotation(degrees(90));rotated.setCropBox(20,30,550,760);
@@ -213,4 +218,95 @@ test('plain PDF text fields belong to each signer and are locked and exported wi
   assert.equal((await h.request('signing?document='+d+'&action=archive',{method:'POST',body:{}})).status,200);
   assert.equal((await guest(0)).text_fields.length,5);assert.equal((await guest(0)).text_fields.find(f=>f.id===aText[2].id).text,'19/11/2026');
  });
+});
+
+test('preparer text versions, all-party approval and signature-preserving downloads',async t=>{
+ const h=await harness();t.after(()=>h.close());
+ const pdf=await PDFDocument.create();pdf.addPage(PageSizes.A4);const bytes=await pdf.save(),pages=[{width:595.28,height:841.89,transform:[1,0,0,-1,0,841.89]}];
+ const made=await h.json('signing?action=create',{method:'POST',body:{title:'Approval test only',filename:'approval-test-only.pdf',size:bytes.length,pages,owner_signs:false}}),d=made.body.id;
+ await h.request('signing-upload?document='+d+'&part=0',{method:'PUT',body:bytes});await h.request('signing-upload?document='+d+'&action=complete',{method:'POST',body:{}});
+ const get=async()=> (await h.json('signing?document='+d)).body;
+ const parties=['Party A','Party B'].map(name=>({id:randomUUID(),name,email:'',kind:'signer'}));
+ const signatures=parties.map((p,i)=>({id:randomUUID(),party_id:p.id,page:1,x:.1+i*.45,y:.7,width:.3,height:.08}));
+ let data=await get();assert.equal(data.document_text.revision,0);assert.deepEqual(data.approved_document_text_fields,[]);
+ assert.equal((await h.json('signing?document='+d+'&action=layout',{method:'POST',body:{revision:data.document.revision,parties,fields:signatures,owner_signs:false}})).status,200);
+ const a={id:randomUUID(),party_id:null,page:1,x:.1,y:.2,width:.6,height:.025,font_size:12,text:'Brent Shaun Strydom'},b={...a,id:randomUUID(),y:.26,text:'Director'};
+ const save=async(fields,base)=>{base ||= await get();return h.json('signing?document='+d+'&action=text',{method:'POST',body:{revision:base.document.revision,text_revision:base.document_text.revision,fields}});};
+ const sessions=[],tokens=[];
+ const guest=i=>h.json('signing-guest',{as:'guest',token:sessions[i]}).then(r=>r.body);
+ const approve=(i,revision)=>h.json('signing-guest?action=approve-text',{as:'guest',token:sessions[i],method:'POST',body:{revision}});
+ await t.test('preparer-only can add text before sharing; versions contain no signature changes',async()=>{
+  let r=await save([a,b]);assert.equal(r.status,200,JSON.stringify(r.body));data=r.body;
+  assert.equal(data.document_text.revision,1);assert.equal(data.document_text.fields.length,2);assert.equal(data.document_text.history[0].changes.length,2);assert.deepEqual(data.approved_document_text_fields,[]);
+  assert.equal((await h.json('signing?document='+d+'&action=approve-text',{method:'POST',body:{revision:1}})).status,403);
+  const p=data.parties[0];assert.equal((await h.json('signing?document='+d+'&action=signature',{method:'POST',body:{party_id:p.id,revision:p.revision,signatures:[{field_id:signatures[0].id,png:signature}]}})).status,403);
+  assert.equal((await save([{...a,text:''}])).status,400);
+  assert.equal((await save([{...a,party_id:p.id}])).status,400);
+  const unchanged=await save([b,a]);assert.equal(unchanged.status,200);assert.equal(unchanged.body.document_text.revision,1);
+ });
+ for(const [i,p] of parties.entries()){
+  const share=await h.json('signing?document='+d+'&action=share',{method:'POST',body:{party_id:p.id,code:'12345'+i}});assert.equal(share.status,200);tokens.push(new URLSearchParams(new URL(share.body.url).hash.slice(1)).get('token'));
+  const access=await h.json('signing-guest?action=access',{method:'POST',as:'guest',body:{token:tokens[i],code:'12345'+i}});assert.equal(access.status,200);sessions.push(access.body.session);
+ }
+ await t.test('each recipient reviews all text and approves the revision once with their existing code link',async()=>{
+  const before=await guest(0);assert.deepEqual(before.document_text.fields.map(f=>f.text).sort(),[a.text,b.text].sort());assert.equal(before.document_text.history.length,1);
+  assert.equal((await h.request('signing-guest?action=text',{method:'POST',as:'guest',token:sessions[0],body:{fields:[]}})).status,405);
+  assert.equal((await h.request('signing?document='+d+'&action=text',{method:'POST',as:'guest',token:sessions[0],body:{fields:[]}})).status,401);
+  const first=await approve(0,1);assert.equal(first.status,200);assert.equal(first.body.document_text.approvals.length,1);assert.equal(first.body.approved_document_text_fields.length,0);
+  assert.equal((await approve(0,1)).body.document_text.approvals.length,1,'Approval must be idempotent');
+  const second=await approve(1,1);assert.equal(second.status,200);assert.equal(second.body.document_text.approved_revision,1);assert.equal(second.body.approved_document_text_fields.length,2);
+  const rendered=await exportSnapshot(h,await get());assert.match(await pdfText(rendered.output),/Brent Shaun Strydom/,'Approved document text exports before signatures as well');
+ });
+ await t.test('parties sign normally, then the preparer can edit, move, remove and add text after every signature',async()=>{
+  for(const [i,p] of parties.entries()){
+   const current=await guest(i),r=await h.json('signing-guest?action=signature',{method:'POST',as:'guest',token:sessions[i],body:{party_id:p.id,revision:current.parties.find(x=>x.id===p.id).revision,signatures:[{field_id:signatures[i].id,png:signature}],confirm:true,consent:true}});assert.equal(r.status,200,JSON.stringify(r.body));
+  }
+  data=await get();assert.equal(data.document.status,'completed');
+  const before={parties:data.parties,fields:data.fields};
+  const revision=await save([{...a,text:'Brent Strydom',x:.2}, {...b,id:randomUUID(),text:'18/11/2026',y:.32}]);assert.equal(revision.status,200,JSON.stringify(revision.body));
+  const after=revision.body;assert.equal(after.document.status,'completed');assert.equal(after.document_text.revision,2);assert.equal(after.document_text.approvals.length,0);assert.equal(after.document_text.approved_revision,1);
+  const listed=(await h.json('signing')).body.items.find(x=>x.id===d);assert.equal(listed.text_revision,2);assert.equal(listed.text_approved,0);assert.equal(listed.signed,2);
+  assert.deepEqual({parties:after.parties,fields:after.fields},before,'Text edits cannot rewrite signatures, positions, signed_at, revisions or links');
+  assert.equal(after.document_text.history.length,2);assert.equal(after.document_text.history[0].changes.length,3);assert.ok(after.document_text.history[0].changes.some(c=>c.before&&!c.after));
+  const output=await exportSnapshot(h,after),text=await pdfText(output.output);assert.match(text,/Brent Shaun Strydom/);assert.match(text,/Director/);assert.doesNotMatch(text,/18\/11\/2026/,'Pending text cannot enter a signed download');
+  const document=await PDFDocument.load(output.output);assert.equal(document.getPage(0).node.Resources().lookup(PDFName.of('XObject')).keys().length,2);
+ });
+ await t.test('all parties see the complete edit and approval history; stale approvals and competing saves are rejected',async()=>{
+  const seen=await guest(0);assert.equal(seen.document_text.revision,2);assert.equal(seen.document_text.history[0].changes.find(c=>c.before&&c.after).before.text,'Brent Shaun Strydom');assert.equal(seen.document_text.approval_history.length,2);
+  assert.equal((await approve(0,1)).status,409);
+  const base=await get(),fields=base.document_text.fields;
+  const competing=await Promise.all([save(fields.map(f=>({...f,y:f.y+.01})),base),save(fields.map(f=>({...f,y:f.y+.02})),base)]);assert.deepEqual(competing.map(r=>r.status).sort(),[200,409]);
+  const current=await get();assert.equal(current.document_text.revision,3);
+  const results=await Promise.all([approve(0,3),approve(1,3)]);for(const r of results)assert.equal(r.status,200,JSON.stringify(r.body));
+  data=await get();assert.equal(data.document_text.approved_revision,3);assert.equal(data.document_text.approval_history.length,4);
+  assert.equal((await h.json('signing')).body.items.find(x=>x.id===d).text_approved,2);
+  const {output,context}=await exportSnapshot(h,data),text=await pdfText(output);assert.match(text,/Brent Strydom/);assert.match(text,/18\/11\/2026/);assert.doesNotMatch(text,/Brent Shaun Strydom|Director/);
+  const sourceFont=context.fontkit.create(new Uint8Array(await readFile(root+'document-signing/fonts/Inter-Regular.ttf')));await assertRenderedText(output,pages,data.approved_document_text_fields,sourceFont,context.self.SigningTextLayout);
+  if(process.env.SIGNING_APPROVAL_REVIEW_PATH)await writeFile(process.env.SIGNING_APPROVAL_REVIEW_PATH,new Uint8Array(output));
+  assert.equal((await h.request('signing?document='+d+'&action=delete',{method:'POST',body:{}})).status,409);
+ });
+ await t.test('removing all preparer text also requires approval; archive and repeat code access preserve the record',async()=>{
+  const removed=await save([]);assert.equal(removed.status,200);assert.equal(removed.body.document_text.revision,4);assert.equal(removed.body.document_text.approved_revision,3);assert.ok(removed.body.approved_document_text_fields.length);
+  assert.equal((await h.request('signing?document='+d+'&action=archive',{method:'POST',body:{}})).status,200);
+  await approve(0,4);const approved=await approve(1,4);assert.equal(approved.status,200);assert.equal(approved.body.document_text.approved_revision,4);assert.deepEqual(approved.body.approved_document_text_fields,[]);
+  const access=await h.json('signing-guest?action=access',{method:'POST',as:'guest',body:{token:tokens[0],code:'123450'}});assert.equal(access.status,200);assert.equal(access.body.document_text.history.length,4);assert.equal(access.body.document_text.approval_history.length,6);assert.equal(access.body.fields.filter(f=>f.has_signature).length,2);
+  assert.equal((await h.request('signing-guest?action=approve-text',{method:'POST',as:'guest',token:sessions[0],origin:'https://elsewhere.test',body:{revision:4}})).status,403);
+ });
+});
+
+test('a preparing administrator who is also a signer approves only for their own party',async t=>{
+ const h=await harness();t.after(()=>h.close());const pdf=await PDFDocument.create();pdf.addPage(PageSizes.A4);const bytes=await pdf.save(),pages=[{width:595.28,height:841.89,transform:[1,0,0,-1,0,841.89]}];
+ const made=await h.json('signing?action=create',{method:'POST',body:{title:'Owner approval',filename:'owner.pdf',size:bytes.length,pages}}),d=made.body.id;
+ await h.request('signing-upload?document='+d+'&part=0',{method:'PUT',body:bytes});await h.request('signing-upload?document='+d+'&action=complete',{method:'POST',body:{}});
+ const current=(await h.json('signing?document='+d)).body,owner=current.parties[0],f={id:randomUUID(),party_id:null,page:1,x:.1,y:.2,width:.6,height:.03,text:'Director',font_size:12};
+ const other={id:randomUUID(),name:'Other signing party',email:'',kind:'signer'};
+ const layout=await h.json('signing?document='+d+'&action=layout',{method:'POST',body:{revision:current.document.revision,parties:[owner,other],fields:[]}});assert.equal(layout.status,200);
+ const saved=await h.json('signing?document='+d+'&action=text',{method:'POST',body:{revision:layout.body.document.revision,text_revision:0,fields:[f]}});assert.equal(saved.status,200);
+ assert.equal((await h.request('signing?document='+d+'&action=approve-text',{method:'POST',body:{revision:1}})).status,409,'Draft identities must be fixed before collecting approvals');
+ assert.equal((await h.request('signing?document='+d+'&action=share',{method:'POST',body:{party_id:other.id,code:'123456'}})).status,200);
+ const approved=await h.json('signing?document='+d+'&action=approve-text',{method:'POST',body:{revision:1,party_id:randomUUID()}});assert.equal(approved.status,200);assert.equal(approved.body.document_text.approvals[0].party_id,owner.id);assert.equal(approved.body.document_text.approved_revision,0);
+ const changedRole=await h.json('signing?document='+d+'&action=layout',{method:'POST',body:{revision:approved.body.document.revision,owner_signs:false,parties:[],fields:[],text_fields:[]}});assert.equal(changedRole.status,409,'Party identities cannot change after approvals become available');
+ assert.equal((await h.request('signing?document='+d+'&action=cancel',{method:'POST',body:{}})).status,200);
+ assert.equal((await h.request('signing?document='+d+'&action=text',{method:'POST',body:{revision:approved.body.document.revision,text_revision:1,fields:[f]}})).status,409);
+ assert.equal((await h.request('signing?document='+d+'&action=approve-text',{method:'POST',body:{revision:1}})).status,409);
 });
