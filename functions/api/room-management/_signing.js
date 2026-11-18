@@ -12,6 +12,7 @@ export async function codeHash(code, salt) {
  return Array.from(new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: new TextEncoder().encode(salt), iterations: 100000, hash: 'SHA-256' }, key, 256)), n => n.toString(16).padStart(2, '0')).join('');
 }
 const SCHEMA = [
+ `CREATE TABLE IF NOT EXISTS room_signing_text_fields (id TEXT PRIMARY KEY, document_id TEXT NOT NULL REFERENCES room_signing_documents(id), party_id TEXT NOT NULL REFERENCES room_signing_parties(id), page INTEGER NOT NULL, x REAL NOT NULL, y REAL NOT NULL, width REAL NOT NULL, height REAL NOT NULL, text_value TEXT NOT NULL DEFAULT '', font_size REAL NOT NULL DEFAULT 12)`,
  `CREATE TABLE IF NOT EXISTS room_signing_documents (id TEXT PRIMARY KEY, room_id TEXT NOT NULL DEFAULT 'client', title TEXT NOT NULL, filename TEXT NOT NULL, total_bytes INTEGER NOT NULL, chunk_size INTEGER NOT NULL, pages_json TEXT NOT NULL, created_by TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'draft', file_ready INTEGER NOT NULL DEFAULT 0, revision INTEGER NOT NULL DEFAULT 0, edit_token TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
  `CREATE TABLE IF NOT EXISTS room_signing_parties (id TEXT PRIMARY KEY, document_id TEXT NOT NULL REFERENCES room_signing_documents(id), name TEXT NOT NULL, email TEXT NOT NULL DEFAULT '', kind TEXT NOT NULL DEFAULT 'signer', link_hash TEXT UNIQUE, link_version INTEGER NOT NULL DEFAULT 0, code_salt TEXT, code_hash TEXT, revoked_at TEXT, signed_at TEXT, revision INTEGER NOT NULL DEFAULT 0, edit_token TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
  `CREATE TABLE IF NOT EXISTS room_signing_fields (id TEXT PRIMARY KEY, document_id TEXT NOT NULL REFERENCES room_signing_documents(id), party_id TEXT NOT NULL REFERENCES room_signing_parties(id), page INTEGER NOT NULL, x REAL NOT NULL, y REAL NOT NULL, width REAL NOT NULL, height REAL NOT NULL, signature_key TEXT)`,
@@ -22,6 +23,7 @@ const SCHEMA = [
  `CREATE TABLE IF NOT EXISTS room_signing_document_states (document_id TEXT PRIMARY KEY REFERENCES room_signing_documents(id), archived_at TEXT)`,
  `CREATE INDEX IF NOT EXISTS room_signing_parties_document ON room_signing_parties(document_id)`,
  `CREATE INDEX IF NOT EXISTS room_signing_fields_document ON room_signing_fields(document_id)`,
+ `CREATE INDEX IF NOT EXISTS room_signing_text_fields_party ON room_signing_text_fields(document_id,party_id)`,
  `CREATE INDEX IF NOT EXISTS room_signing_events_document ON room_signing_events(document_id,created_at)`,
  `CREATE INDEX IF NOT EXISTS room_signing_sessions_expiry ON room_signing_sessions(expires_at)`
 ];
@@ -29,7 +31,7 @@ let readyDb=null;
 export async function schema(env) {
  if (!env.ROOM_DB || !env.ROOM_MEDIA) fail('Document storage is not configured.', 503);
  if(readyDb===env.ROOM_DB)return;
- // New tables only. The same idempotent statements are included in migrations 0009 and 0010.
+ // New tables only. The same idempotent statements are included in migrations 0009–0011.
  await env.ROOM_DB.batch(SCHEMA.map(sql => env.ROOM_DB.prepare(sql)));
  readyDb=env.ROOM_DB;
 }
@@ -64,7 +66,8 @@ export async function snapshot(env, d, auth) {
  const result = await env.ROOM_DB.batch([
   env.ROOM_DB.prepare('SELECT id,name,email,kind,signed_at,revision,link_version,revoked_at,CASE WHEN link_hash IS NULL THEN 0 ELSE 1 END AS has_link,CASE WHEN code_hash IS NULL THEN 0 ELSE 1 END AS requires_code FROM room_signing_parties WHERE document_id=? ORDER BY created_at,id').bind(d.id),
   env.ROOM_DB.prepare('SELECT * FROM room_signing_fields WHERE document_id=? ORDER BY page,id').bind(d.id),
-  env.ROOM_DB.prepare("SELECT party_id,actor,action,created_at FROM room_signing_events WHERE document_id=? AND action IN ('Document created','Signing link created','Signing link replaced','Signing link revoked','Signature confirmed','Document cancelled') ORDER BY created_at DESC,rowid DESC LIMIT 200").bind(d.id)
+  env.ROOM_DB.prepare("SELECT party_id,actor,action,created_at FROM room_signing_events WHERE document_id=? AND action IN ('Document created','Signing link created','Signing link replaced','Signing link revoked','Signature confirmed','Document cancelled') ORDER BY created_at DESC,rowid DESC LIMIT 200").bind(d.id),
+  env.ROOM_DB.prepare('SELECT * FROM room_signing_text_fields WHERE document_id=? ORDER BY page,id').bind(d.id)
  ]);
  const parties = result[0].results || [], fields = result[1].results || [];
  const signed = parties.filter(p => p.signed_at).length;
@@ -72,6 +75,7 @@ export async function snapshot(env, d, auth) {
   document: { id:d.id,title:d.title,filename:d.filename,total_bytes:d.total_bytes,pages:JSON.parse(d.pages_json),file_ready:!!d.file_ready,status:d.status==='cancelled'?'cancelled':parties.length && signed===parties.length?'completed':d.status,archived_at:d.archived_at||null,revision:d.revision,can_sign_owner:!!auth.manager&&auth.manager.id===d.created_by,created_at:d.created_at,updated_at:d.updated_at },
   parties: parties.map(p => auth.manager ? p : {id:p.id,name:p.name,kind:p.kind,signed_at:p.signed_at,revision:p.id===auth.party.id?p.revision:undefined}),
   fields: fields.map(f => { const party = parties.find(p=>p.id===f.party_id); const visible = auth.manager || f.party_id===auth.party.id || party?.signed_at; const {signature_key,...rest}=f; return {...rest,has_signature:!!signature_key&&!!visible,signature_url:signature_key&&visible?'/api/room-management/signing-file?document='+d.id+'&signature='+f.id+'&v='+party.revision:null}; }),
+  text_fields: (result[3].results||[]).map(f=>({id:f.id,document_id:f.document_id,party_id:f.party_id,page:f.page,x:f.x,y:f.y,width:f.width,height:f.height,font_size:f.font_size,text:auth.manager||f.party_id===auth.party.id||parties.find(p=>p.id===f.party_id)?.signed_at?f.text_value:''})),
   current_party_id: auth.party?.id || (auth.manager?.id===d.created_by?parties.find(p=>p.kind==='owner')?.id||null:null),
   events: (result[2].results||[]).map(e=>({...e,actor:parties.find(p=>p.id===e.party_id)?.name||'Administrator'}))
  };
@@ -83,6 +87,9 @@ export function validatePages(pages) {
 }
 export function validField(f, pages, partyIds) {
  return f && /^[0-9a-f-]{36}$/.test(f.id) && partyIds.has(f.party_id) && Number.isInteger(f.page) && f.page>=1 && f.page<=pages.length && [f.x,f.y,f.width,f.height].every(Number.isFinite) && f.x>=0&&f.y>=0&&f.width>0&&f.height>0&&f.x+f.width<=1.000001&&f.y+f.height<=1.000001;
+}
+export function validTextField(f,pages,partyIds) {
+ return validField(f,pages,partyIds)&&typeof f.text==='string'&&f.text.length<=2000&&!/[\u0000-\u001f\u007f]/.test(f.text)&&Number.isFinite(f.font_size)&&f.font_size>=6&&f.font_size<=72;
 }
 function pngBytes(data) {
  if (typeof data!=='string' || !data.startsWith('data:image/png;base64,') || data.length>3e6) fail('Use a PNG signature image.');
@@ -111,6 +118,18 @@ export async function saveSignature(request,env,d,auth,body) {
   const clean={id:f.id,party_id:p.id,page:f.page,x:f.x,y:f.y,width:f.width,height:f.height};
   const existing=fields.find(x=>x.id===f.id);if(existing)Object.assign(existing,clean);else fields.push({...clean,signature_key:null});
  }
+ const textChanges=body.text_fields===undefined?[]:body.text_fields,textRemove=body.remove_text_fields===undefined?[]:body.remove_text_fields;
+ if(!Array.isArray(textChanges)||!Array.isArray(textRemove)||new Set(textChanges.map(f=>f?.id)).size!==textChanges.length||new Set(textRemove).size!==textRemove.length)fail('Check the text fields.');
+ const originalText=(await env.ROOM_DB.prepare('SELECT * FROM room_signing_text_fields WHERE document_id=? AND party_id=?').bind(d.id,p.id).all()).results||[];
+ if(textRemove.some(key=>!originalText.some(f=>f.id===key)))fail('You can remove only your own text fields.',403);
+ const finalText=originalText.filter(f=>!textRemove.includes(f.id)).map(f=>({id:f.id,text:f.text_value}));
+ for(const f of textChanges){
+  if(!validTextField(f,JSON.parse(d.pages_json),new Set([p.id]))||textRemove.includes(f.id))fail('Check the text and its position.');
+  const found=await env.ROOM_DB.prepare('SELECT document_id,party_id FROM room_signing_text_fields WHERE id=?').bind(f.id).first();
+  if(found&&(found.document_id!==d.id||found.party_id!==p.id))fail('You can edit only your own text fields.',403);
+  const existing=finalText.find(t=>t.id===f.id);if(existing)existing.text=f.text;else finalText.push({id:f.id,text:f.text});
+ }
+ if(body.confirm&&finalText.some(f=>!f.text.trim()))fail('Complete or remove your empty text fields before submitting.');
  const pending=new Map(),changes=Array.isArray(body.signatures)?body.signatures:[];
  for(const change of changes){if(!fields.some(f=>f.id===change.field_id)||pending.has(change.field_id))fail('Invalid signature area.');pending.set(change.field_id,change.png===null?null:pngBytes(change.png));}
  if(body.confirm&&body.consent!==true)fail('Confirm that these are your signatures before finishing.');
@@ -122,6 +141,8 @@ export async function saveSignature(request,env,d,auth,body) {
   const gate='EXISTS(SELECT 1 FROM room_signing_parties WHERE id=? AND edit_token=?)';
   for(const key of remove)statements.push(env.ROOM_DB.prepare('DELETE FROM room_signing_fields WHERE id=? AND party_id=? AND '+gate).bind(key,p.id,p.id,token));
   for(const f of positions)statements.push(env.ROOM_DB.prepare(`INSERT INTO room_signing_fields(id,document_id,party_id,page,x,y,width,height) SELECT ?,?,?,?,?,?,?,? WHERE ${gate} ON CONFLICT(id) DO UPDATE SET page=excluded.page,x=excluded.x,y=excluded.y,width=excluded.width,height=excluded.height`).bind(f.id,d.id,p.id,f.page,f.x,f.y,f.width,f.height,p.id,token));
+  for(const key of textRemove)statements.push(env.ROOM_DB.prepare('DELETE FROM room_signing_text_fields WHERE id=? AND party_id=? AND '+gate).bind(key,p.id,p.id,token));
+  for(const f of textChanges)statements.push(env.ROOM_DB.prepare(`INSERT INTO room_signing_text_fields(id,document_id,party_id,page,x,y,width,height,text_value,font_size) SELECT ?,?,?,?,?,?,?,?,?,? WHERE ${gate} ON CONFLICT(id) DO UPDATE SET page=excluded.page,x=excluded.x,y=excluded.y,width=excluded.width,height=excluded.height,text_value=excluded.text_value,font_size=excluded.font_size`).bind(f.id,d.id,p.id,f.page,f.x,f.y,f.width,f.height,f.text.normalize('NFC'),f.font_size,p.id,token));
   for(const [fieldId,key] of keys)statements.push(env.ROOM_DB.prepare('UPDATE room_signing_fields SET signature_key=? WHERE id=? AND party_id=? AND '+gate).bind(key,fieldId,p.id,p.id,token));
   statements.push(env.ROOM_DB.prepare("UPDATE room_signing_documents SET status=CASE WHEN ? THEN 'in_progress' ELSE status END,updated_at=CURRENT_TIMESTAMP WHERE id=? AND "+gate).bind(body.confirm?1:0,d.id,p.id,token));
   statements.push(env.ROOM_DB.prepare('INSERT INTO room_signing_events(id,document_id,party_id,actor,action) SELECT ?,?,?,?,? WHERE '+gate).bind(id(),d.id,p.id,p.name,body.confirm?'Signature confirmed':managerPreparing&&!managerOwn?'Signature draft prepared':'Signature draft saved',p.id,token));

@@ -121,3 +121,77 @@ test('preparer-only agreements, individual placement, shared history and archive
  assert.equal((await h.request('signing?document='+d+'&action=restore',{method:'POST',body:{}})).status,200);assert.ok((await h.json('signing')).body.items.some(x=>x.id===d));
  const draft=await create('Disposable draft');assert.equal((await h.request('signing?document='+draft+'&action=delete',{method:'POST',body:{}})).status,200);assert.equal((await h.request('signing?document='+draft)).status,404);assert.equal((await h.request('signing-file?document='+draft)).status,404);assert.ok(!(await h.json('signing')).body.items.some(x=>x.id===draft));
 });
+
+test('plain PDF text fields belong to each signer and are locked and exported with signatures',async t=>{
+ const h=await harness();t.after(()=>h.close());
+ const pdf=await PDFDocument.create();pdf.addPage(PageSizes.A4);pdf.addPage([PageSizes.A4[1],PageSizes.A4[0]]);const rotated=pdf.addPage(PageSizes.A4);rotated.setRotation(degrees(90));rotated.setCropBox(20,30,550,760);const bytes=await pdf.save();
+ const pages=[{width:595.28,height:841.89,transform:[1,0,0,-1,0,841.89]},{width:841.89,height:595.28,transform:[1,0,0,-1,0,595.28]},{width:760,height:550,transform:[0,1,1,0,-30,-20]}];
+ const made=await h.json('signing?action=create',{method:'POST',body:{title:'Text UI test only',filename:'text-test-only.pdf',size:bytes.length,pages}}),d=made.body.id;
+ await h.request('signing-upload?document='+d+'&part=0',{method:'PUT',body:bytes});await h.request('signing-upload?document='+d+'&action=complete',{method:'POST',body:{}});
+ const get=async()=> (await h.json('signing?document='+d)).body;
+ const owner=(await get()).parties[0],a={id:randomUUID(),name:'Nguyễn Văn An',email:'',kind:'signer'},b={id:randomUUID(),name:'Jürgen Müller',email:'',kind:'signer'},parties=[owner,a,b];
+ const signatures=parties.map((p,i)=>({id:randomUUID(),party_id:p.id,page:i+1,x:.1,y:.7,width:.3,height:.08}));
+ const text=(p,page,value,y=.5)=>({id:randomUUID(),party_id:p.id,page,x:.1,y,width:.45,height:.04,font_size:12,text:value});
+ const prepared=[text(owner,1,'Brent Test'),text(a,2,''),text(b,3,'')];let sessions=[];
+ await t.test('prepares multiple typed or blank fields and preserves them for older clients',async()=>{
+  let r=await h.json('signing?document='+d+'&action=layout',{method:'POST',body:{revision:0,parties,fields:signatures,text_fields:prepared}});assert.equal(r.status,200,JSON.stringify(r.body));assert.equal(r.body.text_fields.length,3);
+  r=await h.json('signing?document='+d+'&action=layout',{method:'POST',body:{revision:r.body.document.revision,parties,fields:signatures}});assert.equal(r.status,200,JSON.stringify(r.body));assert.equal(r.body.text_fields.length,3);
+  for(const p of [a,b]){const share=await h.json('signing?document='+d+'&action=share',{method:'POST',body:{party_id:p.id,code:'012345'}});const token=new URLSearchParams(new URL(share.body.url).hash.slice(1)).get('token');const access=await h.json('signing-guest?action=access',{method:'POST',as:'guest',body:{token,code:'012345'}});assert.equal(access.status,200);sessions.push(access.body.session);}
+ });
+ const guest=async i=>(await h.json('signing-guest',{as:'guest',token:sessions[i]})).body;
+ async function save(p,options={},session){const data=session?(await h.json('signing-guest',{as:'guest',token:session})).body:await get();return h.json(session?'signing-guest?action=signature':'signing?document='+d+'&action=signature',{method:'POST',...(session?{as:'guest',token:session}:{}),body:{party_id:p.id,revision:data.parties.find(x=>x.id===p.id).revision,...options}});}
+ await t.test('hides draft text from other parties, requires own text and locks it on confirmation',async()=>{
+  assert.equal((await guest(0)).text_fields.find(f=>f.id===prepared[0].id).text,'');
+  let r=await save(owner,{signatures:[{field_id:signatures[0].id,png:signature}],text_fields:[{...prepared[0],text:'Brent <Test>',x:.18,font_size:11}],confirm:true,consent:true});assert.equal(r.status,200,JSON.stringify(r.body));
+  assert.equal((await guest(0)).text_fields.find(f=>f.id===prepared[0].id).text,'Brent <Test>');
+  assert.equal((await save(owner,{text_fields:[{...prepared[0],text:'Changed'}]})).status,409);
+  const bad=await save(a,{text_fields:[{...prepared[0],party_id:a.id,text:'Tampered'}]},sessions[0]);assert.equal(bad.status,403);
+  const missing=await save(a,{signatures:[{field_id:signatures[1].id,png:signature}],confirm:true,consent:true},sessions[0]);assert.equal(missing.status,400);assert.match(missing.body.error,/empty text fields/);
+ });
+ let aText;
+ await t.test('creates, edits, resizes, deletes and reloads only the current signer’s text',async()=>{
+  aText=[{...prepared[1],text:a.name,x:.2,width:.6},text(a,2,'Head of Partnerships',.56),text(a,2,'18/11/2026',.62)];const disposable=text(a,2,'Remove this',.2);
+  let r=await save(a,{text_fields:[...aText,disposable]},sessions[0]);assert.equal(r.status,200,JSON.stringify(r.body));
+  let draft=await guest(0);assert.equal(draft.text_fields.find(f=>f.id===aText[1].id).text,'Head of Partnerships');assert.equal(draft.text_fields.find(f=>f.id===aText[0].id).width,.6);
+  assert.equal((await guest(1)).text_fields.find(f=>f.id===aText[0].id).text,'');
+  r=await save(a,{remove_text_fields:[disposable.id],text_fields:[{...aText[2],text:'19/11/2026',y:.64}]},sessions[0]);assert.equal(r.status,200);assert.ok(!r.body.text_fields.some(f=>f.id===disposable.id));assert.equal(r.body.text_fields.find(f=>f.id===aText[2].id).y,.64);
+  assert.equal((await save(a,{remove_text_fields:[prepared[0].id]},sessions[0])).status,403);
+  assert.equal((await save(a,{text_fields:[{...aText[0],width:2}]},sessions[0])).status,400);
+  assert.equal((await save(a,{text_fields:[{...aText[0],font_size:1000}]},sessions[0])).status,400);
+  assert.equal((await save(a,{text_fields:[{...aText[0],text:'Bad\nline'}]},sessions[0])).status,400);
+ });
+ await t.test('concurrent submissions preserve all text and signatures with shared history',async()=>{
+  const results=await Promise.all([
+   save(a,{signatures:[{field_id:signatures[1].id,png:signature}],confirm:true,consent:true},sessions[0]),
+   save(b,{text_fields:[{...prepared[2],text:b.name}],signatures:[{field_id:signatures[2].id,png:signature}],confirm:true,consent:true},sessions[1])
+  ]);for(const r of results)assert.equal(r.status,200,JSON.stringify(r.body));
+  const data=await get();assert.equal(data.document.status,'completed');assert.equal(data.fields.filter(f=>f.has_signature).length,3);assert.equal(data.text_fields.length,5);
+  assert.equal((await guest(1)).text_fields.find(f=>f.id===aText[0].id).text,a.name);assert.equal(data.events.filter(e=>e.action==='Signature confirmed').length,3);
+  assert.equal((await save(a,{text_fields:[{...aText[0],text:'Changed'}]},sessions[0])).status,409);
+ });
+ await t.test('exports searchable Unicode text on A4 and rotated pages, including older editor sessions',async()=>{
+  const data=await get(),sources={};for(const path of ['document-signing/vendor/pdf-lib.min.js','document-signing/vendor/fontkit.umd.min.js','document-signing/text-layout.js'])sources['/'+path]=await readFile(root+path,'utf8');
+  let output,error;const context=vm.createContext({console,Uint8Array,ArrayBuffer,DataView,TextEncoder,TextDecoder,setTimeout,clearTimeout,fetch:async path=>{
+   if(path.startsWith('/api/'))return h.request(path.replace('/api/room-management/',''));const buffer=await readFile(root+path.slice(1));return {ok:true,arrayBuffer:async()=>buffer.buffer.slice(buffer.byteOffset,buffer.byteOffset+buffer.byteLength)};
+  },self:{postMessage:m=>{if(m.error)error=m.error;if(m.bytes)output=m.bytes;}}});
+  context.importScripts=(...paths)=>{for(const path of paths)vm.runInContext(sources[path.split('?')[0]],context);};
+  vm.runInContext(await readFile(root+'document-signing/export-worker.js','utf8'),context);await context.self.onmessage({data:{document:data.document,fields:data.fields,headers:{}}});assert.equal(error,undefined,error);assert.ok(output);
+  const result=await PDFDocument.load(output);assert.equal(result.getPageCount(),3);assert.equal(result.getPage(2).getRotation().angle,90);assert.equal(result.getPage(2).getCropBox().x,20);
+  const pdfjs=await import('../document-signing/vendor/pdf.min.mjs');pdfjs.GlobalWorkerOptions.workerSrc=new URL('../document-signing/vendor/pdf.worker.min.mjs',import.meta.url).href;
+  const parsed=await pdfjs.getDocument({data:new Uint8Array(output),useSystemFonts:false,disableFontFace:true,isEvalSupported:false}).promise;
+  for(let pageIndex=1;pageIndex<=3;pageIndex++){
+   const page=await parsed.getPage(pageIndex),content=await page.getTextContent();
+   for(const f of data.text_fields.filter(f=>f.page===pageIndex)){
+    const item=content.items.find(i=>i.str===f.text);assert.ok(item,'Exported text missing: '+f.text);
+    const [left,top]=pdfjs.Util.applyTransform([item.transform[4],item.transform[5]],data.document.pages[pageIndex-1].transform);
+    assert.ok(Math.abs(left-f.x*data.document.pages[pageIndex-1].width)<.05,'Text x position changed');assert.ok(top>f.y*data.document.pages[pageIndex-1].height&&top<(f.y+f.height)*data.document.pages[pageIndex-1].height,'Text baseline left its field');
+   }
+  }
+  await parsed.destroy();
+ });
+ await t.test('archiving preserves the submitted text while deletion stays blocked',async()=>{
+  assert.equal((await h.request('signing?document='+d+'&action=delete',{method:'POST',body:{}})).status,409);
+  assert.equal((await h.request('signing?document='+d+'&action=archive',{method:'POST',body:{}})).status,200);
+  assert.equal((await guest(0)).text_fields.length,5);assert.equal((await guest(0)).text_fields.find(f=>f.id===aText[2].id).text,'19/11/2026');
+ });
+});

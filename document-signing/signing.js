@@ -1,3 +1,4 @@
+import './text-layout.js?v=3';
 import * as pdfjs from './vendor/pdf.min.mjs';
 pdfjs.GlobalWorkerOptions.workerSrc = '/document-signing/vendor/pdf.worker.min.mjs';
 
@@ -7,6 +8,7 @@ const API = '/api/room-management/';
 const state = {
   data: null, account: null, pdf: null, page: 1, scale: 1, renderTask: null,
   renderSerial: 0, layoutDirty: false, signatures: new Map(), positions: new Set(),
+  textChanges: new Map(), textRemoved: new Map(), selectedText: null, placementKind: null,
   removed: new Map(), images: new Map(), placing: null, placementImage: null,
   selected: null, activeParty: null, template: null, session: null, upload: null,
   busy: false, saving: false, uploading: false
@@ -27,11 +29,12 @@ const button = (text, className, action) => {
   return n;
 };
 const fieldData = f => ({id:f.id, party_id:f.party_id, page:f.page, x:f.x, y:f.y, width:f.width, height:f.height});
+const textData = f => ({...fieldData(f),text:f.text,font_size:f.font_size});
 const editable = () => admin && state.data?.document.status === 'draft';
 const ownParty = () => state.data?.parties.find(p => p.id === state.data.current_party_id) || {id:null};
 const ownFields = () => state.data?.fields.filter(f => f.party_id === state.data.current_party_id) || [];
 const signedParty = p => !!p?.signed_at;
-const dirty = () => state.layoutDirty || state.signatures.size > 0 || state.positions.size > 0 || state.removed.size > 0;
+const dirty = () => state.layoutDirty || state.signatures.size > 0 || state.positions.size > 0 || state.removed.size > 0 || state.textChanges.size > 0 || state.textRemoved.size > 0;
 const authHeaders = () => state.session ? {authorization:'Bearer '+state.session} : {};
 const sourceUrl = () => API+'signing-file?document='+state.data.document.id;
 const partyName = p => p?.name || 'Party '+String.fromCharCode(65+Math.max(0,state.data.parties.filter(x=>x.kind!=='owner').findIndex(x=>x.id===p?.id)));
@@ -79,9 +82,13 @@ function updateToolbar() {
     $('shareDocument').disabled = state.saving;
   }
   $('downloadPdf').disabled = state.busy;
+  $('addText').disabled=state.saving;
+  for(const input of document.querySelectorAll('.pdf-text-input'))input.readOnly=state.saving;
 }
 function setSnapshot(data) {
+  data.text_fields ||= [];
   state.data = data;
+  for(const f of data.text_fields)f.persisted=true;
   for (const f of data.fields) f.persisted = true;
   const own=ownParty();
   if (!state.data.parties.some(p=>p.id===state.activeParty && canEditParty(p))) {
@@ -177,10 +184,11 @@ async function uploadPdf(file) {
 }
 async function openDocument(documentId) {
   const data=await api('signing?document='+documentId);
-  state.page=1; state.layoutDirty=false; state.signatures.clear(); state.positions.clear(); state.removed.clear();
+  state.page=1; state.layoutDirty=false; state.signatures.clear(); state.positions.clear(); state.removed.clear(); state.textChanges.clear(); state.textRemoved.clear(); state.selectedText=null;
   state.selected=null; state.template=null; state.activeParty=null; clearPlacement();
   setSnapshot(data); $('dashboard').hidden=true; $('workbench').hidden=false;
   history.replaceState(null,'','?document='+documentId);
+  if(state.data.text_fields.length)await document.fonts.load('12px "Signing Inter"');
   await loadViewer(); status('');
 }
 async function loadViewer() {
@@ -276,20 +284,100 @@ function renderFields() {
     };
     layer.append(box);
   }
+  renderTextFields(layer);
 }
+const textMeasureCanvas=document.createElement('canvas');
+function textLayout(f) {
+  const ctx=textMeasureCanvas.getContext('2d');ctx.font='1px "Signing Inter"';ctx.fontKerning='none';
+  return self.SigningTextLayout(f,state.data.document.pages[f.page-1],value=>ctx.measureText(value).width);
+}
+function textDirty(f) {
+  if(editable())state.layoutDirty=true;
+  else state.textChanges.set(f.id,textData(f));
+  updateToolbar();
+}
+function removeTextField(f) {
+  if(!canMoveField(f)||state.saving)return;
+  state.data.text_fields=state.data.text_fields.filter(t=>t.id!==f.id);state.textChanges.delete(f.id);
+  if(editable())state.layoutDirty=true;
+  else if(f.persisted!==false)state.textRemoved.set(f.id,f.party_id);
+  if(state.selectedText===f.id)state.selectedText=null;
+  renderFields();renderSidebar();updateToolbar();
+}
+function applyTextStyle(f,content) {
+  const layout=textLayout(f);content.style.fontSize=layout.size*state.scale+'px';
+  content.style.lineHeight=f.height*state.data.document.pages[f.page-1].height*state.scale+'px';
+}
+function renderTextFields(layer) {
+  for(const f of state.data.text_fields.filter(t=>t.page===state.page)) {
+    const party=state.data.parties.find(p=>p.id===f.party_id);if(!party)continue;
+    const allowed=canMoveField(f),signed=signedParty(party);
+    const box=node('div','signature-field text-field'+(signed?' signed':'')+(allowed?' editable-text':' other')+(state.selectedText===f.id?' selected':''));
+    box.dataset.textField=f.id;box.style.left=f.x*100+'%';box.style.top=f.y*100+'%';box.style.width=f.width*100+'%';box.style.height=f.height*100+'%';
+    let content;
+    if(allowed){
+      content=node('input','pdf-text-input');content.type='text';content.value=f.text;content.placeholder='Text';content.maxLength=2000;content.autocomplete='off';content.spellcheck=false;content.readOnly=state.saving;
+      content.setAttribute('aria-label','Text for '+partyName(party)+' on page '+f.page);
+      content.onfocus=()=>{clearPlacement();state.selectedText=f.id;state.selected=null;state.activeParty=f.party_id;for(const item of layer.querySelectorAll('.text-field'))item.classList.toggle('selected',item===box);};
+      content.oninput=()=>{f.text=content.value;textDirty(f);applyTextStyle(f,content);const caption=document.querySelector('[data-text-link="'+f.id+'"] .text-field-label');if(caption)caption.textContent=f.text.slice(0,40)||'Text field';};
+      content.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'||e.key==='Escape'){e.preventDefault();content.blur();}};
+      box.append(content);
+      const move=node('span','move-text','✥');move.setAttribute('aria-label','Move text field');move.title='Drag to move';box.append(move,node('span','resize'));
+      const remove=button('×','remove',e=>{e.stopPropagation();removeTextField(f);});remove.setAttribute('aria-label','Remove text field');remove.onpointerdown=e=>e.stopPropagation();box.append(remove);
+      box.onpointerdown=e=>{
+        if(state.saving||e.button!==0||e.target.closest('input,button'))return;
+        e.preventDefault();state.selectedText=f.id;state.selected=null;state.activeParty=f.party_id;
+        const bounds=$('pageWrap').getBoundingClientRect(),start={x:e.clientX,y:e.clientY,fx:f.x,fy:f.y,fw:f.width,fh:f.height};
+        const resizing=e.target.classList.contains('resize');let moved=false;box.setPointerCapture(e.pointerId);
+        box.onpointermove=ev=>{
+          const dx=(ev.clientX-start.x)/bounds.width,dy=(ev.clientY-start.y)/bounds.height;
+          if(Math.abs(ev.clientX-start.x)+Math.abs(ev.clientY-start.y)>3)moved=true;if(!moved)return;
+          if(resizing){const meta=state.data.document.pages[f.page-1];f.width=Math.max(Math.min(30/meta.width,1-start.fx),Math.min(1-start.fx,start.fw+dx));f.height=Math.max(Math.min(9/meta.height,1-start.fy),Math.min(1-start.fy,start.fh+dy));f.font_size=Math.max(6,Math.min(72,f.height*meta.height/1.25));}
+          else {f.x=Math.max(0,Math.min(1-f.width,start.fx+dx));f.y=Math.max(0,Math.min(1-f.height,start.fy+dy));}
+          box.style.left=f.x*100+'%';box.style.top=f.y*100+'%';box.style.width=f.width*100+'%';box.style.height=f.height*100+'%';applyTextStyle(f,content);textDirty(f);
+        };
+        box.onpointerup=()=>{box.onpointermove=null;box.onpointerup=null;renderFields();renderSidebar();};
+        box.onpointercancel=()=>{box.onpointermove=null;renderFields();};
+      };
+    } else {content=node('span','pdf-text-value',f.text||(signed?'':'Text'));box.append(content);}
+    applyTextStyle(f,content);layer.append(box);
+  }
+}
+async function beginTextPlacement(partyId=currentSignatureParty()?.id) {
+  const p=state.data.parties.find(p=>p.id===partyId);if(!canEditParty(p)||state.saving)return;
+  await document.fonts.load('12px "Signing Inter"');
+  clearPlacement();state.placing=partyId;state.placementKind='text';state.selected=null;state.selectedText=null;
+  $('pdfScroll').classList.add('placing');$('placementPrompt').textContent='Click the PDF to add text.';$('placementPrompt').hidden=false;$('cancelPlacement').hidden=false;
+  if(innerWidth<=700)$('pageWrap').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function placeText(e) {
+  const rect=$('pageWrap').getBoundingClientRect(),meta=state.data.document.pages[state.page-1],width=Math.min(.8,180/meta.width),height=Math.min(.15,18/meta.height);
+  const f={id:crypto.randomUUID(),party_id:state.placing,page:state.page,x:Math.max(0,Math.min(1-width,(e.clientX-rect.left)/rect.width)),y:Math.max(0,Math.min(1-height,(e.clientY-rect.top)/rect.height-height/2)),width,height,font_size:12,text:'',persisted:false};
+  state.data.text_fields.push(f);state.selectedText=f.id;state.activeParty=f.party_id;clearPlacement();textDirty(f);renderFields();renderSidebar();
+  $('fieldLayer').querySelector('[data-text-field="'+f.id+'"] input')?.focus();
+}
+function renderTextList() {
+  const p=currentSignatureParty();if(!p)return;
+  const fields=state.data.text_fields.filter(f=>f.party_id===p.id);if(!fields.length)return;
+  const section=node('section','side-section');section.append(node('h3','','Text fields'));
+  for(const f of fields){const row=button('','field-jump',()=>run(async()=>{await jumpTo(f.page);state.selectedText=f.id;renderFields();$('fieldLayer').querySelector('[data-text-field="'+f.id+'"] input')?.focus();}));row.dataset.textLink=f.id;row.append(node('span','text-field-label',f.text.slice(0,40)||'Text field'),node('span','','Page '+f.page));section.append(row);}
+  $('signatureAreas').append(section);
+}
+
 function clearPlacement() {
-  state.placing=null;state.placementImage=null;
+  state.placing=null;state.placementImage=null;state.placementKind=null;
   $('pdfScroll').classList.remove('placing');$('placementPrompt').hidden=true;$('cancelPlacement').hidden=true;
 }
 function beginPlacement(partyId,png=null) {
   const p=state.data.parties.find(x=>x.id===partyId);if(!canEditParty(p))return;
-  state.placing=partyId;state.placementImage=png;state.selected=null;
+  state.placing=partyId;state.placementImage=png;state.placementKind='signature';state.selected=null;state.selectedText=null;
   $('pdfScroll').classList.add('placing');$('placementPrompt').textContent=png?'Click the PDF to place your signature.':'Click the PDF to place '+partyName(p)+'’s signature area.';
   $('placementPrompt').hidden=false;$('cancelPlacement').hidden=false;
   if(innerWidth<=700)$('pageWrap').scrollIntoView({behavior:'smooth',block:'center'});
 }
 function placeSignature(e) {
-  if(!state.placing||e.target.closest('.signature-field'))return;
+  if(!state.placing||state.saving||e.target.closest('.signature-field'))return;
+  if(state.placementKind==='text'){placeText(e);return;}
   const p=state.data.parties.find(x=>x.id===state.placing);if(!canEditParty(p))return;
   const rect=$('pageWrap').getBoundingClientRect(),meta=state.data.document.pages[state.page-1];
   const width=Math.min(.6,180/meta.width),height=Math.min(.3,60/meta.height);
@@ -305,12 +393,12 @@ function toggleOwnSigning(enabled) {
   if(!editable()||!state.data.document.can_sign_owner)return;
   const existing=state.data.parties.find(p=>p.kind==='owner');
   if(enabled&&!existing){const p={id:crypto.randomUUID(),name:state.account.email.split('@')[0],email:state.account.email,kind:'owner',revision:0};state.data.parties.unshift(p);state.data.current_party_id=p.id;state.activeParty=p.id;}
-  if(!enabled&&existing){state.data.parties=state.data.parties.filter(p=>p.id!==existing.id);for(const f of state.data.fields.filter(f=>f.party_id===existing.id))state.signatures.delete(f.id);state.data.fields=state.data.fields.filter(f=>f.party_id!==existing.id);state.data.current_party_id=null;state.activeParty=null;}
+  if(!enabled&&existing){state.data.parties=state.data.parties.filter(p=>p.id!==existing.id);for(const f of state.data.fields.filter(f=>f.party_id===existing.id))state.signatures.delete(f.id);state.data.fields=state.data.fields.filter(f=>f.party_id!==existing.id);state.data.text_fields=state.data.text_fields.filter(f=>f.party_id!==existing.id);for(const [key,f] of state.textChanges)if(f.party_id===existing.id)state.textChanges.delete(key);state.data.current_party_id=null;state.activeParty=null;}
   clearPlacement();state.selected=null;state.template=null;markDirty();renderSidebar();renderFields();
 }
 function addParty() {
   if(!editable())return;
-  const p={id:crypto.randomUUID(),name:'',email:'',kind:'signer',revision:0};state.data.parties.push(p);state.activeParty=p.id;state.template=null;state.selected=null;clearPlacement();
+  const p={id:crypto.randomUUID(),name:'',email:'',kind:'signer',revision:0};state.data.parties.push(p);state.activeParty=p.id;state.template=null;state.selected=null;state.selectedText=null;clearPlacement();
   markDirty();renderSidebar();$('otherSigners').querySelector('input[data-party="'+p.id+'"]')?.focus();
 }
 function renderSidebar() {
@@ -359,7 +447,7 @@ function renderSidebar() {
     }
     $('signatureAreas').append(sign);
   }
-  renderParties();renderHistory();
+  renderTextList();renderParties();renderHistory();
 }
 function renderParties() {
   const host=$('otherSigners'),prepare=editable(),parties=state.data.parties.filter(p=>p.kind!=='owner'||!admin);
@@ -373,7 +461,7 @@ function renderParties() {
       const label=inputField('Full name',party.name,value=>{party.name=value;renderFields();},{placeholder:'Full name',required:true});label.querySelector('input').dataset.party=party.id;row.append(label);
       const actions=node('div','recipient-actions');
       actions.append(button('Add signature area','secondary',()=>{state.activeParty=party.id;beginPlacement(party.id);renderSidebar();}),button('Remove','text-button remove-recipient',()=>{
-        state.data.parties=state.data.parties.filter(p=>p.id!==party.id);for(const f of state.data.fields.filter(f=>f.party_id===party.id))state.signatures.delete(f.id);state.data.fields=state.data.fields.filter(f=>f.party_id!==party.id);markDirty();renderSidebar();renderFields();
+        state.data.parties=state.data.parties.filter(p=>p.id!==party.id);for(const f of state.data.fields.filter(f=>f.party_id===party.id))state.signatures.delete(f.id);state.data.fields=state.data.fields.filter(f=>f.party_id!==party.id);state.data.text_fields=state.data.text_fields.filter(f=>f.party_id!==party.id);for(const [key,f] of state.textChanges)if(f.party_id===party.id)state.textChanges.delete(key);markDirty();renderSidebar();renderFields();
       }));row.append(actions);
     }
     if(admin&&party.kind==='signer'&&!party.signed_at)row.append(button(party.has_link?'Manage link':'Create signing link','text-button',()=>run(()=>openShare(party.id))));
@@ -401,8 +489,8 @@ async function saveLayout() {
   if(!state.layoutDirty)return;
   validateDetails();
   const {document:d,parties,fields}=state.data;
-  const data=await api('signing?document='+d.id+'&action=layout',{method:'POST',body:{revision:d.revision,title:d.title,owner_signs:parties.some(p=>p.kind==='owner'),parties:parties.map(p=>({id:p.id,name:p.name,email:p.email||'',kind:p.kind})),fields:fields.map(fieldData)}});
-  state.layoutDirty=false;state.positions.clear();state.removed.clear();setSnapshot(data);
+  const data=await api('signing?document='+d.id+'&action=layout',{method:'POST',body:{revision:d.revision,title:d.title,owner_signs:parties.some(p=>p.kind==='owner'),parties:parties.map(p=>({id:p.id,name:p.name,email:p.email||'',kind:p.kind})),fields:fields.map(fieldData),text_fields:state.data.text_fields.map(textData)}});
+  state.layoutDirty=false;state.positions.clear();state.removed.clear();state.textChanges.clear();state.textRemoved.clear();setSnapshot(data);
 }
 async function saveDraft(confirmOwn=false) {
   if(state.saving)return;
@@ -410,10 +498,12 @@ async function saveDraft(confirmOwn=false) {
   try {
     if(editable())await saveLayout();
     const groups=new Map();
-    const group=p=>{if(!groups.has(p))groups.set(p,{signatures:[],positions:[],remove_fields:[]});return groups.get(p);};
+    const group=p=>{if(!groups.has(p))groups.set(p,{signatures:[],positions:[],remove_fields:[],text_fields:[],remove_text_fields:[]});return groups.get(p);};
     for(const [fieldId,png] of state.signatures){const f=state.data.fields.find(f=>f.id===fieldId);if(f)group(f.party_id).signatures.push({field_id:fieldId,png});}
     for(const fieldId of state.positions){const f=state.data.fields.find(f=>f.id===fieldId);if(f)group(f.party_id).positions.push(fieldData(f));}
     for(const [fieldId,partyId] of state.removed)group(partyId).remove_fields.push(fieldId);
+    for(const f of state.textChanges.values())group(f.party_id).text_fields.push(textData(f));
+    for(const [key,partyId] of state.textRemoved)group(partyId).remove_text_fields.push(key);
     const ownId=state.data.current_party_id;if(confirmOwn)group(ownId);
     const ordered=[...groups].sort(([a],[b])=>a===ownId?1:b===ownId?-1:0);
     for(const [partyId,body] of ordered){
@@ -422,6 +512,8 @@ async function saveDraft(confirmOwn=false) {
       for(const f of body.signatures)state.signatures.delete(f.field_id);
       for(const f of body.positions)state.positions.delete(f.id);
       for(const key of body.remove_fields)state.removed.delete(key);
+      for(const f of body.text_fields)state.textChanges.delete(f.id);
+      for(const key of body.remove_text_fields)state.textRemoved.delete(key);
       setSnapshot(data);
     }
   } finally { state.saving=false;updateToolbar(); }
@@ -429,6 +521,7 @@ async function saveDraft(confirmOwn=false) {
 async function finishSigning() {
   if(!$('signingConsent')?.checked)throw Error('Confirm your signature before submitting.');
   if(!ownFields().length||ownFields().some(f=>!hasSignature(f)))throw Error('Add your signature before submitting.');
+  if(state.data.text_fields.some(f=>f.party_id===state.data.current_party_id&&!f.text.trim()))throw Error('Complete or remove your empty text fields before submitting.');
   await saveDraft(true);
 }
 function normalizeSignature(source) {
@@ -535,12 +628,12 @@ async function downloadPdf() {
   state.busy=true;updateToolbar();const original=$('downloadPdf').innerHTML;
   try {
     const latest=await api(admin?'signing?document='+state.data.document.id:'signing-guest');setSnapshot(latest);
-    const signed=new Set(latest.parties.filter(signedParty).map(p=>p.id)),fields=latest.fields.filter(f=>signed.has(f.party_id)&&f.has_signature);
-    if(!fields.length){const r=await fetch(sourceUrl(),{headers:authHeaders(),credentials:'same-origin'});if(!r.ok)throw Error('Could not download the PDF.');saveDownload(await r.blob(),latest.document.filename);return;}
-    const worker=new Worker('/document-signing/export-worker.js');
+    const signed=new Set(latest.parties.filter(signedParty).map(p=>p.id)),fields=latest.fields.filter(f=>signed.has(f.party_id)&&f.has_signature),text_fields=latest.text_fields.filter(f=>signed.has(f.party_id)&&f.text.trim());
+    if(!fields.length&&!text_fields.length){const r=await fetch(sourceUrl(),{headers:authHeaders(),credentials:'same-origin'});if(!r.ok)throw Error('Could not download the PDF.');saveDownload(await r.blob(),latest.document.filename);return;}
+    const worker=new Worker('/document-signing/export-worker.js?v=3');
     await new Promise((resolve,reject)=>{
       worker.onmessage=({data})=>{if(data.status)$('downloadPdf').textContent='Preparing PDF…';if(data.error){worker.terminate();reject(Error(data.error));}if(data.bytes){saveDownload(new Blob([data.bytes],{type:'application/pdf'}),latest.document.filename.replace(/\.pdf$/i,'')+(signed.size===latest.parties.length?'-signed.pdf':'-partially-signed.pdf'));worker.terminate();resolve();}};
-      worker.onerror=()=>{worker.terminate();reject(Error('The PDF could not be prepared on this device.'));};worker.postMessage({document:latest.document,fields,headers:authHeaders()});
+      worker.onerror=()=>{worker.terminate();reject(Error('The PDF could not be prepared on this device.'));};worker.postMessage({document:latest.document,fields,text_fields,headers:authHeaders()});
     });
   } finally {state.busy=false;$('downloadPdf').innerHTML=original;updateToolbar();}
 }
@@ -551,7 +644,7 @@ async function guestAccess(code) {
   state.session=data.session;sessionStorage.setItem('wistudi_signing_'+linkToken,data.session);await startGuest(data);
 }
 async function startGuest(data) {
-  setSnapshot(data);$('accessScreen').hidden=true;$('workbench').hidden=false;await loadViewer();status('');
+  setSnapshot(data);$('accessScreen').hidden=true;$('workbench').hidden=false;if(state.data.text_fields.length)await document.fonts.load('12px "Signing Inter"');await loadViewer();status('');
 }
 async function init() {
   if(admin) {
@@ -571,9 +664,10 @@ $('prevPage').onclick=()=>run(()=>jumpTo(state.page-1));$('nextPage').onclick=()
 $('pageNumber').onchange=()=>run(()=>jumpTo($('pageNumber').value));$('zoom').onchange=()=>run(renderPage);
 $('zoomOut').onclick=()=>run(()=>changeZoom(-.15));$('zoomIn').onclick=()=>run(()=>changeZoom(.15));$('pageWrap').onclick=placeSignature;
 $('saveDraft').onclick=()=>run(()=>saveDraft());$('downloadPdf').onclick=()=>run(downloadPdf);
+$('addText').onclick=()=>run(()=>beginTextPlacement());
 $('drawSignature').onclick=()=>run(openDrawing);$('uploadSignature').onclick=()=>{if(!currentSignatureParty())return;$('signatureUpload').click();};
 $('signatureUpload').onchange=loadSignatureImage;$('useSignature').onclick=placeTemplate;$('cancelPlacement').onclick=clearPlacement;
-$('signatureParty').onchange=()=>{state.activeParty=$('signatureParty').value;state.selected=null;state.template=null;clearPlacement();renderSidebar();};
+$('signatureParty').onchange=()=>{state.activeParty=$('signatureParty').value;state.selected=null;state.selectedText=null;state.template=null;clearPlacement();renderSidebar();};
 $('removeSignature').onclick=()=>{const f=state.data.fields.find(f=>f.id===state.selected);if(f){state.signatures.set(f.id,null);renderFields();renderSidebar();updateToolbar();}};
 $('closeSignature').onclick=$('cancelDrawing').onclick=()=>$('signatureDialog').close();$('acceptDrawing').onclick=acceptDrawing;
 $('undoStroke').onclick=()=>{strokes.pop();paintDrawing();};$('clearDrawing').onclick=()=>{strokes=[];paintDrawing();};
@@ -584,7 +678,7 @@ draw.onpointerup=draw.onpointercancel=()=>{stroke=null;};
 if(admin) {
   $('uploadPdfButton').onclick=()=>{state.upload=null;selectPdf();};$('pdfUpload').onchange=()=>uploadPdf($('pdfUpload').files[0]);
   $('documentFilter').onchange=()=>run(loadList);
-  $('backToList').onclick=()=>run(async()=>{if(dirty()&&!confirm('Leave without saving?'))return;state.layoutDirty=false;state.signatures.clear();state.positions.clear();state.removed.clear();clearPlacement();history.replaceState(null,'',location.pathname);await loadList();});
+  $('backToList').onclick=()=>run(async()=>{if(dirty()&&!confirm('Leave without saving?'))return;state.layoutDirty=false;state.signatures.clear();state.positions.clear();state.removed.clear();state.textChanges.clear();state.textRemoved.clear();state.selectedText=null;clearPlacement();history.replaceState(null,'',location.pathname);await loadList();});
   $('shareDocument').onclick=()=>run(()=>openShare());$('closeShare').onclick=()=>$('shareDialog').close();$('shareRecipient').onchange=()=>run(()=>loadShareParty($('shareRecipient').value));
   $('generateCode').onclick=newCode;$('createLink').onclick=createLink;$('copyLink').onclick=()=>copyText($('shareUrl').value,'Link');$('copyCode').onclick=()=>copyText($('codeDisplay').textContent,'Code');
   $('signOut').onclick=()=>run(async()=>{if(dirty()&&!confirm('Sign out without saving?'))return;await api('session',{method:'DELETE'});location.replace('/room-manager/');});
