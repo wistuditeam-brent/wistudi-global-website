@@ -79,3 +79,20 @@ The other topics remain labelled Guide in preparation. The first six completed o
 Evidence: current public application shell and JavaScript bundle at https://wistudi.com/sign-up, downloaded 9 November 2026 (asset index-C8ug5eQ1.js), current website source, Terms and Privacy Policy. The deployed application's navigation and auth strings confirm the labels and routes used in the articles. Source includes conditional guest access, invitation errors, workspace/onboarding requirements, account/profile menu routes and desktop-only notice support. Availability is described conditionally; there are no invented guarantees, limits or credit amounts.
 
 Authenticated learner/creator transactions and account mutations were not performed. Public account-screen rendering could not be inspected in the local headless browser because of certificate trust; account instructions were verified against the public deployed frontend bundle. Support-page browser QA uses the generated pages and committed shared assets. No fabricated product screenshots were added.
+
+
+## Creating & Publishing content (18 November 2026)
+
+Six more guides now have full articles and links from the existing topic anchors:
+- [Create an XP Video](/support/xp-videos/)
+- [Create a Flow](/support/flows/)
+- [Blocks and activities](/support/blocks-and-activities/)
+- [Videos, uploads and resources](/support/media-and-resources/)
+- [Publish, update and manage versions](/support/publishing-and-versions/)
+- [Share content and control access](/support/sharing-and-access/)
+
+The hub has 12 available guides and 15 outlines in preparation. Published articles are included in the full-text search index. Existing six essential guides keep their content and dates.
+
+The publication and sharing articles use the current deployed frontend wording rather than earlier proposals. In particular, Flow workspace publication and Discover review are separate, Single Flow may be unavailable, new editable versions have restrictions, and regenerating a temporary link can invalidate the previous invitation. No fixed credit amounts, package sizes, balances, rates or prices are included. Templates and presentation/printing remain separate future guide topics.
+
+Detailed evidence and verification limits are recorded in SUPPORT_CREATING_PUBLISHING_EVIDENCE.md.
