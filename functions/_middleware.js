@@ -69,6 +69,12 @@ function stabilizeClientLocale(response) {
 }
 
 export async function onRequest(context) {
+  // Agreement pages and their assets are private application surfaces. Serve
+  // them directly, without the public site's analytics or locale injection.
+  const privatePath = new URL(context.request.url).pathname;
+  if (/^\/(?:document-signing|room-manager\/documents)(?:\/|$)/.test(privatePath)) {
+    return context.next();
+  }
   // Apply country-based defaults only to the Client Room, never to the
   // Wistudi public site or the Room Manager.
   const clientRoomRedirect = clientRoomLanguageRedirect(context.request);
