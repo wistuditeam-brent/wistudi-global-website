@@ -3,7 +3,7 @@
 .page-zoom a:focus-visible,.page-zoom button:focus-visible{outline:3px solid #7c3aed;outline-offset:5px}
 .zoom-skip{position:fixed;top:-100px;left:16px;z-index:300;padding:12px 18px;background:#fff;color:#5620b9;border:2px solid currentColor;border-radius:8px}
 .zoom-skip:focus{top:12px}
-.zoom-hero{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,.87fr) minmax(0,1.13fr);align-items:center;gap:34px;margin:32px auto 0;padding:42px 38px;overflow:hidden;border:1px solid #eee7f6;border-radius:24px;background:linear-gradient(115deg,#fdfaff 10%,#faf6ff 58%,#f4eafd 100%)}
+.zoom-hero{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,.87fr) minmax(0,1.13fr);align-items:center;gap:34px;margin:32px auto 0;padding:42px 38px;overflow:clip;border:1px solid #eee7f6;border-radius:24px;background:linear-gradient(115deg,#fdfaff 10%,#faf6ff 58%,#f4eafd 100%)}
 .zoom-hero:before,.zoom-hero:after{content:'';position:absolute;z-index:-1;border-radius:50%;pointer-events:none}
 .zoom-hero:before{width:520px;height:520px;right:3%;top:-220px;background:linear-gradient(135deg,#e9ddff,transparent)}
 .zoom-hero:after{width:380px;height:230px;right:-100px;bottom:-130px;background:#ffdbc1;transform:rotate(-35deg)}
