@@ -25,6 +25,7 @@
  <button id="tabVideoGroups" class="manager-tab" type="button" role="tab" aria-selected="false" aria-controls="videoGroupsPanel">Video categories</button>
  <button id="tabPartners" class="manager-tab" type="button" role="tab" aria-selected="false" aria-controls="partnerPanel">Partner Ecosystem</button>
  <button id="tabContact" class="manager-tab" type="button" role="tab" aria-selected="false" aria-controls="contactPanel">Contact page</button>
+ <a id="documentsLink" class="manager-tab" href="/room-manager/documents/" style="text-decoration:none">Documents &amp; Signing ↗</a>
 </div>
 
 <section id="contentPanel" class="manager-tab-panel" role="tabpanel" aria-labelledby="tabContent">
@@ -268,6 +269,8 @@ async function request(url,options={}){
 async function load(){
  try{
   const session=await request('/api/room-management/session');$('initializing').hidden=true;$('setup').hidden=true;permitted=session.rooms.map(x=>x.room_id);
+  $('documentsLink').hidden=!permitted.includes('client');
+  if(new URLSearchParams(location.search).get('next')==='documents'&&permitted.includes('client')){location.replace('/room-manager/documents/');return}
   $('room').querySelectorAll('option').forEach(o=>o.disabled=!permitted.includes(o.value));if(!permitted.includes($('room').value))$('room').value=permitted[0]||'';if(!$('room').value)throw Error('no_room_permissions');
   await reloadContent();$('login').hidden=true;$('dashboard').hidden=false;$('logout').hidden=false;$('tabSections').hidden=$('room').value!=='client';await selectManagerTab('content');message('');
  }catch(e){$('dashboard').hidden=true;$('initializing').hidden=true;$('logout').hidden=true;$('login').hidden=false;if(e.message==='unauthorized')message('');else message(e.message)}
