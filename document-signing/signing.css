@@ -134,6 +134,11 @@ input[type=checkbox] { width: 20px; height: 20px; min-height: 20px; padding: 0; 
 .activity summary { cursor: pointer; min-height: 48px; display: flex; align-items: center; color: var(--muted); font-weight: 500; font-size: 14px; }
 .event { font-size: 13px; color: #5e5568; margin: 16px 0; }
 .event time { display: block; color: var(--muted); margin-top: 4px; font-size: 12px; }
+.text-edit-detail { margin: 8px 0; overflow-wrap: anywhere; color: #1d2030; }
+.approval-count { color: var(--muted); font-size: 14px; margin: 0 0 16px; }
+.approval-party { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; font-size: 14px; border-bottom: 1px solid var(--line); }
+.approval-party span:last-child { color: var(--muted); }
+#textReview button { margin-top: 20px; }
 .danger { color: #a83349; background: transparent; border-color: #ead2d6; }
 .danger:hover { color: #8c293c; background: #fdf6f7; }
 .notice { padding: 16px 0; font-size: 14px; color: #664b89; line-height: 1.6; }

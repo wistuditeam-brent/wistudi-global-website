@@ -1,4 +1,4 @@
-import {schema,json,fail,secret,hash,codeHash,sameOrigin,guest,documentById,snapshot,saveSignature,event,handleError} from './_signing.js';
+import {schema,json,fail,secret,hash,codeHash,sameOrigin,guest,documentById,snapshot,saveSignature,approveDocumentText,event,handleError} from './_signing.js';
 export async function onRequest({request,env}) {return handleError(async()=>{
  await schema(env);const url=new URL(request.url),action=url.searchParams.get('action')||'';
  if(request.method!=='GET')sameOrigin(request);
@@ -25,6 +25,7 @@ export async function onRequest({request,env}) {return handleError(async()=>{
  }
  const p=await guest(request,env),d=await documentById(env,p.document_id);if(d.status==='cancelled')fail('This signing request was cancelled.',410);
  const auth={manager:null,party:p};if(request.method==='GET')return json(await snapshot(env,d,auth));
+ if(request.method==='POST'&&action==='approve-text')return json(await approveDocumentText(env,d,auth,await request.json()));
  if(request.method==='POST'&&action==='signature')return json(await saveSignature(request,env,d,auth,await request.json()));
  fail('Method not allowed.',405);
  });}

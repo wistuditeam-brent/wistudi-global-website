@@ -1,4 +1,4 @@
-import {schema,json,fail,id,secret,hash,codeHash,sameOrigin,manager,documentById,snapshot,validatePages,validField,validTextField,event,saveSignature,handleError} from './_signing.js';
+import {schema,json,fail,id,secret,hash,codeHash,sameOrigin,manager,documentById,snapshot,validatePages,validField,validTextField,event,saveSignature,saveDocumentText,approveDocumentText,handleError} from './_signing.js';
 import {CHUNK_SIZE} from './_signing.js';
 
 export async function onRequest({request,env}) { return handleError(async()=>{
@@ -6,7 +6,7 @@ export async function onRequest({request,env}) { return handleError(async()=>{
  const url=new URL(request.url),action=url.searchParams.get('action')||'',documentId=url.searchParams.get('document');
  if(request.method!=='GET')sameOrigin(request);
  if(request.method==='GET'&&!documentId){
-  const r=await env.ROOM_DB.prepare(`SELECT d.id,d.title,d.filename,d.total_bytes,d.status,d.file_ready,d.created_at,d.updated_at,s.archived_at,(SELECT COUNT(*) FROM room_signing_parties p WHERE p.document_id=d.id) AS signers,(SELECT COUNT(*) FROM room_signing_parties p WHERE p.document_id=d.id AND p.signed_at IS NOT NULL) AS signed,(SELECT COUNT(*) FROM room_signing_parties p WHERE p.document_id=d.id AND p.link_hash IS NOT NULL) AS shared FROM room_signing_documents d LEFT JOIN room_signing_document_states s ON s.document_id=d.id WHERE d.room_id='client' AND d.status<>'trashed' AND ${url.searchParams.get('archived')==='1'?'s.archived_at IS NOT NULL':'s.archived_at IS NULL'} ORDER BY d.created_at DESC`).all();
+  const r=await env.ROOM_DB.prepare(`SELECT d.id,d.title,d.filename,d.total_bytes,d.status,d.file_ready,d.created_at,d.updated_at,s.archived_at,(SELECT COUNT(*) FROM room_signing_parties p WHERE p.document_id=d.id) AS signers,(SELECT COUNT(*) FROM room_signing_parties p WHERE p.document_id=d.id AND p.signed_at IS NOT NULL) AS signed,(SELECT COUNT(*) FROM room_signing_parties p WHERE p.document_id=d.id AND p.link_hash IS NOT NULL) AS shared,(SELECT MAX(v.revision) FROM room_signing_document_text_versions v WHERE v.document_id=d.id) AS text_revision,(SELECT COUNT(*) FROM room_signing_document_text_approvals a JOIN room_signing_parties p ON p.id=a.party_id AND p.document_id=d.id WHERE a.document_id=d.id AND a.revision=(SELECT MAX(v.revision) FROM room_signing_document_text_versions v WHERE v.document_id=d.id)) AS text_approved FROM room_signing_documents d LEFT JOIN room_signing_document_states s ON s.document_id=d.id WHERE d.room_id='client' AND d.status<>'trashed' AND ${url.searchParams.get('archived')==='1'?'s.archived_at IS NOT NULL':'s.archived_at IS NULL'} ORDER BY d.created_at DESC`).all();
   const archived=await env.ROOM_DB.prepare("SELECT COUNT(*) AS count FROM room_signing_document_states s JOIN room_signing_documents d ON d.id=s.document_id WHERE d.room_id='client' AND d.status<>'trashed' AND s.archived_at IS NOT NULL").first();
   return json({items:r.results||[],archived_count:archived.count});
  }
@@ -29,6 +29,8 @@ export async function onRequest({request,env}) { return handleError(async()=>{
  if(request.method==='GET')return json(await snapshot(env,d,auth));
  if(request.method!=='POST')fail('Method not allowed.',405);
  const b=await request.json();
+ if(action==='text')return json(await saveDocumentText(env,d,auth,b));
+ if(action==='approve-text')return json(await approveDocumentText(env,d,auth,b));
  if(action==='delete'){
   const result=await env.ROOM_DB.prepare(`UPDATE room_signing_documents SET status='trashed',revision=revision+1,updated_at=CURRENT_TIMESTAMP WHERE id=? AND revision=? AND status='draft' AND NOT EXISTS(SELECT 1 FROM room_signing_parties WHERE document_id=? AND (signed_at IS NOT NULL OR link_hash IS NOT NULL)) AND NOT EXISTS(SELECT 1 FROM room_signing_document_states WHERE document_id=? AND archived_at IS NOT NULL)`).bind(d.id,d.revision,d.id,d.id).run();
   if(!result.meta.changes)fail('This document cannot be deleted because signing has started. You can only archive it.',409);
@@ -66,6 +68,7 @@ export async function onRequest({request,env}) { return handleError(async()=>{
   for(const [index,p] of b.parties.entries())q.push(env.ROOM_DB.prepare(`INSERT INTO room_signing_parties(id,document_id,name,email,kind,created_at) SELECT ?,?,?,?,?,? WHERE ${gate} ON CONFLICT(id) DO UPDATE SET name=excluded.name,email=excluded.email,revision=room_signing_parties.revision+1`).bind(p.id,d.id,p.name.trim(),p.email.trim(),p.id===ownerId?'owner':'signer',new Date(Date.now()+index).toISOString().replace('T',' ').replace('Z',''),d.id,token));
   const removed=old.filter(p=>!ids.has(p.id));for(const p of removed){q.push(env.ROOM_DB.prepare('DELETE FROM room_signing_text_fields WHERE party_id=? AND document_id=? AND '+gate).bind(p.id,d.id,d.id,token));q.push(env.ROOM_DB.prepare('DELETE FROM room_signing_parties WHERE id=? AND document_id=? AND '+gate).bind(p.id,d.id,d.id,token));}
   const prior=(await env.ROOM_DB.prepare('SELECT id,party_id,page,x,y,width,height,signature_key FROM room_signing_fields WHERE document_id=?').bind(d.id).all()).results||[];
+  for(const before of prior.filter(f=>f.signature_key&&!(actor.id===d.created_by&&f.party_id===ownerId))){const after=b.fields.find(f=>f.id===before.id);if(!after||['party_id','page','x','y','width','height'].some(key=>after[key]!==before[key]))fail('This signature is locked.',403);}
   for(const f of b.fields){const before=prior.find(x=>x.id===f.id);const key=before?.party_id===f.party_id?before.signature_key:null;q.push(env.ROOM_DB.prepare(`INSERT INTO room_signing_fields(id,document_id,party_id,page,x,y,width,height,signature_key) SELECT ?,?,?,?,?,?,?,?,? WHERE ${gate}`).bind(f.id,d.id,f.party_id,f.page,f.x,f.y,f.width,f.height,key,d.id,token));}
   for(const f of textFields||[])q.push(env.ROOM_DB.prepare(`INSERT INTO room_signing_text_fields(id,document_id,party_id,page,x,y,width,height,text_value,font_size) SELECT ?,?,?,?,?,?,?,?,?,? WHERE ${gate}`).bind(f.id,d.id,f.party_id,f.page,f.x,f.y,f.width,f.height,f.text.normalize('NFC'),f.font_size,d.id,token));
   const result=await env.ROOM_DB.batch(q);if(!result[0].meta.changes)fail('The document changed while saving. Reload and try again.',409);
