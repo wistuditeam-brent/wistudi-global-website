@@ -630,7 +630,7 @@ async function downloadPdf() {
     const latest=await api(admin?'signing?document='+state.data.document.id:'signing-guest');setSnapshot(latest);
     const signed=new Set(latest.parties.filter(signedParty).map(p=>p.id)),fields=latest.fields.filter(f=>signed.has(f.party_id)&&f.has_signature),text_fields=latest.text_fields.filter(f=>signed.has(f.party_id)&&f.text.trim());
     if(!fields.length&&!text_fields.length){const r=await fetch(sourceUrl(),{headers:authHeaders(),credentials:'same-origin'});if(!r.ok)throw Error('Could not download the PDF.');saveDownload(await r.blob(),latest.document.filename);return;}
-    const worker=new Worker('/document-signing/export-worker.js?v=3');
+    const worker=new Worker('/document-signing/export-worker.js?v=4');
     await new Promise((resolve,reject)=>{
       worker.onmessage=({data})=>{if(data.status)$('downloadPdf').textContent='Preparing PDF…';if(data.error){worker.terminate();reject(Error(data.error));}if(data.bytes){saveDownload(new Blob([data.bytes],{type:'application/pdf'}),latest.document.filename.replace(/\.pdf$/i,'')+(signed.size===latest.parties.length?'-signed.pdf':'-partially-signed.pdf'));worker.terminate();resolve();}};
       worker.onerror=()=>{worker.terminate();reject(Error('The PDF could not be prepared on this device.'));};worker.postMessage({document:latest.document,fields,text_fields,headers:authHeaders()});

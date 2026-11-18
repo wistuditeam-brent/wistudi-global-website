@@ -26,10 +26,12 @@ self.onmessage=async({data})=>{try{
   page.pushOperators(pushGraphicsState(),concatTransformationMatrix(p2[0]-p1[0],p2[1]-p1[1],p0[0]-p1[0],p0[1]-p1[1],p1[0],p1[1]),drawObject(name),popGraphicsState());
   self.postMessage({status:'Adding signature '+(i+1)+' of '+fields.length+'…'});
  }
+ // The variable-font subset encoder produced malformed glyf records and invisible letters.
+ // Embed the complete official static font so existing and new records render reliably.
  if(text_fields.length){
   importScripts('/document-signing/vendor/fontkit.umd.min.js');
   pdf.registerFontkit(fontkit);
-  const font=await pdf.embedFont(await read('/document-signing/fonts/InterVariable.ttf'),{subset:true,features:{liga:false,kern:false}});
+  const font=await pdf.embedFont(await read('/document-signing/fonts/Inter-Regular.ttf'),{subset:false,features:{liga:false,kern:false}});
   for(const f of text_fields){
    if(!f.text?.trim())continue;
    const meta=d.pages[f.page-1],page=pdf.getPage(f.page-1),left=f.x*meta.width,top=f.y*meta.height;
