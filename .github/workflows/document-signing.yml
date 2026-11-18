@@ -1,0 +1,34 @@
+name: Document signing
+on:
+  pull_request:
+    paths:
+      - 'document-signing/**'
+      - 'room-manager/documents/**'
+      - 'functions/api/room-management/**'
+      - 'room-management/migrations/**'
+      - 'tests/document-signing.test.mjs'
+      - 'tests/signing-runtime/**'
+      - '.github/workflows/document-signing.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'document-signing/**'
+      - 'room-manager/documents/**'
+      - 'functions/api/room-management/**'
+      - 'room-management/migrations/**'
+      - 'tests/document-signing.test.mjs'
+      - 'tests/signing-runtime/**'
+      - '.github/workflows/document-signing.yml'
+jobs:
+  signing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tests/signing-runtime/package-lock.json
+      - run: npm ci --prefix tests/signing-runtime
+      - run: node --check document-signing/signing.js
+      - run: node --test tests/document-signing.test.mjs tests/client-room-locale.test.mjs tests/room-video-thumbnails.test.mjs

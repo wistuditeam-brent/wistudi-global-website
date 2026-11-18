@@ -82,6 +82,42 @@ test('private PDF signing, A4 geometry, large uploads and final export',async t=
   assert.equal((await h.request('signing-guest',{as:'guest',token:session2})).status,401);
   assert.equal((await h.request('signing-guest?action=access',{method:'POST',as:'guest',body:{token:link2,code:'012345'}})).status,404);
   const s=(await h.json('signing?document='+d)).body;assert.equal(s.fields.filter(f=>f.has_signature).length,3);
-  assert.equal((await h.request('signing?document='+d+'&action=cancel',{method:'POST',body:{}})).status,200);assert.equal((await h.request('signing-guest',{as:'guest',token:session3})).status,410);
+  assert.equal((await h.request('signing?document='+d+'&action=cancel',{method:'POST',body:{}})).status,409);assert.equal((await h.request('signing-guest',{as:'guest',token:session3})).status,200);
  });
+});
+
+
+test('preparer-only agreements, individual placement, shared history and archive protection',async t=>{
+ const h=await harness();t.after(()=>h.close());
+ const pdf=await PDFDocument.create();pdf.addPage(PageSizes.A4);const bytes=await pdf.save();
+ const pages=[{width:595.28,height:841.89,transform:[1,0,0,-1,0,841.89]}];
+ async function create(title){const r=await h.json('signing?action=create',{method:'POST',body:{title,filename:'test-only.pdf',size:bytes.length,pages,owner_signs:false}});assert.equal(r.status,201);await h.request('signing-upload?document='+r.body.id+'&part=0',{method:'PUT',body:bytes});await h.request('signing-upload?document='+r.body.id+'&action=complete',{method:'POST',body:{}});return r.body.id;}
+ const d=await create('Preparer only');let data=(await h.json('signing?document='+d)).body;
+ assert.equal(data.parties.length,0);assert.equal(data.current_party_id,null);
+ const parties=['Party A Test','Party B Test'].map(name=>({id:randomUUID(),name,email:'',kind:'signer'}));
+ let result=await h.json('signing?document='+d+'&action=layout',{method:'POST',body:{revision:0,title:'MOU Test',owner_signs:false,parties,fields:[]}});assert.equal(result.status,200,JSON.stringify(result.body));assert.equal(result.body.document.title,'MOU Test');assert.equal(result.body.current_party_id,null);
+ const sessions=[];
+ for(const [index,p] of parties.entries()){
+  const share=await h.json('signing?document='+d+'&action=share',{method:'POST',body:{party_id:p.id,code:'23456'+index}});assert.equal(share.status,200,JSON.stringify(share.body));
+  const token=new URLSearchParams(new URL(share.body.url).hash.slice(1)).get('token');const access=await h.json('signing-guest?action=access',{method:'POST',as:'guest',body:{token,code:'23456'+index}});assert.equal(access.status,200);sessions.push(access.body.session);
+ }
+ assert.notEqual(sessions[0],sessions[1]);
+ assert.equal((await h.request('signing?document='+d+'&action=delete',{method:'POST',body:{}})).status,409);
+ const fields=[];
+ for(const [index,p] of parties.entries()){
+  const current=(await h.json('signing-guest',{as:'guest',token:sessions[index]})).body;
+  assert.equal(current.events.filter(e=>e.action==='Signing link created').length,2);assert.ok(current.events.every(e=>e.actor!=='admin@example.test'));
+  const f={id:randomUUID(),party_id:p.id,page:1,x:.1+index*.4,y:.7,width:.3,height:.08};fields.push(f);
+  let saved=await h.json('signing-guest?action=signature',{method:'POST',as:'guest',token:sessions[index],body:{party_id:p.id,revision:current.parties.find(x=>x.id===p.id).revision,positions:[f],signatures:[{field_id:f.id,png:signature}]}});assert.equal(saved.status,200,JSON.stringify(saved.body));
+  f.y=.75;
+  saved=await h.json('signing-guest?action=signature',{method:'POST',as:'guest',token:sessions[index],body:{party_id:p.id,revision:saved.body.parties.find(x=>x.id===p.id).revision,positions:[f],confirm:true,consent:true}});assert.equal(saved.status,200,JSON.stringify(saved.body));assert.equal(saved.body.fields.find(x=>x.id===f.id).y,.75);
+  assert.equal((await h.request('signing-guest?action=signature',{method:'POST',as:'guest',token:sessions[index],body:{party_id:p.id,revision:saved.body.parties.find(x=>x.id===p.id).revision,positions:[{...f,y:.1}]}})).status,409);
+ }
+ data=(await h.json('signing?document='+d)).body;assert.equal(data.document.status,'completed');assert.equal(data.events.filter(e=>e.action==='Signature confirmed'&&e.created_at).length,2);assert.equal(data.fields.filter(f=>f.has_signature).length,2);
+ assert.equal((await h.request('signing?document='+d+'&action=delete',{method:'POST',body:{}})).status,409);
+ assert.equal((await h.request('signing?document='+d+'&action=archive',{method:'POST',body:{}})).status,200);
+ assert.ok(!(await h.json('signing')).body.items.some(x=>x.id===d));assert.ok((await h.json('signing?archived=1')).body.items.some(x=>x.id===d));
+ const guest=(await h.json('signing-guest',{as:'guest',token:sessions[0]})).body;assert.equal(guest.document.status,'completed');assert.equal(guest.fields.filter(f=>f.has_signature).length,2);assert.equal(guest.events.filter(e=>e.action==='Signature confirmed').length,2);
+ assert.equal((await h.request('signing?document='+d+'&action=restore',{method:'POST',body:{}})).status,200);assert.ok((await h.json('signing')).body.items.some(x=>x.id===d));
+ const draft=await create('Disposable draft');assert.equal((await h.request('signing?document='+draft+'&action=delete',{method:'POST',body:{}})).status,200);assert.equal((await h.request('signing?document='+draft)).status,404);assert.equal((await h.request('signing-file?document='+draft)).status,404);assert.ok(!(await h.json('signing')).body.items.some(x=>x.id===draft));
 });
