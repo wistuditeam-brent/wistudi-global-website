@@ -20,7 +20,7 @@ export async function onRequest({request,env}) {return handleError(async()=>{
   if(r.count!==count||r.bytes!==d.total_bytes)fail('The PDF upload is incomplete. Resume the upload first.',409);
   const first=await env.ROOM_MEDIA.get('signing/'+d.id+'/original/0',{range:{offset:0,length:8}}),bytes=first?new Uint8Array(await first.arrayBuffer()):[];
   if(String.fromCharCode(...bytes.slice(0,5))!=='%PDF-')fail('This file is not a PDF.');
-  await env.ROOM_DB.prepare('UPDATE room_signing_documents SET file_ready=1,updated_at=CURRENT_TIMESTAMP WHERE id=? AND file_ready=0').bind(d.id).run();return json({ok:true});
+  await env.ROOM_DB.prepare("UPDATE room_signing_documents SET file_ready=1,updated_at=CURRENT_TIMESTAMP WHERE id=? AND file_ready=0 AND status='draft'").bind(d.id).run();return json({ok:true});
  }
  fail('Method not allowed.',405);
  });}
