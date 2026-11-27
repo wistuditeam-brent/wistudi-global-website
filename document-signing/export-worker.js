@@ -6,7 +6,7 @@ self.onmessage=async({data})=>{try{
  let d=data.document;
  const read=async url=>{const r=await fetch(url,{headers,credentials:'same-origin',cache:'no-store'});if(!r.ok)throw Error('Your access expired. Reload the document before downloading.');return r.arrayBuffer();};
  // Read the authoritative approved text even for an older editor already open.
- let fields=[],text_fields=[];
+ let fields=[],text_fields=[],reviewPending=false;
  {
   const route=headers?.authorization||headers?.Authorization?'signing-guest':'signing?document='+d.id;
   const response=await fetch('/api/room-management/'+route,{headers,credentials:'same-origin',cache:'no-store'});
@@ -14,7 +14,11 @@ self.onmessage=async({data})=>{try{
   const latest=await response.json();if(latest.document.id!==d.id)throw Error('Document access changed. Reload before downloading.');
   d=latest.document;const signed=new Set(latest.parties.filter(p=>p.signed_at).map(p=>p.id));
   fields=latest.fields.filter(f=>signed.has(f.party_id)&&f.has_signature);
-  text_fields=[...(latest.text_fields||[]).filter(f=>signed.has(f.party_id)&&f.text.trim()),...(latest.approved_document_text_fields||[])];
+  // The legally approved PDF contains only text from the last fully approved version.
+  // An explicitly requested review copy displays the latest pending text but must be marked as NOT FINAL.
+  reviewPending=data.review_pending===true && (latest.document_text?.revision||0)>(latest.document_text?.approved_revision||0);
+  const documentText=reviewPending ? latest.document_text.fields : latest.approved_document_text_fields;
+  text_fields=[...(latest.text_fields||[]).filter(f=>signed.has(f.party_id)&&f.text.trim()),...(documentText||[])];
  }
  self.postMessage({status:'Reading the original PDF…'});
  const bytes=await read('/api/room-management/signing-file?document='+d.id);
@@ -45,6 +49,15 @@ self.onmessage=async({data})=>{try{
    page.pushOperators(popGraphicsState());
   }
  }
- self.postMessage({status:'Preparing your signed PDF…'});
- const output=await pdf.save();self.postMessage({bytes:output.buffer},[output.buffer]);
+ if(reviewPending){
+  const marker=await pdf.embedFont(PDFLib.StandardFonts.HelveticaBold);
+  for(const page of pdf.getPages()){
+   const box=page.getCropBox(),label='REVIEW COPY - TEXT APPROVAL PENDING';
+   const size=Math.min(11,Math.max(7,(box.width-36)/marker.widthOfTextAtSize(label,1)));
+   page.drawText(label,{x:box.x+18,y:box.y+16,size,font:marker,color:PDFLib.rgb(.68,.13,.16)});
+   page.drawText(label,{x:box.x+18,y:box.y+box.height-26,size,font:marker,color:PDFLib.rgb(.68,.13,.16),opacity:.8});
+  }
+ }
+ self.postMessage({status:'Preparing your PDF…'});
+ const output=await pdf.save();self.postMessage({bytes:output.buffer,review_pending:reviewPending},[output.buffer]);
 }catch(e){self.postMessage({error:e.message||'The PDF could not be prepared. Please try again.'});}};
