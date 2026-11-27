@@ -50,11 +50,18 @@ own party; a preparing manager who is not signing cannot approve for others.
 Subsequent edits require fresh approvals from every current party. Removing text
 also requires approval. Identical saves retain existing approvals.
 
-The viewer shows the proposed text and approval progress. PDF downloads include
-the latest text version approved by all parties; pending changes never replace
-the last approved text in a download. Existing signed records keep their original
-signatures and signing dates, and need no re-signing. The export worker retrieves
-the authoritative snapshot itself, including for older open editor sessions.
+The viewer shows the proposed text and approval progress. While text approval
+is pending, **Download review PDF** embeds the latest proposed text in a clearly
+marked review copy. Every page carries `REVIEW COPY - TEXT APPROVAL PENDING`;
+the filename ends `-review-pending-approval.pdf`. This copy is not a final,
+fully approved agreement. The ordinary final signed PDF only includes document
+text approved by every signing party. Once the last party approves, the button
+returns to **Download PDF**, the pending marker is removed, and the current
+approved text appears immediately in a new download. For revised documents,
+the prior fully approved text remains the final export version until all parties
+reapprove the new text. Existing signed records keep their original signatures
+and signing dates and need no re-signing. The export worker retrieves the
+latest authorized snapshot itself, including for older open editor sessions.
 Visible idle editors refresh approval and document state on focus and every
 20 seconds without interrupting unsaved edits.
 

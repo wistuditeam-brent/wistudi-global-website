@@ -85,7 +85,9 @@ function updateToolbar() {
     $('shareDocument').disabled = state.saving;
   }
   $('downloadPdf').disabled = state.busy;
-  $('downloadPdf').title=state.data.document_text.revision>state.data.document_text.approved_revision?'Download with the last approved text':'';
+  const pendingText=d.status!=='cancelled'&&state.data.document_text.revision>state.data.document_text.approved_revision;
+  $('downloadPdf').title=pendingText?'Download a marked review copy with the latest text. The final PDF requires all parties to approve.':'Download the signed PDF with approved text.';
+  $('downloadLabel').textContent=pendingText?'Download review PDF':'Download PDF';
   $('addText').disabled=state.saving;
   for(const input of document.querySelectorAll('.pdf-text-input'))input.readOnly=state.saving;
 }
@@ -493,6 +495,7 @@ function renderTextReview() {
   const review=state.data.document_text;if(!review.revision)return;
   const section=node('section','side-section'),complete=review.revision===review.approved_revision;
   section.append(node('h3','','Text approval'),node('p','approval-count',(complete?'Approved':'Awaiting approval')+' · '+review.approvals.length+' of '+state.data.parties.length));
+  if(!complete)section.append(node('p','hint','Downloads show pending text in a marked review copy until every party approves.'));
   for(const p of state.data.parties){const row=node('div','approval-party');row.append(node('span','',partyName(p)),node('span','',review.approvals.some(a=>a.party_id===p.id)?'Approved':'Pending'));section.append(row);}
   const own=ownParty();if(own.id&&state.data.document.status!=='draft'&&!review.approvals.some(a=>a.party_id===own.id)){
     const approve=button('Approve text changes','primary full',()=>run(approveText));approve.disabled=state.saving;section.append(approve);
@@ -674,11 +677,12 @@ async function downloadPdf() {
   try {
     const latest=await api(admin?'signing?document='+state.data.document.id:'signing-guest');setSnapshot(latest);
     const signed=new Set(latest.parties.filter(signedParty).map(p=>p.id)),fields=latest.fields.filter(f=>signed.has(f.party_id)&&f.has_signature),text_fields=[...latest.text_fields.filter(f=>signed.has(f.party_id)&&f.text.trim()),...(latest.approved_document_text_fields||[])];
-    if(!fields.length&&!text_fields.length){const r=await fetch(sourceUrl(),{headers:authHeaders(),credentials:'same-origin'});if(!r.ok)throw Error('Could not download the PDF.');saveDownload(await r.blob(),latest.document.filename);return;}
-    const worker=new Worker('/document-signing/export-worker.js?v=5');
+    const reviewPending=latest.document_text.revision>latest.document_text.approved_revision;
+    if(!fields.length&&!text_fields.length&&!reviewPending){const r=await fetch(sourceUrl(),{headers:authHeaders(),credentials:'same-origin'});if(!r.ok)throw Error('Could not download the PDF.');saveDownload(await r.blob(),latest.document.filename);return;}
+    const worker=new Worker('/document-signing/export-worker.js?v=6');
     await new Promise((resolve,reject)=>{
-      worker.onmessage=({data})=>{if(data.status)$('downloadPdf').textContent='Preparing PDF…';if(data.error){worker.terminate();reject(Error(data.error));}if(data.bytes){saveDownload(new Blob([data.bytes],{type:'application/pdf'}),latest.document.filename.replace(/\.pdf$/i,'')+(signed.size===latest.parties.length?'-signed.pdf':signed.size?'-partially-signed.pdf':'-prepared.pdf'));worker.terminate();resolve();}};
-      worker.onerror=()=>{worker.terminate();reject(Error('The PDF could not be prepared on this device.'));};worker.postMessage({document:latest.document,fields,text_fields,headers:authHeaders()});
+      worker.onmessage=({data})=>{if(data.status)$('downloadLabel').textContent='Preparing PDF…';if(data.error){worker.terminate();reject(Error(data.error));}if(data.bytes){const suffix=data.review_pending?'-review-pending-approval.pdf':signed.size===latest.parties.length?'-signed.pdf':signed.size?'-partially-signed.pdf':'-prepared.pdf';saveDownload(new Blob([data.bytes],{type:'application/pdf'}),latest.document.filename.replace(/\.pdf$/i,'')+suffix);worker.terminate();resolve();}};
+      worker.onerror=()=>{worker.terminate();reject(Error('The PDF could not be prepared on this device.'));};worker.postMessage({document:latest.document,fields,text_fields,headers:authHeaders(),review_pending:reviewPending});
     });
   } finally {state.busy=false;$('downloadPdf').innerHTML=original;updateToolbar();}
 }
