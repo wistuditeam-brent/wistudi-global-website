@@ -16,7 +16,7 @@ function png(red,green,blue){
  return 'data:image/png;base64,'+Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chunk('IHDR',ihdr),chunk('IDAT',deflateSync(Buffer.from([0,red,green,blue,255,red,green,blue,255,red,green,blue,255]))),chunk('IEND',Buffer.alloc(0))]).toString('base64');
 }
 
-async function exportSnapshot(h,data){
+async function exportSnapshot(h,data,{reviewPending=false}={}){
  const sources={};for(const path of ['document-signing/vendor/pdf-lib.min.js','document-signing/vendor/fontkit.umd.min.js','document-signing/text-layout.js'])sources['/'+path]=await readFile(root+path,'utf8');
  let output,error;const context=vm.createContext({console,Uint8Array,ArrayBuffer,DataView,TextEncoder,TextDecoder,setTimeout,clearTimeout,fetch:async path=>{
   if(path.startsWith('/api/'))return h.request(path.replace('/api/room-management/',''));const buffer=await readFile(root+path.slice(1));return {ok:true,arrayBuffer:async()=>buffer.buffer.slice(buffer.byteOffset,buffer.byteOffset+buffer.byteLength)};
@@ -25,7 +25,7 @@ async function exportSnapshot(h,data){
  const signed=new Set(data.parties.filter(p=>p.signed_at).map(p=>p.id));
  vm.runInContext(await readFile(root+'document-signing/export-worker.js','utf8'),context);
  // Legacy payload: the worker retrieves text from existing records at download time.
- await context.self.onmessage({data:{document:data.document,fields:data.fields.filter(f=>signed.has(f.party_id)&&f.has_signature),headers:{}}});assert.equal(error,undefined,error);assert.ok(output);
+ await context.self.onmessage({data:{document:data.document,fields:data.fields.filter(f=>signed.has(f.party_id)&&f.has_signature),headers:{},review_pending:reviewPending}});assert.equal(error,undefined,error);assert.ok(output);
  return {output,context};
 }
 
@@ -253,9 +253,19 @@ test('preparer text versions, all-party approval and signature-preserving downlo
   assert.equal((await h.request('signing-guest?action=text',{method:'POST',as:'guest',token:sessions[0],body:{fields:[]}})).status,405);
   assert.equal((await h.request('signing?document='+d+'&action=text',{method:'POST',as:'guest',token:sessions[0],body:{fields:[]}})).status,401);
   const first=await approve(0,1);assert.equal(first.status,200);assert.equal(first.body.document_text.approvals.length,1);assert.equal(first.body.approved_document_text_fields.length,0);
+  // Regression: the first signer could see their saved text in the editor but the PDF was entirely blank.
+  // The review PDF now includes the pending revision with a visible NOT-FINAL marker; the final PDF does not.
+  const pendingReview=await exportSnapshot(h,first.body,{reviewPending:true}),pendingText=await pdfText(pendingReview.output);
+  assert.match(pendingText,/Brent Shaun Strydom/);assert.match(pendingText,/Director/);
+  assert.match(pendingText,/REVIEW COPY - TEXT APPROVAL PENDING/);
+  const approvedOnly=await exportSnapshot(h,first.body);assert.doesNotMatch(await pdfText(approvedOnly.output),/Brent Shaun Strydom|Director|REVIEW COPY/);
+  const firstFont=pendingReview.context.fontkit.create(new Uint8Array(await readFile(root+'document-signing/fonts/Inter-Regular.ttf')));
+  await assertRenderedText(pendingReview.output,pages,[a,b],firstFont,pendingReview.context.self.SigningTextLayout);
   assert.equal((await approve(0,1)).body.document_text.approvals.length,1,'Approval must be idempotent');
   const second=await approve(1,1);assert.equal(second.status,200);assert.equal(second.body.document_text.approved_revision,1);assert.equal(second.body.approved_document_text_fields.length,2);
-  const rendered=await exportSnapshot(h,await get());assert.match(await pdfText(rendered.output),/Brent Shaun Strydom/,'Approved document text exports before signatures as well');
+  const rendered=await exportSnapshot(h,await get());const finalText=await pdfText(rendered.output);
+  assert.match(finalText,/Brent Shaun Strydom/,'Approved document text exports before signatures as well');
+  assert.doesNotMatch(finalText,/REVIEW COPY/,'The final PDF must never be marked pending after both approvals');
  });
  await t.test('parties sign normally, then the preparer can edit, move, remove and add text after every signature',async()=>{
   for(const [i,p] of parties.entries()){
@@ -268,7 +278,10 @@ test('preparer text versions, all-party approval and signature-preserving downlo
   const listed=(await h.json('signing')).body.items.find(x=>x.id===d);assert.equal(listed.text_revision,2);assert.equal(listed.text_approved,0);assert.equal(listed.signed,2);
   assert.deepEqual({parties:after.parties,fields:after.fields},before,'Text edits cannot rewrite signatures, positions, signed_at, revisions or links');
   assert.equal(after.document_text.history.length,2);assert.equal(after.document_text.history[0].changes.length,3);assert.ok(after.document_text.history[0].changes.some(c=>c.before&&!c.after));
-  const output=await exportSnapshot(h,after),text=await pdfText(output.output);assert.match(text,/Brent Shaun Strydom/);assert.match(text,/Director/);assert.doesNotMatch(text,/18\/11\/2026/,'Pending text cannot enter a signed download');
+  const output=await exportSnapshot(h,after),text=await pdfText(output.output);assert.match(text,/Brent Shaun Strydom/);assert.match(text,/Director/);assert.doesNotMatch(text,/18\/11\/2026/,'Unapproved text cannot enter the final signed download');
+  const review=await exportSnapshot(h,after,{reviewPending:true}),reviewText=await pdfText(review.output);
+  assert.match(reviewText,/18\/11\/2026/,'Review copies must show the latest changes even before reapproval');
+  assert.match(reviewText,/REVIEW COPY - TEXT APPROVAL PENDING/);
   const document=await PDFDocument.load(output.output);assert.equal(document.getPage(0).node.Resources().lookup(PDFName.of('XObject')).keys().length,2);
  });
  await t.test('all parties see the complete edit and approval history; stale approvals and competing saves are rejected',async()=>{
